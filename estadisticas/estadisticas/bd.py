@@ -4,7 +4,7 @@ from datetime import date, datetime
 from decimal import Decimal
 from functools import lru_cache
 
-from sqlalchemy import BigInteger, Date, DateTime, Index, Integer, Numeric, String, create_engine
+from sqlalchemy import BigInteger, Boolean, Date, DateTime, Index, Integer, Numeric, String, create_engine, true
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 from .ajustes import ajustes
@@ -28,6 +28,9 @@ class Movimiento(Base):
     categoria_id: Mapped[int | None] = mapped_column(BigInteger)
     comercio_id: Mapped[int | None] = mapped_column(BigInteger)
     origen: Mapped[str] = mapped_column(String(10))
+    # Ejercicio 4: venía en los mensajes desde el principio, pero el servicio lo ignoraba. Las filas que ya
+    # existen reciben True; para que sean correctas hay que RECONSTRUIR desde los topics (reconstruir.py)
+    revisado: Mapped[bool] = mapped_column(Boolean, server_default=true())
     version: Mapped[int] = mapped_column(BigInteger)  # el id del evento en el outbox: crece con cada cambio
 
 

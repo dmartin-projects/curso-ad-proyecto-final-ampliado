@@ -54,6 +54,7 @@ def _movimiento(sesion: Session, pk: int, datos: dict | None, version: int) -> s
         "categoria_id": datos["categoria_id"],
         "comercio_id": datos["comercio_id"],
         "origen": datos["origen"],
+        "revisado": datos.get("revisado", True),  # .get: los mensajes antiguos sin el campo siguen valiendo
         "version": version,
     }
     # INSERT … ON CONFLICT DO UPDATE … WHERE: un "upsert" que solo pisa la fila si el evento es más nuevo.

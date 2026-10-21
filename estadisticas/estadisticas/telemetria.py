@@ -15,8 +15,8 @@ def activo() -> bool:
     return os.environ.get("OTEL_ENABLED", "").lower() in {"1", "true", "yes"}
 
 
-def configurar(servicio: str, *, exportador=None) -> bool:
-    """Trazas por OTLP. `exportador` solo para tests (uno en memoria)."""
+def configurar(servicio: str, *, exportador=None, lector_metricas=None) -> bool:
+    """Trazas y métricas por OTLP. `exportador` y `lector_metricas` solo para tests (en memoria)."""
     global _configurado
     if _configurado:
         return True
@@ -35,6 +35,18 @@ def configurar(servicio: str, *, exportador=None) -> bool:
 
         proveedor.add_span_processor(BatchSpanProcessor(OTLPSpanExporter()))
     trace.set_tracer_provider(proveedor)
+
+    # Métricas (ejercicio 2): se agregan en memoria y se envían cada OTEL_METRIC_EXPORT_INTERVAL ms
+    from opentelemetry import metrics
+    from opentelemetry.sdk.metrics import MeterProvider
+
+    if lector_metricas is None and not exportador:
+        from opentelemetry.exporter.otlp.proto.http.metric_exporter import OTLPMetricExporter
+        from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
+
+        lector_metricas = PeriodicExportingMetricReader(OTLPMetricExporter())
+    if lector_metricas is not None:
+        metrics.set_meter_provider(MeterProvider(resource=proveedor.resource, metric_readers=[lector_metricas]))
 
     from opentelemetry.instrumentation.sqlalchemy import SQLAlchemyInstrumentor
 

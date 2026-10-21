@@ -20,7 +20,10 @@ from . import telemetria
 from .ajustes import ajustes
 from .bd import Membresia, Movimiento, Progreso, sesion
 
-telemetria.configurar("estadisticas-api")
+if telemetria.configurar("estadisticas-api"):
+    from .retraso import registrar_metrica
+
+    registrar_metrica()  # ejercicio 2: el retraso del consumidor, medido desde la API
 app = FastAPI(title="Estadísticas de Gastos", version="1.0", docs_url="/estadisticas/docs",
               openapi_url="/estadisticas/openapi.json")  # fmt: skip
 telemetria.instrumentar_api(app)
@@ -187,3 +190,43 @@ def dias_semana(
     return DiasSemana(
         hogar_id=hogar_id, ultimo_evento=_ultimo_evento(s), desde=inicio, hasta=fin - timedelta(days=1), dias=dias
     )
+
+
+# ── Ejercicio 4: un dato que el servicio ignoraba, recuperado reconstruyendo desde Kafka ──
+class MesSinRevisar(BaseModel):
+    mes: str
+    movimientos: int
+    gastos: Decimal
+
+
+class SinRevisar(BaseModel):
+    hogar_id: int
+    ultimo_evento: datetime | None
+    meses: list[MesSinRevisar]
+
+
+@app.get(f"{PREFIJO}/hogares/{{hogar_id}}/sin-revisar", response_model=SinRevisar)
+def sin_revisar(
+    hogar_id: Hogar, s: Bd, meses: Annotated[int, Query(ge=1, le=36)] = 6, hasta: str | None = None
+) -> SinRevisar:
+    """Cuántos movimientos (y cuánto gasto) quedan por revisar, mes a mes: lo que trajo la IA o el banco."""
+    ultimo = _mes(hasta)
+    primero = _restar_meses(ultimo, meses - 1)
+    mes = func.date_trunc("month", Movimiento.fecha).label("mes")
+    filas = s.execute(
+        select(
+            mes,
+            func.count(),
+            func.coalesce(func.sum(case((Movimiento.importe < 0, -Movimiento.importe), else_=0)), 0),
+        )
+        .where(Movimiento.hogar_id == hogar_id, Movimiento.revisado.is_(False))
+        .where(Movimiento.fecha >= primero, Movimiento.fecha < _restar_meses(ultimo, -1))
+        .group_by(mes)
+    ).all()
+    por_mes = {f.mes.date(): (f[1], Decimal(f[2])) for f in filas}
+    resultado = []
+    for i in range(meses):
+        m = _restar_meses(ultimo, meses - 1 - i)
+        n, gastos = por_mes.get(m, (0, Decimal("0")))
+        resultado.append(MesSinRevisar(mes=f"{m:%Y-%m}", movimientos=n, gastos=gastos))
+    return SinRevisar(hogar_id=hogar_id, ultimo_evento=_ultimo_evento(s), meses=resultado)

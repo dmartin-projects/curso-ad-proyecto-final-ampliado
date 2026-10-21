@@ -73,3 +73,45 @@ groups:
           - refId: C
             datasourceUid: __expr__
             model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0] } }] }
+      # Módulo 85, ejercicio 1: el relay del outbox está parado (o Kafka no responde)
+      - uid: outbox-atascado
+        title: Eventos sin publicar en Kafka
+        condition: C
+        for: 5m
+        annotations:
+          summary: "Hay eventos esperando desde hace {{ $values.A }} s: las estadísticas se están quedando atrás"
+          description: "¿Está vivo el relay (docker compose ps relay)? ¿Responde Kafka? Los eventos no se pierden: salen al volver"
+        labels: { severidad: aviso }
+        noDataState: OK
+        execErrState: Error
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: max(gastos_eventos_antiguedad_seconds)
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [300] } }] }
+      # Módulo 85, ejercicio 2: el consumidor de estadísticas no da abasto (o está parado)
+      - uid: estadisticas-retraso
+        title: El servicio de estadísticas va con retraso
+        condition: C
+        for: 10m
+        annotations:
+          summary: "{{ $values.A }} mensajes de Kafka sin procesar desde hace más de 10 minutos"
+          description: "¿Está vivo estadisticas-consumidor? Mira sus logs (mensajes aparcados, PostgreSQL) y el grupo en Kafka"
+        labels: { severidad: aviso }
+        noDataState: OK # sin dato = Kafka caído o la API sin arrancar: con Kafka caído ya avisa outbox-atascado
+        execErrState: Error
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: sum(estadisticas_consumidor_retraso)
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [100] } }] }

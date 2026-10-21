@@ -7,4 +7,6 @@ class EventosConfig(AppConfig):
     verbose_name = "Eventos (Kafka)"
 
     def ready(self):
-        from . import receptores  # noqa: F401  (registra los receptores de señales)
+        from . import metricas, receptores  # noqa: F401  (receptores: registra las señales)
+
+        metricas.registrar()  # ejercicio 1: sin OpenTelemetry activo, el SDK nunca llama a los callbacks

@@ -14,6 +14,7 @@ class Ajustes(BaseSettings):
     kafka_grupo: str = "estadisticas"  # el consumer group: Kafka guarda por él hasta dónde ha leído
     topic_movimientos: str = "gastos.movimientos"
     topic_membresias: str = "gastos.membresias"
+    topic_dlq: str = "estadisticas.aparcados"  # ejercicio 3: mensajes que no se pueden aplicar
     # La misma clave con la que Django firma los JWT: el servicio los comprueba sin preguntar a Django
     jwt_signing_key: str
 

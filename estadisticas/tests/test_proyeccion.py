@@ -84,3 +84,12 @@ def test_membresias():
     with sesion() as s:
         assert s.scalar(select(Membresia.rol)) == "admin"
     assert aplicar_uno(MEMB, "1:5", None, cab(3)) == "borrado"
+
+
+def test_un_mensaje_antiguo_sin_revisado_vale_true():
+    """Ejercicio 4: mensajes de antes de que el servicio leyera "revisado" (los de un relay viejo)."""
+    datos = json.loads(mov())
+    datos.pop("revisado")
+    assert aplicar_uno(MOV, "7", json.dumps(datos).encode(), cab(1)) == "guardado"
+    with sesion() as s:
+        assert s.scalar(select(Movimiento.revisado)) is True

@@ -28,10 +28,10 @@ def miembro(usuario_id=5, hogar_id=1):
     )
 
 
-def movimiento(pk, fecha, importe, hogar_id=1):
+def movimiento(pk, fecha, importe, hogar_id=1, revisado=True):
     evento("gastos.movimientos", str(pk), {"id": pk, "hogar_id": hogar_id, "cuenta_id": 1, "fecha": fecha,
                                            "importe": importe, "categoria_id": None, "comercio_id": None,
-                                           "origen": "manual"})  # fmt: skip
+                                           "origen": "manual", "revisado": revisado})  # fmt: skip
 
 
 def get(url, tk=None, **params):
@@ -127,3 +127,17 @@ def test_hasta_mal_formado(token):
 
 def test_salud():
     assert get("/estadisticas/v1/salud").json() == {"bd": "ok", "ultimo_evento": None}
+
+
+# ── Ejercicio 4 ──
+def test_sin_revisar(token):
+    miembro()
+    movimiento(1, "2026-09-03", "-30.00", revisado=False)
+    movimiento(2, "2026-09-04", "-20.00", revisado=False)
+    movimiento(3, "2026-09-05", "-99.00")  # revisado: no cuenta
+    movimiento(4, "2026-10-01", "1500.00", revisado=False)  # ingreso sin revisar: cuenta, pero no suma gasto
+    r = get(f"{URL}/sin-revisar", token(5), meses=2, hasta="2026-10").json()
+    assert r["meses"] == [
+        {"mes": "2026-09", "movimientos": 2, "gastos": "50.00"},
+        {"mes": "2026-10", "movimientos": 1, "gastos": "0"},
+    ]

@@ -11,6 +11,7 @@ from django.conf import settings
 from django.db import transaction
 from django.db.models import F
 from django.utils import timezone
+from opentelemetry import metrics
 
 from finanzas.models import Movimiento
 from finanzas.normalizacion import normalizar
@@ -25,6 +26,22 @@ from .signals import importacion_analizada, importacion_progreso, importacion_te
 
 E = Importacion.Estado
 A = FilaImportacion.Accion
+
+# Módulo 84, ejercicio 1: métricas de negocio de las importaciones. En Prometheus:
+#   gastos_importaciones_total{formato="csv",estado="completada"}  y  gastos_importaciones_movimientos_total
+_medidor = metrics.get_meter("gastos.importaciones")
+importaciones = _medidor.create_counter(
+    "gastos.importaciones", unit="{importacion}", description="Importaciones terminadas, por formato y estado"
+)
+movimientos_creados = _medidor.create_counter(
+    "gastos.importaciones.movimientos", unit="{movimiento}", description="Movimientos nuevos creados al importar"
+)
+# Todas las series, a 0 desde el arranque: increase() de Prometheus no puede contar el salto "no existía → 1",
+# y sin esto la PRIMERA importación de cada proceso no aparecería en el panel (marcaría 0)
+for _formato in Importacion.Formato.values:
+    movimientos_creados.add(0, {"formato": _formato})
+    for _estado in (E.COMPLETADA, E.ERROR):
+        importaciones.add(0, {"formato": _formato, "estado": _estado})
 
 
 def _avisar(senal, importacion_id: int) -> None:
@@ -227,6 +244,8 @@ def finalizar(importacion_id: int) -> Importacion:
         return imp
     imp.estado, imp.terminado_en = E.COMPLETADA, timezone.now()
     imp.save(update_fields=["estado", "terminado_en", "actualizado"])
+    importaciones.add(1, {"formato": imp.formato, "estado": E.COMPLETADA})
+    movimientos_creados.add(imp.creados, {"formato": imp.formato})
     # bulk_create no emite post_save: se avisa explícitamente a quien cachea o vigila presupuestos
     meses = _meses(imp.filas.exclude(movimiento=None))
     transaction.on_commit(lambda: movimientos_cambiados.send(sender=Movimiento, hogar_id=imp.hogar_id, meses=meses))
@@ -241,6 +260,8 @@ def fallar(importacion_id: int, mensaje: str) -> None:
         ).update(estado=E.ERROR, error=mensaje[:1000], terminado_en=timezone.now())
         if actualizadas:
             _avisar(importacion_terminada, importacion_id)
+            formato = Importacion.objects.filter(pk=importacion_id).values_list("formato", flat=True).get()
+            importaciones.add(1, {"formato": formato, "estado": E.ERROR})
 
 
 # ── 4. Deshacer ──

@@ -110,7 +110,7 @@ class Telemetria:
         return [r.log_record for r in self._logs.get_finished_logs()]
 
     def metrica(self, nombre) -> dict:
-        """{atributos (como tupla ordenada): valor} de una métrica de suma (contador)."""
+        """{atributos (como tupla ordenada): valor} de una métrica (contador o histograma)."""
         datos = self._metricas.get_metrics_data()
         valores = {}
         for rm in datos.resource_metrics if datos else []:
@@ -118,7 +118,9 @@ class Telemetria:
                 for m in sm.metrics:
                     if m.name == nombre:
                         for p in m.data.data_points:
-                            valores[tuple(sorted(p.attributes.items()))] = p.value
+                            clave = tuple(sorted(p.attributes.items()))
+                            # contador: su valor; histograma: (cuántas medidas, suma)
+                            valores[clave] = p.value if hasattr(p, "value") else (p.count, p.sum)
         return valores
 
     def limpiar(self):

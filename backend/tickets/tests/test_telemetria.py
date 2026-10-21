@@ -1,5 +1,6 @@
 """Módulo 84: la traza de un ticket, de la subida al gasto, y su métrica de negocio."""
 
+import httpx
 import pytest
 from opentelemetry import trace
 from opentelemetry.trace import SpanKind
@@ -9,6 +10,7 @@ from .test_api import escenario, subir  # noqa: F401 (fixtures)
 
 pytestmark = pytest.mark.django_db
 PROCESADOS = "gastos.tickets.procesados"
+DURACION_IA = "gastos.ia.duracion"
 
 
 def test_subir_un_ticket_es_una_sola_traza_de_punta_a_punta(telemetria, escenario, subir, respx_mock):  # noqa: F811
@@ -41,3 +43,32 @@ def test_subir_un_ticket_es_una_sola_traza_de_punta_a_punta(telemetria, escenari
     assert "Mercadona" not in repr([dict(s.attributes) for s in telemetria.spans()])
 
     assert telemetria.metrica(PROCESADOS)[(("estado", "procesado"),)] == antes + 1
+
+
+def test_ticket_ia_lleva_el_modelo_y_los_tokens_y_su_duracion_va_al_histograma(
+    telemetria,
+    escenario,  # noqa: F811 (fixture de test_api)
+    subir,  # noqa: F811
+    respx_mock,
+):
+    """Módulo 84, ejercicio 3: cuánto tarda la IA de verdad, y cuánto gasta, por modelo."""
+    hogar, roles, cuenta, _ = escenario
+    respuesta = respuesta_ia(datos_ia())
+    cuerpo = respuesta.json() | {
+        "model": "modelo-de-prueba-2026-10",
+        "usage": {"prompt_tokens": 412, "completion_tokens": 96},
+    }
+    respx_mock.post(URL_IA).mock(return_value=httpx.Response(200, json=cuerpo))
+    clave = (("gen_ai.request.model", "modelo-de-prueba"),)
+    antes = telemetria.metrica(DURACION_IA).get(clave, (0, 0))
+
+    assert subir(hogar, roles["miembro"], cuenta).status_code == 202
+
+    [ia] = telemetria.spans("ticket.ia")
+    assert ia.attributes["gen_ai.operation.name"] == "chat"
+    assert ia.attributes["gen_ai.request.model"] == "modelo-de-prueba"  # IA_MODELO
+    assert ia.attributes["gen_ai.response.model"] == "modelo-de-prueba-2026-10"  # el que contestó
+    assert ia.attributes["gen_ai.usage.input_tokens"] == 412
+    assert ia.attributes["gen_ai.usage.output_tokens"] == 96
+    veces, segundos = telemetria.metrica(DURACION_IA)[clave]
+    assert veces == antes[0] + 1 and segundos > antes[1]  # una llamada más, con su duración

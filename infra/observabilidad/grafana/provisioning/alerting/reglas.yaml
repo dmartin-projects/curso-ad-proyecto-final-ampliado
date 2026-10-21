@@ -46,3 +46,30 @@ groups:
           - refId: C
             datasourceUid: __expr__
             model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0.05] } }] }
+  # Ejercicios del módulo 84: alertas de NEGOCIO (las de arriba son técnicas)
+  - orgId: 1
+    name: gastos-negocio
+    folder: Gastos
+    interval: 1m
+    rules:
+      - uid: tickets-atascados
+        title: Hay tickets atascados
+        condition: C
+        for: 15m # un ticket recién subido puede esperar en la cola; atascado de verdad, no se mueve
+        annotations:
+          summary: "{{ $values.A }} ticket(s) llevan más de 15 minutos pendientes o procesando"
+          description: "Soporte → Tickets atascados → Reprocesar (módulo 79). ¿Está vivo worker-ocr?"
+        labels: { severidad: aviso }
+        noDataState: OK
+        execErrState: Error
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              # max, no sum: cada proceso de Gastos exporta el mismo recuento
+              expr: max(gastos_tickets_atascados)
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0] } }] }

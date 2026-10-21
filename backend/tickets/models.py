@@ -1,4 +1,5 @@
 import uuid
+from datetime import timedelta
 from pathlib import Path
 
 from django.conf import settings
@@ -10,6 +11,9 @@ from django.utils.translation import gettext_lazy as _
 from core.models import ModeloConFechas
 from finanzas.models import Cuenta, Movimiento
 from hogares.models import Hogar
+
+# Pendiente o procesando sin moverse desde hace más de esto: atascado (pantalla de soporte y métrica, módulo 84)
+ATASCADO = timedelta(minutes=15)
 
 
 def ruta_ticket(instancia: "Ticket", nombre: str) -> str:

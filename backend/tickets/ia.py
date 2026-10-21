@@ -8,10 +8,12 @@ IA_BASE_URL, IA_MODELO e IA_API_KEY. El resto del proyecto solo conoce `extraer_
 import base64
 import functools
 import json
+import time
 from decimal import ROUND_HALF_UP, Decimal
 
 import httpx
 from django.conf import settings
+from opentelemetry import metrics, trace
 from rest_framework import serializers
 
 from core.circuito import CircuitBreaker
@@ -30,6 +32,16 @@ class ErrorRespuestaIA(ErrorIA):
 
 
 breaker_ia = CircuitBreaker("ia", umbral=5, enfriamiento=120)
+
+# Módulo 84, ejercicio 3: cuánto tarda la IA, por modelo. Cubos pensados para un LLM (de 10 ms a 30 s): con
+# los cubos por defecto el p95 no diría nada (lo mismo que con la duración de las tareas, §2).
+# En Prometheus: gastos_ia_duracion_seconds_bucket{gen_ai_request_model="…"}
+duracion_ia = metrics.get_meter("gastos.tickets").create_histogram(
+    "gastos.ia.duracion",
+    unit="s",
+    description="Duración de las llamadas a la IA, por modelo",
+    explicit_bucket_boundaries_advisory=[0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5, 10, 20, 30],
+)
 
 INSTRUCCIONES = """Extraes datos de tickets de compra (normalmente españoles) a partir del texto de un OCR,
 que puede tener errores de lectura. Reglas:
@@ -161,10 +173,15 @@ class ClienteIA:
         return validar(self._enviar(cuerpo))
 
     def _enviar(self, cuerpo: dict) -> dict:
+        modelo = {"gen_ai.request.model": self.modelo}
+        inicio = time.perf_counter()
         try:
             r = self._http.post("chat/completions", json=cuerpo)
         except httpx.TransportError as e:  # timeouts, conexión rechazada, DNS…
+            duracion_ia.record(time.perf_counter() - inicio, modelo | {"error.type": e.__class__.__name__})
             raise ErrorTransitorioIA(f"Error de red: {e.__class__.__name__}") from e
+        duracion_ia.record(time.perf_counter() - inicio, modelo)
+        self._anotar_span(r)
         if r.status_code == 429 or r.status_code >= 500:
             raise ErrorTransitorioIA(f"HTTP {r.status_code}")
         if r.is_error:  # 400/401/403/404: petición o configuración incorrectas
@@ -173,6 +190,28 @@ class ClienteIA:
             return json.loads(r.json()["choices"][0]["message"]["content"])
         except (KeyError, IndexError, TypeError, ValueError) as e:
             raise ErrorRespuestaIA("La respuesta no contiene un JSON válido") from e
+
+    def _anotar_span(self, r: httpx.Response) -> None:
+        """Atributos GenAI (semantic conventions de OpenTelemetry) en el span en curso: ticket.ia.
+
+        El modelo y los tokens (lo que se paga) sí; el prompt y la respuesta, nunca: son el texto del ticket.
+        """
+        span = trace.get_current_span()
+        if not span.is_recording():
+            return
+        span.set_attributes({"gen_ai.operation.name": "chat", "gen_ai.request.model": self.modelo})
+        try:
+            respuesta = r.json()
+        except ValueError:
+            return
+        if not isinstance(respuesta, dict):
+            return
+        if modelo := respuesta.get("model"):  # el que ha contestado de verdad (p. ej. con fecha de versión)
+            span.set_attribute("gen_ai.response.model", modelo)
+        uso = respuesta.get("usage") or {}  # Chat Completions: prompt_tokens / completion_tokens
+        for origen, destino in (("prompt_tokens", "input_tokens"), ("completion_tokens", "output_tokens")):
+            if isinstance(uso.get(origen), int):
+                span.set_attribute(f"gen_ai.usage.{destino}", uso[origen])
 
 
 @functools.lru_cache(maxsize=4)  # uno por configuración (en los tests, settings cambia entre pruebas)

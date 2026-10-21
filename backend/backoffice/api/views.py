@@ -32,12 +32,11 @@ from importaciones.exceptions import EstadoNoPermitido as ImportacionNoDeshacibl
 from importaciones.models import Importacion
 from tickets import services as tickets
 from tickets.exceptions import EstadoNoPermitido as TicketNoReprocesable
-from tickets.models import Ticket
+from tickets.models import ATASCADO, Ticket
 
 from . import serializers as s
 
 PERSONAL = [IsAuthenticated, EsPersonal, PermisosPorAccion]
-ATASCADO = timedelta(minutes=15)
 M = RegistroAuditoria.Accion.MODIFICAR
 
 

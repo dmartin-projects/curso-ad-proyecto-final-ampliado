@@ -1,0 +1,41 @@
+# usuarios/models.py
+from django.conf import settings
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
+from django.db import models
+from django.db.models.functions import Lower
+from django.utils import timezone
+
+from .managers import UsuarioManager
+
+
+class Usuario(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField("email", unique=True)
+    nombre = models.CharField(max_length=150, blank=True)
+    apellidos = models.CharField(max_length=150, blank=True)
+    is_active = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=False)
+    fecha_alta = models.DateTimeField(default=timezone.now)
+    idioma = models.CharField(max_length=10, choices=settings.LANGUAGES, default="es")
+    zona_horaria = models.CharField(max_length=50, default="Europe/Madrid")
+
+    objects = UsuarioManager()
+
+    USERNAME_FIELD = "email"  # campo con el que se identifica
+    EMAIL_FIELD = "email"
+    REQUIRED_FIELDS = ["nombre"]  # los pide createsuperuser (además de email y password)
+
+    class Meta:
+        verbose_name = "usuario"
+        constraints = [
+            # Un email, una cuenta, sin importar las mayúsculas: "Ana@x.com" y "ana@x.com" son la misma persona
+            models.UniqueConstraint(Lower("email"), name="usuario_email_unico_sin_mayusculas"),
+        ]
+
+    def __str__(self):
+        return self.email
+
+    def get_full_name(self):
+        return f"{self.nombre} {self.apellidos}".strip()
+
+    def get_short_name(self):
+        return self.nombre

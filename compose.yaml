@@ -1,0 +1,40 @@
+# compose.yaml — infraestructura de DESARROLLO (módulos 64 y 71): Django y Angular corren en tu Mac
+name: gastos-dev # nombre del proyecto propio: no comparte contenedores ni volúmenes con compose.prod.yaml
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: gastos
+      POSTGRES_USER: gastos
+      POSTGRES_PASSWORD: gastos
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gastos -d gastos"]
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+
+  rabbitmq:
+    image: rabbitmq:4.2-management-alpine
+    ports: ["5672:5672", "15672:15672"] # 15672: panel web (guest/guest)
+
+  s3:
+    image: rustfs/rustfs:1.0.0 # S3 local (MinIO ya no publica imágenes: módulo 00)
+    environment:
+      RUSTFS_ACCESS_KEY: rustfs
+      RUSTFS_SECRET_KEY: rustfs12345
+      RUSTFS_CONSOLE_ENABLE: "true"
+    ports: ["9000:9000", "9001:9001"] # 9001: consola en /rustfs/console/
+    volumes: [s3data:/data]
+
+  mailpit:
+    image: axllent/mailpit
+    ports: ["1025:1025", "8025:8025"] # 8025: bandeja web
+
+volumes:
+  pgdata:
+  s3data:

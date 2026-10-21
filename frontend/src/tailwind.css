@@ -1,0 +1,23 @@
+@import 'tailwindcss';
+
+/* Los colores de Tailwind salen del tema de Material: bg-primario, text-error… (módulo 56) */
+@theme {
+  --color-primario: var(--mat-sys-primary);
+  --color-superficie: var(--mat-sys-surface);
+  --color-superficie-alta: var(--mat-sys-surface-container);
+  --color-texto: var(--mat-sys-on-surface);
+  --color-texto-suave: var(--mat-sys-on-surface-variant);
+  --color-error: var(--mat-sys-error);
+  /* light-dark(): legible (contraste ≥ 4,5:1, WCAG AA) sobre el fondo claro Y sobre el oscuro (módulo 82) */
+  --color-gasto: light-dark(oklch(0.5 0.19 27), oklch(0.78 0.13 27));
+  --color-ingreso: light-dark(oklch(0.46 0.12 150), oklch(0.8 0.14 150));
+}
+
+/* Tailwind 4 pinta los bordes con currentColor (negro): mejor el color de contorno suave del tema */
+@layer base {
+  *,
+  ::before,
+  ::after {
+    border-color: var(--mat-sys-outline-variant);
+  }
+}

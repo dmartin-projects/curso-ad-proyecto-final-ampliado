@@ -15,7 +15,7 @@ echo "▶ Desplegando $VERSION"
 ANTERIOR=$(cat .version-actual 2>/dev/null || echo latest)
 
 $COMPOSE pull --quiet
-$COMPOSE up -d db redis rabbitmq
+$COMPOSE up -d db redis rabbitmq collector   # collector: módulo 84
 $COMPOSE run --rm migrate                      # con el código NUEVO, mientras sirve el viejo
 # --no-deps: migrate ya se ejecutó. Sin él, compose lo vuelve a lanzar (su imagen ha cambiado) con la web y
 # el proxy YA parados: ~12 s más sin servicio (medido en el ejercicio 3). Y || : si algo no arranca, con set -e

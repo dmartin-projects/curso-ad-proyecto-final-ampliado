@@ -31,6 +31,7 @@ x-celery-ping: &celery-ping
 services:
   migrate:
     <<: *backend
+    environment: { OTEL_SERVICE_NAME: gastos-migrate }
     command: ["python", "manage.py", "migrate", "--noinput"]
     restart: "no"
 
@@ -39,6 +40,7 @@ services:
     depends_on: *tras-migrar
     environment:
       DB_POOL_MAX: "4" # pool de conexiones por proceso (prod.py): ASGI + CONN_MAX_AGE agota PostgreSQL
+      OTEL_SERVICE_NAME: gastos-web # módulo 84: cada proceso, con su nombre en Grafana
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8000/health/ready/"]
       interval: 30s
@@ -51,6 +53,7 @@ services:
 
   worker: # importaciones, presupuestos, informes (cola "default")
     <<: *backend
+    environment: { OTEL_SERVICE_NAME: gastos-worker }
     depends_on: *tras-migrar
     command: ["celery", "-A", "config", "worker", "-l", "info", "-Q", "default", "-c", "2", "-n", "default@%h"]
     healthcheck:
@@ -59,6 +62,7 @@ services:
 
   worker-ocr: # tickets: Tesseract + IA (cola "ocr"), uno a uno y reciclado cada 50
     <<: *backend
+    environment: { OTEL_SERVICE_NAME: gastos-worker-ocr }
     depends_on: *tras-migrar
     command: ["celery", "-A", "config", "worker", "-l", "info", "-Q", "ocr", "-c", "1",
               "--max-tasks-per-child", "50", "-n", "ocr@%h"]
@@ -71,14 +75,35 @@ services:
 
   beat: # UNO solo: informes del día 1 y limpieza nocturna (módulo 78)
     <<: *backend
+    environment: { OTEL_SERVICE_NAME: gastos-beat }
     depends_on: *tras-migrar
     command: ["celery", "-A", "config", "beat", "-l", "info",
               "--scheduler", "django_celery_beat.schedulers:DatabaseScheduler"]
 
   tasks-worker: # django.tasks: los correos (módulo 26)
     <<: *backend
+    environment: { OTEL_SERVICE_NAME: gastos-tasks-worker }
     depends_on: *tras-migrar
     command: ["python", "manage.py", "db_worker", "--queue-name", "*", "--no-reload"]
+
+  collector: # módulo 84: recibe la telemetría de todos los procesos y la envía a Grafana Cloud
+    image: otel/opentelemetry-collector-contrib:0.163.1
+    restart: unless-stopped
+    command: ["--config=/etc/otelcol/config.yaml"]
+    volumes: ["./infra/observabilidad/otelcol.prod.yaml:/etc/otelcol/config.yaml:ro"]
+    environment: # solo estas tres: el collector no necesita (ni debe ver) el resto del .env
+      GRAFANA_CLOUD_OTLP_ENDPOINT: ${GRAFANA_CLOUD_OTLP_ENDPOINT:-}
+      GRAFANA_CLOUD_INSTANCE_ID: ${GRAFANA_CLOUD_INSTANCE_ID:-}
+      GRAFANA_CLOUD_TOKEN: ${GRAFANA_CLOUD_TOKEN:-}
+    expose: ["4318"] # solo en la red interna: nada de OTLP abierto a Internet
+    # Sin healthcheck: la imagen no trae shell ni curl (distroless). Si cae, los SDK reintentan y
+    # descartan; la aplicación sigue funcionando igual.
+    deploy:
+      resources:
+        limits: { memory: 256m }
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
 
   db:
     image: postgres:17

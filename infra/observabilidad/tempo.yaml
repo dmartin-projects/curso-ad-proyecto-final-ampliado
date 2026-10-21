@@ -1,0 +1,16 @@
+# infra/observabilidad/tempo.yaml — almacén de trazas (local: en disco)
+# Tempo 3: sin bloque "compactor" (la 3.0 cambió su arquitectura interna; un bloque de la 2.x hace que
+# no arranque: "field compactor not found")
+stream_over_http_enabled: true # búsquedas en streaming desde Grafana
+server:
+  http_listen_port: 3200
+distributor:
+  receivers:
+    otlp:
+      protocols:
+        grpc: { endpoint: 0.0.0.0:4317 }
+storage:
+  trace:
+    backend: local
+    local: { path: /var/tempo/traces }
+    wal: { path: /var/tempo/wal }

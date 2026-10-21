@@ -1,0 +1,7 @@
+apiVersion: 1
+providers:
+  - name: gastos
+    folder: Gastos
+    type: file
+    options:
+      path: /var/lib/grafana/dashboards # infra/observabilidad/grafana/dashboards, montado en el compose

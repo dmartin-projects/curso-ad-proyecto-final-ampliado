@@ -64,7 +64,7 @@ jobs:
           host: ${{ secrets.SERVIDOR_HOST }}
           username: ${{ secrets.SERVIDOR_USUARIO }}
           key: ${{ secrets.SERVIDOR_SSH_KEY }}
-          source: "compose.prod.yaml,infra/desplegar.sh,infra/backup.sh"
+          source: "compose.prod.yaml,infra/desplegar.sh,infra/backup.sh,infra/observabilidad/otelcol.prod.yaml"
           target: /opt/gastos
       - name: Desplegar
         uses: appleboy/ssh-action@v1

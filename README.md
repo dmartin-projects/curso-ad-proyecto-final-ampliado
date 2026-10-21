@@ -74,3 +74,18 @@ docker compose exec db createdb -U gastos gastos_e2e
 cd backend && DJANGO_SETTINGS_MODULE=config.settings.e2e uv run python manage.py migrate
 cd ../frontend && npx playwright install chromium && npx playwright test
 ```
+
+## Ampliaciones (Parte 6 del curso)
+
+Cada módulo es un commit (`git log --oneline`), con sus ejercicios resueltos en el siguiente.
+
+**84 · OpenTelemetry y Grafana.** Apagado por defecto. Para verlo en local:
+
+```bash
+docker compose -f compose.yaml -f compose.observabilidad.yaml up -d   # Grafana en http://localhost:3000
+# en backend/.env: OTEL_ENABLED=true, OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4318, OTEL_METRIC_EXPORT_INTERVAL=5000
+OTEL_SERVICE_NAME=gastos-web uv run python manage.py runserver
+OTEL_SERVICE_NAME=gastos-worker uv run celery -A config worker -l info -Q ocr,default
+```
+
+En producción, el servicio `collector` de `compose.prod.yaml` envía a Grafana Cloud con las variables `GRAFANA_CLOUD_*` de `.env.example`.

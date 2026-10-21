@@ -1,0 +1,29 @@
+# infra/observabilidad/otelcol.yaml — el collector de OpenTelemetry EN LOCAL (módulo 84)
+# Recibe trazas, métricas y logs de Django y Celery por OTLP y reparte cada señal a su almacén.
+receivers:
+  otlp:
+    protocols:
+      grpc: { endpoint: 0.0.0.0:4317 }
+      http: { endpoint: 0.0.0.0:4318 } # el que usa el SDK de Python (OTEL_EXPORTER_OTLP_ENDPOINT)
+
+processors:
+  memory_limiter: # primero: si el collector se queda sin memoria, rechaza en vez de morir
+    check_interval: 1s
+    limit_mib: 400
+  batch: {} # agrupa antes de enviar: menos peticiones a Tempo/Loki/Prometheus
+
+exporters:
+  otlp_grpc/tempo: # trazas → Tempo
+    endpoint: tempo:4317
+    tls: { insecure: true } # red interna de Docker
+  otlp_http/loki: # logs → Loki (acepta OTLP de forma nativa desde la 3.0)
+    endpoint: http://loki:3100/otlp
+  otlp_http/prometheus: # métricas → Prometheus (receptor OTLP, --web.enable-otlp-receiver)
+    endpoint: http://prometheus:9090/api/v1/otlp
+    tls: { insecure: true }
+
+service:
+  pipelines:
+    traces: { receivers: [otlp], processors: [memory_limiter, batch], exporters: [otlp_grpc/tempo] }
+    metrics: { receivers: [otlp], processors: [memory_limiter, batch], exporters: [otlp_http/prometheus] }
+    logs: { receivers: [otlp], processors: [memory_limiter, batch], exporters: [otlp_http/loki] }

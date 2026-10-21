@@ -1,0 +1,48 @@
+# Alertas de Grafana (módulo 84). Se evalúan cada minuto; "for" evita avisar por un pico de segundos.
+apiVersion: 1
+groups:
+  - orgId: 1
+    name: gastos-api
+    folder: Gastos
+    interval: 1m
+    rules:
+      - uid: api-lenta
+        title: La API va lenta (p95 > 1 s)
+        condition: C
+        for: 5m
+        annotations:
+          summary: "El 95 % de las peticiones a la API tarda más de 1 s desde hace 5 minutos"
+          description: "Mira el panel 'Latencia p95 por ruta' y abre una traza lenta de esa ruta en Tempo"
+        labels: { severidad: aviso }
+        noDataState: OK # sin tráfico no hay latencia: no es un problema
+        execErrState: Error
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: histogram_quantile(0.95, sum by (le) (rate(http_server_request_duration_seconds_bucket{job="gastos-web"}[5m])))
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [1] } }] }
+      - uid: api-errores
+        title: Errores 5xx en la API (> 5 %)
+        condition: C
+        for: 5m
+        annotations:
+          summary: "Más del 5 % de las peticiones termina en un error 5xx"
+          description: "Busca el error en Sentry (lleva el trace_id) o filtra en Loki por severity_text=ERROR"
+        labels: { severidad: critica }
+        noDataState: OK
+        execErrState: Error
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: (sum(rate(http_server_request_duration_seconds_count{job="gastos-web",http_response_status_code=~"5.."}[5m])) or vector(0)) / sum(rate(http_server_request_duration_seconds_count{job="gastos-web"}[5m]))
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0.05] } }] }

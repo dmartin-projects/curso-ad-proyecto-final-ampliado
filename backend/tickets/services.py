@@ -14,6 +14,7 @@ from django.db import transaction
 from django.db.models import F
 from django.forms.models import model_to_dict
 from django.utils import timezone
+from opentelemetry import trace
 
 from core.auditoria import registrar
 from core.models import RegistroAuditoria
@@ -28,6 +29,9 @@ from .signals import ticket_terminado
 
 E = Ticket.Estado
 TOLERANCIA_SUMA = Decimal("0.05")
+# Módulo 84: spans propios para los dos pasos que la instrumentación automática no ve por dentro.
+# Sin OpenTelemetry activo, get_tracer() devuelve un tracer que no hace nada (coste casi nulo).
+tracer = trace.get_tracer("gastos.tickets")
 
 
 def _encolar(ticket_id: int) -> None:
@@ -72,8 +76,13 @@ def leer(ticket: Ticket) -> tuple[str, bytes | None]:
     """Texto del ticket (reutiliza el de un intento anterior) y la imagen si el OCR no ha servido."""
     if len(ticket.texto_ocr.strip()) >= ocr.MIN_CARACTERES:
         return ticket.texto_ocr, None
-    with ticket.archivo.open("rb") as f:
-        lectura = ocr.leer(f.read(), ticket.tipo)
+    with tracer.start_as_current_span("ticket.ocr") as span:
+        with ticket.archivo.open("rb") as f:
+            lectura = ocr.leer(f.read(), ticket.tipo)
+        # Atributos para filtrar en Tempo: cuántos caracteres y si sirvió. NUNCA el texto (datos personales)
+        span.set_attributes(
+            {"ticket.tipo": ticket.tipo, "ocr.caracteres": len(lectura.texto), "ocr.util": lectura.es_util}
+        )
     Ticket.objects.filter(pk=ticket.pk).update(texto_ocr=lectura.texto)
     ticket.texto_ocr = lectura.texto
     return lectura.texto, None if lectura.es_util else lectura.imagen_png
@@ -82,8 +91,11 @@ def leer(ticket: Ticket) -> tuple[str, bytes | None]:
 def procesar(ticket: Ticket) -> Ticket:
     texto, imagen = leer(ticket)
     categorias = list(ticket.hogar.categorias.values_list("nombre", flat=True))
-    with ClienteIA.desde_settings() as cliente:
-        datos = breaker_ia.llamar(cliente.extraer_ticket, texto, categorias, imagen)
+    with tracer.start_as_current_span("ticket.ia") as span:
+        span.set_attribute("ia.con_imagen", imagen is not None)
+        with ClienteIA.desde_settings() as cliente:
+            datos = breaker_ia.llamar(cliente.extraer_ticket, texto, categorias, imagen)
+        span.set_attribute("ia.confianza", datos["confianza"])
     return aplicar(ticket.pk, datos)
 
 

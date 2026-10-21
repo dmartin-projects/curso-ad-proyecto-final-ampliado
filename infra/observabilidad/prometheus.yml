@@ -1,0 +1,7 @@
+# infra/observabilidad/prometheus.yml — almacén de métricas
+# No raspa nada (scrape_configs vacío): las métricas le llegan EMPUJADAS por el collector vía OTLP
+global:
+  evaluation_interval: 30s
+otlp:
+  # service.name → etiqueta job (lo hace solo); además, estos atributos del Resource como etiquetas
+  promote_resource_attributes: [service.version, deployment.environment.name]

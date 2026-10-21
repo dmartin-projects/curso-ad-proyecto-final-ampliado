@@ -19,5 +19,9 @@ STORAGES["default"] = {
         "region_name": "us-east-1",
         "signature_version": "s3v4",  # firma v4, como en producción (ver módulo 20)
         "querystring_auth": True,
+        # Módulo 84: sin hilos. Con ellos (lo normal en boto3), cada subida va en otro hilo, el contexto de
+        # OpenTelemetry no lo cruza y el S3.PutObject sale como una traza suelta. Con ficheros de ≤10 MB
+        # los hilos (subida en paralelo por partes) no aportan nada.
+        "use_threads": False,
     },
 }

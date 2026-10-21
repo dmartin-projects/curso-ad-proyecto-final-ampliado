@@ -93,3 +93,69 @@ class MovimientoFactory(DjangoModelFactory):
     fecha = factory.Faker("date_this_year")
     importe = factory.Faker("pydecimal", left_digits=3, right_digits=2, max_value=-1, min_value=-500)
     concepto = factory.Faker("company", locale="es_ES")
+
+
+# ── OpenTelemetry en los tests (módulo 84) ──
+class Telemetria:
+    """Lo que ha generado el código bajo prueba: spans, métricas y logs, en memoria."""
+
+    def __init__(self, trazas, metricas, logs):
+        self._trazas, self._metricas, self._logs = trazas, metricas, logs
+
+    def spans(self, nombre=None):
+        todos = self._trazas.get_finished_spans()
+        return [s for s in todos if nombre is None or s.name == nombre]
+
+    def logs(self):
+        return [r.log_record for r in self._logs.get_finished_logs()]
+
+    def metrica(self, nombre) -> dict:
+        """{atributos (como tupla ordenada): valor} de una métrica de suma (contador)."""
+        datos = self._metricas.get_metrics_data()
+        valores = {}
+        for rm in datos.resource_metrics if datos else []:
+            for sm in rm.scope_metrics:
+                for m in sm.metrics:
+                    if m.name == nombre:
+                        for p in m.data.data_points:
+                            valores[tuple(sorted(p.attributes.items()))] = p.value
+        return valores
+
+    def limpiar(self):
+        self._trazas.clear()
+        self._logs.clear()
+
+
+@pytest.fixture(scope="session")
+def _telemetria_sesion():
+    # Los proveedores globales de OpenTelemetry solo se pueden fijar UNA vez por proceso: se configura
+    # al primer uso y se reutiliza en toda la sesión (cada test empieza con los exportadores vacíos)
+    from opentelemetry.sdk._logs.export import InMemoryLogRecordExporter
+    from opentelemetry.sdk.metrics.export import InMemoryMetricReader
+    from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
+
+    from core import telemetria
+
+    trazas, metricas, logs = InMemorySpanExporter(), InMemoryMetricReader(), InMemoryLogRecordExporter()
+    telemetria.configurar("gastos-tests", exportadores={"trazas": trazas, "metricas": metricas, "logs": logs})
+    return Telemetria(trazas, metricas, logs)
+
+
+@pytest.fixture
+def _conexion_instrumentada(_telemetria_sesion):
+    """psycopg se instrumenta al CONECTAR: una conexión abierta por un test anterior no generaría spans.
+    En producción no pasa: configurar() se ejecuta en ready(), antes de la primera conexión."""
+    from django.db import connections
+    from opentelemetry.instrumentation.psycopg import PsycopgInstrumentor
+
+    for conexion in connections.all():
+        if conexion.connection is not None and not getattr(
+            conexion.connection, "_is_instrumented_by_opentelemetry", False
+        ):
+            PsycopgInstrumentor.instrument_connection(conexion.connection)
+
+
+@pytest.fixture
+def telemetria(_telemetria_sesion, db, _conexion_instrumentada):
+    _telemetria_sesion.limpiar()
+    return _telemetria_sesion

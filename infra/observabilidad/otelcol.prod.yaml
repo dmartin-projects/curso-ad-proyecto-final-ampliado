@@ -1,0 +1,47 @@
+# infra/observabilidad/otelcol.prod.yaml — el collector EN PRODUCCIÓN (módulo 84)
+# Corre en la VM junto a Gastos y reenvía todo a Grafana Cloud. Los procesos de Python no saben nada
+# de Grafana Cloud: hablan con "collector:4318" en la red interna. Cambiar de proveedor = cambiar este fichero.
+extensions:
+  basicauth/grafana_cloud: # Grafana Cloud: usuario = id de la instancia, contraseña = token de acceso
+    client_auth:
+      username: ${env:GRAFANA_CLOUD_INSTANCE_ID}
+      password: ${env:GRAFANA_CLOUD_TOKEN}
+  health_check: { endpoint: 0.0.0.0:13133 } # para el healthcheck de Docker
+
+receivers:
+  otlp:
+    protocols:
+      http: { endpoint: 0.0.0.0:4318 }
+
+processors:
+  memory_limiter: { check_interval: 1s, limit_mib: 200 }
+  # Muestreo de COLA: se decide con la traza ya completa. Se guardan TODAS las que tienen un error o
+  # tardan más de 1 s, y un 10 % del resto. En el SDK no se puede (al empezar no se sabe cómo acabará).
+  tail_sampling:
+    decision_wait: 10s # espera a que lleguen todos los spans de la traza (Celery incluido)
+    policies:
+      - { name: errores, type: status_code, status_code: { status_codes: [ERROR] } }
+      - { name: lentas, type: latency, latency: { threshold_ms: 1000 } }
+      - { name: el-resto, type: probabilistic, probabilistic: { sampling_percentage: 10 } }
+  batch: {}
+
+exporters:
+  otlp_http/grafana_cloud: # trazas, métricas y logs, todo al mismo endpoint OTLP de Grafana Cloud
+    endpoint: ${env:GRAFANA_CLOUD_OTLP_ENDPOINT} # https://otlp-gateway-prod-<región>.grafana.net/otlp
+    auth: { authenticator: basicauth/grafana_cloud }
+
+service:
+  extensions: [basicauth/grafana_cloud, health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, tail_sampling, batch]
+      exporters: [otlp_http/grafana_cloud]
+    metrics: # las métricas NO se muestrean: son agregados, ya son baratas
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/grafana_cloud]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, batch]
+      exporters: [otlp_http/grafana_cloud]

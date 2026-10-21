@@ -52,6 +52,10 @@ STORAGES = {
             "querystring_auth": True,  # los tickets y los extractos son privados
             "querystring_expire": 300,
             "file_overwrite": False,
+            # Módulo 84: sin hilos. Con ellos (lo normal en boto3), cada subida va en otro hilo, el contexto de
+            # OpenTelemetry no lo cruza y el S3.PutObject sale como una traza suelta. Con ficheros de ≤10 MB
+            # los hilos (subida en paralelo por partes) no aportan nada.
+            "use_threads": False,
         },
     },
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
@@ -87,10 +91,14 @@ SPECTACULAR_SETTINGS["SERVE_PERMISSIONS"] = ["rest_framework.permissions.IsAdmin
 if dsn := env("SENTRY_DSN", default=""):
     import sentry_sdk
 
+    from core.telemetria import enlazar_sentry
+
     sentry_sdk.init(
         dsn=dsn,
         environment="produccion",
         release=env("VERSION", default=None),
-        traces_sample_rate=0.1,
+        # Con OpenTelemetry activo (módulo 84) las trazas van a Grafana: Sentry solo para errores
+        traces_sample_rate=0.0 if env.bool("OTEL_ENABLED", default=False) else 0.1,
         # sin datos personales: es el comportamiento por defecto (send_default_pii está obsoleto)
+        before_send=enlazar_sentry,  # cada error lleva el trace_id de su traza en Grafana (módulo 84)
     )

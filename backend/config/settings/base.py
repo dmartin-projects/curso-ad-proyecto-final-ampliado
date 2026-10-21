@@ -219,10 +219,10 @@ LOGGING = {
     "disable_existing_loggers": False,
     "filters": {"request_id": {"()": "core.logging.RequestIdFilter"}},
     "formatters": {
-        "texto": {"format": "{asctime} {levelname} {name} [{request_id}] {message}", "style": "{"},
+        "texto": {"format": "{asctime} {levelname} {name} [{request_id}] [{traza}] {message}", "style": "{"},
         "json": {
             "()": "pythonjsonlogger.json.JsonFormatter",
-            "fmt": "%(asctime)s %(levelname)s %(name)s %(request_id)s %(message)s",
+            "fmt": "%(asctime)s %(levelname)s %(name)s %(request_id)s %(traza)s %(message)s",
         },
     },
     "handlers": {

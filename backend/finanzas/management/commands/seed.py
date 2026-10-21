@@ -5,6 +5,7 @@ from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
+from eventos import registro as eventos
 from finanzas.models import Comercio, Cuenta, Movimiento, Presupuesto
 from hogares.services import crear_hogar
 from usuarios.models import Usuario
@@ -69,7 +70,9 @@ class Command(BaseCommand):
                     creado_por=usuario,
                 )
             )
-        Movimiento.objects.bulk_create(nuevos, batch_size=1000)
+        with transaction.atomic():  # bulk_create no emite post_save: los eventos de Kafka, a mano (módulo 85)
+            creados = Movimiento.objects.bulk_create(nuevos, batch_size=1000)
+            eventos.movimientos_cambiados([m.pk for m in creados], tipo="movimiento.creado")
         Presupuesto.objects.create(
             hogar=hogar, categoria=categorias["Supermercado"], mes=hoy.replace(day=1), importe=Decimal("400")
         )

@@ -8,7 +8,8 @@ export const SOPORTE = { email: 'soporte@example.com', password: 'soporte12345' 
  * en cada uso (ROTATE_REFRESH_TOKENS + BLACKLIST_AFTER_ROTATION, módulo 35) y la cookie guardada quedaría
  * en la lista negra tras el primer test.
  */
-export async function entrar(page: Page, usuario = DEMO) {
+export async function entrar(page: Page, usuario = DEMO, estadisticas = simularEstadisticas) {
+  await estadisticas(page);
   await page.goto('/login');
   await page.getByLabel('Email').fill(usuario.email);
   await page.getByLabel('Contraseña').fill(usuario.password);
@@ -24,4 +25,30 @@ export function vigilarConsola(page: Page) {
     if (m.type() === 'error' && !m.text().includes('401')) errores.push(m.text());
   });
   return () => expect(errores, errores.join('\n')).toEqual([]);
+}
+
+/**
+ * El servicio de estadísticas (módulo 85) no se arranca en estos E2E, que prueban la aplicación de Django:
+ * su respuesta se simula en el navegador. El servicio tiene sus propios tests (estadisticas/tests) y el
+ * recorrido contra la producción levantada en local lo prueba de verdad, con Kafka.
+ */
+export async function simularEstadisticas(page: Page) {
+  await page.route('**/estadisticas/v1/**', (r) =>
+    r.fulfill({
+      json: {
+        hogar_id: 1,
+        ultimo_evento: '2026-10-21T22:43:52Z',
+        desde: '2026-05-01',
+        hasta: '2026-10-21',
+        dias: ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'].map(
+          (nombre, i) => ({ dia: i + 1, nombre, gasto_medio: String(10 + i) }),
+        ),
+      },
+    }),
+  );
+}
+
+/** El servicio de estadísticas caído: Caddy responde 502. */
+export async function estadisticasCaidas(page: Page) {
+  await page.route('**/estadisticas/v1/**', (r) => r.fulfill({ status: 502, body: 'Bad Gateway' }));
 }

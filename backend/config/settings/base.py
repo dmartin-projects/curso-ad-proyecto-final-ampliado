@@ -45,6 +45,7 @@ PROPIAS = [
     "notificaciones",
     "informes",
     "backoffice",
+    "eventos",  # módulo 85: outbox → Kafka
 ]
 INSTALLED_APPS = DJANGO_APPS + TERCEROS + PROPIAS
 
@@ -153,6 +154,10 @@ CELERY_BEAT_SCHEDULE = {
         "task": "core.tasks.limpiar_resultados_de_tareas",
         "schedule": crontab(minute=30, hour=3),
     },
+    "limpiar-eventos-publicados": {  # módulo 85
+        "task": "eventos.tasks.limpiar_eventos_publicados",
+        "schedule": crontab(minute=45, hour=3),
+    },
 }
 
 # core/agrupar.py: debounce de tareas repetidas (módulo 76). Solo se desactiva en E2E.
@@ -257,3 +262,9 @@ TICKETS_TAMANO_MAXIMO = 10 * 1024 * 1024  # 10 MB
 IMPORTACION_TAMANO_MAXIMO = 5 * 1024 * 1024  # 5 MB
 IMPORTACION_TAMANO_LOTE = 500  # filas por tarea del chord
 IMPORTACION_DIAS_CONCILIACION = 3  # un gasto manual o de ticket y la fila del banco pueden diferir unos días
+
+# ── Eventos: outbox → Kafka (módulo 85) ──
+KAFKA_BOOTSTRAP_SERVERS = env("KAFKA_BOOTSTRAP_SERVERS", default="localhost:9092")
+# ¿Fallar si un evento se guarda fuera de transaction.atomic()? En dev y tests sí (dev.py, test.py);
+# en producción se registra el error y se sigue: perder el evento es malo, tirar la petición, peor.
+EVENTOS_EXIGIR_TRANSACCION = False

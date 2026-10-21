@@ -9,14 +9,17 @@ set -a                                         # exporta lo que se lea de .env: 
 set +a
 export VERSION="${NUEVA#v}"                    # v1.4.0 → 1.4.0 (la etiqueta de la imagen)
 COMPOSE="docker compose -f compose.prod.yaml"
-SERVICIOS="web worker worker-ocr beat tasks-worker proxy"
+SERVICIOS="web worker worker-ocr beat tasks-worker relay estadisticas-api estadisticas-consumidor proxy"  # 85: relay y estadísticas
 
 echo "▶ Desplegando $VERSION"
 ANTERIOR=$(cat .version-actual 2>/dev/null || echo latest)
 
 $COMPOSE pull --quiet
-$COMPOSE up -d db redis rabbitmq collector   # collector: módulo 84
+$COMPOSE up -d db redis rabbitmq collector kafka   # collector: módulo 84; kafka: módulo 85
 $COMPOSE run --rm migrate                      # con el código NUEVO, mientras sirve el viejo
+$COMPOSE run --rm topics                       # módulo 85: los topics (si ya existen, no hace nada)
+$COMPOSE run --rm estadisticas-bd              # módulo 85: usuario y BD del servicio (idempotente)
+$COMPOSE run --rm estadisticas-migrate         # módulo 85: migraciones de Alembic del servicio
 # --no-deps: migrate ya se ejecutó. Sin él, compose lo vuelve a lanzar (su imagen ha cambiado) con la web y
 # el proxy YA parados: ~12 s más sin servicio (medido en el ejercicio 3). Y || : si algo no arranca, con set -e
 # el script terminaría AQUÍ, sin volver atrás; quien decide es la comprobación de salud de abajo.

@@ -1,0 +1,47 @@
+# compose.eventos.yaml — Kafka EN LOCAL (módulo 85)
+#   docker compose -f compose.yaml -f compose.eventos.yaml up -d
+# Django, el relay del outbox y el servicio de estadísticas siguen en tu Mac y se conectan a localhost:9092.
+# Panel de Kafka: http://localhost:8090 (topics, particiones, mensajes y grupos de consumidores).
+services:
+  kafka:
+    image: apache/kafka:4.3.2
+    ports: ["9092:9092"]
+    environment:
+      # Un solo nodo que es a la vez broker y controller (KRaft: Kafka ya no usa ZooKeeper)
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      # Dos puertas: INTERNA para los contenedores (kafka:19092) y EXTERNA para tu Mac (localhost:9092).
+      # El broker devuelve a cada cliente la dirección "anunciada" de la puerta por la que entró.
+      KAFKA_LISTENERS: INTERNA://:19092,EXTERNA://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNA://kafka:19092,EXTERNA://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNA:PLAINTEXT,EXTERNA:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNA
+      # Con un solo nodo, los topics internos no pueden tener 3 réplicas (el valor por defecto)
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      # Los topics los crea `manage.py crear_topics` con su configuración: nada de topics "por accidente"
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_LOG_DIRS: /var/lib/kafka/data
+      KAFKA_HEAP_OPTS: -Xms512m -Xmx512m
+    volumes: [kafkadata:/var/lib/kafka/data]
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null"]
+      interval: 10s
+      timeout: 10s
+      retries: 12
+
+  kafka-ui:
+    image: kafbat/kafka-ui:v1.5.0
+    ports: ["8090:8080"]
+    environment:
+      KAFKA_CLUSTERS_0_NAME: gastos
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:19092
+    depends_on:
+      kafka: { condition: service_healthy }
+
+volumes:
+  kafkadata:

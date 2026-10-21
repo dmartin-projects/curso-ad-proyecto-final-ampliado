@@ -92,6 +92,45 @@ jobs:
         run: uvx pip-audit --strict
         continue-on-error: true                 # informa sin bloquear (decide tu política)
 
+  estadisticas: # módulo 85: el microservicio, con PostgreSQL y Kafka de verdad
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: estadisticas
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: gastos
+          POSTGRES_USER: gastos
+          POSTGRES_PASSWORD: gastos
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U gastos" --health-interval 5s --health-timeout 5s --health-retries 10
+      kafka: # la configuración por defecto de la imagen: un nodo KRaft escuchando en localhost:9092
+        image: apache/kafka:4.3.2
+        ports: ["9092:9092"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: estadisticas/uv.lock
+      - run: uv sync --locked
+      - name: Lint y formato
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+      - name: Esperar a Kafka
+        run: |
+          for _ in $(seq 1 30); do
+            uv run python -c "from confluent_kafka.admin import AdminClient as A; A({'bootstrap.servers':'localhost:9092'}).list_topics(timeout=2)" && exit 0
+            sleep 2
+          done
+          exit 1
+      - name: Tests (también los de Kafka)
+        run: uv run pytest
+
   frontend:
     runs-on: ubuntu-latest
     defaults:

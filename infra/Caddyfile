@@ -29,6 +29,12 @@
 		}
 	}
 
+	# Módulo 85: el servicio de estadísticas (FastAPI). Si está caído, Caddy responde 502 SOLO aquí: el resto
+	# de la aplicación sigue funcionando (y la tarjeta de Angular dice "no disponible")
+	handle /estadisticas/* {
+		reverse_proxy estadisticas-api:8000
+	}
+
 	# La SPA de Angular (y sus fuentes, en /fuentes)
 	root * /srv/frontend
 

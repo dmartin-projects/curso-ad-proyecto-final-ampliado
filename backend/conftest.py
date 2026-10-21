@@ -1,11 +1,28 @@
 import factory
 import pytest
 from django.core.cache import cache
+from django.db import transaction
 from factory.django import DjangoModelFactory
 from rest_framework.test import APIClient
 
 from hogares.models import Hogar, Membresia
 from usuarios.models import Usuario
+
+
+class FactoriaAtomica(DjangoModelFactory):
+    """Crea los datos de prueba dentro de atomic(), como el código de la aplicación (módulo 85).
+
+    Guardar un movimiento o una membresía escribe un evento en el outbox, y fuera de una transacción eso
+    falla a propósito en los tests (EVENTOS_EXIGIR_TRANSACCION). Los datos de prueba no son la excepción.
+    """
+
+    class Meta:
+        abstract = True
+
+    @classmethod
+    def _create(cls, model_class, *args, **kwargs):
+        with transaction.atomic():
+            return super()._create(model_class, *args, **kwargs)
 
 
 class UsuarioFactory(DjangoModelFactory):
@@ -18,14 +35,14 @@ class UsuarioFactory(DjangoModelFactory):
     password = factory.django.Password("clave-segura-123")
 
 
-class HogarFactory(DjangoModelFactory):
+class HogarFactory(FactoriaAtomica):
     class Meta:
         model = Hogar
 
     nombre = factory.Sequence(lambda n: f"Hogar {n}")
 
 
-class MembresiaFactory(DjangoModelFactory):
+class MembresiaFactory(FactoriaAtomica):
     class Meta:
         model = Membresia
 
@@ -68,7 +85,7 @@ def hogar_con_roles(db):
     return hogar, roles
 
 
-class CuentaFactory(DjangoModelFactory):
+class CuentaFactory(FactoriaAtomica):
     class Meta:
         model = "finanzas.Cuenta"
 
@@ -76,7 +93,7 @@ class CuentaFactory(DjangoModelFactory):
     nombre = factory.Sequence(lambda n: f"Cuenta {n}")
 
 
-class CategoriaFactory(DjangoModelFactory):
+class CategoriaFactory(FactoriaAtomica):
     class Meta:
         model = "finanzas.Categoria"
 
@@ -84,7 +101,7 @@ class CategoriaFactory(DjangoModelFactory):
     nombre = factory.Sequence(lambda n: f"Categoría {n}")
 
 
-class MovimientoFactory(DjangoModelFactory):
+class MovimientoFactory(FactoriaAtomica):
     class Meta:
         model = "finanzas.Movimiento"
 

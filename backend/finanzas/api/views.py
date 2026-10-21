@@ -16,6 +16,7 @@ from core.api.paginacion import PaginacionCursor, PaginacionEstandar
 from core.auditoria import registrar
 from core.hojas_de_calculo import texto_csv
 from core.models import RegistroAuditoria
+from eventos import registro as eventos
 from finanzas import dashboard
 from finanzas.exceptions import CuentaConMovimientos
 from finanzas.models import Categoria, Comercio, Cuenta, Movimiento, Presupuesto
@@ -161,6 +162,7 @@ class MovimientoViewSet(DelHogarViewSet):
             meses = set(seleccion.dates("fecha", "month"))
             antes = {m.pk: model_to_dict(m) for m in seleccion}
             n = seleccion.update(categoria=datos.validated_data["categoria"], revisado=True)
+            eventos.movimientos_cambiados(antes)  # update() tampoco emite post_save: los eventos, a mano (módulo 85)
             for mov in Movimiento.objects.filter(pk__in=antes):  # auditado uno a uno, como en el backoffice
                 registrar(mov, RegistroAuditoria.Accion.MODIFICAR, request.user, antes=antes[mov.pk])
             # update() no emite post_save: se avisa a mano (dashboard y presupuestos, módulos 76 y 77)

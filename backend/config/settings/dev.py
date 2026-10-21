@@ -25,3 +25,5 @@ STORAGES["default"] = {
         "use_threads": False,
     },
 }
+
+EVENTOS_EXIGIR_TRANSACCION = True  # módulo 85: un evento fuera de atomic() falla en desarrollo

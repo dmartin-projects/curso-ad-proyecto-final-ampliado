@@ -1,0 +1,30 @@
+<mat-card class="p-4">
+  <h2 class="mb-2 font-medium">¿Qué días gastáis más?</h2>
+  @let r = datos();
+  @if (r.error()) {
+    <p class="text-sm text-texto-suave" role="status">
+      Las estadísticas no están disponibles ahora mismo. El resto de la aplicación funciona con
+      normalidad.
+    </p>
+  } @else if (r.hasValue()) {
+    @let d = r.value();
+    @defer (on viewport) {
+      <app-grafico
+        tipo="bar"
+        [datos]="grafico()"
+        [etiqueta]="'Gasto medio por día de la semana, del ' + d.desde + ' al ' + d.hasta"
+        class="h-64"
+      />
+    } @placeholder {
+      <div class="h-64 animate-pulse rounded-lg bg-superficie-alta"></div>
+    }
+    <p class="mt-2 text-xs text-texto-suave">
+      Gasto medio de los últimos 6 meses · servicio de estadísticas
+      @if (d.ultimo_evento) {
+        · último cambio recibido {{ d.ultimo_evento | date: 'd/M HH:mm:ss' }}
+      }
+    </p>
+  } @else {
+    <div class="h-64 animate-pulse rounded-lg bg-superficie-alta"></div>
+  }
+</mat-card>

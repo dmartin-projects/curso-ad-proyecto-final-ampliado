@@ -12,3 +12,5 @@ STORAGES = {
     "staticfiles": {"BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage"},
 }
 MAILERS = {"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}}
+
+EVENTOS_EXIGIR_TRANSACCION = True  # módulo 85: un evento fuera de atomic() rompe el test

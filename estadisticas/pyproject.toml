@@ -1,0 +1,38 @@
+[project]
+name = "estadisticas"
+version = "0.1.0"
+description = "Estadísticas de Gastos: un microservicio que se alimenta de los eventos de Kafka (módulo 85)"
+requires-python = ">=3.13"
+dependencies = [
+    "alembic>=1.20.0",
+    "confluent-kafka>=2.16",
+    "fastapi>=0.159.1",
+    "opentelemetry-exporter-otlp-proto-http>=1.45.1",
+    "opentelemetry-instrumentation-fastapi>=0.66b1",
+    "opentelemetry-instrumentation-sqlalchemy>=0.66b1",
+    "opentelemetry-sdk>=1.45.1",
+    "psycopg[binary,pool]>=3.3.6",
+    "pydantic-settings>=2.16.1",
+    "pyjwt>=2.15.1",
+    "sqlalchemy>=2.1",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28.1",
+    "pytest>=9.1.1",
+    "ruff>=0.17.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra -p no:cacheprovider"
+markers = ["kafka: necesita Kafka en localhost:9092 (docker compose ... up -d kafka)"]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]

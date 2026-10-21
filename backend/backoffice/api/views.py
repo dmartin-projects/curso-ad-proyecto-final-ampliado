@@ -24,6 +24,7 @@ from backoffice.permisos import EsPersonal, PermisosPorAccion
 from core.auditoria import registrar
 from core.consultas import contar
 from core.models import RegistroAuditoria
+from eventos import registro as eventos
 from finanzas.models import Categoria, Movimiento
 from finanzas.signals import movimientos_cambiados
 from hogares.models import Hogar, Membresia
@@ -216,6 +217,7 @@ class MovimientoSoporteViewSet(viewsets.ReadOnlyModelViewSet):
             antes = {m.pk: model_to_dict(m) for m in del_hogar}
             meses = {datos["fecha"].replace(day=1) for datos in antes.values()}
             n = del_hogar.update(categoria=categoria, revisado=True)
+            eventos.movimientos_cambiados(antes)  # update() no emite post_save: eventos a mano (módulo 85)
             for mov in Movimiento.objects.filter(pk__in=antes):
                 registrar(mov, M, request.user, antes=antes[mov.pk])
             transaction.on_commit(

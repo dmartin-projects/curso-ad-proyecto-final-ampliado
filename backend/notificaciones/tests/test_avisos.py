@@ -4,6 +4,7 @@ from decimal import Decimal
 import pytest
 from django.core import mail
 from django.core.cache import cache
+from django.db import transaction
 
 from conftest import CategoriaFactory, CuentaFactory, MovimientoFactory, UsuarioFactory
 from finanzas.models import Movimiento, Presupuesto
@@ -111,8 +112,10 @@ def test_cualquier_save_avisa_tambien_del_mes_de_antes(escenario, django_capture
     comprobar_presupuestos(hogar.pk, [date(2026, 10, 1)])
     m = Movimiento.objects.get(pk=m.pk)  # cargado desde la BD: from_db guarda la fecha
     m.fecha = date(2026, 9, 28)
-    with django_capture_on_commit_callbacks(execute=True):
-        m.save()  # sin pasar por la API (backoffice, un comando…): el receiver avisa de AMBOS meses
+    # sin pasar por la API (backoffice, un comando…): el receiver avisa de AMBOS meses. En una transacción,
+    # como todo guardado de un movimiento desde el módulo 85 (escribe su evento en el outbox)
+    with django_capture_on_commit_callbacks(execute=True), transaction.atomic():
+        m.save()
     p.refresh_from_db()
     assert p.alerta_enviada is False
 
@@ -134,7 +137,7 @@ def test_dos_saves_seguidos_y_carga_sin_fecha(escenario, senales, django_capture
     octubre, septiembre = date(2026, 10, 1), date(2026, 9, 1)
     MovimientoFactory(cuenta=cuenta, fecha=date(2026, 10, 3))
     m = Movimiento.objects.get()
-    with django_capture_on_commit_callbacks(execute=True):
+    with django_capture_on_commit_callbacks(execute=True), transaction.atomic():  # outbox (módulo 85)
         m.fecha = date(2026, 9, 1)
         m.save()
         m.notas = "solo cambian las notas"

@@ -63,6 +63,13 @@ describe('authInterceptor', () => {
     expect(error).toBeInstanceOf(ErrorApi);
   });
 
+  it('pone el JWT al servicio de estadísticas (módulo 85), que lo valida con la misma clave', () => {
+    http.get('/estadisticas/v1/hogares/1/dias-semana').subscribe();
+    const r = ctrl.expectOne('/estadisticas/v1/hogares/1/dias-semana');
+    expect(r.request.headers.get('Authorization')).toBe('Bearer viejo');
+    r.flush({});
+  });
+
   it('no pone el JWT fuera de nuestra API', () => {
     http.get('https://otro.example/datos').subscribe();
     expect(ctrl.expectOne('https://otro.example/datos').request.headers.has('Authorization')).toBe(

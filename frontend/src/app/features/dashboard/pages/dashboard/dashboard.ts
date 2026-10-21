@@ -12,6 +12,7 @@ import { lastValueFrom } from 'rxjs';
 import { HogarStore } from '../../../../core/hogar/hogar-store';
 import { Grafico } from '../../../../shared/components/grafico/grafico';
 import { Importe } from '../../../../shared/components/importe/importe';
+import { DiasSemanaCard } from '../../components/dias-semana/dias-semana';
 import { DashboardApi } from '../../services/dashboard-api';
 
 const mesDe = (fecha: Date) => fecha.toLocaleDateString('sv-SE').slice(0, 7); // AAAA-MM
@@ -28,6 +29,7 @@ const mesDe = (fecha: Date) => fecha.toLocaleDateString('sv-SE').slice(0, 7); //
     MatProgressBarModule,
     Grafico,
     Importe,
+    DiasSemanaCard,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
@@ -48,6 +50,9 @@ export default class Dashboard {
     queryFn: () => lastValueFrom(this.api.resumen(this.store.activoId()!, this.mesActual())),
     placeholderData: keepPreviousData,
   }));
+
+  /** Módulo 85: la tarjeta del servicio de estadísticas, con su propio resource (si cae, solo cae ella). */
+  protected readonly diasSemana = this.api.diasSemana(computed(() => this.store.activoId()!));
 
   protected readonly porCategoria = computed<ChartData<'doughnut'>>(() => {
     const filas = this.resumen.data()?.por_categoria ?? [];

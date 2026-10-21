@@ -95,7 +95,8 @@ def test_adjunto_generico_y_auditoria():
 
     antes = model_to_dict(m)
     m.concepto = "Cena de cumpleaños"
-    m.save()
+    with transaction.atomic():  # guardar un movimiento escribe en el outbox (módulo 85): siempre en una transacción
+        m.save()
     r = registrar(m, RegistroAuditoria.Accion.MODIFICAR, antes=antes)
     assert r.cambios == {"concepto": ["Cena", "Cena de cumpleaños"]}
     assert r.objeto == m

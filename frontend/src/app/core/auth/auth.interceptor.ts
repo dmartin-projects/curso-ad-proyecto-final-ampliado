@@ -5,8 +5,12 @@ import { catchError, switchMap, throwError } from 'rxjs';
 import { SIN_AUTH } from '../http/contexto';
 import { AuthStore } from './auth-store';
 
+/** Nuestras APIs: Django y, desde el módulo 85, el servicio de estadísticas. A NINGUNA otra URL va el token. */
+export const APIS_PROPIAS = ['/api/', '/estadisticas/'];
+const esApiPropia = (url: string) => APIS_PROPIAS.some((prefijo) => url.startsWith(prefijo));
+
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
-  if (!req.url.startsWith('/api/') || req.context.get(SIN_AUTH)) return next(req);
+  if (!esApiPropia(req.url) || req.context.get(SIN_AUTH)) return next(req);
 
   const auth = inject(AuthStore);
   const conToken = (r: HttpRequest<unknown>, token: string | null) =>

@@ -21,6 +21,9 @@ jobs:
           - nombre: proxy
             contexto: .
             dockerfile: infra/proxy.Dockerfile
+          - nombre: estadisticas            # módulo 85
+            contexto: estadisticas
+            dockerfile: estadisticas/Dockerfile
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +67,7 @@ jobs:
           host: ${{ secrets.SERVIDOR_HOST }}
           username: ${{ secrets.SERVIDOR_USUARIO }}
           key: ${{ secrets.SERVIDOR_SSH_KEY }}
-          source: "compose.prod.yaml,infra/desplegar.sh,infra/backup.sh,infra/observabilidad/otelcol.prod.yaml"
+          source: "compose.prod.yaml,infra/desplegar.sh,infra/backup.sh,infra/observabilidad/otelcol.prod.yaml,infra/estadisticas-bd.sh"
           target: /opt/gastos
       - name: Desplegar
         uses: appleboy/ssh-action@v1

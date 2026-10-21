@@ -13,6 +13,7 @@ from django.db.models import F
 from django.utils import timezone
 from opentelemetry import metrics
 
+from eventos import registro as eventos
 from finanzas.models import Movimiento
 from finanzas.normalizacion import normalizar
 from finanzas.servicios_comercios import reconocer_comercio, sugerir_categoria
@@ -221,6 +222,8 @@ def importar_lote(importacion_id: int, ids: list[int]) -> dict:
     )
     for fila, mov in zip(nuevas, movimientos, strict=True):
         fila.movimiento = mov
+    # bulk_create no emite post_save: los eventos de Kafka se escriben a mano, en la misma transacción (85)
+    eventos.movimientos_cambiados([m.pk for m in movimientos], tipo="movimiento.creado")
     Movimiento.objects.bulk_update([f.coincide_con for f in conciliadas], ["huella"])
     FilaImportacion.objects.bulk_update(filas, ["accion", "movimiento"])
     Importacion.objects.filter(pk=importacion_id).update(

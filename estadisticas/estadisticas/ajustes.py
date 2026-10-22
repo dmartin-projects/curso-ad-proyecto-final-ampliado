@@ -1,5 +1,5 @@
-"""Configuración por variables de entorno (o un .env junto a pyproject.toml), con pydantic-settings."""
-
+# estadisticas/ajustes.py — configuración por variables de entorno (o un .env junto a pyproject.toml), con
+# pydantic-settings (módulo 85). Solo la leen el composition root y la infraestructura (módulo 89).
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict

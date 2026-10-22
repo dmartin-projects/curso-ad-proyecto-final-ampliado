@@ -297,8 +297,105 @@ apps) sin PostgreSQL.
 - Lo que una app avisa a otra va por sus signals (`<app>_signals.py`), que emite su publicador al confirmar la
   transacción. Quien escucha (las notificaciones) no sabe nada de cómo se produjo.
 
-## 12. Lo que viene
+## 12. El servicio de estadísticas (FastAPI)
 
-- **89**: estadisticas (FastAPI) con el mismo árbol: `domain`, `application/<use_case>/` con DTOs de Pydantic,
-  `infrastructure/{api/v1/{routers,schemas}, database/{models,repositories}, messaging}`, un `APIRouter` por módulo
-  montado en `infrastructure/api/app.py`, y el contenedor como composition root.
+**El mismo árbol que una app de Django**, a propósito: quien sabe dónde está algo en `finanzas` sabe dónde está en
+`estadisticas/estadisticas/`. Cambian los *adapters* (FastAPI, SQLAlchemy, Kafka) y nada más.
+
+```
+estadisticas/estadisticas/
+├── domain/                                   Python puro: ni FastAPI, ni SQLAlchemy, ni Kafka, ni Pydantic
+│   ├── bo/               movimiento.py → Movimiento, membresia.py → Membresia (fotos con versión, frozen)
+│   ├── vo/               mes.py → Mes, periodo.py → Periodo
+│   ├── enums/            topic.py → Topic, resultado.py → Resultado
+│   ├── exceptions/       evento_invalido_exception.py → EventoInvalidoException (y EsquemaDesconocido…,
+│   │                     ConsumidorActivo…, MesMalFormado…): cada una con su decisión (aparcar, parar, 422)
+│   ├── events/           movimiento_guardado_event.py → MovimientoGuardadoEvent (y los otros tres); evento.py: la unión
+│   ├── services/         interpretacion.py (interpretar: de un mensaje a un evento), medias_por_dia.py
+│   ├── read_models/      mes_de_tendencia.py → MesDeTendencia, mes_sin_revisar.py → MesSinRevisar
+│   └── repositories/
+│       ├── i_movimiento_command_repository.py    IMovimientoCommandRepository (y membresía, progreso)
+│       ├── i_movimiento_query_service.py         IMovimientoQueryService (y membresía, progreso)
+│       └── queries/      periodo_del_hogar_query.py → PeriodoDelHogarQuery
+├── application/
+│   ├── procesar_lote_use_case/               i_…, procesar_lote_use_case.py, dtos/procesar_lote_input_dto.py
+│   ├── reconstruir_proyeccion_use_case/      i_…, reconstruir_proyeccion_use_case.py
+│   ├── obtener_tendencia_use_case/           i_…, obtener_tendencia_use_case.py, dtos/ (input y outputs, Pydantic)
+│   ├── obtener_dias_semana_use_case/, obtener_sin_revisar_use_case/
+│   ├── shared/           dtos/mensaje_input_dto.py → MensajeInputDTO (un mensaje de Kafka sin Kafka), mes_hasta.py
+│   └── ports/            i_unidad_de_trabajo.py, i_aparcados.py, i_trazas.py (+ i_traza.py),
+│                         i_grupo_de_consumidores.py, i_reloj.py
+├── infrastructure/
+│   ├── api/
+│   │   ├── app.py        crear_app(): el router principal (monta v1 con su prefijo y los exception handlers)
+│   │   ├── dependencies/ usuario_actual.py (el JWT de Django), hogar_permitido.py (Hogar: 404 si no eres miembro)
+│   │   ├── exceptions/   mes_mal_formado_handler.py (MesMalFormadoException → 422)
+│   │   └── v1/
+│   │       ├── routers/  tendencia_router.py → tendencia() (un endpoint por archivo; y salud, dias_semana…)
+│   │       ├── schemas/  tendencia_schema.py → Tendencia (el contrato OpenAPI; un schema por archivo)
+│   │       ├── router.py el APIRouter de la v1: reúne los de routers/ (el urls.py de Django)
+│   │       └── parametros.py  Meses (query param con sus límites)
+│   ├── database/
+│   │   ├── models/       movimiento_model.py → MovimientoModel (SQLAlchemy 2), base.py → Base
+│   │   ├── repositories/ movimiento_command_repository_sql.py → MovimientoCommandRepositorySQL
+│   │   │                 movimiento_query_service_sql.py → MovimientoQueryServiceSQL
+│   │   ├── metadata.py   puerta de entrada de los modelos (la leen Alembic y el test de migraciones)
+│   │   └── unidad_de_trabajo_sql.py, sesiones.py, guardado.py (DataError → EventoInvalidoException), conexion.py
+│   ├── consumer/         consumidor_kafka.py (adapter de entrada: el bucle de Kafka)
+│   ├── cli/              reconstruir_cli.py (adapter de entrada: línea de comandos)
+│   ├── messaging/        aparcados_kafka.py → AparcadosKafka, grupo_kafka.py → GrupoKafka (adapters de salida)
+│   ├── metrics/          retraso_consumidor.py (el gauge del retraso, que publica la API)
+│   ├── telemetry/        telemetria.py, trazas_otel.py → TrazasOTel, traza_otel.py → TrazaOTel
+│   ├── clock/            reloj_sistema.py → RelojSistema
+│   └── container.py      composition root: una función por use case (y las dependencias de FastAPI)
+├── ajustes.py            configuración (pydantic-settings). Solo la leen el container y la infraestructura
+└── api.py, consumidor.py, reconstruir.py     puntos de entrada (uvicorn, python -m): los comandos de siempre
+```
+
+`migraciones/` (Alembic) y `tests/` (en espejo: `domain/{services,vo}`, `application`, `fakes`,
+`infrastructure/{api/v1,database/{models,repositories},consumer,telemetry}`) están en la raíz del proyecto.
+
+| Pieza | Django (§1-§11) | FastAPI (este servicio) |
+|---|---|---|
+| Entrada HTTP | `views/` (una view por archivo) | `routers/` (un endpoint por archivo, con su `APIRouter`) |
+| Contrato de la API | `serializers/` | `schemas/` (Pydantic): el nombre de la clase es el del esquema en OpenAPI, por eso no lleva sufijo (como el modelo de Django) |
+| Rutas de la app | `infrastructure/api/v1/urls.py` (`DefaultRouter`) | `infrastructure/api/v1/router.py` (`APIRouter` que incluye los de `routers/`) |
+| Router principal | `config/api_v1.py` (un `include` por app) | `infrastructure/api/app.py` (`app.include_router(v1, prefix="/estadisticas/v1")`) |
+| Errores del dominio → HTTP | El *exception handler* de DRF (`core/infrastructure/api/exceptions/`) | `infrastructure/api/exceptions/` con `app.add_exception_handler` |
+| Autorización por hogar | `HogarDesdeUrlMixin` / `RolEnHogar` (adapter de entrada) | La dependencia `hogar_permitido` (`Hogar`), que lee `IMembresiaQueryService` |
+| DTOs | `@dataclass(frozen=True)` | Pydantic con `ConfigDict(frozen=True)`; Pydantic prohibido en `domain` |
+| Modelos de la BD | Django ORM, `<app>/models.py` como puerta de entrada; la clase conserva su nombre | SQLAlchemy 2, `<x>_model.py` → `<X>Model`; puerta de entrada `database/metadata.py` (el nombre de la clase no está en las migraciones) |
+| Implementaciones | `*_orm.py` → `…ORM` | `*_sql.py` → `…SQL` (SQLAlchemy + PostgreSQL) |
+| Transacción | `UnidadDeTrabajoDjango` (`atomic`): la de la conexión | `UnidadDeTrabajoSQL(sesion)`: la de una `Session`, que el container comparte con los repositorios; `savepoint()` es `begin_nested()` |
+| Migraciones | `makemigrations --check` | `alembic check` y `tests/infrastructure/database/models/test_migraciones.py` |
+| Composition root | `container.py`, una función por use case que llaman las views | `container.py`, igual; los routers la piden con `Depends(container.obtener_tendencia)` y esas funciones piden a su vez `Depends(container.sesion)` y `Depends(container.reloj)` |
+| Cambiar una pieza en un test | `monkeypatch.setattr(container, …)` | Lo mismo, y en la API `app.dependency_overrides[container.reloj]` |
+| Procesos y comandos | `management/commands/`, `tasks/` | `consumer/`, `cli/` y los puntos de entrada de la raíz |
+
+Una petición, capa por capa: `GET /estadisticas/v1/hogares/1/tendencia?meses=3`
+
+1. `infrastructure/api/app.py` → `v1/router.py` → `v1/routers/tendencia_router.py` → `tendencia()`.
+2. FastAPI resuelve las dependencias, en orden: `Hogar` (`usuario_actual` comprueba el JWT: 401; `hogar_permitido`
+   pregunta a `IMembresiaQueryService`: 404), y después `container.obtener_tendencia`, que monta
+   `ObtenerTendenciaUseCase` con la `Session` de la petición (`container.sesion`) y el reloj (`container.reloj`).
+   Por último valida los *query params* (`meses`: 422).
+3. El router traduce los parámetros a un `ObtenerTendenciaInputDTO` y llama a `caso.ejecutar(entrada)`.
+4. `ObtenerTendenciaUseCase` decide el periodo con el dominio (`mes_hasta` → `Mes`, `Periodo.de_meses`) y pide los
+   meses a `IMovimientoQueryService.tendencia(PeriodoDelHogarQuery)` y la hora del último evento a
+   `IProgresoQueryService`; traduce los *read models* a `TendenciaOutputDTO`. Un `hasta` mal formado sale como
+   `MesMalFormadoException` y el *handler* de `api/exceptions/` lo convierte en 422.
+5. `MovimientoQueryServiceSQL` agrupa en PostgreSQL (`date_trunc`, `CASE`) y devuelve un `MesDeTendencia` por mes.
+6. El router convierte el OutputDTO en el *schema* `Tendencia` (`model_validate(dto, from_attributes=True)`) y FastAPI
+   lo serializa. Al terminar la petición, `container.sesion` cierra la `Session`.
+
+Contratos de import-linter (`estadisticas/pyproject.toml`, *steps* del *job* `estadisticas` del CI):
+
+1. `domain` y `application` no importan fastapi, starlette, sqlalchemy, psycopg, confluent_kafka, opentelemetry, jwt,
+   pydantic_settings ni `estadisticas.ajustes`. `domain`, además, ni pydantic.
+2. Capas, de arriba abajo: puntos de entrada → `infrastructure.api | consumer | cli` → `infrastructure.container` →
+   `infrastructure.telemetry` → `infrastructure.database | messaging | metrics | clock` → `application` → `domain`.
+3. Los paquetes de los *use cases* son independientes entre sí: lo que comparten va en `application/shared` o en
+   `ports`.
+
+El CI ejecuta `tests/domain`, `tests/application` y `tests/fakes` sin PostgreSQL ni Kafka (con `DATABASE_URL` y
+`KAFKA_BOOTSTRAP_SERVERS` apuntando a puertos cerrados) y después `tests/infrastructure` con los dos.

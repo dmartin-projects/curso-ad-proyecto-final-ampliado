@@ -3,10 +3,11 @@
 from alembic import context
 
 from estadisticas.ajustes import ajustes
-from estadisticas.bd import Base, motor
+from estadisticas.infrastructure.database.metadata import metadata
+from estadisticas.infrastructure.database.sesiones import motor
 
 config = context.config
-target_metadata = Base.metadata  # para `alembic revision --autogenerate`
+target_metadata = metadata  # para `alembic revision --autogenerate`
 
 
 def run_migrations_offline() -> None:

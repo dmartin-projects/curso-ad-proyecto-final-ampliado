@@ -143,6 +143,13 @@ jobs:
         run: |
           uv run ruff check .
           uv run ruff format --check .
+      - name: Capas (import-linter, contratos en pyproject.toml)
+        run: uv run lint-imports
+      - name: Dominio y use cases, sin base de datos ni Kafka
+        env:
+          DATABASE_URL: postgresql+psycopg://nadie:nada@localhost:1/no_existe # si alguno la tocara, fallaría
+          KAFKA_BOOTSTRAP_SERVERS: localhost:1
+        run: uv run pytest tests/domain tests/application tests/fakes
       - name: Esperar a Kafka
         run: |
           for _ in $(seq 1 30); do
@@ -150,8 +157,8 @@ jobs:
             sleep 2
           done
           exit 1
-      - name: Tests (también los de Kafka)
-        run: uv run pytest
+      - name: Tests de infraestructura (también los de Kafka)
+        run: uv run pytest tests/infrastructure
 
   frontend:
     runs-on: ubuntu-latest

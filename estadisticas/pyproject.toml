@@ -21,6 +21,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "httpx>=0.28.1",
+    "import-linter>=2.15",
     "pytest>=9.1.1",
     "ruff>=0.17.1",
 ]
@@ -29,10 +30,66 @@ dev = [
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-ra -p no:cacheprovider"
-markers = ["kafka: necesita Kafka en localhost:9092 (docker compose ... up -d kafka)"]
+markers = ["kafka: necesita Kafka en KAFKA_BOOTSTRAP_SERVERS (localhost:9092: docker compose ... up -d kafka)"]
 
 [tool.ruff]
 line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
+
+# ── Arquitectura (módulo 89): las capas se comprueban en el CI con `uv run lint-imports` ──
+[tool.importlinter]
+root_packages = ["estadisticas"]
+include_external_packages = true # para poder prohibir fastapi, sqlalchemy, confluent_kafka…
+
+[[tool.importlinter.contracts]]
+id = "nucleo-sin-frameworks"
+name = "El dominio y la aplicación no conocen FastAPI, SQLAlchemy, Kafka, OpenTelemetry ni la configuración"
+type = "forbidden"
+source_modules = ["estadisticas.domain", "estadisticas.application"]
+forbidden_modules = [
+    "fastapi",
+    "starlette",
+    "sqlalchemy",
+    "psycopg",
+    "confluent_kafka",
+    "opentelemetry",
+    "jwt",
+    "pydantic_settings",
+    "estadisticas.ajustes",
+]
+
+[[tool.importlinter.contracts]]
+id = "dominio-puro"
+name = "El dominio es Python puro: ni siquiera Pydantic"
+type = "forbidden"
+source_modules = ["estadisticas.domain"]
+forbidden_modules = ["pydantic"]
+
+[[tool.importlinter.contracts]]
+id = "estadisticas-capas"
+name = "estadisticas: cada capa solo importa las de debajo"
+type = "layers"
+containers = ["estadisticas"]
+layers = [
+    "api | consumidor | reconstruir", # puntos de entrada del proceso (uvicorn, python -m)
+    "infrastructure.api | infrastructure.consumer | infrastructure.cli", # adapters de entrada (HTTP, Kafka, línea de comandos)
+    "infrastructure.container", # composition root: monta los use cases con los adapters de salida
+    "infrastructure.telemetry", # adapter de salida (trazas) que instrumenta la base de datos
+    "infrastructure.database | infrastructure.messaging | infrastructure.metrics | infrastructure.clock", # adapters de salida
+    "application", # use cases (con sus DTOs), ports y shared
+    "domain", # bo, vo, enums, exceptions, events, services, read_models, repositories (interfaces)
+]
+
+[[tool.importlinter.contracts]]
+id = "use-cases-independientes"
+name = "Un use case no importa otro: lo que comparten va en application/shared o en ports"
+type = "independence"
+modules = [
+    "estadisticas.application.procesar_lote_use_case",
+    "estadisticas.application.reconstruir_proyeccion_use_case",
+    "estadisticas.application.obtener_tendencia_use_case",
+    "estadisticas.application.obtener_dias_semana_use_case",
+    "estadisticas.application.obtener_sin_revisar_use_case",
+]

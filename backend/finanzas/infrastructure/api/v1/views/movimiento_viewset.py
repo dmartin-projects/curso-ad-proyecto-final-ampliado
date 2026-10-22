@@ -1,4 +1,4 @@
-# finanzas/infrastructure/api/v1/views/movimiento_viewset.py — adapter de entrada HTTP (módulos 33-38, 76, 87 y 88)
+# finanzas/infrastructure/api/v1/views/movimiento_viewset.py — adapter de entrada HTTP (módulos 33-38, 76, 87, 88 y 90)
 #
 # Escribir: serializer → InputDTO → use case de comando. Leer (listado, detalle, CSV y la response de un POST o un
 # PATCH): query params → InputDTO → use case de consulta → OutputDTO → presenter → el mismo serializer de siempre.
@@ -52,9 +52,11 @@ from finanzas.infrastructure.api.v1.serializers.movimiento_serializer import Mov
 from finanzas.infrastructure.api.v1.serializers.recategorizar_serializer import RecategorizarSerializer
 from finanzas.infrastructure.database.models.movimiento_model import Movimiento as MovimientoModel
 from hogares.infrastructure.api.base.del_hogar_viewset import DelHogarViewSet
+from oauth.domain.enums.scope import Scope
+from oauth.infrastructure.api.views.acepta_oauth import AceptaOAuth
 
 
-class MovimientoViewSet(DelHogarViewSet):
+class MovimientoViewSet(AceptaOAuth, DelHogarViewSet):
     # Estos atributos son los de siempre: de ellos salen el esquema OpenAPI (filtros, búsqueda, orden, paginación)
     # y la validación de los query params. El QuerySet de DelHogarViewSet solo lo usa get_object() al modificar.
     modelo = MovimientoModel
@@ -67,6 +69,9 @@ class MovimientoViewSet(DelHogarViewSet):
     roles_por_accion = roles_de(RegistrarMovimientoUseCase, ModificarMovimientoUseCase, EliminarMovimientoUseCase) | {
         "recategorizar": RecategorizarMovimientosUseCase.rol_minimo
     }
+    # Módulo 90: lo que una aplicación puede hacer con un token OAuth. El resto (editar, borrar, recategorizar,
+    # exportar) solo desde la app.
+    scopes_por_accion = {"list": Scope.GASTOS_LEER, "retrieve": Scope.GASTOS_LEER, "create": Scope.GASTOS_ESCRIBIR}
 
     @property
     def paginator(self):

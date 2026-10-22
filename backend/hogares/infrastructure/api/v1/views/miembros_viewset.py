@@ -1,12 +1,10 @@
-# hogares/infrastructure/api/v1/views/miembros_viewset.py — adapter de entrada HTTP (módulos 36, 71 y 88)
+# hogares/infrastructure/api/v1/views/miembros_viewset.py — adapter de entrada HTTP (módulos 36, 71, 88 y 90)
 from drf_spectacular.utils import extend_schema
 from rest_framework import mixins, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from core.domain.enums.rol import Rol
-from core.domain.vo.actor import Actor
 from core.infrastructure.api.views import consultas
 from hogares.application.cambiar_rol_use_case.dtos.cambiar_rol_input_dto import CambiarRolInputDTO
 from hogares.application.expulsar_miembro_use_case.dtos.expulsar_miembro_input_dto import ExpulsarMiembroInputDTO
@@ -52,10 +50,6 @@ class MiembrosViewSet(
 
     def get_queryset(self):
         return MembresiaModel.objects.none()  # solo para el esquema OpenAPI y los filtros: se lee con use cases
-
-    @property
-    def actor(self) -> Actor:
-        return Actor(usuario_id=self.request.user.pk, rol=Rol(self.membresia.rol))
 
     def _leer(self, membresia_id: int):
         leido = container.obtener_miembro().ejecutar(ObtenerMiembroInputDTO(self.hogar.pk, self.actor, membresia_id))

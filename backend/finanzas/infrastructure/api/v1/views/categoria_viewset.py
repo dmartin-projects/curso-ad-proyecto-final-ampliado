@@ -1,4 +1,4 @@
-# finanzas/infrastructure/api/v1/views/categoria_viewset.py — adapter de entrada HTTP (módulos 33-38, 87 y 88)
+# finanzas/infrastructure/api/v1/views/categoria_viewset.py — adapter de entrada HTTP (módulos 33-38, 87, 88 y 90)
 #
 # Una view hace tres cosas: traduce la request (serializer o query params → InputDTO), llama al use case que le da
 # el container y traduce el resultado (OutputDTO → presenter → serializer de salida). Sin reglas, sin
@@ -31,12 +31,15 @@ from finanzas.infrastructure.api.v1.serializers.categoria_serializer import Cate
 from finanzas.infrastructure.api.v1.serializers.reordenar_serializer import ReordenarSerializer
 from finanzas.infrastructure.database.models.categoria_model import Categoria as CategoriaModel
 from hogares.infrastructure.api.base.del_hogar_viewset import DelHogarViewSet
+from oauth.domain.enums.scope import Scope
+from oauth.infrastructure.api.views.acepta_oauth import AceptaOAuth
 
 
-class CategoriaViewSet(DelHogarViewSet):
+class CategoriaViewSet(AceptaOAuth, DelHogarViewSet):
     modelo = CategoriaModel
     serializer_class = CategoriaSerializer
     pagination_class = None
+    scopes_por_accion = {"list": Scope.GASTOS_LEER}  # módulo 90
     roles_por_accion = roles_de(CrearCategoriaUseCase, ModificarCategoriaUseCase, EliminarCategoriaUseCase)
 
     def _leer(self, categoria_id: int):

@@ -55,8 +55,8 @@ jobs:
 
       - name: Lint y formato
         run: |
-          uv run ruff check .
-          uv run ruff format --check .
+          uv run ruff check . ../cli
+          uv run ruff format --check . ../cli
 
       - name: Migraciones al día
         run: uv run python manage.py makemigrations --check --dry-run
@@ -86,6 +86,8 @@ jobs:
           SMTP_USER: ci
           SMTP_PASSWORD: ci
           SENTRY_DSN: ""
+          OAUTH_ISSUER: https://gastos.example.com/api/oauth # módulo 90
+          OIDC_RSA_PRIVATE_KEY: ci # el check no la lee: solo tiene que existir
         run: uv run python manage.py check --deploy --fail-level WARNING
 
       - name: Auditoría de dependencias

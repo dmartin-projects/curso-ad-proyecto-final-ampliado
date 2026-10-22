@@ -3,6 +3,8 @@
 DJANGO_SETTINGS_MODULE=config.settings.e2e uv run python manage.py runserver 8000
 """
 
+from oauth.infrastructure.crypto.claves import nueva_clave_pem
+
 from .base import *  # noqa: F403
 
 DEBUG = True
@@ -30,3 +32,7 @@ IA_API_KEY = "e2e"
 # Los tests entran muchas veces por minuto: el límite real de "login" (5/min, módulo 35) los haría fallar
 REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {**REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"], "login": "1000/min"}
 EXIGIR_CASOS_DE_USO = True  # módulo 88: los E2E también fallan si algo escribe sin use case
+# Módulo 90: el authorization server, en el origen de la app (como en producción, donde Vercel reenvía /api/*),
+# y una clave de firma nueva en cada arranque
+OAUTH_ISSUER = OAUTH2_PROVIDER["OIDC_ISS_ENDPOINT"] = "http://localhost:4200/api/oauth"
+OAUTH2_PROVIDER["OIDC_RSA_PRIVATE_KEY"] = nueva_clave_pem()

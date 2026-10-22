@@ -19,11 +19,21 @@ SECURE_HSTS_SECONDS = env.int("SECURE_HSTS_SECONDS", default=3600)  # súbelo a 
 SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 # La lista "preload" de los navegadores es casi irreversible: solo cuando HTTPS lleve meses funcionando bien
 SECURE_HSTS_PRELOAD = env.bool("SECURE_HSTS_PRELOAD", default=False)
+SILENCED_SYSTEM_CHECKS = [
+    # Módulo 90: el CLI (una app nativa) recibe el code en http://127.0.0.1:<puerto> (RFC 8252 §7.3), así que "http"
+    # tiene que estar entre los esquemas permitidos. Que sea SOLO loopback lo exige el dominio al registrar el
+    # cliente (oauth/domain/services/redirect_uris.py). Decisión consciente, no un aviso olvidado.
+    "oauth2_provider.W008",
+]
 if not SECURE_HSTS_PRELOAD:
-    SILENCED_SYSTEM_CHECKS = ["security.W021"]  # decisión consciente, no un aviso olvidado
+    SILENCED_SYSTEM_CHECKS.append("security.W021")  # decisión consciente, no un aviso olvidado
 SECURE_REFERRER_POLICY = "same-origin"
 SECURE_CROSS_ORIGIN_OPENER_POLICY = "same-origin"
 JWT_REFRESH_COOKIE["secure"] = True  # módulo 35
+
+# ── Authorization server (módulo 90): sin valores por defecto, que no se despliegue con los de desarrollo ──
+OAUTH_ISSUER = OAUTH2_PROVIDER["OIDC_ISS_ENDPOINT"] = env("OAUTH_ISSUER")  # https://gastos.tudominio.com/api/oauth
+OAUTH2_PROVIDER["OIDC_RSA_PRIVATE_KEY"] = env.str("OIDC_RSA_PRIVATE_KEY", multiline=True)
 
 # ── Base de datos: pool en la web (ASGI) ──
 # Con gunicorn + UvicornWorker cada petición síncrona corre en un hilo, y con CONN_MAX_AGE cada hilo se

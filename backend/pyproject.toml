@@ -13,6 +13,7 @@ dependencies = [
     "django-celery-beat>=2.9.0",
     "django-environ>=0.14.0",
     "django-filter>=26.2",
+    "django-oauth-toolkit>=3.4.1",
     "django-storages[s3]>=1.14.6",
     "django-tasks-db>=0.13.0",
     "djangorestframework>=3.18.3",
@@ -85,9 +86,9 @@ fail_under = 85  # RNF8 (módulo 70)
 show_missing = true
 skip_covered = true
 
-# ── Arquitectura (módulos 87 y 88): las capas se comprueban en el CI con `uv run lint-imports` ──
+# ── Arquitectura (módulos 87, 88 y 90): las capas se comprueban en el CI con `uv run lint-imports` ──
 [tool.importlinter]
-root_packages = ["config", "core", "finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice"]
+root_packages = ["config", "core", "finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
 include_external_packages = true # para poder prohibir django, rest_framework, celery…
 
 # ── 1. El núcleo (domain + application) de TODAS las apps, sin frameworks ──
@@ -103,23 +104,23 @@ id = "nucleo-compartido"
 name = "El shared kernel no depende de ninguna app"
 type = "forbidden"
 source_modules = ["core.domain", "core.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
 
 # ── 2. Las capas, iguales en todas las apps (las que una app no tiene, entre paréntesis: opcionales) ──
 [[tool.importlinter.contracts]]
 id = "capas"
 name = "Cada capa solo importa las de debajo (en todas las apps)"
 type = "layers"
-containers = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice"]
+containers = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
 layers = [
-    "(infrastructure.api) | (infrastructure.signals.receivers) | (infrastructure.metrics)", # adapters de entrada (HTTP, signals, métricas)
+    "(infrastructure.api) | (infrastructure.signals.receivers) | (infrastructure.metrics) | (infrastructure.web)", # adapters de entrada (HTTP, signals, métricas, páginas)
     "(infrastructure.websocket)", # adapter de entrada (Channels); la API reparte sus tickets de conexión
     "(infrastructure.tasks)", # adapter de entrada (Celery, django.tasks); los receivers encolan tareas
     "(infrastructure.relay)", # adapter de entrada del relay (eventos): el comando y la tarea lo llaman
     "(infrastructure.container)", # composition root: monta los use cases con los adapters de salida
-    "(infrastructure.messaging) | (infrastructure.finanzas)", # adapters de salida: el publicador de eventos, el ACL hacia finanzas…
+    "(infrastructure.messaging) | (infrastructure.finanzas) | (infrastructure.server)", # adapters de salida: el publicador de eventos, el ACL hacia finanzas, lo que se enchufa en django-oauth-toolkit…
     "(infrastructure.cache) | (infrastructure.realtime)", # …la caché del dashboard, el aviso por WebSocket…
-    "(infrastructure.database) | (infrastructure.auth) | (infrastructure.ocr) | (infrastructure.ia) | (infrastructure.lectores) | (infrastructure.pdf) | (infrastructure.i18n) | (infrastructure.signals.finanzas_signals) | (infrastructure.signals.hogares_signals) | (infrastructure.signals.tickets_signals) | (infrastructure.signals.importaciones_signals) | (infrastructure.signals.informes_signals)", # …la base de datos, los servicios externos y las signals que la app ofrece
+    "(infrastructure.database) | (infrastructure.auth) | (infrastructure.crypto) | (infrastructure.ocr) | (infrastructure.ia) | (infrastructure.lectores) | (infrastructure.pdf) | (infrastructure.i18n) | (infrastructure.signals.finanzas_signals) | (infrastructure.signals.hogares_signals) | (infrastructure.signals.tickets_signals) | (infrastructure.signals.importaciones_signals) | (infrastructure.signals.informes_signals)", # …la base de datos, los servicios externos y las signals que la app ofrece
     "(application)", # use cases, sus DTOs y los ports de la aplicación
     "(domain)", # BOs, value objects, eventos, excepciones, read models e interfaces de los repositorios
 ]
@@ -130,63 +131,70 @@ id = "finanzas-nucleo"
 name = "El núcleo de finanzas no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["finanzas.domain", "finanzas.application"]
-forbidden_modules = ["hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice"]
+forbidden_modules = ["hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
 
 [[tool.importlinter.contracts]]
 id = "hogares-nucleo"
 name = "El núcleo de hogares no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["hogares.domain", "hogares.application"]
-forbidden_modules = ["finanzas", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice"]
+forbidden_modules = ["finanzas", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
 
 [[tool.importlinter.contracts]]
 id = "eventos-nucleo"
 name = "El núcleo de eventos no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["eventos.domain", "eventos.application"]
-forbidden_modules = ["finanzas", "hogares", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice"]
+forbidden_modules = ["finanzas", "hogares", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
 
 [[tool.importlinter.contracts]]
 id = "tickets-nucleo"
 name = "El núcleo de tickets no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["tickets.domain", "tickets.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "importaciones", "informes", "notificaciones", "usuarios", "backoffice"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
 
 [[tool.importlinter.contracts]]
 id = "importaciones-nucleo"
 name = "El núcleo de importaciones no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["importaciones.domain", "importaciones.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "informes", "notificaciones", "usuarios", "backoffice"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
 
 [[tool.importlinter.contracts]]
 id = "informes-nucleo"
 name = "El núcleo de informes no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["informes.domain", "informes.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "notificaciones", "usuarios", "backoffice"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "notificaciones", "usuarios", "backoffice", "oauth"]
 
 [[tool.importlinter.contracts]]
 id = "notificaciones-nucleo"
 name = "El núcleo de notificaciones no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["notificaciones.domain", "notificaciones.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "usuarios", "backoffice"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "usuarios", "backoffice", "oauth"]
 
 [[tool.importlinter.contracts]]
 id = "usuarios-nucleo"
 name = "El núcleo de usuarios no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["usuarios.domain", "usuarios.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "backoffice"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "backoffice", "oauth"]
 
 [[tool.importlinter.contracts]]
 id = "backoffice-nucleo"
 name = "El núcleo de backoffice no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["backoffice.domain", "backoffice.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "oauth"]
+
+[[tool.importlinter.contracts]]
+id = "oauth-nucleo"
+name = "El núcleo de oauth no importa otras apps (solo el shared kernel)"
+type = "forbidden"
+source_modules = ["oauth.domain", "oauth.application"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice"]
 
 # ── Ejercicio 2 del módulo 88: los procesos no se conocen entre sí ──
 # Tickets, importaciones e informes trabajan sobre finanzas y hogares, y avisan por sus signals; ninguno importa a
@@ -200,8 +208,9 @@ modules = ["tickets", "importaciones", "informes"]
 
 # ── 4. Lo que una app ofrece a las demás ──
 # Su contenedor (use cases) con sus InputDTOs y su dominio; para leer, sus modelos (<app>/models.py) y sus query
-# services (database/repositories/*_query_service_orm.py); sus signals (el contrato de sus avisos) y, de hogares, la
-# base de las vistas anidadas (api/base). El resto de sus adapters solo los importa ella (y config, que monta las URLs
+# services (database/repositories/*_query_service_orm.py); sus signals (el contrato de sus avisos); de hogares, la
+# base de las vistas anidadas (api/base), y de oauth, la autenticación y los permisos de la API (api/authentication,
+# api/permissions, api/views/acepta_oauth.py). El resto de sus adapters solo los importa ella (y config, que monta las URLs
 # y el ASGI). El adapter que habla con OTRA app (infrastructure/finanzas/: el anti-corruption layer) también es suyo.
 
 [[tool.importlinter.contracts]]
@@ -346,3 +355,15 @@ protected_modules = [
     "backoffice.infrastructure.database",
 ]
 allowed_importers = ["backoffice", "config"]
+
+[[tool.importlinter.contracts]]
+id = "oauth-adapters"
+name = "Los adapters de oauth son suyos (las demás APIs solo usan su autenticación, sus permisos y AceptaOAuth)"
+type = "protected"
+protected_modules = [
+    "oauth.infrastructure.crypto",
+    "oauth.infrastructure.database",
+    "oauth.infrastructure.server",
+    "oauth.infrastructure.web",
+]
+allowed_importers = ["oauth", "config"]

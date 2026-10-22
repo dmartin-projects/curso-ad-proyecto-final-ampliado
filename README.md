@@ -12,10 +12,11 @@ Es Gastos (módulos 70-83) con las ampliaciones de las Partes 6 y 7 encima. **Ca
 | **87 · Arquitectura hexagonal (finanzas)** | *Hexagonal architecture* con CQRS y estructura explícita en la app `finanzas`, un archivo por clase: `domain/` (`bo/`, `vo/`, `enums/`, `exceptions/`, `events/`, `read_models/`, `repositories/` con las interfaces `I*CommandRepository` e `I*QueryService`), `application/` (un paquete por *use case* con su interfaz `I*UseCase` y sus `dtos/` `*InputDTO`/`*OutputDTO`; `ports/`) e `infrastructure/` (`api/v1/` con *views*, *serializers* y `urls.py`; `database/` con `models/` y `repositories/`; `container.py` como *composition root*); `config/api_v1.py` como router principal; capas vigiladas por import-linter en el CI | `docs/arquitectura.md`, `backend/finanzas/` |
 | **88 · Hexagonal en el resto del monolito** | Las mismas convenciones en hogares, usuarios, tickets, importaciones, informes, notificaciones, eventos y *backoffice*; *anti-corruption layer* entre apps; 22 contratos de import-linter | `backend/*/domain`, `backend/*/application`, `backend/pyproject.toml` |
 | **89 · Hexagonal en el microservicio FastAPI** | El servicio de estadísticas con **la misma estructura** que las apps del monolito: interfaces ABC, un paquete por *use case* con DTOs de Pydantic, `database/` con modelos y repositorios de SQLAlchemy, `api/v1|v2/` con *routers* y *schemas*, `Depends` sobre `container.py` como *composition root*, API versionada y Alembic comprobado en los tests | `estadisticas/estadisticas/`, `docs/arquitectura.md` §12 |
+| **90 · OAuth 2.1 y OpenID Connect** | Gastos como *authorization server* (django-oauth-toolkit): *authorization code* + PKCE, *refresh tokens* con rotación y detección de reutilización, *client credentials*, ID tokens RS256 con JWKS y *discovery*, y el RFC 9700 activado; login y consentimiento en páginas de Django; la API como *resource server* (scope **y** rol en el hogar); `gastos-cli`, un cliente nativo escrito a mano | `backend/oauth/`, `cli/gastos_cli.py`, `docs/arquitectura.md` §1 y §3 |
 
 La Parte 7 (el agente de IA) se añadirá aquí con el mismo formato cuando esté terminada.
 
-Estado comprobado al terminar el módulo 89: 432 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (Kafka y PostgreSQL reales), 26 de *frontend* (Vitest) y 10 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones.
+Estado comprobado al terminar el módulo 90: 565 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (sin cambios desde el 89), 26 de *frontend* (Vitest) y 12 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones (24 contratos).
 
 ## Estructura
 
@@ -23,6 +24,7 @@ Estado comprobado al terminar el módulo 89: 432 tests de *backend* (1 se salta 
 backend/            Django 6.1 + DRF + Celery + Channels (módulos 71-79)
 estadisticas/       microservicio FastAPI que consume los events de Kafka (módulos 85 y 89)
 frontend/           Angular 22 (módulos 80-81), Playwright en e2e/ (módulo 82)
+cli/                gastos-cli: un cliente OAuth 2.1 + OIDC de la API, en un solo archivo (módulo 90)
 infra/              Caddyfile, csp.mjs, desplegar.sh, backup.sh (módulos 83 y 86); entornos/, secretos/, terraform/ (86)
 compose.yaml        infraestructura de desarrollo: PostgreSQL, Redis, RabbitMQ, S3 (RustFS), Mailpit
 compose.prod.yaml   un entorno de la VM: producción o staging (módulos 83 y 86); compose.edge.yaml: Caddy (86)
@@ -81,7 +83,7 @@ Personal de soporte (el *backoffice* está dentro de la app, no hay Django admin
 ## Tests
 
 ```bash
-cd backend && uv run pytest -n 4 --cov                 # 431 tests (+1 que se salta sin Kafka)
+cd backend && uv run pytest -n 4 --cov                 # 564 tests (+1 que se salta sin Kafka)
 cd frontend && npx ng test --watch=false                # 16 tests
 # punta a punta (módulo 82): una vez, crea la BD de E2E
 docker compose exec db createdb -U gastos gastos_e2e
@@ -134,3 +136,22 @@ Los pasos con tus cuentas (Oracle, Vercel, Hostinger, GitHub) están en el módu
 cd backend && uv run lint-imports        # capas y apps del monolito
 cd estadisticas && uv run lint-imports   # capas del microservicio
 ```
+
+**90 · OAuth 2.1 y OpenID Connect.** Gastos es además un *authorization server*: otras aplicaciones (aquí, el CLI) piden acceso en nombre de un usuario. La SPA sigue con su login de siempre.
+
+```bash
+cd backend
+uv run python manage.py generar_clave_oidc >> .env   # una vez: la clave que firma los ID tokens
+uv run python manage.py migrate
+uv run python manage.py crear_cliente_oauth "Gastos CLI" --tipo nativa --client-id gastos-cli \
+    --scopes "openid email gastos:leer gastos:escribir" --redirect-uri http://127.0.0.1/callback
+uv run python manage.py runserver                    # discovery: http://localhost:8000/api/oauth/.well-known/openid-configuration
+
+# en otra terminal, desde la raíz del repositorio
+uv run cli/gastos_cli.py login     # abre el navegador: entra (demo@example.com) y pulsa «Permitir»
+uv run cli/gastos_cli.py hogares
+uv run cli/gastos_cli.py gasto 1 --cuenta 1 --importe -3.20 --concepto Café
+uv run cli/gastos_cli.py logout    # revoca el refresh token en el servidor
+```
+
+En producción, el emisor es `https://gastos.tudominio.com/api/oauth` (`OAUTH_ISSUER` en `infra/entornos/`, la clave en `infra/secretos/`) y el CLI se apunta allí con `GASTOS_EMISOR`.

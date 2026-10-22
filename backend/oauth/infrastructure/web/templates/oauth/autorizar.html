@@ -1,0 +1,31 @@
+{% extends "oauth/base.html" %}
+{% load i18n %}
+{% block titulo %}{% translate "Dar acceso a una aplicación" %}{% endblock %}
+{% block contenido %}
+  {% if error %}
+    {# Cliente o redirect URI no válidos: NO se redirige a ningún sitio (podría ser la web de un atacante) #}
+    <h1>{% translate "Esta petición no es válida" %}</h1>
+    <p>{{ error.description }}</p>
+    <p class="suave">{% translate "Cierra esta ventana y vuelve a la aplicación." %} ({{ error.error }})</p>
+  {% else %}
+    <h1>{% blocktranslate with nombre=application.name %}«{{ nombre }}» quiere acceder a tu cuenta{% endblocktranslate %}</h1>
+    <p class="suave">{% blocktranslate with email=user.email %}Has entrado como {{ email }}.{% endblocktranslate %}</p>
+    <p>{% translate "Podrá, en tu nombre:" %}</p>
+    <ul>{% for descripcion in scopes_descriptions %}<li>{{ descripcion }}</li>{% endfor %}</ul>
+    <p class="suave">{% translate "En cada hogar, nunca más de lo que te permite tu rol. Puedes retirarle el acceso cuando quieras." %}</p>
+    <form method="post" id="autorizar">
+      {% csrf_token %}
+      {% for campo in form %}{% if campo.is_hidden %}{{ campo }}{% endif %}{% endfor %}
+      {{ form.non_field_errors }}
+      <div class="acciones">
+        <button type="submit" class="secundario">{% translate "Cancelar" %}</button>
+        <button type="submit" class="principal" name="allow" value="on">{% translate "Permitir" %}</button>
+      </div>
+    </form>
+    <form method="post" action="{% url 'oauth2_provider:salir' %}">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{% url 'oauth2_provider:login' %}?next={{ request.get_full_path|urlencode }}">
+      <p class="suave">{% translate "¿No eres tú?" %} <button type="submit" class="enlace">{% translate "Entra con otra cuenta" %}</button></p>
+    </form>
+  {% endif %}
+{% endblock %}

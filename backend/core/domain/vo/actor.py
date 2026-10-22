@@ -1,5 +1,5 @@
-# core/domain/vo/actor.py — quién pide un use case y con qué rol (módulos 87 y 88)
-from dataclasses import dataclass
+# core/domain/vo/actor.py — quién pide un use case y con qué rol (módulos 87, 88 y 90)
+from dataclasses import dataclass, replace
 
 from core.domain.enums.rol import Rol
 from core.domain.exceptions.sin_permiso_exception import SinPermisoException
@@ -35,3 +35,11 @@ class Actor:
     def exigir(self, minimo: Rol) -> None:
         if Rol(self.rol).nivel < minimo.nivel:
             raise SinPermisoException()
+
+    def limitado_a(self, techo: Rol | None) -> "Actor":
+        """Módulo 90: el usuario no actúa él mismo, sino una aplicación con su permiso (un token OAuth). Puede hacer
+        lo que permite SU rol en el hogar Y lo que permiten los scopes del token: la intersección, el menor de los
+        dos. Sin techo (ningún scope de la API), nada."""
+        if techo is None:
+            raise SinPermisoException()
+        return self if Rol(self.rol).nivel <= techo.nivel else replace(self, rol=techo)

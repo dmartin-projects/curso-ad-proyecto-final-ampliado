@@ -1,8 +1,9 @@
-# backoffice/infrastructure/api/v1/urls.py — las rutas del backoffice (módulos 79 y 88)
+# backoffice/infrastructure/api/v1/urls.py — las rutas del backoffice (módulos 79, 88 y 90)
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from backoffice.infrastructure.api.v1.views.auditoria_viewset import AuditoriaViewSet
+from backoffice.infrastructure.api.v1.views.estado_servicio_view import EstadoServicioView
 from backoffice.infrastructure.api.v1.views.hogar_soporte_viewset import HogarSoporteViewSet
 from backoffice.infrastructure.api.v1.views.importacion_soporte_viewset import ImportacionSoporteViewSet
 from backoffice.infrastructure.api.v1.views.movimiento_soporte_viewset import MovimientoSoporteViewSet
@@ -20,4 +21,8 @@ router.register("movimientos", MovimientoSoporteViewSet, basename="soporte-movim
 router.register("auditoria", AuditoriaViewSet, basename="soporte-auditoria")
 router.register("tareas", TareaProgramadaViewSet, basename="soporte-tarea")
 
-urlpatterns = [path("resumen/", ResumenView.as_view(), name="soporte-resumen"), *router.urls]
+urlpatterns = [
+    path("resumen/", ResumenView.as_view(), name="soporte-resumen"),
+    path("estado/", EstadoServicioView.as_view(), name="soporte-estado"),  # módulo 90: para un servicio (OAuth)
+    *router.urls,
+]

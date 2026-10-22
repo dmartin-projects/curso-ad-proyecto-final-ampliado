@@ -1,9 +1,8 @@
-# hogares/infrastructure/api/base/rol_en_hogar.py — el rol mínimo de cada acción, en el hogar de la URL (módulos 36 y 88)
+# hogares/infrastructure/api/base/rol_en_hogar.py — el rol mínimo de cada acción, en el hogar de la URL (módulos 36, 88 y 90)
 from rest_framework.permissions import BasePermission
 
+from core.domain.enums.rol import Rol
 from hogares.infrastructure.database.models.membresia_model import Membresia as MembresiaModel
-
-NIVEL = {MembresiaModel.Rol.LECTOR: 0, MembresiaModel.Rol.MIEMBRO: 1, MembresiaModel.Rol.ADMIN: 2}
 
 ROLES_POR_METODO = {
     "GET": MembresiaModel.Rol.LECTOR,
@@ -27,4 +26,4 @@ class RolEnHogar(BasePermission):
         requerido = getattr(view, "roles_por_accion", {}).get(getattr(view, "action", None)) or getattr(
             view, "roles_por_metodo", ROLES_POR_METODO
         ).get(request.method, MembresiaModel.Rol.ADMIN)
-        return NIVEL[view.membresia.rol] >= NIVEL[requerido]
+        return view.actor.rol.nivel >= Rol(requerido).nivel  # el rol del Actor: con un token OAuth, ya limitado

@@ -1,0 +1,36 @@
+{% load i18n %}<!doctype html>
+<html lang="{{ LANGUAGE_CODE|default:'es' }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Gastos{% endblock %}</title>
+  {# El estilo mínimo de la app (el azul de su tema de Material), sin depender de la SPA ni de una CDN #}
+  <style>
+    :root { color-scheme: light dark; --primario: #005cbb; --fondo: #f9f9ff; --tarjeta: #fff; --texto: #1a1b20;
+            --suave: #44474e; --borde: #c4c6d0; --error: #ba1a1a; }
+    @media (prefers-color-scheme: dark) {
+      :root { --primario: #abc7ff; --fondo: #111318; --tarjeta: #1d2024; --texto: #e2e2e9; --suave: #c4c6d0;
+              --borde: #44474e; --error: #ffb4ab; }
+    }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; box-sizing: border-box;
+           font-family: Roboto, system-ui, sans-serif; background: var(--fondo); color: var(--texto); }
+    main { width: 100%; max-width: 400px; background: var(--tarjeta); border: 1px solid var(--borde);
+           border-radius: 16px; padding: 24px; box-sizing: border-box; }
+    h1 { font-size: 22px; font-weight: 500; margin: 0 0 16px; }
+    p, li { font-size: 14px; line-height: 1.5; }
+    .suave { color: var(--suave); }
+    .error { color: var(--error); }
+    label { display: block; font-size: 14px; margin: 12px 0 4px; }
+    input[type=email], input[type=password] { width: 100%; box-sizing: border-box; padding: 12px;
+           border: 1px solid var(--borde); border-radius: 4px; font-size: 16px; background: transparent; color: inherit; }
+    .acciones { display: flex; gap: 8px; justify-content: flex-end; margin-top: 24px; }
+    button { border: 0; border-radius: 20px; padding: 10px 24px; font-size: 14px; font-weight: 500; cursor: pointer; }
+    .principal { background: var(--primario); color: var(--fondo); }
+    .secundario { background: transparent; color: var(--primario); }
+    .enlace { background: none; border: 0; padding: 0; color: var(--primario); font-size: 14px; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <main>{% block contenido %}{% endblock %}</main>
+</body>
+</html>

@@ -1,0 +1,21 @@
+{% extends "oauth/base.html" %}
+{% load i18n %}
+{% block titulo %}{% translate "Entrar en Gastos" %}{% endblock %}
+{% block contenido %}
+  <h1>{% translate "Entrar en Gastos" %}</h1>
+  <p class="suave">{% translate "Una aplicación te pide acceso a tu cuenta de Gastos. Entra para ver qué te pide." %}</p>
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <label for="id_username">{% translate "Email" %}</label>
+    <input type="email" name="username" id="id_username" autocomplete="username" required autofocus value="{{ form.username.value|default:'' }}">
+    <label for="id_password">{% translate "Contraseña" %}</label>
+    <input type="password" name="password" id="id_password" autocomplete="current-password" required>
+    {% if demasiados_intentos %}
+      <p class="error" role="alert">{% translate "Demasiados intentos. Espera un minuto y vuelve a probar." %}</p>
+    {% elif form.errors %}
+      <p class="error" role="alert">{% translate "Email o contraseña incorrectos." %}</p>
+    {% endif %}
+    <div class="acciones"><button type="submit" class="principal">{% translate "Entrar" %}</button></div>
+  </form>
+{% endblock %}

@@ -8,5 +8,6 @@ urlpatterns = [
     path("health/ready/", health.health_ready),
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="docs"),
+    path("api/oauth/", include("oauth.infrastructure.web.urls")),  # módulo 90: antes que api/<version>/
     path("api/<str:version>/", include("config.api_v1")),  # DRF lee la versión de la URL (ALLOWED_VERSIONS: v1)
 ]

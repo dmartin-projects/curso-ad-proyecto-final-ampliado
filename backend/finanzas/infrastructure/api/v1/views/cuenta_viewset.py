@@ -1,4 +1,4 @@
-# finanzas/infrastructure/api/v1/views/cuenta_viewset.py — adapter de entrada HTTP (módulos 33-38, 87 y 88)
+# finanzas/infrastructure/api/v1/views/cuenta_viewset.py — adapter de entrada HTTP (módulos 33-38, 87, 88 y 90)
 from rest_framework.response import Response
 
 from core.infrastructure.api.views import consultas
@@ -11,13 +11,15 @@ from finanzas.infrastructure.api.v1.serializers.cuenta_serializer import CuentaS
 from finanzas.infrastructure.database.models.cuenta_model import Cuenta as CuentaModel
 from hogares.infrastructure.api.base.del_hogar_viewset import DelHogarViewSet
 from hogares.models import Membresia
+from oauth.domain.enums.scope import Scope
+from oauth.infrastructure.api.views.acepta_oauth import AceptaOAuth
 
 
 # CRUD puro al escribir: sin reglas ni efectos, no hay use case de comando que escribir (módulo 87); crea y edita con
 # el ORM… salvo el borrado, que tiene la primera regla del dominio y su use case (ejercicio 1). Leer (con el saldo),
 # como cualquier otro recurso: use cases de consulta.
 # (Un comentario y no un docstring: el docstring de una view es la descripción del endpoint en OpenAPI.)
-class CuentaViewSet(DelHogarViewSet):
+class CuentaViewSet(AceptaOAuth, DelHogarViewSet):
     modelo = CuentaModel
     serializer_class = CuentaSerializer
     pagination_class = None
@@ -28,6 +30,7 @@ class CuentaViewSet(DelHogarViewSet):
         "PATCH": Membresia.Rol.ADMIN,
         "DELETE": Membresia.Rol.ADMIN,
     }
+    scopes_por_accion = {"list": Scope.GASTOS_LEER}  # módulo 90: una aplicación ve las cuentas (para apuntar en ellas)
 
     def _leer(self, cuenta_id: int):
         leida = container.obtener_cuenta().ejecutar(ObtenerCuentaInputDTO(self.hogar.pk, self.actor, cuenta_id))

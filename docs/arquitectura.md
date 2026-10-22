@@ -72,6 +72,9 @@ Las demás apps tienen el mismo árbol; las carpetas de `infrastructure/` que fi
 | `infrastructure/realtime/`, `i18n/` | *Adapters* de salida: la *channel layer* (`tiempo_real.py`, `grupos.py`) y `TraductorDjango(ITraductor)` | notificaciones |
 | `infrastructure/metrics/` | Métricas de negocio de OpenTelemetry (*gauges* que leen un use case de consulta) | tickets, eventos |
 | `infrastructure/messaging/` + `relay/` | El *outbox* (`OutboxDjango(IOutbox)`), Kafka (`BrokerKafka(IBroker)`) y el *relay* que publica los pendientes | eventos |
+| `infrastructure/web/` | Adapter de entrada con páginas de Django: el login y el consentimiento del *authorization server* (`views/`, `urls.py`, `templates/`) y los *endpoints* de django-oauth-toolkit (módulo 90) | oauth |
+| `infrastructure/server/`, `crypto/` | Lo que se enchufa en los ajustes de django-oauth-toolkit (`ValidadorGastos`, `ScopesPorCliente`, los generadores de tokens) y la clave que firma los ID tokens | oauth |
+| `infrastructure/api/{authentication,permissions,views}/` | La API como *resource server*: `AutenticacionOAuth`, `ScopeRequerido`, `EsServicio` y el *mixin* `AceptaOAuth`, que usan las views de las demás apps | oauth |
 
 `core` es el **shared kernel**, con las mismas carpetas: `core/domain/{vo,enums,exceptions,services,bo,read_models,
 repositories/queries}` (`Dinero`, `Mes`, `Actor`, `Rol`, `Accion`, `DominioException` y sus subclases, `diferencias`,
@@ -133,18 +136,20 @@ Lo comprueba `uv run lint-imports` (contratos en `backend/pyproject.toml`, *job*
    pytesseract ni httpx (ni directa ni indirectamente).
 2. Dentro de cada app, de arriba abajo (un solo contrato `layers` con todas las apps como `containers`; las capas
    que una app no tiene van entre paréntesis, opcionales): `infrastructure.api | infrastructure.signals.receivers |
-   infrastructure.metrics` → `infrastructure.websocket` → `infrastructure.tasks` → `infrastructure.relay` →
-   `infrastructure.container` → `infrastructure.messaging | infrastructure.finanzas` → `infrastructure.cache |
-   infrastructure.realtime` → `infrastructure.database | auth | ocr | ia | lectores | pdf | i18n |
-   signals.<app>_signals` → `application` → `domain`. Nunca hacia arriba.
+   infrastructure.metrics | infrastructure.web` → `infrastructure.websocket` → `infrastructure.tasks` →
+   `infrastructure.relay` → `infrastructure.container` → `infrastructure.messaging | infrastructure.finanzas |
+   infrastructure.server` → `infrastructure.cache | infrastructure.realtime` → `infrastructure.database | auth |
+   crypto | ocr | ia | lectores | pdf | i18n | signals.<app>_signals` → `application` → `domain`. Nunca hacia
+   arriba.
 3. `core.domain` y `core.application` no importan ninguna app.
 4. El núcleo de una app (`domain` + `application`) no importa ninguna otra app (un contrato `<app>-nucleo` por
    app): lo que necesita de otra es un port suyo, en sus palabras (`IGastos`, `IMovimientos`), y su
    `infrastructure/finanzas/` lo implementa con la otra.
 5. Los *adapters* de una app son suyos (un contrato `protected` por app): desde fuera solo se importan su
    `container`, sus InputDTOs, su `domain`, sus modelos (`<app>.models`, para FK y lecturas), sus query services
-   (`database/repositories/*_query_service_orm.py`), sus signals (`signals/<app>_signals.py`) y, de hogares,
-   `api/base/` (la base de las vistas anidadas). El ACL (`infrastructure/finanzas/`) también es de su app. `config`
+   (`database/repositories/*_query_service_orm.py`), sus signals (`signals/<app>_signals.py`); de hogares,
+   `api/base/` (la base de las vistas anidadas), y de oauth, `api/authentication/`, `api/permissions/` y
+   `api/views/acepta_oauth.py` (la autenticación OAuth y los scopes de la API). El ACL (`infrastructure/finanzas/`) también es de su app. `config`
    monta las URLs y el ASGI.
 
 Una app nueva se añade a `root_packages`, a `containers` del contrato de capas y con sus contratos 4 y 5.
@@ -252,7 +257,8 @@ case cuesta microsegundos. En un test con base de datos, una pieza se cambia con
 | Mapper | Funciones `x_a_bo(fila)` y `x_a_modelo(bo)` en `infrastructure/database/mappers/`. |
 | Transacción | Solo `with self.uow` en el use case. Nada de `transaction.atomic` en views ni serializers. |
 | Eventos | Dataclasses frozen en `domain/events/`, en pasado. Los publica el use case dentro de la transacción; `PublicadorEventosDjango` los traduce (outbox + `on_commit`). Un evento sin traducción lanza `TypeError`. |
-| Autorización | `Actor(usuario_id, rol)` lo construye el adapter de entrada (`DelHogarViewSet.actor`; `Actor.sistema()` en tareas). Todo id externo se busca "en este hogar". |
+| Autorización | `Actor(usuario_id, rol)` lo construye el adapter de entrada (`HogarDesdeUrlMixin.actor`, con `actor_de` de `hogares/infrastructure/api/base/actor_de.py`; `Actor.sistema()` en tareas). Todo id externo se busca "en este hogar". |
+| Acceso delegado (OAuth, módulo 90) | Una view acepta tokens de aplicaciones solo si lo declara: `AceptaOAuth` y `scopes_por_accion` (lo que no aparece no se delega). El adapter de autenticación deja una `Delegacion` (`core/domain/vo/delegacion.py`) en `request.auth`; `actor_de` limita el rol del Actor al techo de sus scopes (`Actor.limitado_a`): scope Y rol, la intersección. Ningún scope llega a ADMIN. Cuenta, autenticación y backoffice no aceptan tokens OAuth. |
 | Tarea de Celery | Un archivo por tarea en `infrastructure/tasks/`, con `name="<app>.tasks.<función>"`. `apps.ready()` importa los receivers y las tareas. |
 | Tarea de django.tasks | Un archivo en `infrastructure/tasks/` con `@ruta_estable("<app>.tasks")` debajo de `@task` (la ruta es su identidad en la cola) y un `<app>/tasks.py` que la reexporta. El publicador la encola con `import_string(RUTA).enqueue(...)`; las de Celery, por su nombre (`current_app.tasks[NOMBRE]`), sin importar `tasks/` (está por encima). |
 | Excepción de un adapter | La que no es del dominio (`TransitorioIAException`, `CircuitoAbiertoException`, `SinTransaccionException`) vive en un archivo junto a su adapter, con el mismo sufijo. |
@@ -291,6 +297,7 @@ apps) sin PostgreSQL.
 | notificaciones | notificaciones | `IDestinatarios` (usuarios y membresías, por sus modelos) | — (escucha las signals de las demás) |
 | eventos | el outbox | — | `IOutbox` (lo usan los publicadores de finanzas y hogares) |
 | backoffice | nada propio | los use cases de tickets, importaciones y finanzas, con `Actor.soporte` | — |
+| oauth | clientes registrados (el *authorization server* del módulo 90, sobre django-oauth-toolkit) | — | la autenticación OAuth de la API y `AceptaOAuth` (las views de finanzas y hogares la usan) |
 
 - Los procesos crean y borran movimientos con los use cases de finanzas, así que cada cambio tiene sus eventos
   (outbox de Kafka, avisos, comprobación de presupuestos) y, si lo pide una persona, su auditoría.

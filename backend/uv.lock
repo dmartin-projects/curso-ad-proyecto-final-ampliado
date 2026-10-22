@@ -834,6 +834,22 @@ wheels = [
 ]
 
 [[package]]
+name = "django-oauth-toolkit"
+version = "3.4.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "jwcrypto" },
+    { name = "oauthlib" },
+    { name = "requests" },
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/66/42/b3c6a5d7e204011a702cc02ababb756d10538645dfd188ea441e4c65a082/django_oauth_toolkit-3.4.1.tar.gz", hash = "sha256:c4de73c0765eed55a99ea0fa8433b20664dcc1f43930149cff569abed166c5c2", size = 256139, upload-time = "2026-08-21T03:45:36.538Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c4/16/11cf2eacd7ac1c32908288b6d56fadef5676071a4ac0af7e626fd1abd3ef/django_oauth_toolkit-3.4.1-py3-none-any.whl", hash = "sha256:c47f2a70e83bade0a47a5e9b20e86030d8ed9c0a8f10ec4ed30446cad7291f2d", size = 163957, upload-time = "2026-08-21T03:45:34.904Z" },
+]
+
+[[package]]
 name = "django-storages"
 version = "1.14.6"
 source = { registry = "https://pypi.org/simple" }
@@ -1034,6 +1050,7 @@ dependencies = [
     { name = "django-celery-beat" },
     { name = "django-environ" },
     { name = "django-filter" },
+    { name = "django-oauth-toolkit" },
     { name = "django-storages", extra = ["s3"] },
     { name = "django-tasks-db" },
     { name = "djangorestframework" },
@@ -1090,6 +1107,7 @@ requires-dist = [
     { name = "django-celery-beat", specifier = ">=2.9.0" },
     { name = "django-environ", specifier = ">=0.14.0" },
     { name = "django-filter", specifier = ">=26.2" },
+    { name = "django-oauth-toolkit", specifier = ">=3.4.1" },
     { name = "django-storages", extras = ["s3"], specifier = ">=1.14.6" },
     { name = "django-tasks-db", specifier = ">=0.13.0" },
     { name = "djangorestframework", specifier = ">=3.18.3" },
@@ -1513,6 +1531,19 @@ wheels = [
 ]
 
 [[package]]
+name = "jwcrypto"
+version = "1.6.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+    { name = "typing-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/13/8f/e802d77957903483129813ce6fa01a72a906f9cdd454039d1ec1e6d1e44a/jwcrypto-1.6.1.tar.gz", hash = "sha256:a1e1570da5c2e35dbcd375ec1d2891a24de8eb35ee2c1fe8e91978efb72cfe90", size = 116287, upload-time = "2026-09-15T21:22:33.286Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/31/a4/ee780473e42a3edaf65da1ad37f5c601a9c740e215c1e09db36bf90f3f59/jwcrypto-1.6.1-py3-none-any.whl", hash = "sha256:77e856818e514cb3d64a1043b6885a7d52f5cc37773f5e944de02103c8d3a54f", size = 121267, upload-time = "2026-09-15T21:22:32.27Z" },
+]
+
+[[package]]
 name = "kombu"
 version = "5.6.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1612,6 +1643,15 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/a4/69/1c821d8386fae5cecc5fcaacf3de3947ff0a23f16bb481b5532b5868372a/msgpack-1.2.3-cp315-cp315t-win32.whl", hash = "sha256:3d4c807ed050fe3ddbea5ba7e9f63d7136871ce42861be1f50ff739f0e91047a", size = 75820, upload-time = "2026-09-29T02:33:47.596Z" },
     { url = "https://files.pythonhosted.org/packages/68/9e/41e2f7343a3764a9c1fb10c79f9a6a05db9df93dedd76401d1b511f5a685/msgpack-1.2.3-cp315-cp315t-win_amd64.whl", hash = "sha256:5f304123b90e8b2e49867981b7f6061612c39f50cca51ee88de007c084cf68d3", size = 83345, upload-time = "2026-09-29T02:33:49.325Z" },
     { url = "https://files.pythonhosted.org/packages/80/cd/0c3aa439bc7a7bf24684fef3a0ad776cba170e18ed94445e723bce42fce7/msgpack-1.2.3-cp315-cp315t-win_arm64.whl", hash = "sha256:f41ca154b7737b11893cdce3c78c61d703398a1cd54d4297bdad908392338a8e", size = 77572, upload-time = "2026-09-29T02:33:50.729Z" },
+]
+
+[[package]]
+name = "oauthlib"
+version = "4.0.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/7a/d8/a1bcc8ba112a627f8ffbdc212a78ce18d3ac07e91a5ca65d27918eee25a1/oauthlib-4.0.0.tar.gz", hash = "sha256:efb274799819440f95b4ab3b818869f1ce9ae26c5beacba0201d1a1b76b54f86", size = 187232, upload-time = "2026-09-28T06:01:18.77Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/d9/f4/78229a1066068ca14fc60fb26cf7381cabe4382261392b90e5f9552722d4/oauthlib-4.0.0-py3-none-any.whl", hash = "sha256:624c28c13a0a59cabf9747dfa52af63be3e512a7f2714df16e91b5b3a145e6cd", size = 159715, upload-time = "2026-09-28T06:01:17.008Z" },
 ]
 
 [[package]]

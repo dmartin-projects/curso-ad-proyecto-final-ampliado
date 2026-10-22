@@ -188,6 +188,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/backoffice/estado/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Estado de las colas y los procesos, para un servicio de monitorización (OAuth: client credentials). */
+        get: operations["backoffice_estado_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/backoffice/hogares/": {
         parameters: {
             query?: never;
@@ -2338,6 +2355,25 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Auditoria"];
+                };
+            };
+        };
+    };
+    backoffice_estado_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Resumen"];
                 };
             };
         };

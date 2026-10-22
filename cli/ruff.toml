@@ -1,0 +1,6 @@
+# El CLI (módulo 90) no es parte del backend, pero sigue su mismo estilo
+line-length = 120
+
+[lint]
+select = ["E", "F", "I", "B", "UP"]
+ignore = ["E501"]

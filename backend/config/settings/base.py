@@ -34,6 +34,7 @@ TERCEROS = [
     "channels",
     "django_celery_beat",
     "django_tasks_db",
+    "oauth2_provider",  # módulo 90: Gastos como authorization server (OAuth 2.1 + OpenID Connect)
 ]
 PROPIAS = [
     "core",
@@ -46,6 +47,7 @@ PROPIAS = [
     "informes",
     "backoffice",
     "eventos",  # módulo 85: outbox → Kafka
+    "oauth",  # módulo 90: clientes, scopes, login y consentimiento del authorization server
 ]
 INSTALLED_APPS = DJANGO_APPS + TERCEROS + PROPIAS
 
@@ -69,7 +71,8 @@ WSGI_APPLICATION = "config.wsgi.application"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "templates"],
+        # Módulo 90: los templates del authorization server viven con su adapter de entrada (oauth/infrastructure/web)
+        "DIRS": [BASE_DIR / "templates", BASE_DIR / "oauth" / "infrastructure" / "web" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -215,6 +218,63 @@ JWT_REFRESH_COOKIE = {
     "secure": not DEBUG,
     "samesite": "Strict",
 }
+# ── OAuth 2.1 y OpenID Connect: Gastos como authorization server (módulo 90) ──
+# La SPA NO usa esto para su propio login (sigue con el JWT de arriba): es para OTRAS aplicaciones (el CLI, la app
+# móvil, el agente de la Parte 7) que actúan en nombre de un usuario, y para servicios (client credentials).
+# El emisor es la URL pública: en producción, la del dominio de la app (Vercel reenvía /api/* a Django).
+OAUTH_ISSUER = env("OAUTH_ISSUER", default="http://localhost:8000/api/oauth")
+LOGIN_URL = "/api/oauth/login/"  # el login del authorization server (páginas de Django), no el de la SPA
+# Su sesión de Django (y su cookie CSRF) solo viajan a /api/oauth/: la API nunca las recibe
+SESSION_COOKIE_PATH = CSRF_COOKIE_PATH = "/api/oauth/"
+# El modelo Application de django-oauth-toolkit es "swappable": la migración de oauth (ClienteOAuth) lo referencia
+# por este ajuste, que tiene que existir aunque usemos el de serie
+OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
+OAUTH2_PROVIDER = {
+    "OIDC_ENABLED": True,
+    "OIDC_ISS_ENDPOINT": OAUTH_ISSUER,
+    # La clave privada que firma los ID tokens (RS256); la pública, en el JWKS. `manage.py generar_clave_oidc`
+    "OIDC_RSA_PRIVATE_KEY": env.str("OIDC_RSA_PRIVATE_KEY", multiline=True, default=""),
+    "OIDC_RESPONSE_TYPES_SUPPORTED": ["code"],  # solo authorization code: ni implicit ni hybrid
+    "OIDC_TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED": ["client_secret_basic", "client_secret_post", "none"],
+    "OAUTH2_GRANT_TYPES_SUPPORTED": ["authorization_code", "refresh_token", "client_credentials"],
+    "OAUTH2_RESPONSE_TYPES_SUPPORTED": ["code"],
+    "SCOPES": {
+        "openid": _("Saber quién eres (tu identificador en Gastos)"),
+        "profile": _("Ver tu nombre, tu idioma y tu zona horaria"),
+        "email": _("Ver tu email"),
+        "gastos:leer": _("Ver los movimientos, las cuentas y el resumen de tus hogares"),
+        "gastos:escribir": _("Apuntar movimientos en tus hogares"),
+        "operaciones:leer": _("Ver el estado de las colas y los procesos (solo servicios internos)"),
+    },
+    "SCOPES_BACKEND_CLASS": "oauth.infrastructure.server.scopes_por_cliente.ScopesPorCliente",
+    "OAUTH2_VALIDATOR_CLASS": "oauth.infrastructure.server.validador_gastos.ValidadorGastos",
+    "ACCESS_TOKEN_GENERATOR": "oauth.infrastructure.server.generadores_de_tokens.generar_access_token",
+    "REFRESH_TOKEN_GENERATOR": "oauth.infrastructure.server.generadores_de_tokens.generar_refresh_token",
+    "AUTHORIZATION_CODE_EXPIRE_SECONDS": 60,  # el code vive segundos: se canjea al momento
+    "ACCESS_TOKEN_EXPIRE_SECONDS": 600,  # 10 min, como el de la SPA
+    "ID_TOKEN_EXPIRE_SECONDS": 600,
+    "REFRESH_TOKEN_EXPIRE_SECONDS": 30 * 24 * 3600,  # 30 días SIN USARSE (cada uso lo rota y empieza de nuevo)
+    "ROTATE_REFRESH_TOKEN": True,
+    "REFRESH_TOKEN_REUSE_PROTECTION": True,  # un refresh token reutilizado revoca toda su familia (RFC 9700 §4.14)
+    "REFRESH_TOKEN_GRACE_PERIOD_SECONDS": 0,
+    "PKCE_REQUIRED": True,  # todos los clientes, también los confidenciales (OAuth 2.1)
+    "REQUEST_APPROVAL_PROMPT": "force",  # el consentimiento, siempre
+    # http solo para las redirect URIs de loopback de las apps nativas (RFC 8252): lo exige el dominio
+    # (oauth/domain/services/redirect_uris.py), no esta lista. Sin comodines: comparación exacta.
+    "ALLOWED_REDIRECT_URI_SCHEMES": ["https", "http"],
+    "ALLOW_URI_WILDCARDS": False,
+    # RFC 9700 (OAuth 2.0 Security BCP): todo lo que django-oauth-toolkit 3.4 deja activar ya (en la 4.0, por defecto)
+    "COMPLIANT_BCP_RFC9700_IMPLICIT_GRANT": True,  # implicit: rechazado
+    "COMPLIANT_BCP_RFC9700_PASSWORD_GRANT": True,  # password: rechazado
+    "COMPLIANT_BCP_RFC9700_PKCE_METHOD": True,  # solo S256 (nada de "plain")
+    "COMPLIANT_BCP_RFC9700_ACCESS_TOKEN_TRANSPORT": True,  # el token, en la cabecera; nunca en la URL
+    "COMPLIANT_BCP_RFC9700_AUTHZ_RESPONSE_ISS": True,  # `iss` en la respuesta de /authorize (RFC 9207: mix-up)
+    "COMPLIANT_BCP_RFC9700_TOKEN_STORAGE": True,  # en la BD, solo el hash de cada token
+    "COMPLIANT_BCP_RFC9700_REFRESH_TOKEN": True,
+    "COMPLIANT_BCP_RFC9700_REDIRECT_URI_MATCHING": True,
+    "COMPLIANT_BCP_RFC9700_PKCE_REQUIRED": True,
+}
+
 SPECTACULAR_SETTINGS = {
     "TITLE": "API Gastos",
     "VERSION": "1.0.0",

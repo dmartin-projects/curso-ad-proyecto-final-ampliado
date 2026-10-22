@@ -1,4 +1,4 @@
-# hogares/infrastructure/api/v1/views/hogar_viewset.py — adapter de entrada HTTP (módulos 36, 71 y 88)
+# hogares/infrastructure/api/v1/views/hogar_viewset.py — adapter de entrada HTTP (módulos 36, 71, 88 y 90)
 #
 # Escribir: serializer → InputDTO → use case de comando. Leer (el listado, el detalle y la response de un POST o un
 # PATCH): use case de consulta → OutputDTO → presenter → el mismo serializer. Sigue siendo un ModelViewSet: rutas,
@@ -6,7 +6,6 @@
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from core.domain.enums.rol import Rol
 from core.domain.vo.actor import Actor
 from core.infrastructure.api.views import consultas
 from hogares.application.crear_hogar_use_case.dtos.crear_hogar_input_dto import CrearHogarInputDTO
@@ -15,16 +14,20 @@ from hogares.application.listar_hogares_use_case.dtos.listar_hogares_input_dto i
 from hogares.application.modificar_hogar_use_case.dtos.modificar_hogar_input_dto import ModificarHogarInputDTO
 from hogares.application.obtener_hogar_use_case.dtos.obtener_hogar_input_dto import ObtenerHogarInputDTO
 from hogares.infrastructure import container
+from hogares.infrastructure.api.base.actor_de import actor_de
 from hogares.infrastructure.api.v1.presenters.hogar_presenter import presentar
 from hogares.infrastructure.api.v1.serializers.hogar_serializer import HogarSerializer
 from hogares.infrastructure.database.models.hogar_model import Hogar as HogarModel
 from hogares.infrastructure.database.models.membresia_model import Membresia as MembresiaModel
+from oauth.domain.enums.scope import Scope
+from oauth.infrastructure.api.views.acepta_oauth import AceptaOAuth
 
 
-class HogarViewSet(viewsets.ModelViewSet):
+class HogarViewSet(AceptaOAuth, viewsets.ModelViewSet):
     """Mis hogares. Crear lo puede cualquiera; editar y borrar, solo administradores."""
 
     serializer_class = HogarSerializer
+    scopes_por_accion = {"list": Scope.GASTOS_LEER, "retrieve": Scope.GASTOS_LEER}  # módulo 90
 
     def get_queryset(self):
         return HogarModel.objects.none()  # solo para el esquema OpenAPI y los filtros: se lee con use cases
@@ -41,7 +44,7 @@ class HogarViewSet(viewsets.ModelViewSet):
         return hogar
 
     def _actor(self, hogar) -> Actor:
-        return Actor(usuario_id=self.request.user.pk, rol=Rol(hogar.mi_rol))  # su rol, leído con el hogar
+        return actor_de(self.request, hogar.mi_rol)  # su rol, leído con el hogar
 
     def list(self, request, *args, **kwargs):
         entrada = ListarHogaresInputDTO(

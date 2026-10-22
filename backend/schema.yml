@@ -312,6 +312,23 @@ paths:
               schema:
                 $ref: '#/components/schemas/Auditoria'
           description: ''
+  /api/v1/backoffice/estado/:
+    get:
+      operationId: backoffice_estado_retrieve
+      description: 'Estado de las colas y los procesos, para un servicio de monitorización
+        (OAuth: client credentials).'
+      tags:
+      - backoffice
+      security:
+      - oauth2:
+        - operaciones:leer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Resumen'
+          description: ''
   /api/v1/backoffice/hogares/:
     get:
       operationId: backoffice_hogares_list
@@ -977,6 +994,8 @@ paths:
       tags:
       - hogares
       security:
+      - oauth2:
+        - gastos:leer
       - jwtAuth: []
       - cookieAuth: []
       responses:
@@ -1037,6 +1056,8 @@ paths:
       tags:
       - hogares
       security:
+      - oauth2:
+        - gastos:leer
       - jwtAuth: []
       - cookieAuth: []
       responses:
@@ -1266,6 +1287,8 @@ paths:
       tags:
       - hogares
       security:
+      - oauth2:
+        - gastos:leer
       - jwtAuth: []
       - cookieAuth: []
       responses:
@@ -1459,6 +1482,8 @@ paths:
       tags:
       - hogares
       security:
+      - oauth2:
+        - gastos:leer
       - jwtAuth: []
       - cookieAuth: []
       responses:
@@ -2123,6 +2148,8 @@ paths:
       tags:
       - hogares
       security:
+      - oauth2:
+        - gastos:leer
       - jwtAuth: []
       - cookieAuth: []
       responses:
@@ -2155,6 +2182,8 @@ paths:
               $ref: '#/components/schemas/MovimientoRequest'
         required: true
       security:
+      - oauth2:
+        - gastos:escribir
       - jwtAuth: []
       - cookieAuth: []
       responses:
@@ -2185,6 +2214,8 @@ paths:
       tags:
       - hogares
       security:
+      - oauth2:
+        - gastos:leer
       - jwtAuth: []
       - cookieAuth: []
       responses:
@@ -2835,6 +2866,8 @@ paths:
       tags:
       - hogares
       security:
+      - oauth2:
+        - gastos:leer
       - jwtAuth: []
       - cookieAuth: []
       responses:
@@ -5230,3 +5263,28 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    oauth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: /api/oauth/authorize/
+          tokenUrl: /api/oauth/token/
+          refreshUrl: /api/oauth/token/
+          scopes:
+            openid: Saber quién eres (tu identificador en Gastos)
+            profile: Ver tu nombre, tu idioma y tu zona horaria
+            email: Ver tu email
+            gastos:leer: Ver los movimientos, las cuentas y el resumen de tus hogares
+            gastos:escribir: Apuntar movimientos en tus hogares
+            operaciones:leer: Ver el estado de las colas y los procesos (solo servicios
+              internos)
+        clientCredentials:
+          tokenUrl: /api/oauth/token/
+          scopes:
+            openid: Saber quién eres (tu identificador en Gastos)
+            profile: Ver tu nombre, tu idioma y tu zona horaria
+            email: Ver tu email
+            gastos:leer: Ver los movimientos, las cuentas y el resumen de tus hogares
+            gastos:escribir: Apuntar movimientos en tus hogares
+            operaciones:leer: Ver el estado de las colas y los procesos (solo servicios
+              internos)

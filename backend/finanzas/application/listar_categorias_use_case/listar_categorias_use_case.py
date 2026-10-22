@@ -1,10 +1,10 @@
 # finanzas/application/listar_categorias_use_case/listar_categorias_use_case.py (módulo 87)
 from core.domain.enums.rol import Rol
+from core.domain.repositories.queries.listado_del_hogar_query import ListadoDelHogarQuery
 from finanzas.application.listar_categorias_use_case.dtos.listar_categorias_input_dto import ListarCategoriasInputDTO
 from finanzas.application.listar_categorias_use_case.i_listar_categorias_use_case import IListarCategoriasUseCase
 from finanzas.application.shared.dtos.categoria_listada_output_dto import CategoriaListadaOutputDTO
 from finanzas.domain.repositories.i_categoria_query_service import ICategoriaQueryService
-from finanzas.domain.repositories.queries.listado_del_hogar_query import ListadoDelHogarQuery
 
 
 class ListarCategoriasUseCase(IListarCategoriasUseCase):

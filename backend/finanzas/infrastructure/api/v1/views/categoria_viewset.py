@@ -1,4 +1,4 @@
-# finanzas/infrastructure/api/v1/views/categoria_viewset.py — adapter de entrada HTTP (módulos 33-38 y 87)
+# finanzas/infrastructure/api/v1/views/categoria_viewset.py — adapter de entrada HTTP (módulos 33-38, 87 y 88)
 #
 # Una view hace tres cosas: traduce la request (serializer o query params → InputDTO), llama al use case que le da
 # el container y traduce el resultado (OutputDTO → presenter → serializer de salida). Sin reglas, sin
@@ -8,6 +8,8 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from core.infrastructure.api.views import consultas
+from core.infrastructure.api.views.roles import roles_de
 from finanzas.application.crear_categoria_use_case.crear_categoria_use_case import CrearCategoriaUseCase
 from finanzas.application.crear_categoria_use_case.dtos.crear_categoria_input_dto import CrearCategoriaInputDTO
 from finanzas.application.eliminar_categoria_use_case.dtos.eliminar_categoria_input_dto import (
@@ -27,10 +29,8 @@ from finanzas.infrastructure import container
 from finanzas.infrastructure.api.v1.presenters.categoria_presenter import presentar
 from finanzas.infrastructure.api.v1.serializers.categoria_serializer import CategoriaSerializer
 from finanzas.infrastructure.api.v1.serializers.reordenar_serializer import ReordenarSerializer
-from finanzas.infrastructure.api.v1.views import consultas
-from finanzas.infrastructure.api.v1.views.roles import roles_de
 from finanzas.infrastructure.database.models.categoria_model import Categoria as CategoriaModel
-from hogares.api.base import DelHogarViewSet
+from hogares.infrastructure.api.base.del_hogar_viewset import DelHogarViewSet
 
 
 class CategoriaViewSet(DelHogarViewSet):

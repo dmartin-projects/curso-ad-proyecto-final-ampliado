@@ -10,9 +10,8 @@ from decimal import Decimal
 import pytest
 from django.core.cache import cache
 
-from conftest import CategoriaFactory, CuentaFactory, MovimientoFactory
+from conftest import CategoriaFactory, CuentaFactory, MovimientoFactory, PresupuestoFactory
 from core.models import RegistroAuditoria
-from finanzas.models import Presupuesto
 
 pytestmark = pytest.mark.django_db
 
@@ -36,7 +35,7 @@ def test_las_constraints_llegan_como_errores_del_formulario(admin):
     hogar, c = admin
     comida = CategoriaFactory(hogar=hogar, nombre="Comida")
     CuentaFactory(hogar=hogar, nombre="Común")
-    Presupuesto.objects.create(hogar=hogar, categoria=comida, mes=date(2026, 10, 1), importe=10)
+    PresupuestoFactory(hogar=hogar, categoria=comida, mes=date(2026, 10, 1), importe=10)
 
     pres = url(hogar, "presupuestos")
     assert "importe" in errores(c.post(pres, {"categoria": comida.pk, "mes": "2026-11-01", "importe": "0"}))
@@ -75,7 +74,7 @@ def test_crear_un_presupuesto_devuelve_lo_gastado(admin):
 def test_borrar_un_presupuesto_invalida_el_dashboard(admin, django_capture_on_commit_callbacks):
     hogar, c = admin
     comida = CategoriaFactory(hogar=hogar)
-    p = Presupuesto.objects.create(hogar=hogar, categoria=comida, mes=date(2026, 10, 1), importe=10)
+    p = PresupuestoFactory(hogar=hogar, categoria=comida, mes=date(2026, 10, 1), importe=10)
     dashboard = url(hogar, "dashboard")
     assert len(c.get(dashboard, {"mes": "2026-10"}).json()["presupuestos"]) == 1
     with django_capture_on_commit_callbacks(execute=True):
@@ -86,13 +85,11 @@ def test_borrar_un_presupuesto_invalida_el_dashboard(admin, django_capture_on_co
 def test_cambiar_la_fecha_de_mes_rearma_la_alerta_del_mes_viejo(admin, django_capture_on_commit_callbacks):
     hogar, c = admin
     comida = CategoriaFactory(hogar=hogar)
-    p = Presupuesto.objects.create(
-        hogar=hogar, categoria=comida, mes=date(2026, 10, 1), importe=100, alerta_enviada=True
-    )
+    p = PresupuestoFactory(hogar=hogar, categoria=comida, mes=date(2026, 10, 1), importe=100, alerta_enviada=True)
     gasto = MovimientoFactory(
         cuenta=CuentaFactory(hogar=hogar), categoria=comida, fecha=date(2026, 10, 5), importe=-150
     )
-    cache.clear()  # las comprobaciones se agrupan 10 s (core/agrupar.py)
+    cache.clear()  # las comprobaciones se agrupan 10 s (core/infrastructure/tasks/agrupar.py)
     with django_capture_on_commit_callbacks(execute=True):
         r = c.patch(f"{url(hogar, 'movimientos')}{gasto.pk}/", {"fecha": "2026-09-28"})  # era de septiembre
     assert r.status_code == 200

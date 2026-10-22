@@ -6,15 +6,18 @@ from django.contrib.postgres.search import TrigramSimilarity
 from django.db import IntegrityError, transaction
 
 from conftest import CategoriaFactory, CuentaFactory, MovimientoFactory, UsuarioFactory
-from finanzas.domain.services.normalizacion import normalizar
+from core.domain.services.normalizacion import normalizar
+from core.infrastructure.signals.red_de_seguridad import escrituras_directas
 from finanzas.models import Categoria, Comercio, Movimiento, Presupuesto
-from hogares.services import crear_hogar
+from hogares.application.crear_hogar_use_case.dtos.crear_hogar_input_dto import CrearHogarInputDTO
+from hogares.infrastructure import container as hogares
+from hogares.models import Hogar
 
 pytestmark = pytest.mark.django_db
 
 
 def test_crear_hogar_crea_categorias_por_defecto():
-    hogar = crear_hogar(usuario=UsuarioFactory(), nombre="Casa")
+    hogar = Hogar.objects.get(pk=hogares.crear_hogar().ejecutar(CrearHogarInputDTO(UsuarioFactory().pk, "Casa")).id)
     assert hogar.categorias.filter(padre__isnull=True, es_ingreso=False).count() == 9
     assert hogar.categorias.get(nombre="Luz").padre.nombre == "Hogar"
     assert hogar.categorias.filter(es_ingreso=True).count() == 2
@@ -27,13 +30,13 @@ def test_importe_cero_no_permitido():
 
 def test_categoria_raiz_duplicada_choca_aunque_padre_sea_null():
     c = CategoriaFactory(nombre="Comida")
-    with pytest.raises(IntegrityError), transaction.atomic():
+    with pytest.raises(IntegrityError), escrituras_directas(), transaction.atomic():  # la constraint, sin use case
         Categoria.objects.create(hogar=c.hogar, nombre="Comida")
 
 
 def test_presupuesto_debe_ser_dia_1():
     c = CategoriaFactory()
-    with pytest.raises(IntegrityError), transaction.atomic():
+    with pytest.raises(IntegrityError), escrituras_directas(), transaction.atomic():
         Presupuesto.objects.create(hogar=c.hogar, categoria=c, mes=date(2026, 10, 15), importe=100)
 
 
@@ -72,7 +75,7 @@ def test_busqueda_trigram_de_comercios():
 def test_adjunto_generico_y_auditoria():
     from django.core.files.base import ContentFile
 
-    from core.auditoria import registrar
+    from core.infrastructure.database.auditoria_de_modelos import registrar
     from core.models import Adjunto, RegistroAuditoria
 
     m = MovimientoFactory(concepto="Cena")
@@ -83,8 +86,22 @@ def test_adjunto_generico_y_auditoria():
 
     antes = model_to_dict(m)
     m.concepto = "Cena de cumpleaños"
-    with transaction.atomic():  # guardar un movimiento escribe en el outbox (módulo 85): siempre en una transacción
+    with escrituras_directas():  # la auditoría de un MODELO (auditoria_de_modelos.py), no la de un use case
         m.save()
     r = registrar(m, RegistroAuditoria.Accion.MODIFICAR, antes=antes)
     assert r.cambios == {"concepto": ["Cena", "Cena de cumpleaños"]}
     assert r.objeto == m
+
+
+def test_a_igualdad_de_veces_la_categoria_habitual_es_siempre_la_misma():
+    from finanzas.infrastructure.database.services.reconocedor_comercios_orm import ReconocedorComerciosORM
+
+    cuenta = CuentaFactory()
+    hogar = cuenta.hogar
+    antigua, nueva = CategoriaFactory(hogar=hogar, nombre="Comida"), CategoriaFactory(hogar=hogar, nombre="Hogar")
+    with escrituras_directas():
+        mercadona = Comercio.objects.create(nombre="Mercadona")
+    MovimientoFactory(cuenta=cuenta, comercio=mercadona, categoria=nueva)
+    MovimientoFactory(cuenta=cuenta, comercio=mercadona, categoria=antigua)
+    # empate a una: desempata el id, no el azar
+    assert ReconocedorComerciosORM().categoria_habitual(hogar.pk, mercadona.pk) == antigua.pk

@@ -4,8 +4,7 @@ from confluent_kafka import KafkaError, KafkaException
 from confluent_kafka.admin import NewTopic
 from django.core.management.base import BaseCommand, CommandError
 
-from eventos.kafka import admin
-from eventos.topics import TOPICS
+from eventos.infrastructure.messaging.kafka import TOPICS, admin
 
 
 class Command(BaseCommand):

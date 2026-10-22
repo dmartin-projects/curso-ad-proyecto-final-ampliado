@@ -7,9 +7,9 @@ django_asgi_app = get_asgi_application()  # ⚠️ ANTES de importar consumers (
 
 from channels.routing import ProtocolTypeRouter, URLRouter  # noqa: E402
 
-from notificaciones.middleware import TicketAuthMiddleware  # noqa: E402
-from notificaciones.origenes import ValidadorOrigen  # noqa: E402
-from notificaciones.routing import websocket_urlpatterns  # noqa: E402
+from notificaciones.infrastructure.websocket.middleware import TicketAuthMiddleware  # noqa: E402
+from notificaciones.infrastructure.websocket.origenes import ValidadorOrigen  # noqa: E402
+from notificaciones.infrastructure.websocket.routing import websocket_urlpatterns  # noqa: E402
 
 application = ProtocolTypeRouter(
     {

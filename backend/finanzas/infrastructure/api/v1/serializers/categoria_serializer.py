@@ -1,4 +1,4 @@
-# finanzas/infrastructure/api/v1/serializers/categoria_serializer.py (módulos 33 y 87)
+# finanzas/infrastructure/api/v1/serializers/categoria_serializer.py (módulos 33, 87 y 88)
 #
 # Entrada: valida el FORMATO (tipos, obligatorios, que el id sea de tu hogar) y entrega los datos al use case con
 # a_dominio(). Las REGLAS son del dominio: la jerarquía (dos niveles, sin ciclos) es Categoria.colgar_de() y el
@@ -7,7 +7,7 @@ from rest_framework import serializers
 
 from core.infrastructure.api.serializers.a_dominio_mixin import ADominioMixin
 from finanzas.infrastructure.database.models.categoria_model import Categoria as CategoriaModel
-from hogares.api.base import DelHogarMixin
+from hogares.infrastructure.api.base.del_hogar_mixin import DelHogarMixin
 
 
 class CategoriaSerializer(DelHogarMixin, ADominioMixin, serializers.ModelSerializer):

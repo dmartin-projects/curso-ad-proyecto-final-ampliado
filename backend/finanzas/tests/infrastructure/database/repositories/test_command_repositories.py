@@ -1,4 +1,4 @@
-"""Contract tests (módulo 87): los MISMOS tests contra el command repository del ORM y contra el fake de memoria.
+"""Contract tests (módulos 87 y 88): los MISMOS tests contra el command repository del ORM y contra el fake de memoria.
 
 Los tests de los use cases se fían de los fakes. Si un fake se porta distinto que el de verdad (no detecta un
 duplicado, devuelve movimientos de otro hogar…), esos tests mienten. Aquí se comprueba que no.
@@ -28,10 +28,12 @@ from finanzas.infrastructure.database.repositories.movimiento_command_repository
 from finanzas.infrastructure.database.repositories.presupuesto_command_repository_orm import (
     PresupuestoCommandRepositoryORM,
 )
+from finanzas.infrastructure.database.services.reconocedor_comercios_orm import ReconocedorComerciosORM
 from finanzas.tests.fakes.categoria_command_repository_fake import CategoriaCommandRepositoryFake
 from finanzas.tests.fakes.movimiento_command_repository_fake import MovimientoCommandRepositoryFake
 from finanzas.tests.fakes.mundo import HOGAR, OTRO_HOGAR
 from finanzas.tests.fakes.presupuesto_command_repository_fake import PresupuestoCommandRepositoryFake
+from finanzas.tests.fakes.reconocedor_comercios_fake import ReconocedorComerciosFake
 
 OCTUBRE = Mes(2026, 10)
 
@@ -45,6 +47,7 @@ class Entorno:
     otro_hogar: int
     cuenta: int
     cuenta_ajena: int
+    comercios: object = None
 
 
 @pytest.fixture(params=["memoria", "orm"])
@@ -52,7 +55,8 @@ def entorno(request) -> Entorno:
     if request.param == "memoria":
         movimientos, categorias = MovimientoCommandRepositoryFake(), CategoriaCommandRepositoryFake()
         presupuestos = PresupuestoCommandRepositoryFake(movimientos, categorias)
-        return Entorno(movimientos, categorias, presupuestos, HOGAR, OTRO_HOGAR, 10, 20)
+        comercios = ReconocedorComerciosFake(movimientos, categorias)
+        return Entorno(movimientos, categorias, presupuestos, HOGAR, OTRO_HOGAR, 10, 20, comercios)
     request.getfixturevalue("db")
     cuenta, ajena = CuentaFactory(), CuentaFactory()
     return Entorno(
@@ -63,6 +67,7 @@ def entorno(request) -> Entorno:
         ajena.hogar_id,
         cuenta.pk,
         ajena.pk,
+        ReconocedorComerciosORM(),
     )
 
 
@@ -159,3 +164,48 @@ def test_un_duplicado_no_rompe_la_transaccion(entorno):
     with pytest.raises(CategoriaDuplicadaException):
         categoria(entorno, "Ocio")
     assert categoria(entorno, "Viajes").id is not None
+
+
+# ── Módulo 88: en bloque, y el reconocedor de comercios ──
+def test_en_bloque_solo_del_hogar(entorno):
+    nuevos = [
+        Movimiento(
+            hogar_id=entorno.hogar,
+            cuenta_id=entorno.cuenta,
+            fecha=date(2026, 10, d),
+            importe=Dinero("-1"),
+            concepto="Café",
+            huella=f"h{d}",
+        )
+        for d in (1, 2)
+    ]
+    entorno.movimientos.crear_varios(nuevos)
+    ajeno = movimiento(entorno, ajeno=True)
+    ids = [m.id for m in nuevos]
+    assert all(ids) and [m.huella for m in entorno.movimientos.obtener_varios(entorno.hogar, [*ids, ajeno.id])] == [
+        "h1",
+        "h2",
+    ]
+    nuevos[0].desconciliar()
+    nuevos[0].modificar(hoy=date(2026, 10, 31), concepto="Otro")  # guardar_huellas guarda SOLO la huella
+    entorno.movimientos.guardar_huellas([nuevos[0]])
+    leido = entorno.movimientos.obtener(entorno.hogar, ids[0])
+    assert (leido.huella, leido.concepto) == ("", "Café")
+    entorno.movimientos.eliminar_varios(entorno.hogar, [*ids, ajeno.id])
+    assert entorno.movimientos.obtener_varios(entorno.hogar, ids) == []
+    assert entorno.movimientos.obtener(entorno.otro_hogar, ajeno.id)  # el de otro hogar sigue ahí
+
+
+def test_comercios_reconocer_crear_y_la_categoria_habitual(entorno):
+    c = entorno.comercios
+    pk, nombre = c.reconocer_o_crear("Mercadona", "A46103834")
+    assert nombre == "Mercadona" and c.reconocer("COMPRA MERCADONA SA 0042") == pk
+    assert c.reconocer_o_crear("MERCADONA") == (pk, "Mercadona")  # reconocido: no se duplica
+    assert c.reconocer_o_crear("  ") is None and c.reconocer("") is None
+
+    super_, comida = categoria(entorno, "Súper"), categoria(entorno, "Comida")
+    for cat, revisado in ((comida, True), (super_, True), (super_, True), (comida, False)):
+        movimiento(entorno, comercio_id=pk, categoria_id=cat.id, revisado=revisado)
+    assert c.categoria_habitual(entorno.hogar, pk) == super_.id  # la que más usa el hogar (y solo lo revisado)
+    assert c.categoria_habitual(entorno.otro_hogar, pk) is None  # otro hogar, otras costumbres
+    assert c.categoria_habitual(entorno.hogar, None, "COMIDA") == comida.id  # sin costumbre: la sugerida

@@ -1,8 +1,8 @@
 # finanzas/tests/fakes/categoria_command_repository_fake.py — ICategoriaCommandRepository en memoria (módulo 87)
+from core.tests.fakes.almacen_en_memoria import AlmacenEnMemoria, copia
 from finanzas.domain.exceptions.categoria_duplicada_exception import CategoriaDuplicadaException
 from finanzas.domain.exceptions.categoria_no_encontrada_exception import CategoriaNoEncontradaException
 from finanzas.domain.repositories.i_categoria_command_repository import ICategoriaCommandRepository
-from finanzas.tests.fakes.almacen_en_memoria import AlmacenEnMemoria, copia
 
 
 class CategoriaCommandRepositoryFake(AlmacenEnMemoria, ICategoriaCommandRepository):

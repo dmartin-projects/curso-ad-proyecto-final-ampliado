@@ -1,11 +1,11 @@
 # finanzas/infrastructure/database/repositories/cuenta_query_service_orm.py — ICuentaQueryService con el ORM
-# (módulo 87)
+# (módulos 87 y 88)
 from django.db.models import DecimalField, Sum, Value
 from django.db.models.functions import Coalesce
 
+from core.domain.repositories.queries.listado_del_hogar_query import ListadoDelHogarQuery
 from finanzas.domain.read_models.cuenta_con_saldo import CuentaConSaldo
 from finanzas.domain.repositories.i_cuenta_query_service import ICuentaQueryService
-from finanzas.domain.repositories.queries.listado_del_hogar_query import ListadoDelHogarQuery
 from finanzas.infrastructure.database.models.cuenta_model import Cuenta as CuentaModel
 
 
@@ -26,3 +26,6 @@ class CuentaQueryServiceORM(ICuentaQueryService):
     def detalle(self, hogar_id: int, cuenta_id: int) -> CuentaConSaldo | None:
         fila = self._con_saldo(hogar_id).filter(pk=cuenta_id).first()
         return None if fila is None else _a_read_model(fila)
+
+    def existe(self, hogar_id: int, cuenta_id: int) -> bool:
+        return CuentaModel.objects.filter(hogar_id=hogar_id, pk=cuenta_id).exists()

@@ -1,7 +1,7 @@
-# finanzas/infrastructure/database/repositories/presupuesto_command_repository_orm.py (módulos 76 y 87)
+# finanzas/infrastructure/database/repositories/presupuesto_command_repository_orm.py (módulos 76, 87 y 88)
 from core.domain.vo.dinero import Dinero
 from core.infrastructure.database.guardado import guardar_fila
-from core.infrastructure.signals.red_de_seguridad import publicados_por_caso_de_uso
+from core.infrastructure.signals.red_de_seguridad import en_un_caso_de_uso, publicados_por_caso_de_uso
 from finanzas.domain.bo.presupuesto import Presupuesto
 from finanzas.domain.exceptions.presupuesto_duplicado_exception import PresupuestoDuplicadoException
 from finanzas.domain.exceptions.presupuesto_no_encontrado_exception import PresupuestoNoEncontradoException
@@ -27,7 +27,8 @@ class PresupuestoCommandRepositoryORM(IPresupuestoCommandRepository):
         presupuesto.id = fila.pk
 
     def eliminar(self, presupuesto: Presupuesto) -> None:
-        PresupuestoModel.objects.filter(pk=presupuesto.id).delete()
+        with en_un_caso_de_uso():  # delete() de un QuerySet: no hay instancia que marcar
+            PresupuestoModel.objects.filter(pk=presupuesto.id).delete()
 
     def con_gastado(self, hogar_id, meses):
         filas = PresupuestoModel.objects.filter(

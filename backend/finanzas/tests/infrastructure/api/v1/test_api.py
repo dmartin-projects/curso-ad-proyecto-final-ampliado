@@ -6,10 +6,10 @@ from decimal import Decimal
 import pytest
 from django.utils import timezone
 
-from conftest import CategoriaFactory, CuentaFactory, HogarFactory, MovimientoFactory
+from conftest import CategoriaFactory, CuentaFactory, HogarFactory, MovimientoFactory, PresupuestoFactory
 from core.infrastructure.database.auditoria_django import AuditoriaDjango
 from core.models import RegistroAuditoria
-from finanzas.models import Comercio, Movimiento, Presupuesto
+from finanzas.models import Comercio, Movimiento
 
 pytestmark = pytest.mark.django_db
 
@@ -180,7 +180,7 @@ def test_exportar_csv_sin_formulas(cliente, escenario):
 
 def test_presupuesto_con_gastado_incluye_subcategorias(cliente, escenario):
     hogar, roles, cuenta, comida, super_ = escenario
-    Presupuesto.objects.create(hogar=hogar, categoria=comida, mes=date(2026, 10, 1), importe=Decimal("100"))
+    PresupuestoFactory(hogar=hogar, categoria=comida, mes=date(2026, 10, 1), importe=Decimal("100"))
     MovimientoFactory(cuenta=cuenta, categoria=comida, fecha=date(2026, 10, 5), importe=Decimal("-20"))
     MovimientoFactory(cuenta=cuenta, categoria=super_, fecha=date(2026, 10, 31), importe=Decimal("-30"))
     MovimientoFactory(cuenta=cuenta, categoria=super_, fecha=date(2026, 11, 1), importe=Decimal("-99"))
@@ -215,11 +215,11 @@ def test_presupuesto_con_importe_mayor_que_cero(cliente, escenario):
 
 def test_un_presupuesto_por_categoria_y_mes(cliente, escenario):
     hogar, roles, _, comida, super_ = escenario
-    Presupuesto.objects.create(hogar=hogar, categoria=comida, mes=date(2026, 10, 1), importe=Decimal("10"))
+    PresupuestoFactory(hogar=hogar, categoria=comida, mes=date(2026, 10, 1), importe=Decimal("10"))
     c = cliente(roles["admin"])
     r = c.post(url(hogar, "presupuestos"), {"categoria": comida.pk, "mes": "2026-10-15", "importe": "20"})
     assert errores(r) == {"categoria": ["Ya hay un presupuesto de esta categoría para ese mes."]}
-    otro = Presupuesto.objects.create(hogar=hogar, categoria=super_, mes=date(2026, 10, 1), importe=Decimal("5"))
+    otro = PresupuestoFactory(hogar=hogar, categoria=super_, mes=date(2026, 10, 1), importe=Decimal("5"))
     assert "categoria" in errores(c.patch(f"{url(hogar, 'presupuestos')}{otro.pk}/", {"categoria": comida.pk}))
     assert c.patch(f"{url(hogar, 'presupuestos')}{otro.pk}/", {"importe": "6"}).status_code == 200  # él mismo no cuenta
 

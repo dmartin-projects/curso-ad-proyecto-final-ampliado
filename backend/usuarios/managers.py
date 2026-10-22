@@ -1,4 +1,5 @@
-# usuarios/managers.py
+# usuarios/managers.py — el manager del usuario. Se queda aquí (módulo 88): use_in_migrations=True y la migración
+# 0001 lo importa como usuarios.managers.UsuarioManager; moverlo rompería las migraciones.
 from django.contrib.auth.base_user import BaseUserManager
 
 

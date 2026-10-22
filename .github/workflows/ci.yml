@@ -92,7 +92,7 @@ jobs:
         run: uvx pip-audit --strict
         continue-on-error: true                 # informa sin bloquear (decide tu política)
 
-  arquitectura: # módulo 87: las capas de la arquitectura hexagonal. Sin PostgreSQL, sin Redis: no los necesita
+  arquitectura: # módulos 87 y 88: las capas de la arquitectura hexagonal. Sin PostgreSQL, sin Redis: no los necesita
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -112,7 +112,7 @@ jobs:
       - name: Capas (import-linter, contratos en pyproject.toml)
         run: uv run lint-imports
       - name: Dominio y use cases, sin base de datos
-        run: uv run pytest core/tests/domain finanzas/tests/domain finanzas/tests/application finanzas/tests/fakes
+        run: uv run pytest ./*/tests/domain ./*/tests/application ./*/tests/fakes # el shared kernel y todas las apps
 
   estadisticas: # módulo 85: el microservicio, con PostgreSQL y Kafka de verdad
     runs-on: ubuntu-latest

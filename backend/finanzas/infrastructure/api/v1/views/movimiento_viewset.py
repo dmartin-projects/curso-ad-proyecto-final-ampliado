@@ -1,4 +1,4 @@
-# finanzas/infrastructure/api/v1/views/movimiento_viewset.py — adapter de entrada HTTP (módulos 33-38, 76 y 87)
+# finanzas/infrastructure/api/v1/views/movimiento_viewset.py — adapter de entrada HTTP (módulos 33-38, 76, 87 y 88)
 #
 # Escribir: serializer → InputDTO → use case de comando. Leer (listado, detalle, CSV y la response de un POST o un
 # PATCH): query params → InputDTO → use case de consulta → OutputDTO → presenter → el mismo serializer de siempre.
@@ -9,9 +9,11 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from core.hojas_de_calculo import texto_csv
 from core.infrastructure.api.pagination.paginacion_cursor import PaginacionCursor
 from core.infrastructure.api.pagination.paginacion_estandar import PaginacionEstandar
+from core.infrastructure.api.views import consultas
+from core.infrastructure.api.views.roles import roles_de
+from core.infrastructure.hojas_de_calculo.celdas_de_texto import texto_csv
 from finanzas.application.eliminar_movimiento_use_case.dtos.eliminar_movimiento_input_dto import (
     EliminarMovimientoInputDTO,
 )
@@ -48,10 +50,8 @@ from finanzas.infrastructure.api.v1.filters.movimiento_filter import MovimientoF
 from finanzas.infrastructure.api.v1.presenters.movimiento_presenter import presentar
 from finanzas.infrastructure.api.v1.serializers.movimiento_serializer import MovimientoSerializer
 from finanzas.infrastructure.api.v1.serializers.recategorizar_serializer import RecategorizarSerializer
-from finanzas.infrastructure.api.v1.views import consultas
-from finanzas.infrastructure.api.v1.views.roles import roles_de
 from finanzas.infrastructure.database.models.movimiento_model import Movimiento as MovimientoModel
-from hogares.api.base import DelHogarViewSet
+from hogares.infrastructure.api.base.del_hogar_viewset import DelHogarViewSet
 
 
 class MovimientoViewSet(DelHogarViewSet):

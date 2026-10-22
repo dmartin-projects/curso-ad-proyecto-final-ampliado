@@ -1,10 +1,10 @@
 # finanzas/application/listar_cuentas_use_case/listar_cuentas_use_case.py (módulo 87)
 from core.domain.enums.rol import Rol
+from core.domain.repositories.queries.listado_del_hogar_query import ListadoDelHogarQuery
 from finanzas.application.listar_cuentas_use_case.dtos.listar_cuentas_input_dto import ListarCuentasInputDTO
 from finanzas.application.listar_cuentas_use_case.i_listar_cuentas_use_case import IListarCuentasUseCase
 from finanzas.application.shared.dtos.cuenta_con_saldo_output_dto import CuentaConSaldoOutputDTO
 from finanzas.domain.repositories.i_cuenta_query_service import ICuentaQueryService
-from finanzas.domain.repositories.queries.listado_del_hogar_query import ListadoDelHogarQuery
 
 
 class ListarCuentasUseCase(IListarCuentasUseCase):

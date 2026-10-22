@@ -14,3 +14,4 @@ STORAGES = {
 MAILERS = {"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend"}}
 
 EVENTOS_EXIGIR_TRANSACCION = True  # módulo 85: un evento fuera de atomic() rompe el test
+EXIGIR_CASOS_DE_USO = True  # módulo 88: una escritura sin use case (sin sus eventos) rompe el test

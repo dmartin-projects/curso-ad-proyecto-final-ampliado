@@ -6,6 +6,8 @@ class TicketsConfig(AppConfig):
     name = "tickets"
 
     def ready(self):
-        from . import metricas
+        # Los adapters de entrada que Django y Celery no descubren solos (módulos 87 y 88)
+        from .infrastructure.metrics import metricas_tickets
+        from .infrastructure.tasks import procesar_ticket_task  # noqa: F401
 
-        metricas.registrar()  # sin OpenTelemetry activo, el SDK nunca llama a la función
+        metricas_tickets.registrar()  # sin OpenTelemetry activo, el SDK nunca llama a la función

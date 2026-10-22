@@ -3,8 +3,8 @@ from django.core.management import BaseCommand, CommandError
 from django.db import transaction
 from django.forms.models import model_to_dict
 
-from core.auditoria import registrar
-from core.grupos import GRUPOS
+from core.infrastructure.database.auditoria_de_modelos import registrar
+from core.infrastructure.database.grupos import GRUPOS
 from core.models import RegistroAuditoria
 from usuarios.models import Usuario
 

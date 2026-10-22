@@ -1,4 +1,4 @@
-# finanzas/application/registrar_movimiento_use_case/registrar_movimiento_use_case.py (módulo 87)
+# finanzas/application/registrar_movimiento_use_case/registrar_movimiento_use_case.py (módulos 87 y 88)
 #
 # Un use case ORQUESTA: comprueba quién lo pide (autorización por hogar), abre la transacción, construye o carga
 # los BOs, les pide que cambien (las reglas son suyas), guarda, audita y publica los eventos, todo dentro de la
@@ -20,7 +20,6 @@ from finanzas.application.registrar_movimiento_use_case.i_registrar_movimiento_u
 from finanzas.application.shared.autorizacion_por_hogar import exigir_categoria, exigir_cuenta
 from finanzas.application.shared.dtos.movimiento_output_dto import MovimientoOutputDTO
 from finanzas.domain.bo.movimiento import Movimiento
-from finanzas.domain.enums.origen import Origen
 from finanzas.domain.events.movimiento_registrado_event import MovimientoRegistradoEvent
 from finanzas.domain.repositories.i_categoria_command_repository import ICategoriaCommandRepository
 from finanzas.domain.repositories.i_cuenta_command_repository import ICuentaCommandRepository
@@ -58,7 +57,7 @@ class RegistrarMovimientoUseCase(IRegistrarMovimientoUseCase):
             etiquetas=entrada.etiquetas,
             notas=entrada.notas,
             revisado=entrada.revisado,
-            origen=Origen.MANUAL,
+            origen=entrada.origen,
             creado_por_id=entrada.actor.usuario_id,
         )
         with self.uow:  # el movimiento, su auditoría y su evento: todo o nada (módulo 85)

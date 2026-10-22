@@ -1,8 +1,8 @@
 # finanzas/domain/repositories/i_categoria_query_service.py (módulo 87)
 from abc import ABC, abstractmethod
 
+from core.domain.repositories.queries.listado_del_hogar_query import ListadoDelHogarQuery
 from finanzas.domain.read_models.categoria_listada import CategoriaListada
-from finanzas.domain.repositories.queries.listado_del_hogar_query import ListadoDelHogarQuery
 
 
 class ICategoriaQueryService(ABC):

@@ -1,5 +1,5 @@
 # finanzas/infrastructure/database/repositories/movimiento_query_service_orm.py — IMovimientoQueryService con el ORM
-# (módulos 34, 37, 73 y 87)
+# (módulos 34, 37, 73, 87 y 88)
 #
 # Todo el ORM dentro: select_related para los nombres (una consulta, no N), Count de los adjuntos, values_list e
 # iterator para el CSV, keyset para el cursor. Fuera solo salen read models.
@@ -12,8 +12,10 @@ from django.db.models import Count, Q
 from core.domain.read_models.pagina import Pagina
 from core.domain.repositories.queries.paginacion_cursor import PaginacionCursor
 from core.infrastructure.database import paginacion
+from finanzas.domain.read_models.movimiento_del_mes import MovimientoDelMes
 from finanzas.domain.read_models.movimiento_exportado import MovimientoExportado
 from finanzas.domain.read_models.movimiento_listado import MovimientoListado
+from finanzas.domain.read_models.movimiento_sin_conciliar import MovimientoSinConciliar
 from finanzas.domain.repositories.i_movimiento_query_service import IMovimientoQueryService
 from finanzas.domain.repositories.queries.filtros_movimientos_query import FiltrosMovimientosQuery
 from finanzas.domain.repositories.queries.movimientos_query import MovimientosQuery
@@ -76,6 +78,13 @@ def _a_listado(fila: MovimientoModel) -> MovimientoListado:
     )
 
 
+def _categoria(nombre: str | None, padre: str | None) -> str | None:
+    """Como la enseña la app (Categoria.__str__): «Padre › Hija» si es una subcategoría."""
+    if nombre is None:
+        return None
+    return f"{padre} › {nombre}" if padre else nombre
+
+
 class MovimientoQueryServiceORM(IMovimientoQueryService):
     @staticmethod
     def _del_hogar(hogar_id: int):
@@ -98,3 +107,35 @@ class MovimientoQueryServiceORM(IMovimientoQueryService):
         )
         for fecha, concepto, importe, cuenta, categoria, etiquetas in filas.iterator(chunk_size=2000):
             yield MovimientoExportado(fecha, concepto, importe, cuenta, categoria, tuple(etiquetas))
+
+    # ── Lo que leen otras apps (módulo 88) ──
+    def del_mes(self, hogar_id, mes):
+        # {% regroup %} del informe agrupa elementos CONSECUTIVOS: ordenados por la categoría
+        filas = (
+            MovimientoModel.objects.filter(hogar_id=hogar_id)
+            .del_mes(mes.inicio)
+            .order_by("categoria__nombre", "categoria_id", "fecha", "id")
+            .values_list(
+                "pk",
+                "fecha",
+                "concepto",
+                "importe",
+                "cuenta__nombre",
+                "categoria_id",
+                "categoria__nombre",
+                "categoria__padre__nombre",
+            )
+        )
+        return [
+            MovimientoDelMes(pk, fecha, concepto, importe, cuenta, categoria_id, _categoria(nombre, padre))
+            for pk, fecha, concepto, importe, cuenta, categoria_id, nombre, padre in filas
+        ]
+
+    def huellas_existentes(self, cuenta_id, huellas):
+        filas = MovimientoModel.objects.filter(cuenta_id=cuenta_id, huella__in=list(huellas))
+        return set(filas.values_list("huella", flat=True))
+
+    def sin_conciliar(self, cuenta_id, desde, hasta):
+        filas = MovimientoModel.objects.filter(cuenta_id=cuenta_id, huella="", fecha__range=(desde, hasta))
+        # el orden de siempre (Meta.ordering): a igual distancia, se empareja el mismo que en el módulo 75
+        return [MovimientoSinConciliar(*fila) for fila in filas.values_list("pk", "fecha", "importe")]

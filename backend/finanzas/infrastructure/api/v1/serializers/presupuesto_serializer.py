@@ -1,4 +1,4 @@
-# finanzas/infrastructure/api/v1/serializers/presupuesto_serializer.py (módulos 76 y 87)
+# finanzas/infrastructure/api/v1/serializers/presupuesto_serializer.py (módulos 76, 87 y 88)
 #
 # Sin validate_mes, validate_importe ni el duplicado: un Presupuesto del dominio es de un Mes, su importe lo comprueba
 # el BO y el duplicado lo traduce el command repository desde la constraint.
@@ -7,7 +7,7 @@ from rest_framework import serializers
 from core.infrastructure.api.serializers.a_dominio_mixin import ADominioMixin
 from finanzas.infrastructure.database.models.categoria_model import Categoria as CategoriaModel
 from finanzas.infrastructure.database.models.presupuesto_model import Presupuesto as PresupuestoModel
-from hogares.api.base import DelHogarMixin
+from hogares.infrastructure.api.base.del_hogar_mixin import DelHogarMixin
 
 
 class PresupuestoSerializer(DelHogarMixin, ADominioMixin, serializers.ModelSerializer):

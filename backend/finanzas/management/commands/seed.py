@@ -5,9 +5,19 @@ from decimal import Decimal
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from eventos import registro as eventos
-from finanzas.models import Comercio, Cuenta, Movimiento, Presupuesto
-from hogares.services import crear_hogar
+from core.domain.vo.actor import Actor
+from finanzas.application.apuntar_movimientos_use_case.dtos.apuntar_movimientos_input_dto import (
+    ApuntarMovimientosInputDTO,
+)
+from finanzas.application.apuntar_movimientos_use_case.dtos.movimiento_apuntado_input_dto import (
+    MovimientoApuntadoInputDTO,
+)
+from finanzas.application.crear_presupuesto_use_case.dtos.crear_presupuesto_input_dto import CrearPresupuestoInputDTO
+from finanzas.domain.enums.origen import Origen
+from finanzas.infrastructure import container as finanzas
+from finanzas.models import Categoria, Comercio, Cuenta
+from hogares.application.crear_hogar_use_case.dtos.crear_hogar_input_dto import CrearHogarInputDTO
+from hogares.infrastructure import container as hogares
 from usuarios.models import Usuario
 
 COMERCIOS = [
@@ -35,45 +45,37 @@ class Command(BaseCommand):
         if creado:
             usuario.set_password("demo12345-demo")
             usuario.save()
-        hogar = crear_hogar(usuario=usuario, nombre="Casa demo")
-        cuenta = Cuenta.objects.create(hogar=hogar, nombre="Cuenta común")
-        categorias = {c.nombre: c for c in hogar.categorias.all()}
+        hogar_id = hogares.crear_hogar().ejecutar(CrearHogarInputDTO(usuario.pk, "Casa demo")).id
+        cuenta = Cuenta.objects.create(hogar_id=hogar_id, nombre="Cuenta común")
+        categorias = dict(Categoria.objects.filter(hogar_id=hogar_id).values_list("nombre", "id"))
         comercios = [(Comercio.objects.get_or_create(nombre=n)[0], cat, r) for n, cat, r in COMERCIOS]
 
         hoy = date.today()
         nuevos = []
         for _ in range(movimientos):
             comercio, cat, (minimo, maximo) = random.choice(comercios)
-            importe = Decimal(random.uniform(minimo, maximo)).quantize(Decimal("0.01"))
             nuevos.append(
-                Movimiento(
-                    hogar=hogar,
-                    cuenta=cuenta,
+                MovimientoApuntadoInputDTO(
                     fecha=hoy - timedelta(days=random.randint(0, 540)),
-                    importe=importe,
+                    importe=Decimal(random.uniform(minimo, maximo)).quantize(Decimal("0.01")),
                     concepto=comercio.nombre.upper(),
-                    comercio=comercio,
-                    categoria=categorias.get(cat),
-                    creado_por=usuario,
+                    comercio_id=comercio.pk,
+                    categoria_id=categorias.get(cat),
                 )
             )
         for mes in range(18):  # nóminas
             dia = (hoy.replace(day=1) - timedelta(days=30 * mes)).replace(day=28)
             nuevos.append(
-                Movimiento(
-                    hogar=hogar,
-                    cuenta=cuenta,
-                    fecha=dia,
-                    importe=Decimal("2150.00"),
-                    concepto="NOMINA",
-                    categoria=categorias["Nómina"],
-                    creado_por=usuario,
+                MovimientoApuntadoInputDTO(
+                    fecha=dia, importe=Decimal("2150.00"), concepto="NOMINA", categoria_id=categorias["Nómina"]
                 )
             )
-        with transaction.atomic():  # bulk_create no emite post_save: los eventos de Kafka, a mano (módulo 85)
-            creados = Movimiento.objects.bulk_create(nuevos, batch_size=1000)
-            eventos.movimientos_cambiados([m.pk for m in creados], tipo="movimiento.creado")
-        Presupuesto.objects.create(
-            hogar=hogar, categoria=categorias["Supermercado"], mes=hoy.replace(day=1), importe=Decimal("400")
+        # Como cualquier otro proceso: por los use cases de finanzas (un INSERT y sus eventos para Kafka)
+        actor = Actor.sistema(en_nombre_de=usuario.pk)
+        finanzas.apuntar_movimientos().ejecutar(
+            ApuntarMovimientosInputDTO(hogar_id, actor, cuenta.pk, Origen.MANUAL, tuple(nuevos))
         )
-        self.stdout.write(self.style.SUCCESS(f"Hogar {hogar.pk} con {len(nuevos)} movimientos para {email}"))
+        finanzas.crear_presupuesto().ejecutar(
+            CrearPresupuestoInputDTO(hogar_id, actor, categorias["Supermercado"], hoy.replace(day=1), Decimal("400"))
+        )
+        self.stdout.write(self.style.SUCCESS(f"Hogar {hogar_id} con {len(nuevos)} movimientos para {email}"))

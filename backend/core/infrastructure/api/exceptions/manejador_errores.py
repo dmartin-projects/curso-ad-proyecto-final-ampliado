@@ -1,4 +1,4 @@
-# core/infrastructure/api/exceptions/manejador_errores.py — los errores, en el formato de la API (módulos 38 y 87)
+# core/infrastructure/api/exceptions/manejador_errores.py — los errores, en el formato de la API (módulos 38, 87 y 88)
 import logging
 
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -10,7 +10,7 @@ from rest_framework.views import exception_handler as handler_drf
 from core.domain.exceptions.cursor_no_valido_exception import CursorNoValidoException
 from core.domain.exceptions.dominio_exception import DominioException
 from core.domain.exceptions.pagina_no_valida_exception import PaginaNoValidaException
-from core.logging import request_id_var
+from core.infrastructure.logging.request_id import request_id_var
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +73,8 @@ def manejador_errores(exc, context):
     if isinstance(exc, DominioException):
         if exc.campo:
             tipo, titulo = TITULOS[400]
-            return _problema(400, tipo, titulo, errors={exc.campo: [str(exc.mensaje)]})
+            mensajes = getattr(exc, "mensajes", None) or [str(exc.mensaje)]  # varios motivos (una contraseña débil)
+            return _problema(400, tipo, titulo, errors={exc.campo: mensajes})
         return _problema(exc.status, exc.codigo, exc.mensaje, detail=exc.contexto or None)
 
     # 2. ValidationError de Django (validate_password, full_clean, validadores de modelo) → 400

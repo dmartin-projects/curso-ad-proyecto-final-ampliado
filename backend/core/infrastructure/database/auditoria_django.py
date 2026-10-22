@@ -1,4 +1,4 @@
-# core/infrastructure/database/auditoria_django.py — IAuditoria con el modelo RegistroAuditoria (módulos 17 y 87)
+# core/infrastructure/database/auditoria_django.py — IAuditoria con el modelo RegistroAuditoria (módulos 17, 87 y 88)
 from django.contrib.contenttypes.models import ContentType
 
 from core.application.ports.i_auditoria import IAuditoria
@@ -29,7 +29,7 @@ class AuditoriaDjango(IAuditoria):
         _registro(accion, objeto, usuario_id, antes).save()
 
     def registrar_varios(self, accion: Accion, objetos, usuario_id: int | None, antes=None) -> None:
-        # Recategorizar toca cientos de movimientos de una vez: un INSERT para todos sus registros
+        # Recategorizar o deshacer una importación toca cientos de movimientos de una vez: un INSERT para todos
         antes = antes or [None] * len(objetos)
         registros = [_registro(accion, o, usuario_id, a) for o, a in zip(objetos, antes, strict=True)]
         RegistroAuditoria.objects.bulk_create(registros, batch_size=1000)

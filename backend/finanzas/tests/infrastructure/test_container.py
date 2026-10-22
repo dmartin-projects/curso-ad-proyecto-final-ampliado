@@ -12,6 +12,9 @@ pytestmark = pytest.mark.django_db
 
 
 class PublicadorRoto(IPublicadorEventos):
+    def __init__(self, **piezas):  # el contenedor le pasa su outbox (módulo 88): no lo usa
+        pass
+
     def publicar(self, *eventos):
         raise ConnectionError("el outbox no responde")
 

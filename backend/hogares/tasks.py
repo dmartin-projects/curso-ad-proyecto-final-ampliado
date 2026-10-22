@@ -1,23 +1,5 @@
-from django.conf import settings
-from django.core.mail import send_mail
-from django.tasks import task
-from django.utils.translation import gettext as _
+# hogares/tasks.py — la ruta de siempre de la tarea de django.tasks (módulo 88). Vive en infrastructure/tasks/; la
+# cola (django-tasks-db) la guarda por su ruta y el worker la busca aquí (core/infrastructure/tasks/ruta_estable.py).
+from hogares.infrastructure.tasks.enviar_invitacion_task import enviar_invitacion
 
-from .models import Invitacion
-
-
-@task(queue_name="emails")
-def enviar_invitacion(invitacion_id: int) -> None:
-    inv = Invitacion.objects.select_related("hogar", "invitado_por").get(pk=invitacion_id)
-    enlace = f"{settings.FRONTEND_URL}/invitaciones/{inv.token}"
-    send_mail(
-        _("Te han invitado a «%(hogar)s»") % {"hogar": inv.hogar.nombre},
-        _("%(quien)s te invita a compartir las cuentas de «%(hogar)s». Acepta aquí: %(enlace)s")
-        % {
-            "quien": inv.invitado_por.get_full_name() if inv.invitado_por else "",
-            "hogar": inv.hogar.nombre,
-            "enlace": enlace,
-        },
-        None,
-        [inv.email],
-    )
+__all__ = ["enviar_invitacion"]

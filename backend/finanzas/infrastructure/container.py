@@ -1,4 +1,4 @@
-# finanzas/infrastructure/container.py — composition root de finanzas (módulo 87)
+# finanzas/infrastructure/container.py — composition root de finanzas (módulos 87 y 88)
 #
 # El ÚNICO sitio que sabe qué implementación va detrás de cada interfaz. Las views, las tareas, los receivers y los
 # comandos piden aquí su use case ya montado; nadie más escribe `RegistrarMovimientoUseCase(MovimientoCommand…)`.
@@ -9,11 +9,20 @@
 from core.infrastructure.clock.reloj_django import RelojDjango
 from core.infrastructure.database.auditoria_django import AuditoriaDjango
 from core.infrastructure.database.unidad_de_trabajo_django import UnidadDeTrabajoDjango
+from eventos.infrastructure import container as eventos
+from finanzas.application.apuntar_movimientos_use_case.apuntar_movimientos_use_case import ApuntarMovimientosUseCase
+from finanzas.application.apuntar_movimientos_use_case.i_apuntar_movimientos_use_case import IApuntarMovimientosUseCase
 from finanzas.application.comprobar_presupuestos_use_case.comprobar_presupuestos_use_case import (
     ComprobarPresupuestosUseCase,
 )
 from finanzas.application.comprobar_presupuestos_use_case.i_comprobar_presupuestos_use_case import (
     IComprobarPresupuestosUseCase,
+)
+from finanzas.application.conciliar_movimientos_use_case.conciliar_movimientos_use_case import (
+    ConciliarMovimientosUseCase,
+)
+from finanzas.application.conciliar_movimientos_use_case.i_conciliar_movimientos_use_case import (
+    IConciliarMovimientosUseCase,
 )
 from finanzas.application.crear_categoria_use_case.crear_categoria_use_case import CrearCategoriaUseCase
 from finanzas.application.crear_categoria_use_case.i_crear_categoria_use_case import ICrearCategoriaUseCase
@@ -25,6 +34,16 @@ from finanzas.application.crear_categorias_por_defecto_use_case.i_crear_categori
 )
 from finanzas.application.crear_presupuesto_use_case.crear_presupuesto_use_case import CrearPresupuestoUseCase
 from finanzas.application.crear_presupuesto_use_case.i_crear_presupuesto_use_case import ICrearPresupuestoUseCase
+from finanzas.application.descartar_propuestos_use_case.descartar_propuestos_use_case import DescartarPropuestosUseCase
+from finanzas.application.descartar_propuestos_use_case.i_descartar_propuestos_use_case import (
+    IDescartarPropuestosUseCase,
+)
+from finanzas.application.desconciliar_movimientos_use_case.desconciliar_movimientos_use_case import (
+    DesconciliarMovimientosUseCase,
+)
+from finanzas.application.desconciliar_movimientos_use_case.i_desconciliar_movimientos_use_case import (
+    IDesconciliarMovimientosUseCase,
+)
 from finanzas.application.eliminar_categoria_use_case.eliminar_categoria_use_case import EliminarCategoriaUseCase
 from finanzas.application.eliminar_categoria_use_case.i_eliminar_categoria_use_case import IEliminarCategoriaUseCase
 from finanzas.application.eliminar_cuenta_use_case.eliminar_cuenta_use_case import EliminarCuentaUseCase
@@ -32,6 +51,10 @@ from finanzas.application.eliminar_cuenta_use_case.i_eliminar_cuenta_use_case im
 from finanzas.application.eliminar_movimiento_use_case.eliminar_movimiento_use_case import EliminarMovimientoUseCase
 from finanzas.application.eliminar_movimiento_use_case.i_eliminar_movimiento_use_case import (
     IEliminarMovimientoUseCase,
+)
+from finanzas.application.eliminar_movimientos_use_case.eliminar_movimientos_use_case import EliminarMovimientosUseCase
+from finanzas.application.eliminar_movimientos_use_case.i_eliminar_movimientos_use_case import (
+    IEliminarMovimientosUseCase,
 )
 from finanzas.application.eliminar_presupuesto_use_case.eliminar_presupuesto_use_case import (
     EliminarPresupuestoUseCase,
@@ -119,7 +142,7 @@ from finanzas.infrastructure.messaging.publicador_eventos_django import Publicad
 
 
 def _transaccion_y_eventos() -> dict:
-    return {"uow": UnidadDeTrabajoDjango(), "eventos": PublicadorEventosDjango()}
+    return {"uow": UnidadDeTrabajoDjango(), "eventos": PublicadorEventosDjango(outbox=eventos.outbox())}
 
 
 # ── Movimientos ──
@@ -159,6 +182,37 @@ def recategorizar_movimientos() -> IRecategorizarMovimientosUseCase:
         auditoria=AuditoriaDjango(),
         **_transaccion_y_eventos(),
     )
+
+
+def eliminar_movimientos() -> IEliminarMovimientosUseCase:
+    return EliminarMovimientosUseCase(
+        movimientos=MovimientoCommandRepositoryORM(), auditoria=AuditoriaDjango(), **_transaccion_y_eventos()
+    )
+
+
+def descartar_propuestos() -> IDescartarPropuestosUseCase:
+    return DescartarPropuestosUseCase(
+        movimientos=MovimientoCommandRepositoryORM(), auditoria=AuditoriaDjango(), **_transaccion_y_eventos()
+    )
+
+
+# ── Lo que apuntan los procesos: tickets, extractos, el seed (módulo 88) ──
+def apuntar_movimientos() -> IApuntarMovimientosUseCase:
+    return ApuntarMovimientosUseCase(
+        movimientos=MovimientoCommandRepositoryORM(),
+        cuentas=CuentaCommandRepositoryORM(),
+        categorias=CategoriaCommandRepositoryORM(),
+        comercios=ReconocedorComerciosORM(),
+        **_transaccion_y_eventos(),
+    )
+
+
+def conciliar_movimientos() -> IConciliarMovimientosUseCase:
+    return ConciliarMovimientosUseCase(movimientos=MovimientoCommandRepositoryORM(), uow=UnidadDeTrabajoDjango())
+
+
+def desconciliar_movimientos() -> IDesconciliarMovimientosUseCase:
+    return DesconciliarMovimientosUseCase(movimientos=MovimientoCommandRepositoryORM(), uow=UnidadDeTrabajoDjango())
 
 
 # ── Categorías ──

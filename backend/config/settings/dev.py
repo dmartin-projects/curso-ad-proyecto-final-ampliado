@@ -27,3 +27,4 @@ STORAGES["default"] = {
 }
 
 EVENTOS_EXIGIR_TRANSACCION = True  # módulo 85: un evento fuera de atomic() falla en desarrollo
+EXIGIR_CASOS_DE_USO = True  # módulo 88: una escritura sin use case (sin sus eventos) falla en desarrollo

@@ -1,15 +1,15 @@
-# finanzas/infrastructure/api/v1/views/cuenta_viewset.py — adapter de entrada HTTP (módulos 33-38 y 87)
+# finanzas/infrastructure/api/v1/views/cuenta_viewset.py — adapter de entrada HTTP (módulos 33-38, 87 y 88)
 from rest_framework.response import Response
 
+from core.infrastructure.api.views import consultas
 from finanzas.application.eliminar_cuenta_use_case.dtos.eliminar_cuenta_input_dto import EliminarCuentaInputDTO
 from finanzas.application.listar_cuentas_use_case.dtos.listar_cuentas_input_dto import ListarCuentasInputDTO
 from finanzas.application.obtener_cuenta_use_case.dtos.obtener_cuenta_input_dto import ObtenerCuentaInputDTO
 from finanzas.infrastructure import container
 from finanzas.infrastructure.api.v1.presenters.cuenta_presenter import presentar
 from finanzas.infrastructure.api.v1.serializers.cuenta_serializer import CuentaSerializer
-from finanzas.infrastructure.api.v1.views import consultas
 from finanzas.infrastructure.database.models.cuenta_model import Cuenta as CuentaModel
-from hogares.api.base import DelHogarViewSet
+from hogares.infrastructure.api.base.del_hogar_viewset import DelHogarViewSet
 from hogares.models import Membresia
 
 

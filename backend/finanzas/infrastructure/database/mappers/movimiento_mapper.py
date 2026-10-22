@@ -1,4 +1,4 @@
-# finanzas/infrastructure/database/mappers/movimiento_mapper.py — BO ↔ fila (módulo 87)
+# finanzas/infrastructure/database/mappers/movimiento_mapper.py — BO ↔ fila (módulos 87 y 88)
 #
 # Explícito y aburrido, a propósito: se lee en diez segundos y es el único sitio donde Django y el dominio se tocan.
 # En infraestructura, el modelo se importa como MovimientoModel: así no se confunde con el BO Movimiento.
@@ -22,6 +22,7 @@ def movimiento_a_bo(fila: MovimientoModel) -> Movimiento:
         origen=fila.origen,
         revisado=fila.revisado,
         creado_por_id=fila.creado_por_id,
+        huella=fila.huella,
     )
 
 
@@ -40,4 +41,5 @@ def movimiento_a_modelo(m: Movimiento) -> MovimientoModel:
         origen=str(m.origen),
         revisado=m.revisado,
         creado_por_id=m.creado_por_id,
+        huella=m.huella,  # solo cuenta en el INSERT: el UPDATE de guardar() no la toca (CAMPOS)
     )

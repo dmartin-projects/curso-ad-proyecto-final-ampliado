@@ -6,4 +6,6 @@ class NotificacionesConfig(AppConfig):
     name = "notificaciones"
 
     def ready(self):
-        from . import receivers  # noqa: F401  (registra los receptores, módulo 15)
+        # Los adapters de entrada que Django y Celery no descubren solos (módulos 15, 87 y 88)
+        from .infrastructure.signals import receivers  # noqa: F401
+        from .infrastructure.tasks import emitir_evento_hogar_task, enviar_email_notificacion_task  # noqa: F401

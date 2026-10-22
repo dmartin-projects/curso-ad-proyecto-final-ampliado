@@ -3,8 +3,8 @@ from django.contrib.postgres.indexes import GinIndex
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from core.domain.services.normalizacion import normalizar
 from core.models import ModeloConFechas
-from finanzas.domain.services.normalizacion import normalizar
 
 
 class Comercio(ModeloConFechas):

@@ -7,7 +7,7 @@ una proyección desviada. Repetirlo es inofensivo: los consumidores se quedan co
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
-from eventos import registro
+from eventos.infrastructure.messaging.instantanea import instantanea
 
 
 class Command(BaseCommand):
@@ -18,5 +18,5 @@ class Command(BaseCommand):
 
     def handle(self, *args, hogar, **opciones):
         with transaction.atomic():
-            n = registro.instantanea(hogar_id=hogar)
+            n = instantanea(hogar_id=hogar)
         self.stdout.write(self.style.SUCCESS(f"{n} eventos al outbox; el relay los publicará"))

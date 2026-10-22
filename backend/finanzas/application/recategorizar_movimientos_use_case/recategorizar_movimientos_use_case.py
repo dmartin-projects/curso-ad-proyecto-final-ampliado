@@ -1,4 +1,4 @@
-# finanzas/application/recategorizar_movimientos_use_case/recategorizar_movimientos_use_case.py (módulo 87)
+# finanzas/application/recategorizar_movimientos_use_case/recategorizar_movimientos_use_case.py (módulos 87 y 88)
 from dataclasses import replace
 
 from core.application.ports.i_auditoria import IAuditoria
@@ -23,7 +23,7 @@ class RecategorizarMovimientosUseCase(IRecategorizarMovimientosUseCase):
     """Hasta 1.000 movimientos de una vez: un UPDATE, no 1.000 BOs guardados (no castrar el ORM).
     La regla ("elegir la categoría es revisarlo") sigue siendo del dominio: cambios_al_recategorizar.
 
-    Se audita uno a uno (en un solo INSERT), como cualquier modificación de un movimiento.
+    Se audita, uno a uno (en un solo INSERT), lo pida la API o el backoffice: las dos llaman a este use case.
     """
 
     rol_minimo = Rol.MIEMBRO

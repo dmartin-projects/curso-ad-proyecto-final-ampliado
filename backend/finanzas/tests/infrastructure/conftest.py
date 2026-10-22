@@ -5,8 +5,8 @@ from decimal import Decimal
 
 import pytest
 
-from conftest import CategoriaFactory, CuentaFactory, MovimientoFactory
-from finanzas.models import Comercio, Presupuesto
+from conftest import CategoriaFactory, CuentaFactory, MovimientoFactory, PresupuestoFactory
+from finanzas.models import Comercio
 
 OCT = date(2026, 10, 1)
 
@@ -31,5 +31,5 @@ def datos(hogar_con_roles):
     mov(3, "1000.00")
     mov(7, "-2.50", comida, revisado=False)
     mov(5, "-30", ocio, mes=9)
-    Presupuesto.objects.create(hogar=hogar, categoria=comida, mes=OCT, importe=Decimal("10"))
+    PresupuestoFactory(hogar=hogar, categoria=comida, mes=OCT, importe=Decimal("10"))
     return hogar, roles, comida, ocio

@@ -1,9 +1,11 @@
-# finanzas/infrastructure/api/v1/views/presupuesto_viewset.py — adapter de entrada HTTP (módulos 33-38, 76 y 87)
+# finanzas/infrastructure/api/v1/views/presupuesto_viewset.py — adapter de entrada HTTP (módulos 33-38, 76, 87 y 88)
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 
 from core.domain.vo.mes import Mes
+from core.infrastructure.api.views import consultas
+from core.infrastructure.api.views.roles import roles_de
 from finanzas.application.crear_presupuesto_use_case.crear_presupuesto_use_case import CrearPresupuestoUseCase
 from finanzas.application.crear_presupuesto_use_case.dtos.crear_presupuesto_input_dto import CrearPresupuestoInputDTO
 from finanzas.application.eliminar_presupuesto_use_case.dtos.eliminar_presupuesto_input_dto import (
@@ -27,10 +29,8 @@ from finanzas.application.obtener_presupuesto_use_case.dtos.obtener_presupuesto_
 from finanzas.infrastructure import container
 from finanzas.infrastructure.api.v1.presenters.presupuesto_presenter import presentar
 from finanzas.infrastructure.api.v1.serializers.presupuesto_serializer import PresupuestoSerializer
-from finanzas.infrastructure.api.v1.views import consultas
-from finanzas.infrastructure.api.v1.views.roles import roles_de
 from finanzas.infrastructure.database.models.presupuesto_model import Presupuesto as PresupuestoModel
-from hogares.api.base import DelHogarViewSet
+from hogares.infrastructure.api.base.del_hogar_viewset import DelHogarViewSet
 from hogares.models import Membresia
 
 

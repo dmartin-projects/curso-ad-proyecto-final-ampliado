@@ -52,7 +52,7 @@ INSTALLED_APPS = DJANGO_APPS + TERCEROS + PROPIAS
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    "core.logging.request_id_middleware",
+    "core.infrastructure.logging.request_id.request_id_middleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -169,7 +169,7 @@ CELERY_BEAT_SCHEDULE = {
     },
 }
 
-# core/agrupar.py: debounce de tareas repetidas (módulo 76). Solo se desactiva en E2E.
+# core/infrastructure/tasks/agrupar.py: debounce de tareas repetidas (módulo 76). Solo se desactiva en E2E.
 AGRUPAR_TAREAS = True
 
 TASKS = {"default": {"BACKEND": "django_tasks_db.DatabaseBackend", "QUEUES": ["default", "emails"]}}
@@ -231,7 +231,7 @@ SPECTACULAR_SETTINGS = {
 LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
-    "filters": {"request_id": {"()": "core.logging.RequestIdFilter"}},
+    "filters": {"request_id": {"()": "core.infrastructure.logging.request_id.RequestIdFilter"}},
     "formatters": {
         "texto": {"format": "{asctime} {levelname} {name} [{request_id}] [{traza}] {message}", "style": "{"},
         "json": {
@@ -277,3 +277,7 @@ KAFKA_BOOTSTRAP_SERVERS = env("KAFKA_BOOTSTRAP_SERVERS", default="localhost:9092
 # ¿Fallar si un evento se guarda fuera de transaction.atomic()? En dev y tests sí (dev.py, test.py);
 # en producción se registra el error y se sigue: perder el evento es malo, tirar la petición, peor.
 EVENTOS_EXIGIR_TRANSACCION = False
+
+# ¿Fallar si se escribe con el ORM algo cuyos eventos solo publica un use case? En dev, tests y E2E sí; en producción
+# se registra el error y se sigue (core/infrastructure/signals/red_de_seguridad.py, módulo 88).
+EXIGIR_CASOS_DE_USO = False

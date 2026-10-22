@@ -1,4 +1,4 @@
-# finanzas/infrastructure/api/v1/views/dashboard_view.py — adapter de entrada HTTP (módulos 23, 77 y 87)
+# finanzas/infrastructure/api/v1/views/dashboard_view.py — adapter de entrada HTTP (módulos 23, 77, 87 y 88)
 from zoneinfo import ZoneInfo
 
 from django.utils import timezone
@@ -16,7 +16,8 @@ from finanzas.infrastructure import container
 from finanzas.infrastructure.api.v1.serializers.dashboard_serializer import DashboardSerializer
 from finanzas.infrastructure.api.v1.serializers.mes_query_serializer import MesQuerySerializer
 from finanzas.infrastructure.cache import dashboard_cache
-from hogares.permissions import HogarDesdeUrlMixin, RolEnHogar
+from hogares.infrastructure.api.base.hogar_desde_url_mixin import HogarDesdeUrlMixin
+from hogares.infrastructure.api.base.rol_en_hogar import RolEnHogar
 
 
 def mes_actual(hogar) -> Mes:

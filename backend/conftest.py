@@ -5,15 +5,18 @@ from django.db import transaction
 from factory.django import DjangoModelFactory
 from rest_framework.test import APIClient
 
+from core.infrastructure.signals.red_de_seguridad import escrituras_directas
 from hogares.models import Hogar, Membresia
 from usuarios.models import Usuario
 
 
 class FactoriaAtomica(DjangoModelFactory):
-    """Crea los datos de prueba dentro de atomic(), como el código de la aplicación (módulo 85).
+    """Datos de PARTIDA: los que ya estaban antes de lo que prueba el test (módulos 85 y 88).
 
-    Guardar un movimiento o una membresía escribe un evento en el outbox, y fuera de una transacción eso
-    falla a propósito en los tests (EVENTOS_EXIGIR_TRANSACCION). Los datos de prueba no son la excepción.
+    Movimientos, presupuestos, categorías y membresías solo se escriben con use cases (que publican sus eventos):
+    escribirlos con el ORM hace saltar la alarma (EXIGIR_CASOS_DE_USO). Las factorías no son
+    cambios de la aplicación, como un loaddata: `escrituras_directas()` lo dice explícitamente, y no publican nada.
+    Un test que quiera eventos (outbox, avisos) hace el cambio con un use case o con la API.
     """
 
     class Meta:
@@ -21,7 +24,7 @@ class FactoriaAtomica(DjangoModelFactory):
 
     @classmethod
     def _create(cls, model_class, *args, **kwargs):
-        with transaction.atomic():
+        with escrituras_directas(), transaction.atomic():
             return super()._create(model_class, *args, **kwargs)
 
 
@@ -101,6 +104,16 @@ class CategoriaFactory(FactoriaAtomica):
     nombre = factory.Sequence(lambda n: f"Categoría {n}")
 
 
+class PresupuestoFactory(FactoriaAtomica):
+    class Meta:
+        model = "finanzas.Presupuesto"
+
+    categoria = factory.SubFactory(CategoriaFactory)
+    hogar = factory.SelfAttribute("categoria.hogar")
+    mes = factory.Faker("date_this_month", before_today=True)
+    importe = 100
+
+
 class MovimientoFactory(FactoriaAtomica):
     class Meta:
         model = "finanzas.Movimiento"
@@ -153,7 +166,7 @@ def _telemetria_sesion():
     from opentelemetry.sdk.metrics.export import InMemoryMetricReader
     from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 
-    from core import telemetria
+    from core.infrastructure.telemetry import telemetria
 
     trazas, metricas, logs = InMemorySpanExporter(), InMemoryMetricReader(), InMemoryLogRecordExporter()
     telemetria.configurar("gastos-tests", exportadores={"trazas": trazas, "metricas": metricas, "logs": logs})

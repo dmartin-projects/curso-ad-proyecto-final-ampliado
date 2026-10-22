@@ -29,3 +29,4 @@ IA_API_KEY = "e2e"
 
 # Los tests entran muchas veces por minuto: el límite real de "login" (5/min, módulo 35) los haría fallar
 REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {**REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"], "login": "1000/min"}
+EXIGIR_CASOS_DE_USO = True  # módulo 88: los E2E también fallan si algo escribe sin use case

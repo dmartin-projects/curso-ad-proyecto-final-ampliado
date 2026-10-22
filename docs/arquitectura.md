@@ -54,18 +54,37 @@ finanzas/
 │   ├── tasks/            comprobar_presupuestos_task.py (Celery, con name= explícito)
 │   └── container.py      composition root: una función por use case
 ├── models.py             puerta de entrada de los modelos: Django los busca en <app>.models
+├── tasks.py              (solo si tiene tareas de django.tasks) reexporta su ruta estable: <app>.tasks.<función>
 ├── migrations/           en la raíz de la app, como siempre
 ├── management/commands/  donde Django los busca (son adapters de entrada)
 └── tests/                en espejo: domain/bo, domain/services, application, infrastructure/api/v1,
                           infrastructure/database/{models,repositories}, fakes/
 ```
 
+Las demás apps tienen el mismo árbol; las carpetas de `infrastructure/` que finanzas no necesita:
+
+| Carpeta | Qué hay | Apps |
+|---|---|---|
+| `infrastructure/finanzas/` | El *adapter* hacia OTRA app (*anti-corruption layer*): `gastos_en_finanzas.py` → `GastosEnFinanzas(IGastos)`, `movimientos_en_finanzas.py` → `MovimientosEnFinanzas(IMovimientos)` | tickets, importaciones |
+| `infrastructure/ocr/`, `ia/`, `lectores/`, `pdf/` | *Adapters* de salida a servicios externos: `LectorTesseract`, `ExtractorIA` (con su cliente, sus *serializers* de validación y sus excepciones), `LectorDeArchivos` (CSV y PDF de cualquier banco), `MaquetadorWeasyPrint` | tickets, importaciones, informes |
+| `infrastructure/auth/` | Lo que ya resuelve Django detrás de un port: `PoliticaDeContrasenasDjango`, `SesionesSimpleJWT`, `EnlacesDjango` | usuarios |
+| `infrastructure/websocket/` | Adapter de entrada de Channels: `consumers.py`, `middleware.py` (el ticket de un solo uso), `origenes.py`, `routing.py` | notificaciones |
+| `infrastructure/realtime/`, `i18n/` | *Adapters* de salida: la *channel layer* (`tiempo_real.py`, `grupos.py`) y `TraductorDjango(ITraductor)` | notificaciones |
+| `infrastructure/metrics/` | Métricas de negocio de OpenTelemetry (*gauges* que leen un use case de consulta) | tickets, eventos |
+| `infrastructure/messaging/` + `relay/` | El *outbox* (`OutboxDjango(IOutbox)`), Kafka (`BrokerKafka(IBroker)`) y el *relay* que publica los pendientes | eventos |
+
 `core` es el **shared kernel**, con las mismas carpetas: `core/domain/{vo,enums,exceptions,services,bo,read_models,
 repositories/queries}` (`Dinero`, `Mes`, `Actor`, `Rol`, `Accion`, `DominioException` y sus subclases, `diferencias`,
-`IAuditable`, `Pagina[T]`, `Paginacion`, `PaginacionCursor`), `core/application/dtos/` (`PaginaOutputDTO[T]`),
-`core/application/ports/` (`IUnidadDeTrabajo`, `IPublicadorEventos`, `IAuditoria`, `IReloj`) y
-`core/infrastructure/` (sus adapters de Django, el *exception handler*, la paginación y las piezas de los
-*serializers* que llaman al dominio). Lo que no sea de todas las apps, no va en core.
+`normalizar`, `IAuditable`, `Pagina[T]`, `Paginacion`, `PaginacionCursor`, `ListadoDelHogarQuery`),
+`core/application/dtos/` (`PaginaOutputDTO[T]`), `core/application/ports/` (`IUnidadDeTrabajo`,
+`IPublicadorEventos`, `IAuditoria`, `IReloj`) y `core/infrastructure/`: sus *adapters* de Django
+(`database/`, `clock/`), el *exception handler* y la paginación (`api/`), las piezas que comparten las views
+(`api/views/consultas.py`: los query params de un listado; `roles.py`; `health.py`), la búsqueda de los query
+services (`database/busqueda.py`), las tareas (`tasks/ruta_estable.py`, `tasks/agrupar.py`), la alarma de las
+escrituras sin use case (`signals/red_de_seguridad.py`), el *circuit breaker* (`cache/`), el `request_id` de los
+logs (`logging/`), OpenTelemetry (`telemetry/`), la huella de un archivo (`storage/`) y el texto de una hoja de cálculo
+sin fórmulas (`hojas_de_calculo/`). Sus *fakes*, que usan los tests de todas las apps, en `core/tests/fakes/`. Lo que
+no sea de todas las apps, no va en core.
 
 ## 2. Nombres
 
@@ -109,14 +128,26 @@ repositories/queries}` (`Dinero`, `Mes`, `Actor`, `Rol`, `Accion`, `DominioExcep
 
 Lo comprueba `uv run lint-imports` (contratos en `backend/pyproject.toml`, *job* `arquitectura` del CI):
 
-1. `*.domain` y `*.application` no importan django, rest_framework, drf_spectacular, django_filters, celery,
-   psycopg ni opentelemetry (ni directa ni indirectamente).
-2. Dentro de la app, de arriba abajo: `infrastructure.api | infrastructure.signals.receivers` →
-   `infrastructure.tasks` → `infrastructure.container` → `infrastructure.messaging` → `infrastructure.cache` →
-   `infrastructure.database | infrastructure.signals.finanzas_signals` → `application` → `domain`. Nunca hacia arriba.
+1. `*.domain` y `*.application` (de todas las apps y de core) no importan django, rest_framework,
+   drf_spectacular, django_filters, celery, channels, psycopg, opentelemetry, confluent_kafka, weasyprint,
+   pytesseract ni httpx (ni directa ni indirectamente).
+2. Dentro de cada app, de arriba abajo (un solo contrato `layers` con todas las apps como `containers`; las capas
+   que una app no tiene van entre paréntesis, opcionales): `infrastructure.api | infrastructure.signals.receivers |
+   infrastructure.metrics` → `infrastructure.websocket` → `infrastructure.tasks` → `infrastructure.relay` →
+   `infrastructure.container` → `infrastructure.messaging | infrastructure.finanzas` → `infrastructure.cache |
+   infrastructure.realtime` → `infrastructure.database | auth | ocr | ia | lectores | pdf | i18n |
+   signals.<app>_signals` → `application` → `domain`. Nunca hacia arriba.
 3. `core.domain` y `core.application` no importan ninguna app.
+4. El núcleo de una app (`domain` + `application`) no importa ninguna otra app (un contrato `<app>-nucleo` por
+   app): lo que necesita de otra es un port suyo, en sus palabras (`IGastos`, `IMovimientos`), y su
+   `infrastructure/finanzas/` lo implementa con la otra.
+5. Los *adapters* de una app son suyos (un contrato `protected` por app): desde fuera solo se importan su
+   `container`, sus InputDTOs, su `domain`, sus modelos (`<app>.models`, para FK y lecturas), sus query services
+   (`database/repositories/*_query_service_orm.py`), sus signals (`signals/<app>_signals.py`) y, de hogares,
+   `api/base/` (la base de las vistas anidadas). El ACL (`infrastructure/finanzas/`) también es de su app. `config`
+   monta las URLs y el ASGI.
 
-Cada app que se reorganiza añade su contrato de capas (copia el de finanzas con sus carpetas).
+Una app nueva se añade a `root_packages`, a `containers` del contrato de capas y con sus contratos 4 y 5.
 
 ## 4. Interfaces con `abc.ABC`, no con `typing.Protocol`
 
@@ -223,7 +254,15 @@ case cuesta microsegundos. En un test con base de datos, una pieza se cambia con
 | Eventos | Dataclasses frozen en `domain/events/`, en pasado. Los publica el use case dentro de la transacción; `PublicadorEventosDjango` los traduce (outbox + `on_commit`). Un evento sin traducción lanza `TypeError`. |
 | Autorización | `Actor(usuario_id, rol)` lo construye el adapter de entrada (`DelHogarViewSet.actor`; `Actor.sistema()` en tareas). Todo id externo se busca "en este hogar". |
 | Tarea de Celery | Un archivo por tarea en `infrastructure/tasks/`, con `name="<app>.tasks.<función>"`. `apps.ready()` importa los receivers y las tareas. |
-| CRUD puro | Si un recurso no tiene reglas ni efectos (las cuentas), se queda como `ModelViewSet` sobre el ORM. Se extrae a use case con la primera regla. |
+| Tarea de django.tasks | Un archivo en `infrastructure/tasks/` con `@ruta_estable("<app>.tasks")` debajo de `@task` (la ruta es su identidad en la cola) y un `<app>/tasks.py` que la reexporta. El publicador la encola con `import_string(RUTA).enqueue(...)`; las de Celery, por su nombre (`current_app.tasks[NOMBRE]`), sin importar `tasks/` (está por encima). |
+| Excepción de un adapter | La que no es del dominio (`TransitorioIAException`, `CircuitoAbiertoException`, `SinTransaccionException`) vive en un archivo junto a su adapter, con el mismo sufijo. |
+| Entre apps | Una app pide a otra con el contenedor de la otra, desde su `infrastructure/finanzas/` (*anti-corruption layer*), que traduce a sus propios tipos (un ticket habla de su `total`; finanzas, de un `importe` negativo). Escribir en las tablas de otra app con el ORM está prohibido; leerlas, con sus modelos o sus query services, no. |
+| Actor de un proceso | `Actor.sistema(en_nombre_de=usuario_id)` en tareas que trabajan para alguien (lo creado queda a su nombre); `Actor.soporte(usuario_id)` en el backoffice (rol ADMIN en cualquier hogar, auditado con su usuario). |
+| Escrituras sin use case | Movimientos, presupuestos, categorías y membresías tienen eventos que solo publica el use case. Sus receivers de `post_save`/`post_delete` son una alarma (`vigilar`, en `core/infrastructure/signals/red_de_seguridad.py`): lanzan `EscrituraSinCasoDeUsoException` con `EXIGIR_CASOS_DE_USO=True` (dev, tests, E2E) y en producción dejan un error en el log. El repositorio marca lo que guarda (`publicados_por_caso_de_uso`) y lo que escribe en bloque va dentro de `en_un_caso_de_uso()`; los datos de partida de un test (factories), dentro de `escrituras_directas()`. |
+| Cascadas | Lo que borra la base de datos por cascada (borrar un hogar) no pasa por los use cases de los hijos: los receivers lo detectan con el argumento `origin` de `post_delete` (`es_cascada`) y publican solo lo imprescindible (tombstones). |
+| Backoffice | Un adapter de entrada más, sin dominio propio: lee de TODOS los hogares con sus use cases de consulta (`backoffice/domain/repositories/i_<x>_soporte_query_service.py`) y, para cambiar algo, llama a los use cases de la app dueña con `Actor.soporte`. Los permisos son los de Django (`PermisosPorAccion`), no un `rol_minimo`. |
+| CRUD puro | Si un recurso no tiene reglas ni efectos (crear y editar cuentas, `/auth/me/`, marcar notificaciones como leídas, activar un usuario o pausar una tarea desde el backoffice), se queda sobre el ORM. Se extrae a use case con la primera regla. |
+| Subdominio genérico | Lo que ya resuelve Django (usuarios: hash de contraseñas, `AbstractBaseUser`, tokens de un solo uso) se usa a través de un port (`IPoliticaDeContrasenas`, `IEnlaces`, `ISesiones`), sin reescribirlo. `usuarios/managers.py` se queda donde está: las migraciones lo importan por su ruta. |
 
 ## 10. Tests en espejo
 
@@ -231,28 +270,35 @@ case cuesta microsegundos. En un test con base de datos, una pieza se cambia con
 |---|---|---|
 | `tests/domain/{bo,services}/test_<módulo>.py` | Invariantes y reglas de BOs y domain services | No (pytest-django la bloquea) |
 | `tests/application/test_<use_case>.py` | Orquestación de cada use case con `tests/fakes/` (`Mundo`): permisos, qué se guarda, audita y publica, rollback | No |
-| `tests/fakes/` | Un fake por interfaz (`<x>_fake.py`, hereda de ella), `mundo.py` y los tests de los propios fakes | No |
+| `tests/fakes/` | Un fake por interfaz (`<x>_fake.py`, hereda de ella) y `mundo.py`; los de core (`AuditoriaFake`, `PublicadorEventosFake`, `UnidadDeTrabajoFake`, `RelojFake`, `AlmacenEnMemoria`), en `core/tests/fakes/` | No |
 | `tests/infrastructure/database/repositories/` | *Contract tests* (fake y ORM, los mismos tests) y query services | Sí |
+| `tests/infrastructure/finanzas/` | *Contract test* del ACL: el *adapter* hacia finanzas y su fake, con los mismos tests | Sí |
 | `tests/infrastructure/api/v1/` | La API de extremo a extremo (`test_api.py`, `test_reglas_api.py`, `test_dashboard_view.py`…) | Sí |
 
-El *job* `arquitectura` del CI ejecuta `domain`, `application` y `fakes` sin PostgreSQL.
+El *job* `arquitectura` del CI ejecuta `./*/tests/domain` y `./*/tests/application` (el shared kernel y todas las
+apps) sin PostgreSQL.
 
-## 11. Mientras dure la migración (hasta el 88)
+## 11. Las apps y sus relaciones
 
-- Las apps aún sin esta estructura (tickets, importaciones, backoffice, informes, notificaciones…) siguen escribiendo
-  movimientos con el ORM. Para ellas siguen los receivers de `post_save`/`post_delete` (finanzas y eventos): la
-  **red de seguridad** (`core/infrastructure/signals/red_de_seguridad.py`). Lo que guarda un use case viene marcado y
-  los receivers lo saltan.
-- Desde fuera de finanzas se importa, de momento: `finanzas.models`, `finanzas.infrastructure.signals.finanzas_signals`,
-  `finanzas.infrastructure.database.services.reconocimiento_comercios`, el `DashboardQueryServiceORM` (informes, sin use case hasta el 88) y
-  `finanzas.domain.services.normalizacion`. En el 88, las escrituras de otras apps pasan a los use cases de finanzas
-  (por el contenedor) y desaparece la red de seguridad.
+| App | Escribe con use cases | Necesita de otras apps (sus ports) | Ofrece |
+|---|---|---|---|
+| finanzas | movimientos, categorías, presupuestos, cuentas (al borrar) | — | su contenedor (también `apuntar_movimientos`, `conciliar_…`, `eliminar_movimientos`, `descartar_propuestos`), query services, `finanzas_signals` |
+| hogares | hogares, membresías, invitaciones | — | su contenedor, query services, `hogares_signals`, `api/base/` |
+| usuarios | registro, recuperación, contraseña | — | `usuarios.models` |
+| tickets | tickets | `IGastos` → finanzas | `tickets_signals`, `TicketQueryServiceORM` (los atascados) |
+| importaciones | importaciones y sus filas | `IMovimientos` → finanzas | `importaciones_signals` |
+| informes | informes mensuales | lee el dashboard y los movimientos del mes (query services de finanzas) | `informes_signals` |
+| notificaciones | notificaciones | `IDestinatarios` (usuarios y membresías, por sus modelos) | — (escucha las signals de las demás) |
+| eventos | el outbox | — | `IOutbox` (lo usan los publicadores de finanzas y hogares) |
+| backoffice | nada propio | los use cases de tickets, importaciones y finanzas, con `Actor.soporte` | — |
+
+- Los procesos crean y borran movimientos con los use cases de finanzas, así que cada cambio tiene sus eventos
+  (outbox de Kafka, avisos, comprobación de presupuestos) y, si lo pide una persona, su auditoría.
+- Lo que una app avisa a otra va por sus signals (`<app>_signals.py`), que emite su publicador al confirmar la
+  transacción. Quien escucha (las notificaciones) no sabe nada de cómo se produjo.
 
 ## 12. Lo que viene
 
-- **88**: hogares, usuarios, tickets, importaciones, informes, notificaciones, backoffice y eventos con esta misma
-  estructura; tickets e importaciones crean movimientos con use cases de finanzas; el backoffice recategoriza con
-  `RecategorizarMovimientosUseCase` (hoy duplica la lógica); un contrato de independencia entre apps.
 - **89**: estadisticas (FastAPI) con el mismo árbol: `domain`, `application/<use_case>/` con DTOs de Pydantic,
   `infrastructure/{api/v1/{routers,schemas}, database/{models,repositories}, messaging}`, un `APIRouter` por módulo
   montado en `infrastructure/api/app.py`, y el contenedor como composition root.

@@ -1,4 +1,4 @@
-# finanzas/infrastructure/api/v1/serializers/movimiento_serializer.py (módulos 33 y 87)
+# finanzas/infrastructure/api/v1/serializers/movimiento_serializer.py (módulos 33, 87 y 88)
 from decimal import Decimal
 
 from django.utils import timezone
@@ -12,7 +12,7 @@ from finanzas.infrastructure.api.v1.serializers.comercio_serializer import Comer
 from finanzas.infrastructure.database.models.categoria_model import Categoria as CategoriaModel
 from finanzas.infrastructure.database.models.cuenta_model import Cuenta as CuentaModel
 from finanzas.infrastructure.database.models.movimiento_model import Movimiento as MovimientoModel
-from hogares.api.base import DelHogarMixin
+from hogares.infrastructure.api.base.del_hogar_mixin import DelHogarMixin
 
 
 class MovimientoSerializer(DelHogarMixin, ADominioMixin, serializers.ModelSerializer):

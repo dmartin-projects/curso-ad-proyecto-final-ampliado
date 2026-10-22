@@ -80,7 +80,7 @@
       <table class="datos">
         <thead><tr><th style="width:16%">{% translate "Fecha" %}</th><th>{% translate "Concepto" %}</th><th>{% translate "Cuenta" %}</th><th class="num">{% translate "Importe" %}</th></tr></thead>
         {% for m in grupo.list %}
-          <tr><td>{{ m.fecha|date:"SHORT_DATE_FORMAT" }}</td><td>{{ m.concepto }}</td><td>{{ m.cuenta.nombre }}</td><td class="num">{{ m.importe|floatformat:"2g" }} €</td></tr>
+          <tr><td>{{ m.fecha|date:"SHORT_DATE_FORMAT" }}</td><td>{{ m.concepto }}</td><td>{{ m.cuenta }}</td><td class="num">{{ m.importe|floatformat:"2g" }} €</td></tr>
         {% endfor %}
       </table>
     </div>

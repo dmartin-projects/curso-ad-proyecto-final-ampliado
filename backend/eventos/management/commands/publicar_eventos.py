@@ -9,8 +9,9 @@ from django.core.management.base import BaseCommand
 from django.db import DatabaseError, close_old_connections
 from opentelemetry.instrumentation.utils import suppress_instrumentation
 
-from eventos import relay
-from eventos.kafka import productor
+from eventos.domain.exceptions.publicacion_no_confirmada_exception import PublicacionNoConfirmadaException
+from eventos.infrastructure.messaging.kafka import productor
+from eventos.infrastructure.relay.publicar_lote import publicar_lote
 
 logger = logging.getLogger(__name__)
 
@@ -35,8 +36,8 @@ class Command(BaseCommand):
             with suppress_instrumentation():  # su "SELECT 1" (CONN_HEALTH_CHECKS), cada 0,5 s, tampoco a Tempo
                 close_old_connections()  # proceso de larga vida: si PostgreSQL se reinició, reconecta
             try:
-                n = relay.publicar_lote(kafka, tamano=lote)
-            except (relay.ErrorDePublicacion, KafkaException, DatabaseError) as e:
+                n = publicar_lote(kafka, tamano=lote)
+            except (PublicacionNoConfirmadaException, KafkaException, DatabaseError) as e:
                 # Kafka o PostgreSQL caídos: nada se ha marcado. Esperar cada vez más (máximo 30 s) y reintentar
                 logger.warning("No se pudo publicar el lote (%s); reintento en %.0f s", e, espera_por_error)
                 parar.wait(espera_por_error)

@@ -1,4 +1,4 @@
-"""RecategorizarMovimientosUseCase con los fakes (módulo 87)."""
+"""RecategorizarMovimientosUseCase con los fakes (módulos 87 y 88)."""
 
 from datetime import date
 
@@ -49,4 +49,19 @@ def test_recategorizar_audita_cada_movimiento(mundo):
 
     assert [(r[0], r[2], r[4]) for r in mundo.auditoria.registros] == [
         (Accion.MODIFICAR, m.id, {"categoria": ["None", str(super_.id)], "revisado": ["False", "True"]}) for m in mios
+    ]
+
+
+def test_recategorizar_tambien_audita(mundo):  # lo pida la API o el backoffice
+    super_ = mundo.categoria("Súper")
+    m = mundo.movimiento(revisado=False)
+    mundo.recategorizar.ejecutar(RecategorizarMovimientosInputDTO(HOGAR, actor(), (m.id,), super_.id))
+    assert mundo.auditoria.registros == [
+        (
+            Accion.MODIFICAR,
+            "finanzas.movimiento",
+            m.id,
+            7,
+            {"categoria": ["None", str(super_.id)], "revisado": ["False", "True"]},
+        )
     ]

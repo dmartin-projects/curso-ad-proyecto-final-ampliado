@@ -1,8 +1,8 @@
 # finanzas/infrastructure/database/repositories/categoria_query_service_orm.py — ICategoriaQueryService con el ORM
 # (módulo 87)
+from core.domain.repositories.queries.listado_del_hogar_query import ListadoDelHogarQuery
 from finanzas.domain.read_models.categoria_listada import CategoriaListada
 from finanzas.domain.repositories.i_categoria_query_service import ICategoriaQueryService
-from finanzas.domain.repositories.queries.listado_del_hogar_query import ListadoDelHogarQuery
 from finanzas.infrastructure.database.models.categoria_model import Categoria as CategoriaModel
 
 

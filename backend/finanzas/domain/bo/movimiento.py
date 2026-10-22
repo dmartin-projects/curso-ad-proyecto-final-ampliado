@@ -1,4 +1,4 @@
-# finanzas/domain/bo/movimiento.py — el business object Movimiento y sus reglas (módulo 87)
+# finanzas/domain/bo/movimiento.py — el business object Movimiento y sus reglas (módulos 87 y 88)
 from dataclasses import dataclass, field, fields, replace
 from datetime import date
 from typing import ClassVar
@@ -10,6 +10,7 @@ from finanzas.domain.enums.origen import Origen
 from finanzas.domain.exceptions.concepto_vacio_exception import ConceptoVacioException
 from finanzas.domain.exceptions.fecha_futura_exception import FechaFuturaException
 from finanzas.domain.exceptions.importe_cero_exception import ImporteCeroException
+from finanzas.domain.exceptions.movimiento_ya_conciliado_exception import MovimientoYaConciliadoException
 
 
 # ── Reglas sueltas: las usa el BO y, para dar todos los errores a la vez, el serializer ──
@@ -57,6 +58,10 @@ class Movimiento(IAuditable):
     origen: Origen = Origen.MANUAL
     revisado: bool = True
     creado_por_id: int | None = None
+    # La fila del extracto del banco con la que se ha conciliado (módulos 75 y 88): sha256 de cuenta, fecha, importe,
+    # concepto y nº de ocurrencia. Importaciones no escribe en esta tabla: se lo pide a finanzas, y la regla "una
+    # fila del banco por movimiento" vive aquí.
+    huella: str = ""
     id: int | None = None
 
     def __post_init__(self):
@@ -89,6 +94,24 @@ class Movimiento(IAuditable):
     def cambios_al_recategorizar(categoria_id: int) -> dict:
         """Elegir la categoría a mano es revisarlo. Una regla, para uno (modificar) o para mil (en bloque)."""
         return {"categoria_id": categoria_id, "revisado": True}
+
+    @property
+    def es_propuesta(self) -> bool:
+        """Lo creó un proceso (un ticket, un extracto) y nadie lo ha revisado: aún no es un dato de nadie."""
+        return not self.revisado and self.origen != Origen.MANUAL
+
+    @property
+    def conciliado(self) -> bool:
+        return bool(self.huella)
+
+    def conciliar(self, huella: str) -> None:
+        """El gasto apuntado a mano "absorbe" la fila del banco: no se importará otra vez (módulo 75)."""
+        if self.conciliado and self.huella != huella:
+            raise MovimientoYaConciliadoException()
+        self.huella = huella
+
+    def desconciliar(self) -> None:
+        self.huella = ""
 
     @property
     def mes(self) -> Mes:

@@ -1,9 +1,9 @@
 # finanzas/tests/fakes/presupuesto_command_repository_fake.py — IPresupuestoCommandRepository en memoria (módulo 87)
 from core.domain.vo.dinero import Dinero
+from core.tests.fakes.almacen_en_memoria import AlmacenEnMemoria, copia
 from finanzas.domain.exceptions.presupuesto_duplicado_exception import PresupuestoDuplicadoException
 from finanzas.domain.exceptions.presupuesto_no_encontrado_exception import PresupuestoNoEncontradoException
 from finanzas.domain.repositories.i_presupuesto_command_repository import IPresupuestoCommandRepository
-from finanzas.tests.fakes.almacen_en_memoria import AlmacenEnMemoria, copia
 from finanzas.tests.fakes.categoria_command_repository_fake import CategoriaCommandRepositoryFake
 from finanzas.tests.fakes.movimiento_command_repository_fake import MovimientoCommandRepositoryFake
 

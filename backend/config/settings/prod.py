@@ -96,7 +96,7 @@ SPECTACULAR_SETTINGS["SERVE_PERMISSIONS"] = ["rest_framework.permissions.IsAdmin
 if dsn := env("SENTRY_DSN", default=""):
     import sentry_sdk
 
-    from core.telemetria import enlazar_sentry
+    from core.infrastructure.telemetry.telemetria import enlazar_sentry
 
     sentry_sdk.init(
         dsn=dsn,

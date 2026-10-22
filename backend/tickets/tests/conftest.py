@@ -7,7 +7,7 @@ from django.core.cache import cache
 from django.core.files.uploadedfile import SimpleUploadedFile
 from PIL import Image, ImageDraw, ImageFont
 
-from tickets import ocr
+from tickets.infrastructure.ocr import lector_tesseract as ocr
 
 URL_IA = "https://ia.test/v1/chat/completions"
 

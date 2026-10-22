@@ -1,4 +1,4 @@
-# finanzas/domain/repositories/i_movimiento_command_repository.py — el lado de ESCRITURA (CQRS, módulo 87)
+# finanzas/domain/repositories/i_movimiento_command_repository.py — el lado de ESCRITURA (CQRS, módulos 87 y 88)
 #
 # SOLO lo que necesita la escritura: cargar el BO, guardarlo, borrarlo y una operación en bloque. Los listados,
 # los filtros y el CSV no están aquí: son lectura (query services). Dos implementaciones: la del ORM
@@ -30,3 +30,15 @@ class IMovimientoCommandRepository(ABC):
     def actualizar_en_bloque(self, hogar_id: int, ids: Iterable[int], cambios: dict) -> tuple[list[int], set[Mes]]:
         """Aplica `cambios` a los movimientos de `ids` que sean del hogar, en una sola operación.
         Devuelve los ids afectados y sus meses."""
+
+    # ── En bloque (módulo 88): lo que traen y deshacen los procesos (tickets, extractos) ──
+    @abstractmethod
+    def crear_varios(self, movimientos: list[Movimiento]) -> None:
+        """Inserta todos de una vez (con su huella, si la traen) y les pone el id."""
+
+    @abstractmethod
+    def eliminar_varios(self, hogar_id: int, ids: Iterable[int]) -> None: ...
+
+    @abstractmethod
+    def guardar_huellas(self, movimientos: list[Movimiento]) -> None:
+        """Solo la huella: conciliar no cambia ningún otro dato del movimiento."""

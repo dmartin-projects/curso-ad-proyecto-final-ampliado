@@ -11,6 +11,7 @@ from finanzas.domain.enums.origen import Origen
 from finanzas.domain.exceptions.concepto_vacio_exception import ConceptoVacioException
 from finanzas.domain.exceptions.fecha_futura_exception import FechaFuturaException
 from finanzas.domain.exceptions.importe_cero_exception import ImporteCeroException
+from finanzas.domain.exceptions.movimiento_ya_conciliado_exception import MovimientoYaConciliadoException
 
 HOY = date(2026, 10, 15)
 
@@ -63,3 +64,14 @@ def test_auditoria_con_los_nombres_de_siempre():
     m = mov(id=3)
     assert str(m) == "2026-10-15 Pan -12.50"  # como el __str__ del modelo de Django
     assert m.datos_auditables()["importe"] == Dinero("-12.50") and "cuenta" in m.datos_auditables()
+
+
+def test_conciliar_una_sola_fila_del_banco_y_propuestas():  # módulo 88
+    m = mov(origen=Origen.TICKET, revisado=False)
+    assert m.es_propuesta and not m.conciliado
+    m.conciliar("h1")
+    m.conciliar("h1")  # la misma fila otra vez: nada que hacer
+    with pytest.raises(MovimientoYaConciliadoException):
+        m.conciliar("h2")  # otra fila del banco: no, ya tiene la suya
+    m.desconciliar()
+    assert m.huella == "" and not mov(revisado=False).es_propuesta  # uno manual nunca es una "propuesta"

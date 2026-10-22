@@ -6,12 +6,8 @@ services:
     image: caddy:2.10-alpine
     restart: unless-stopped
     ports: ["80:80", "443:443", "443:443/udp"] # 443/udp: HTTP/3
-    env_file: # host y secreto de cada entorno; el que aún no exista se queda sin configurar
-      - path: ../produccion/edge.env
-        required: false
-      - path: ../staging/edge.env
-        required: false
-    environment:
+    environment: # de edge/.env (lo escribe desplegar.sh); los sitios de cada entorno, en caddy/entornos/
+      ACME_EMAIL: ${ACME_EMAIL:?Falta ACME_EMAIL}
       CADDY_GLOBAL: ${CADDY_GLOBAL:-} # vacío en la VM; "local_certs" para ensayar en local (certificados propios)
     volumes:
       # el DIRECTORIO, no el archivo: montar un archivo suelto ata el contenedor a su inodo, y un editor, sed -i

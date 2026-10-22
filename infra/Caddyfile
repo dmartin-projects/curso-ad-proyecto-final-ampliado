@@ -1,7 +1,7 @@
 # infra/Caddyfile — la puerta de la VM (módulos 65, 83 y 86): SOLO la API, para los dos entornos
-# Angular ya no está aquí (lo sirve Vercel). Cada entorno se registra con su edge.env, que escribe
-# desplegar.sh: API_HOST_PRODUCCION, ORIGEN_SECRETO_PRODUCCION, API_HOST_STAGING, ORIGEN_SECRETO_STAGING.
-# Un entorno que aún no existe se queda en un host .invalid solo HTTP (sin pedir certificados).
+# Angular ya no está aquí (lo sirve Vercel). Cada entorno se registra con su propio sitio, que escribe
+# desplegar.sh en entornos/<entorno>.caddy (host y secreto). Ejercicio 4: así un entorno se añade o cambia con
+# "caddy reload" (sin cortes), en vez de recrear el contenedor, que cortaba también al otro entorno.
 {
 	{$CADDY_GLOBAL}
 	email {$ACME_EMAIL}
@@ -66,10 +66,4 @@
 	}
 }
 
-{$API_HOST_PRODUCCION:http://produccion.invalid} {
-	import api web-produccion:8000 estadisticas-produccion:8000 {$ORIGEN_SECRETO_PRODUCCION:sin-configurar}
-}
-
-{$API_HOST_STAGING:http://staging.invalid} {
-	import api web-staging:8000 estadisticas-staging:8000 {$ORIGEN_SECRETO_STAGING:sin-configurar}
-}
+import entornos/*.caddy

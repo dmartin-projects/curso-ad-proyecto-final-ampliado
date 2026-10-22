@@ -81,3 +81,10 @@ resource "vercel_project_environment_variable" "secreto_staging" {
   target           = ["preview"]
   sensitive        = true
 }
+
+# Ejercicio 1: la llave para que la prueba de humo de GitHub Actions entre en staging (protegido con Vercel
+# Authentication). terraform output -raw vercel_bypass → secreto VERCEL_AUTOMATION_BYPASS_SECRET del environment staging
+resource "vercel_project_protection_bypass" "humo" {
+  project_id = vercel_project.gastos.id
+  note       = "Prueba de humo de GitHub Actions (staging.yml)"
+}

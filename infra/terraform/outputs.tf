@@ -24,3 +24,9 @@ output "urls" {
     staging    = "https://staging.gastos.${var.dominio}  →  https://api.staging.gastos.${var.dominio}"
   }
 }
+
+output "vercel_bypass" {
+  description = "Para GitHub (environment staging): secreto VERCEL_AUTOMATION_BYPASS_SECRET"
+  value       = vercel_project_protection_bypass.humo.secret
+  sensitive   = true
+}

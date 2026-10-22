@@ -25,17 +25,18 @@ ANTERIOR=$(cat .version-actual 2>/dev/null || echo latest)
 
 # ── 1. La puerta (Caddy, compartida): registrar este entorno y que esté arriba ──
 docker network inspect gastos-edge >/dev/null 2>&1 || docker network create gastos-edge
-MAYUS=$(echo "$ENTORNO" | tr '[:lower:]' '[:upper:]')
-(
-  umask 077                                     # lleva el secreto de Vercel: solo para este usuario
-  printf 'ACME_EMAIL=%s\nAPI_HOST_%s=%s\nORIGEN_SECRETO_%s=%s\n' \
-    "$(valor ACME_EMAIL)" "$MAYUS" "$API_HOST" "$MAYUS" "$(valor ORIGEN_SECRETO)" > edge.env
-)
-mkdir -p ../edge/caddy
+mkdir -p ../edge/caddy/entornos
 cp compose.edge.yaml ../edge/compose.edge.yaml
 cp infra/Caddyfile ../edge/caddy/Caddyfile
-$EDGE up -d --quiet-pull                        # recrea Caddy solo si cambió su entorno (un edge.env nuevo)
-$EDGE exec -T caddy caddy reload --config /etc/caddy/Caddyfile   # y si solo cambió el Caddyfile, sin cortes
+# Su sitio en Caddy: un archivo por entorno, con el secreto de Vercel (solo legible por este usuario)
+(
+  umask 077
+  printf '# Generado por desplegar.sh (%s): no lo edites\n%s {\n\timport api web-%s:8000 estadisticas-%s:8000 %s\n}\n' \
+    "$ENTORNO" "$API_HOST" "$ENTORNO" "$ENTORNO" "$(valor ORIGEN_SECRETO)" > "../edge/caddy/entornos/$ENTORNO.caddy"
+)
+printf 'ACME_EMAIL=%s\n' "$(valor ACME_EMAIL)" > ../edge/.env
+$EDGE up -d --quiet-pull                        # crea Caddy si no existe (no lo recrea si nada cambió)
+$EDGE exec -T caddy caddy reload --config /etc/caddy/Caddyfile   # el sitio nuevo o cambiado, sin cortes
 
 # ── 2. El entorno (módulos 83-85) ──
 $COMPOSE pull --quiet

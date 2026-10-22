@@ -74,6 +74,28 @@ Con la vieja en *fallbacks*, lo firmado antes (enlaces de recuperación de contr
 
 Los JWT se firman con `JWT_SIGNING_KEY`, no con `SECRET_KEY`: rotar esta no cierra las sesiones de la app. Para cerrarlas todas (filtración de `JWT_SIGNING_KEY`), cambia `JWT_SIGNING_KEY`: todos los usuarios tendrán que volver a entrar.
 
+## Rotar una clave de age (módulo 86, ejercicio 3)
+
+Cuando alguien deja el equipo, se cambia el secreto `SOPS_AGE_KEY` de un environment o una clave pudo filtrarse:
+
+```bash
+age-keygen -o staging-nueva.txt                       # la clave nueva del entorno (pública en la 2ª línea)
+# .sops.yaml: la pública vieja de staging → la nueva
+sops updatekeys -y infra/secretos/staging.env         # quién puede descifrar (con tu clave personal)
+sops rotate -i infra/secretos/staging.env             # y una clave de datos nueva
+# GitHub → Environments → staging → SOPS_AGE_KEY = el contenido de staging-nueva.txt; luego bórralo del disco
+```
+
+La clave vieja ya no descifra el archivo nuevo, **pero sí todas sus versiones anteriores en git**. Si se filtró, rota también los secretos que contiene (los valores), no solo la clave.
+
+## Staging con los datos de producción (módulo 86, ejercicio 2)
+
+```bash
+/opt/gastos/staging/infra/staging-desde-produccion.sh   # copia, restaura, anonimiza y reconstruye Kafka y estadísticas
+```
+
+Todos los usuarios de staging quedan con la contraseña `STAGING_PASSWORD` (en `infra/secretos/staging.env`).
+
 ## La cola de OCR crece sin parar
 
 ```bash

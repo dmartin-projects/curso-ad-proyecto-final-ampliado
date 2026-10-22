@@ -22,6 +22,7 @@ from finanzas.application.crear_categorias_por_defecto_use_case.crear_categorias
 )
 from finanzas.application.crear_presupuesto_use_case.crear_presupuesto_use_case import CrearPresupuestoUseCase
 from finanzas.application.eliminar_categoria_use_case.eliminar_categoria_use_case import EliminarCategoriaUseCase
+from finanzas.application.eliminar_cuenta_use_case.eliminar_cuenta_use_case import EliminarCuentaUseCase
 from finanzas.application.eliminar_movimiento_use_case.eliminar_movimiento_use_case import EliminarMovimientoUseCase
 from finanzas.application.eliminar_presupuesto_use_case.eliminar_presupuesto_use_case import (
     EliminarPresupuestoUseCase,
@@ -67,14 +68,16 @@ def actor(rol: Rol = Rol.MIEMBRO, usuario_id: int = 7) -> Actor:
 class Mundo:
     def __init__(self):
         self.movimientos = MovimientoCommandRepositoryFake()
-        self.cuentas = CuentaCommandRepositoryFake((HOGAR, 10), (OTRO_HOGAR, 20))
+        self.cuentas = CuentaCommandRepositoryFake(
+            (HOGAR, 10), (HOGAR, 11), (OTRO_HOGAR, 20), movimientos=self.movimientos
+        )
         self.categorias = CategoriaCommandRepositoryFake()
         self.presupuestos = PresupuestoCommandRepositoryFake(self.movimientos, self.categorias)
         self.comercios = ReconocedorComerciosFake(mercadona=100)
         self.auditoria = AuditoriaFake()
         self.eventos = PublicadorEventosFake()
         self.uow = UnidadDeTrabajoFake(
-            self.movimientos, self.categorias, self.presupuestos, self.auditoria, self.eventos
+            self.movimientos, self.cuentas, self.categorias, self.presupuestos, self.auditoria, self.eventos
         )
         comun = {"eventos": self.eventos, "uow": self.uow}
         repos = {"movimientos": self.movimientos, "categorias": self.categorias}
@@ -98,6 +101,7 @@ class Mundo:
         self.modificar_presupuesto = ModificarPresupuestoUseCase(**pres)
         self.eliminar_presupuesto = EliminarPresupuestoUseCase(presupuestos=self.presupuestos, **comun)
         self.comprobar = ComprobarPresupuestosUseCase(presupuestos=self.presupuestos, **comun)
+        self.eliminar_cuenta = EliminarCuentaUseCase(cuentas=self.cuentas, uow=self.uow)  # ejercicio 1
 
     # ── Datos de partida (sin pasar por los use cases: así un test prueba UN use case) ──
     def categoria(self, nombre="Súper", hogar_id=HOGAR, padre: Categoria | None = None) -> Categoria:

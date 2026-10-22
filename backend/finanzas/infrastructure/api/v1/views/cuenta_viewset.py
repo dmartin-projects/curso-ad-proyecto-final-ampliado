@@ -1,10 +1,9 @@
 # finanzas/infrastructure/api/v1/views/cuenta_viewset.py — adapter de entrada HTTP (módulos 33-38 y 87)
-from django.db.models import RestrictedError
 from rest_framework.response import Response
 
+from finanzas.application.eliminar_cuenta_use_case.dtos.eliminar_cuenta_input_dto import EliminarCuentaInputDTO
 from finanzas.application.listar_cuentas_use_case.dtos.listar_cuentas_input_dto import ListarCuentasInputDTO
 from finanzas.application.obtener_cuenta_use_case.dtos.obtener_cuenta_input_dto import ObtenerCuentaInputDTO
-from finanzas.domain.exceptions.cuenta_con_movimientos_exception import CuentaConMovimientosException
 from finanzas.infrastructure import container
 from finanzas.infrastructure.api.v1.presenters.cuenta_presenter import presentar
 from finanzas.infrastructure.api.v1.serializers.cuenta_serializer import CuentaSerializer
@@ -15,8 +14,8 @@ from hogares.models import Membresia
 
 
 # CRUD puro al escribir: sin reglas ni efectos, no hay use case de comando que escribir (módulo 87); crea y edita con
-# el ORM. Lo único que no se permite, borrar una cuenta con movimientos, lo impide la base de datos (RESTRICT) y aquí
-# se traduce. Leer (con el saldo), como cualquier otro recurso: use cases de consulta.
+# el ORM… salvo el borrado, que tiene la primera regla del dominio y su use case (ejercicio 1). Leer (con el saldo),
+# como cualquier otro recurso: use cases de consulta.
 # (Un comentario y no un docstring: el docstring de una view es la descripción del endpoint en OpenAPI.)
 class CuentaViewSet(DelHogarViewSet):
     modelo = CuentaModel
@@ -48,8 +47,5 @@ class CuentaViewSet(DelHogarViewSet):
         serializer.save()
         serializer.instance = self._leer(serializer.instance.pk)  # la response, con su saldo
 
-    def perform_destroy(self, instance):
-        try:
-            instance.delete()
-        except RestrictedError:  # Movimiento.cuenta es RESTRICT: el historial no se borra con la cuenta
-            raise CuentaConMovimientosException() from None
+    def perform_destroy(self, instance):  # ejercicio 1: la regla del borrado, en un use case
+        container.eliminar_cuenta().ejecutar(EliminarCuentaInputDTO(self.hogar.pk, self.actor, instance.pk))

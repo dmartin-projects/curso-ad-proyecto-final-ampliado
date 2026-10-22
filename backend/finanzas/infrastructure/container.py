@@ -27,6 +27,8 @@ from finanzas.application.crear_presupuesto_use_case.crear_presupuesto_use_case 
 from finanzas.application.crear_presupuesto_use_case.i_crear_presupuesto_use_case import ICrearPresupuestoUseCase
 from finanzas.application.eliminar_categoria_use_case.eliminar_categoria_use_case import EliminarCategoriaUseCase
 from finanzas.application.eliminar_categoria_use_case.i_eliminar_categoria_use_case import IEliminarCategoriaUseCase
+from finanzas.application.eliminar_cuenta_use_case.eliminar_cuenta_use_case import EliminarCuentaUseCase
+from finanzas.application.eliminar_cuenta_use_case.i_eliminar_cuenta_use_case import IEliminarCuentaUseCase
 from finanzas.application.eliminar_movimiento_use_case.eliminar_movimiento_use_case import EliminarMovimientoUseCase
 from finanzas.application.eliminar_movimiento_use_case.i_eliminar_movimiento_use_case import (
     IEliminarMovimientoUseCase,
@@ -250,3 +252,8 @@ def listar_comercios() -> IListarComerciosUseCase:
 def obtener_dashboard() -> IObtenerDashboardUseCase:
     # el query service del ORM, envuelto en la caché: el use case no sabe que la hay
     return ObtenerDashboardUseCase(dashboard=DashboardQueryServiceCache(DashboardQueryServiceORM()))
+
+
+# ── Cuentas (ejercicio 1) ──
+def eliminar_cuenta() -> IEliminarCuentaUseCase:
+    return EliminarCuentaUseCase(cuentas=CuentaCommandRepositoryORM(), uow=UnidadDeTrabajoDjango())

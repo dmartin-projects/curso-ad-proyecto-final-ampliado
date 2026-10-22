@@ -89,3 +89,12 @@ def test_membresias():
     assert mundo.memoria.membresias[(1, 5)].rol == "admin"
     caso.ejecutar(lote([mensaje(MEMB, "1:5", None, 3, offset=2)]))
     assert mundo.memoria.membresias == {}
+
+
+# ── Ejercicio 1: reintentar los aparcados ──
+def test_un_reintento_no_hace_retroceder_el_progreso():
+    mundo = Mundo()
+    caso = mundo.procesar_lote()
+    caso.ejecutar(lote([movimiento(1, offset=50)]))
+    caso.ejecutar(lote([movimiento(2, offset=7)], anotar_progreso=False))  # un aparcado de hace tiempo, reintentado
+    assert set(importes(mundo)) == {1, 2} and mundo.memoria.progreso == {(MOV, 0): (50, MARCA)}

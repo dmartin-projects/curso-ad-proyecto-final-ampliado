@@ -164,3 +164,17 @@ def test_sin_revisar(token):
         {"mes": "2026-09", "movimientos": 2, "gastos": "50.00"},
         {"mes": "2026-10", "movimientos": 1, "gastos": "0"},
     ]
+
+
+# ── Ejercicio 2: una v2 que convive con la v1 ──
+def test_v2_tendencia_con_tasa_de_ahorro(token):
+    miembro()
+    movimiento(1, "2026-09-03", "-30.00")
+    movimiento(2, "2026-10-01", "2000.00")
+    movimiento(3, "2026-10-02", "-500.00")
+    params = {"meses": 2, "hasta": "2026-10"}
+    v2 = get("/estadisticas/v2/hogares/1/tendencia", token(5), **params).json()
+    assert [(m["mes"], m["tasa_ahorro"]) for m in v2["meses"]] == [("2026-09", None), ("2026-10", "75.0")]
+    v1 = get(f"{URL}/tendencia", token(5), **params).json()  # la v1, igual que siempre
+    assert v1["meses"][1] == {"mes": "2026-10", "gastos": "500.00", "ingresos": "2000.00", "ahorro": "1500.00"}
+    assert get("/estadisticas/v2/hogares/1/tendencia", token(6)).status_code == 404  # mismas dependencias

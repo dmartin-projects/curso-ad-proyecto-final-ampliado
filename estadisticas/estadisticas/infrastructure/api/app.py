@@ -7,6 +7,7 @@ from fastapi import FastAPI
 from estadisticas.domain.exceptions.mes_mal_formado_exception import MesMalFormadoException
 from estadisticas.infrastructure.api.exceptions.mes_mal_formado_handler import mes_mal_formado
 from estadisticas.infrastructure.api.v1.router import router as v1
+from estadisticas.infrastructure.api.v2.router import router as v2
 from estadisticas.infrastructure.metrics.retraso_consumidor import registrar_metrica
 from estadisticas.infrastructure.telemetry import telemetria
 
@@ -20,8 +21,9 @@ def crear_app() -> FastAPI:
         docs_url="/estadisticas/docs",
         openapi_url="/estadisticas/openapi.json",
     )
-    # El mismo prefijo en desarrollo y detrás de Caddy: sin reescribir rutas. Una v2 sería otro router en api/v2
+    # El mismo prefijo en desarrollo y detrás de Caddy: sin reescribir rutas
     app.include_router(v1, prefix="/estadisticas/v1")
+    app.include_router(v2, prefix="/estadisticas/v2")  # ejercicio 2: la v2 convive con la v1, que no cambia
     app.add_exception_handler(MesMalFormadoException, mes_mal_formado)
     telemetria.instrumentar_api(app)
     return app

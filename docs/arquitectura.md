@@ -311,7 +311,7 @@ estadisticas/estadisticas/
 │   ├── exceptions/       evento_invalido_exception.py → EventoInvalidoException (y EsquemaDesconocido…,
 │   │                     ConsumidorActivo…, MesMalFormado…): cada una con su decisión (aparcar, parar, 422)
 │   ├── events/           movimiento_guardado_event.py → MovimientoGuardadoEvent (y los otros tres); evento.py: la unión
-│   ├── services/         interpretacion.py (interpretar: de un mensaje a un evento), medias_por_dia.py
+│   ├── services/         interpretacion.py (interpretar: de un mensaje a un evento), medias_por_dia.py, ahorro.py
 │   ├── read_models/      mes_de_tendencia.py → MesDeTendencia, mes_sin_revisar.py → MesSinRevisar
 │   └── repositories/
 │       ├── i_movimiento_command_repository.py    IMovimientoCommandRepository (y membresía, progreso)
@@ -327,21 +327,22 @@ estadisticas/estadisticas/
 │                         i_grupo_de_consumidores.py, i_reloj.py
 ├── infrastructure/
 │   ├── api/
-│   │   ├── app.py        crear_app(): el router principal (monta v1 con su prefijo y los exception handlers)
+│   │   ├── app.py        crear_app(): el router principal (monta cada versión con su prefijo y los handlers)
 │   │   ├── dependencies/ usuario_actual.py (el JWT de Django), hogar_permitido.py (Hogar: 404 si no eres miembro)
 │   │   ├── exceptions/   mes_mal_formado_handler.py (MesMalFormadoException → 422)
-│   │   └── v1/
-│   │       ├── routers/  tendencia_router.py → tendencia() (un endpoint por archivo; y salud, dias_semana…)
-│   │       ├── schemas/  tendencia_schema.py → Tendencia (el contrato OpenAPI; un schema por archivo)
-│   │       ├── router.py el APIRouter de la v1: reúne los de routers/ (el urls.py de Django)
-│   │       └── parametros.py  Meses (query param con sus límites)
+│   │   ├── v1/
+│   │   │   ├── routers/  tendencia_router.py → tendencia() (un endpoint por archivo; y salud, dias_semana…)
+│   │   │   ├── schemas/  tendencia_schema.py → Tendencia (el contrato OpenAPI; un schema por archivo)
+│   │   │   ├── router.py el APIRouter de la v1: reúne los de routers/ (el urls.py de Django)
+│   │   │   └── parametros.py  Meses (query param con sus límites)
+│   │   └── v2/           router.py, routers/tendencia_router.py, schemas/ (TendenciaConTasa…): convive con la v1
 │   ├── database/
 │   │   ├── models/       movimiento_model.py → MovimientoModel (SQLAlchemy 2), base.py → Base
 │   │   ├── repositories/ movimiento_command_repository_sql.py → MovimientoCommandRepositorySQL
 │   │   │                 movimiento_query_service_sql.py → MovimientoQueryServiceSQL
 │   │   ├── metadata.py   puerta de entrada de los modelos (la leen Alembic y el test de migraciones)
 │   │   └── unidad_de_trabajo_sql.py, sesiones.py, guardado.py (DataError → EventoInvalidoException), conexion.py
-│   ├── consumer/         consumidor_kafka.py (adapter de entrada: el bucle de Kafka)
+│   ├── consumer/         consumidor_kafka.py (el bucle de Kafka) y reintentos_kafka.py (los aparcados): de entrada
 │   ├── cli/              reconstruir_cli.py (adapter de entrada: línea de comandos)
 │   ├── messaging/        aparcados_kafka.py → AparcadosKafka, grupo_kafka.py → GrupoKafka (adapters de salida)
 │   ├── metrics/          retraso_consumidor.py (el gauge del retraso, que publica la API)
@@ -349,7 +350,7 @@ estadisticas/estadisticas/
 │   ├── clock/            reloj_sistema.py → RelojSistema
 │   └── container.py      composition root: una función por use case (y las dependencias de FastAPI)
 ├── ajustes.py            configuración (pydantic-settings). Solo la leen el container y la infraestructura
-└── api.py, consumidor.py, reconstruir.py     puntos de entrada (uvicorn, python -m): los comandos de siempre
+└── api.py, consumidor.py, reconstruir.py, reintentar.py   puntos de entrada (uvicorn, python -m)
 ```
 
 `migraciones/` (Alembic) y `tests/` (en espejo: `domain/{services,vo}`, `application`, `fakes`,
@@ -392,8 +393,9 @@ Contratos de import-linter (`estadisticas/pyproject.toml`, *steps* del *job* `es
 
 1. `domain` y `application` no importan fastapi, starlette, sqlalchemy, psycopg, confluent_kafka, opentelemetry, jwt,
    pydantic_settings ni `estadisticas.ajustes`. `domain`, además, ni pydantic.
-2. Capas, de arriba abajo: puntos de entrada → `infrastructure.api | consumer | cli` → `infrastructure.container` →
-   `infrastructure.telemetry` → `infrastructure.database | messaging | metrics | clock` → `application` → `domain`.
+2. Capas, de arriba abajo: puntos de entrada (`api | consumidor | reconstruir | reintentar`) → `infrastructure.api |
+   consumer | cli` → `infrastructure.container` → `infrastructure.telemetry` → `infrastructure.database | messaging |
+   metrics | clock` → `application` → `domain`.
 3. Los paquetes de los *use cases* son independientes entre sí: lo que comparten va en `application/shared` o en
    `ports`.
 

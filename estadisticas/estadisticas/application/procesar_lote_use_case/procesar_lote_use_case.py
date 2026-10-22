@@ -60,12 +60,12 @@ class ProcesarLoteUseCase(IProcesarLoteUseCase):
         """Aplica el lote. Devuelve cuántos mensajes tenía. EsquemaDesconocidoException (y cualquier error que no
         sea del mensaje, como una base de datos caída) sale de aquí sin haber confirmado nada."""
         try:
-            self._aplicar(entrada.mensajes, con_cuidado=False)
-        except _HayVenenososException:
-            self._aplicar(entrada.mensajes, con_cuidado=True)  # la transacción anterior se deshizo entera
+            self._aplicar(entrada.mensajes, con_cuidado=False, anotar_progreso=entrada.anotar_progreso)
+        except _HayVenenososException:  # la transacción anterior se deshizo entera
+            self._aplicar(entrada.mensajes, con_cuidado=True, anotar_progreso=entrada.anotar_progreso)
         return len(entrada.mensajes)
 
-    def _aplicar(self, mensajes: list[MensajeInputDTO], *, con_cuidado: bool) -> None:
+    def _aplicar(self, mensajes: list[MensajeInputDTO], *, con_cuidado: bool, anotar_progreso: bool) -> None:
         progreso: dict[tuple[str, int], tuple[int, datetime]] = {}
         aparcados = 0
         with self.uow:
@@ -85,7 +85,8 @@ class ProcesarLoteUseCase(IProcesarLoteUseCase):
                             aparcados += 1
                             resultado = Resultado.APARCADO
                     traza.resultado(resultado)
-                progreso[(m.topic, m.particion)] = (m.offset, m.marca)
+                if anotar_progreso:
+                    progreso[(m.topic, m.particion)] = (m.offset, m.marca)
             for (topic, particion), (offset, marca) in progreso.items():
                 self.progreso.guardar(topic, particion, offset, marca)
             # Antes de confirmar nada: los aparcados tienen que estar a salvo. Si no, excepción → el lote se

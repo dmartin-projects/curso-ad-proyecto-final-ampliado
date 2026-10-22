@@ -73,7 +73,7 @@ name = "estadisticas: cada capa solo importa las de debajo"
 type = "layers"
 containers = ["estadisticas"]
 layers = [
-    "api | consumidor | reconstruir", # puntos de entrada del proceso (uvicorn, python -m)
+    "api | consumidor | reconstruir | reintentar", # puntos de entrada del proceso (uvicorn, python -m)
     "infrastructure.api | infrastructure.consumer | infrastructure.cli", # adapters de entrada (HTTP, Kafka, línea de comandos)
     "infrastructure.container", # composition root: monta los use cases con los adapters de salida
     "infrastructure.telemetry", # adapter de salida (trazas) que instrumenta la base de datos

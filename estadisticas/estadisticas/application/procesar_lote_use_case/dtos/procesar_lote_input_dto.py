@@ -9,3 +9,6 @@ class ProcesarLoteInputDTO(BaseModel):
     model_config = ConfigDict(frozen=True)
 
     mensajes: list[MensajeInputDTO]
+    # Ejercicio 1: False para mensajes que no vienen de la cabeza del topic (los aparcados que se reintentan);
+    # anotar su offset haría retroceder el progreso de su partición
+    anotar_progreso: bool = True

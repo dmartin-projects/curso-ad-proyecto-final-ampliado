@@ -286,3 +286,48 @@ def test_dos_consumidores_se_reparten_las_particiones(topics):
     finally:
         parar_a()
         parar_b()
+
+
+# ── Módulo 89, ejercicio 1: reintentar los aparcados ──
+def aparcados_en_kafka() -> int:
+    from confluent_kafka import Consumer, TopicPartition
+
+    c = Consumer(KAFKA | {"group.id": f"contar-{uuid.uuid4()}"})
+    _inicio, fin = c.get_watermark_offsets(TopicPartition(ajustes().topic_dlq, 0), timeout=10)
+    c.close()
+    return fin
+
+
+def test_reintentar_los_aparcados(topics, monkeypatch):
+    from confluent_kafka import Producer
+
+    from estadisticas.domain.bo.movimiento import Movimiento
+    from estadisticas.infrastructure.consumer.reintentos_kafka import reintentar
+
+    original, con_bug = Movimiento.desde_evento.__func__, {"activo": True}
+
+    def desde_evento(cls, pk, datos, version):  # un bug del servicio: el movimiento 2 "no se puede leer"
+        if con_bug["activo"] and pk == 2:
+            raise ValueError("bug en el servicio")
+        return original(cls, pk, datos, version)
+
+    monkeypatch.setattr(Movimiento, "desde_evento", classmethod(desde_evento))
+    publicar(topics, [(1, "-1.00", 1), (2, "-2.00", 2), (3, "-3.00", 3)])
+    p = Producer(KAFKA)
+    p.produce(topics, key=b"4", value=b"{roto", headers=[("version", "4"), ("esquema", "1")])  # este, sin arreglo
+    p.flush(10)
+    parar = en_marcha()
+    try:
+        assert esperar(lambda: set(filas()) == {1, 3} and aparcados_en_kafka() == 2)
+    finally:
+        parar()
+    with sesion() as s:
+        progreso = s.execute(select(ProgresoModel.particion, ProgresoModel.offset)).all()
+
+    con_bug["activo"] = False  # se despliega el arreglo
+    assert reintentar() == 2  # los dos aparcados: el 2 se aplica; el JSON roto se vuelve a aparcar
+    assert str(filas()[2]) == "-2.00" and set(filas()) == {1, 2, 3}
+    assert aparcados_en_kafka() == 3  # el roto, otra vez al final (y no se relee en la misma pasada)
+    with sesion() as s:  # el progreso de las particiones no ha retrocedido
+        assert s.execute(select(ProgresoModel.particion, ProgresoModel.offset)).all() == progreso
+    assert reintentar() == 1  # la siguiente vez, solo lo nuevo: el grupo de reintentos recuerda dónde se quedó

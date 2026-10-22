@@ -62,8 +62,8 @@ class Mundo:
 MARCA = datetime(2026, 10, 15, 12, 0, tzinfo=UTC)
 
 
-def lote(mensajes: list[MensajeInputDTO]) -> ProcesarLoteInputDTO:
-    return ProcesarLoteInputDTO(mensajes=mensajes)
+def lote(mensajes: list[MensajeInputDTO], *, anotar_progreso: bool = True) -> ProcesarLoteInputDTO:
+    return ProcesarLoteInputDTO(mensajes=mensajes, anotar_progreso=anotar_progreso)
 
 
 def mensaje(topic: str, clave: str, valor: bytes | None, version: int, *, offset: int = 0, particion: int = 0,

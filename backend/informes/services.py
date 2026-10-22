@@ -7,7 +7,9 @@ from django.template.loader import render_to_string
 from django.utils import timezone, translation
 from weasyprint import HTML
 
-from finanzas import dashboard
+from core.domain.vo.mes import Mes
+from finanzas.domain.repositories.queries.dashboard_query import DashboardQuery
+from finanzas.infrastructure.database.repositories.dashboard_query_service_orm import DashboardQueryServiceORM
 from finanzas.models import Movimiento
 from hogares.models import Hogar
 
@@ -18,7 +20,7 @@ from .signals import informe_generado
 def contexto(hogar: Hogar, mes: date) -> dict:
     return {
         "hogar": hogar,
-        "resumen": dashboard.calcular(hogar, mes),  # los mismos números que el dashboard (módulo 77)
+        "resumen": DashboardQueryServiceORM().resumen(DashboardQuery(hogar.pk, Mes.de(mes))),  # los del dashboard (77)
         "movimientos": (
             Movimiento.objects.del_hogar(hogar)
             .del_mes(mes)

@@ -191,11 +191,11 @@ REST_FRAMEWORK = {
         "rest_framework.filters.SearchFilter",
         "rest_framework.filters.OrderingFilter",
     ],
-    "DEFAULT_PAGINATION_CLASS": "core.api.paginacion.PaginacionEstandar",
+    "DEFAULT_PAGINATION_CLASS": "core.infrastructure.api.pagination.paginacion_estandar.PaginacionEstandar",
     "PAGE_SIZE": 20,
     "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.ScopedRateThrottle"],
     "DEFAULT_THROTTLE_RATES": {"login": "5/min", "registro": "5/hour", "recuperar": "3/hour", "subidas": "60/hour"},
-    "EXCEPTION_HANDLER": "core.api.exceptions.manejador_errores",
+    "EXCEPTION_HANDLER": "core.infrastructure.api.exceptions.manejador_errores.manejador_errores",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
 }

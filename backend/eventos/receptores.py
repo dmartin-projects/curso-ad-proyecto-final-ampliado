@@ -3,11 +3,16 @@
 post_save y post_delete se ejecutan DENTRO de la operación que los dispara, así que el evento entra en la
 misma transacción que el cambio… siempre que haya una transacción (ver registro._exigir_transaccion).
 Los cambios en bloque no emiten señales: esos llaman a registro.movimientos_cambiados() a mano.
+
+Módulo 87: los use cases de finanzas publican sus eventos ellos mismos
+(finanzas/infrastructure/messaging/publicador_eventos_django.py) y sus instancias vienen marcadas; estos receivers
+quedan para quien aún guarda sin use case (hasta el módulo 88).
 """
 
 from django.db.models.signals import post_delete, post_save, pre_delete
 from django.dispatch import receiver
 
+from core.infrastructure.signals.red_de_seguridad import lo_publica_un_caso_de_uso
 from finanzas.models import Categoria, Movimiento
 from hogares.models import Membresia
 
@@ -16,7 +21,7 @@ from . import registro
 
 @receiver(post_save, sender=Movimiento, dispatch_uid="eventos_movimiento_guardado")
 def al_guardar_movimiento(sender, instance, created, raw=False, **kwargs):
-    if raw:  # loaddata: no es un cambio de la aplicación
+    if raw or lo_publica_un_caso_de_uso(instance):  # loaddata, o ya lo ha publicado el use case
         return
     registro.movimiento_guardado(instance, creado=created)
 
@@ -24,7 +29,8 @@ def al_guardar_movimiento(sender, instance, created, raw=False, **kwargs):
 @receiver(post_delete, sender=Movimiento, dispatch_uid="eventos_movimiento_borrado")
 def al_borrar_movimiento(sender, instance, **kwargs):
     # También al borrar un hogar o una cuenta: el borrado en cascada emite post_delete por cada movimiento
-    registro.movimiento_borrado(instance.pk)
+    if not lo_publica_un_caso_de_uso(instance):
+        registro.movimiento_borrado(instance.pk)
 
 
 @receiver(post_save, sender=Membresia, dispatch_uid="eventos_membresia_guardada")

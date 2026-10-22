@@ -7,14 +7,25 @@ from django.core.cache import cache
 from django.db import transaction
 
 from conftest import CategoriaFactory, CuentaFactory, MovimientoFactory, UsuarioFactory
+from core.domain.vo.mes import Mes
+from finanzas.application.comprobar_presupuestos_use_case.dtos.comprobar_presupuestos_input_dto import (
+    ComprobarPresupuestosInputDTO,
+)
+from finanzas.infrastructure import container
+from finanzas.infrastructure.signals.finanzas_signals import movimientos_cambiados
 from finanzas.models import Movimiento, Presupuesto
-from finanzas.servicios_presupuestos import comprobar_presupuestos
-from finanzas.signals import movimientos_cambiados
 from notificaciones.models import Notificacion
 
 pytestmark = pytest.mark.django_db
 T = Notificacion.Tipo
 HOY = date(2026, 10, 15)
+
+
+def comprobar_presupuestos(hogar_id, meses) -> list[int]:
+    """El use case del módulo 87 (antes, finanzas.servicios_presupuestos): devuelve OutputDTOs, aquí sus ids."""
+    return [
+        p.id for p in container.comprobar_presupuestos().ejecutar(ComprobarPresupuestosInputDTO(hogar_id, tuple(meses)))
+    ]
 
 
 @pytest.fixture
@@ -63,9 +74,9 @@ def test_al_volver_por_debajo_la_alerta_se_rearma(escenario):
     hogar, _, cuenta, super_ = escenario
     p = Presupuesto.objects.create(hogar=hogar, categoria=super_, mes=date(2026, 10, 1), importe=Decimal("100"))
     gasto = MovimientoFactory(cuenta=cuenta, categoria=super_, fecha=HOY, importe=Decimal("-150"))
-    meses = [date(2026, 10, 1)]
+    meses = [Mes(2026, 10)]
 
-    assert comprobar_presupuestos(hogar.pk, meses) == [p]
+    assert comprobar_presupuestos(hogar.pk, meses) == [p.pk]
     assert comprobar_presupuestos(hogar.pk, meses) == []  # una segunda comprobación no vuelve a avisar
     gasto.delete()
     comprobar_presupuestos(hogar.pk, meses)
@@ -95,7 +106,7 @@ def test_cambiar_la_fecha_a_otro_mes_rearma_la_alerta_del_mes_de_antes(
     hogar, roles, cuenta, super_ = escenario
     p = Presupuesto.objects.create(hogar=hogar, categoria=super_, mes=date(2026, 10, 1), importe=Decimal("100"))
     gasto = MovimientoFactory(cuenta=cuenta, categoria=super_, fecha=HOY, importe=Decimal("-150"))
-    comprobar_presupuestos(hogar.pk, [date(2026, 10, 1)])  # octubre: superado y avisado
+    comprobar_presupuestos(hogar.pk, [Mes(2026, 10)])  # octubre: superado y avisado
     with django_capture_on_commit_callbacks(execute=True):
         r = cliente(roles["miembro"]).patch(
             f"/api/v1/hogares/{hogar.pk}/movimientos/{gasto.pk}/", {"fecha": "2026-09-28"}
@@ -109,7 +120,7 @@ def test_cualquier_save_avisa_tambien_del_mes_de_antes(escenario, django_capture
     hogar, _, cuenta, super_ = escenario
     p = Presupuesto.objects.create(hogar=hogar, categoria=super_, mes=date(2026, 10, 1), importe=Decimal("100"))
     m = MovimientoFactory(cuenta=cuenta, categoria=super_, fecha=HOY, importe=Decimal("-150"))
-    comprobar_presupuestos(hogar.pk, [date(2026, 10, 1)])
+    comprobar_presupuestos(hogar.pk, [Mes(2026, 10)])
     m = Movimiento.objects.get(pk=m.pk)  # cargado desde la BD: from_db guarda la fecha
     m.fecha = date(2026, 9, 28)
     # sin pasar por la API (backoffice, un comando…): el receiver avisa de AMBOS meses. En una transacción,
@@ -152,7 +163,7 @@ def test_borrar_una_subcategoria_rearma_la_alerta_de_la_madre(escenario, cliente
     fruta = CategoriaFactory(hogar=hogar, nombre="Fruta", padre=super_)
     p = Presupuesto.objects.create(hogar=hogar, categoria=super_, mes=date(2026, 10, 1), importe=Decimal("100"))
     MovimientoFactory(cuenta=cuenta, categoria=fruta, fecha=HOY, importe=Decimal("-150"))
-    assert comprobar_presupuestos(hogar.pk, [date(2026, 10, 1)]) == [p]  # Súper, superado por su subcategoría
+    assert comprobar_presupuestos(hogar.pk, [Mes(2026, 10)]) == [p.pk]  # Súper, superado por su subcategoría
     with django_capture_on_commit_callbacks(execute=True):
         r = cliente(roles["admin"]).delete(f"/api/v1/hogares/{hogar.pk}/categorias/{fruta.pk}/")
     assert r.status_code == 204

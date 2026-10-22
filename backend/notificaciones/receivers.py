@@ -10,8 +10,7 @@ from django.dispatch import receiver
 from django.utils.translation import gettext_lazy as _
 
 from core.agrupar import agrupar
-from finanzas.servicios_presupuestos import presupuesto_superado
-from finanzas.signals import movimientos_cambiados
+from finanzas.infrastructure.signals.finanzas_signals import movimientos_cambiados, presupuesto_superado
 from hogares.models import Membresia
 from importaciones.models import Importacion
 from importaciones.signals import importacion_analizada, importacion_progreso, importacion_terminada

@@ -11,7 +11,9 @@ from django.template.loader import render_to_string
 from django.utils import timezone, translation
 from django.utils.translation import gettext as _
 
-from finanzas import dashboard
+from core.domain.vo.mes import Mes
+from finanzas.domain.repositories.queries.dashboard_query import DashboardQuery
+from finanzas.infrastructure.database.repositories.dashboard_query_service_orm import DashboardQueryServiceORM
 from finanzas.models import Movimiento
 from hogares.models import Hogar
 
@@ -24,7 +26,7 @@ logger = logging.getLogger(__name__)
 @shared_task(ignore_result=True)
 def generar_informes_mensuales() -> int:
     """Coordinadora (Celery Beat, día 1 a las 7:00): encola UNA tarea por hogar, no un bucle de horas (módulo 26)."""
-    mes = dashboard.mes_anterior(timezone.localdate().replace(day=1))  # TIME_ZONE del proyecto (Madrid)
+    mes = Mes.de(timezone.localdate()).anterior().inicio  # TIME_ZONE del proyecto (Madrid)
     con_movimientos = Movimiento.objects.del_mes(mes).values("hogar_id").distinct()
     pendientes = (
         Hogar.objects.filter(pk__in=con_movimientos)
@@ -51,7 +53,7 @@ def enviar_informe(informe_id: int, usuario_id: int) -> None:
         contexto = {
             "usuario": usuario,
             "informe": informe,
-            "resumen": dashboard.calcular(informe.hogar, informe.mes),
+            "resumen": DashboardQueryServiceORM().resumen(DashboardQuery(informe.hogar_id, Mes.de(informe.mes))),
             "enlace": f"/hogares/{informe.hogar_id}/informes",
             "frontend_url": settings.FRONTEND_URL,
         }

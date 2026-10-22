@@ -5,8 +5,8 @@ import pytest
 
 from conftest import CategoriaFactory, CuentaFactory, MovimientoFactory
 from core.models import RegistroAuditoria
+from finanzas.infrastructure.signals.finanzas_signals import movimientos_cambiados
 from finanzas.models import Comercio, Movimiento
-from finanzas.signals import movimientos_cambiados
 from importaciones import services
 from importaciones.models import FilaImportacion, Importacion
 

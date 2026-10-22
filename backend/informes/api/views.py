@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from finanzas.api.views import DelHogarViewSet
+from hogares.api.base import DelHogarViewSet
 from informes.models import InformeMensual
 from informes.tasks import generar_informe
 

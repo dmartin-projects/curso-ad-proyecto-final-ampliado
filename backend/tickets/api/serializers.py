@@ -6,8 +6,8 @@ from PIL import Image, UnidentifiedImageError
 from rest_framework import serializers
 
 from core.archivos import huella_archivo
-from finanzas.api.serializers import DelHogarMixin
 from finanzas.models import Categoria, Cuenta, Movimiento
+from hogares.api.base import DelHogarMixin
 from tickets.models import LineaTicket, Ticket
 
 # Firmas ("magic bytes"): el tipo real lo dice el contenido, no la extensión ni el Content-Type del cliente

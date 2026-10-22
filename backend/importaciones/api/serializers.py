@@ -2,8 +2,8 @@ from django.conf import settings
 from rest_framework import serializers
 
 from core.archivos import huella_archivo
-from finanzas.api.serializers import DelHogarMixin
 from finanzas.models import Cuenta
+from hogares.api.base import DelHogarMixin
 from importaciones.models import FilaImportacion, Importacion
 
 

@@ -5,7 +5,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from core.api.paginacion import PaginacionCursor
+from core.infrastructure.api.pagination.paginacion_cursor import PaginacionCursor
 from notificaciones import services
 from notificaciones.middleware import DURACION_TICKET, crear_ticket
 from notificaciones.models import Notificacion

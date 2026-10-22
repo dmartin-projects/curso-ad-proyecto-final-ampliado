@@ -18,8 +18,12 @@ from opentelemetry import trace
 
 from core.auditoria import registrar
 from core.models import RegistroAuditoria
+from finanzas.infrastructure.database.services.reconocimiento_comercios import (
+    reconocer_comercio,
+    reconocer_o_crear_comercio,
+    sugerir_categoria,
+)
 from finanzas.models import Movimiento
-from finanzas.servicios_comercios import reconocer_comercio, reconocer_o_crear_comercio, sugerir_categoria
 
 from . import ocr
 from .exceptions import EstadoNoPermitido

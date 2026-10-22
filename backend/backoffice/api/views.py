@@ -25,8 +25,8 @@ from core.auditoria import registrar
 from core.consultas import contar
 from core.models import RegistroAuditoria
 from eventos import registro as eventos
+from finanzas.infrastructure.signals.finanzas_signals import movimientos_cambiados
 from finanzas.models import Categoria, Movimiento
-from finanzas.signals import movimientos_cambiados
 from hogares.models import Hogar, Membresia
 from importaciones import services as importaciones
 from importaciones.exceptions import EstadoNoPermitido as ImportacionNoDeshacible

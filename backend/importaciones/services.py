@@ -14,10 +14,10 @@ from django.utils import timezone
 from opentelemetry import metrics
 
 from eventos import registro as eventos
+from finanzas.domain.services.normalizacion import normalizar
+from finanzas.infrastructure.database.services.reconocimiento_comercios import reconocer_comercio, sugerir_categoria
+from finanzas.infrastructure.signals.finanzas_signals import movimientos_cambiados
 from finanzas.models import Movimiento
-from finanzas.normalizacion import normalizar
-from finanzas.servicios_comercios import reconocer_comercio, sugerir_categoria
-from finanzas.signals import movimientos_cambiados
 
 from . import lectores
 from .deduplicacion import huellas

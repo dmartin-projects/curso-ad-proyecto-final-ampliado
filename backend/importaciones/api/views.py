@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from core.auditoria import registrar
 from core.models import RegistroAuditoria
-from finanzas.api.views import DelHogarViewSet
+from hogares.api.base import DelHogarViewSet
 from hogares.models import Membresia
 from importaciones import services
 from importaciones.models import FilaImportacion, Importacion

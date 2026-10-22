@@ -3,7 +3,7 @@
 import hashlib
 from collections import Counter
 
-from finanzas.normalizacion import normalizar
+from finanzas.domain.services.normalizacion import normalizar
 
 from .lectores import FilaLeida
 

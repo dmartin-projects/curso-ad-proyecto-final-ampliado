@@ -74,7 +74,7 @@ def test_la_categoria_habitual_del_hogar_gana_a_la_de_la_ia(escenario, subir, re
 
 
 def test_a_igualdad_de_veces_la_categoria_sugerida_es_siempre_la_misma(escenario):
-    from finanzas.servicios_comercios import sugerir_categoria
+    from finanzas.infrastructure.database.services.reconocimiento_comercios import sugerir_categoria
 
     hogar, _, cuenta, _ = escenario
     antigua, nueva = CategoriaFactory(hogar=hogar, nombre="Comida"), CategoriaFactory(hogar=hogar, nombre="Hogar")

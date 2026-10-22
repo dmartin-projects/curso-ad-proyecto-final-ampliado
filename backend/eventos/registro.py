@@ -10,7 +10,6 @@ reconstruir cualquier proyección desde cero.
 
 import logging
 from collections.abc import Iterable
-from decimal import Decimal
 
 from django.conf import settings
 from django.db import transaction
@@ -61,16 +60,19 @@ def _evento(topic: str, clave: str, tipo: str, valor: dict | None, traceparent: 
 
 # ── Movimientos ──
 def datos_movimiento(m) -> dict:
-    """Lo que viaja de un movimiento: lo justo para las estadísticas. Ni concepto ni notas (privacidad)."""
+    """Lo que viaja de un movimiento: lo justo para las estadísticas. Ni concepto ni notas (privacidad).
+
+    `m` puede ser el modelo de Django o la entidad del dominio (módulo 87): los dos tienen estos atributos.
+    """
     return {
-        "id": m.pk,
+        "id": m.id,
         "hogar_id": m.hogar_id,
         "cuenta_id": m.cuenta_id,
         "fecha": str(m.fecha),  # date o "2026-10-21"
-        "importe": str(Decimal(m.importe)),  # como texto: un float perdería céntimos
+        "importe": str(m.importe),  # Decimal o Dinero, como texto ("-12.50"): un float perdería céntimos
         "categoria_id": m.categoria_id,
         "comercio_id": m.comercio_id,
-        "origen": m.origen,
+        "origen": str(m.origen),
         "revisado": m.revisado,
     }
 
@@ -78,7 +80,7 @@ def datos_movimiento(m) -> dict:
 def movimiento_guardado(m, *, creado: bool) -> None:
     tipo = "movimiento.creado" if creado else "movimiento.actualizado"
     _exigir_transaccion(tipo)
-    _evento(MOVIMIENTOS, str(m.pk), tipo, datos_movimiento(m), _traceparent()).save()
+    _evento(MOVIMIENTOS, str(m.id), tipo, datos_movimiento(m), _traceparent()).save()
 
 
 def movimiento_borrado(pk: int) -> None:

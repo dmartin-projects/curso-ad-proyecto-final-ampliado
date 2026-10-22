@@ -10,7 +10,7 @@ class DescubrimientoView(ConnectDiscoveryInfoView):
     - Solo RS256: DOT anuncia también HS256, y Gastos firma todos sus ID tokens con RS256. Anunciar lo que no se usa
       invita a un cliente a aceptarlo.
     - El revocation_endpoint (RFC 7009, un metadato del RFC 8414 que OIDC Discovery admite): sin él, un cliente no
-      sabe dónde revocar sus tokens al cerrar sesión.
+      sabe dónde revocar sus tokens al cerrar sesión. (Ejercicio 3: y el device_authorization_endpoint, RFC 8628.)
     """
 
     def get(self, request, *args, **kwargs):
@@ -18,5 +18,7 @@ class DescubrimientoView(ConnectDiscoveryInfoView):
         datos = json.loads(respuesta.content)
         datos["id_token_signing_alg_values_supported"] = ["RS256"]
         datos["revocation_endpoint"] = self._get_endpoint_url(request, "revoke-token", required=True)
+        # Ejercicio 3: dónde pide su código un dispositivo (RFC 8628 §4)
+        datos["device_authorization_endpoint"] = self._get_endpoint_url(request, "device-authorization", required=True)
         respuesta.content = json.dumps(datos)
         return respuesta

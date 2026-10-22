@@ -12,7 +12,7 @@ from oauth.domain.exceptions.scopes_no_validos_exception import ScopesNoValidosE
 from oauth.domain.services.redirect_uris import validar_redirect_uri
 from oauth.domain.services.scopes import techo
 
-NATIVA, WEB, SERVICIO = TipoCliente.NATIVA, TipoCliente.WEB, TipoCliente.SERVICIO
+NATIVA, WEB, SERVICIO, DISPOSITIVO = TipoCliente.NATIVA, TipoCliente.WEB, TipoCliente.SERVICIO, TipoCliente.DISPOSITIVO
 
 
 def cliente(tipo=NATIVA, scopes=("openid", "gastos:leer"), redirect_uris=("http://127.0.0.1/callback",), **otros):
@@ -85,3 +85,12 @@ def test_el_techo_de_los_scopes():
     assert techo({"gastos:leer", "gastos:escribir"}) == Rol.MIEMBRO
     assert techo({"openid", "email"}) is None
     assert techo({"operaciones:leer"}) is None
+
+
+def test_un_dispositivo_es_publico_sin_redirect_y_solo_pide_la_api():  # ejercicio 3
+    assert not DISPOSITIVO.confidencial and DISPOSITIVO.con_usuario and not DISPOSITIVO.con_redirect
+    cliente(DISPOSITIVO, scopes=("gastos:leer", "gastos:escribir"), redirect_uris=())
+    with pytest.raises(ScopesNoValidosException):
+        cliente(DISPOSITIVO, scopes=("openid", "gastos:leer"), redirect_uris=())  # el device flow no da ID tokens
+    with pytest.raises(RedirectUriNoValidaException):
+        cliente(DISPOSITIVO, scopes=("gastos:leer",))

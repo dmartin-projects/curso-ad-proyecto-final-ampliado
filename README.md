@@ -16,7 +16,7 @@ Es Gastos (módulos 70-83) con las ampliaciones de las Partes 6 y 7 encima. **Ca
 
 La Parte 7 (el agente de IA) se añadirá aquí con el mismo formato cuando esté terminada.
 
-Estado comprobado al terminar el módulo 90: 565 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (sin cambios desde el 89), 26 de *frontend* (Vitest) y 12 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones (24 contratos).
+Estado comprobado al terminar el módulo 90 (con sus ejercicios): 595 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (sin cambios desde el 89), 29 de *frontend* (Vitest) y 13 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones (24 contratos).
 
 ## Estructura
 
@@ -83,8 +83,8 @@ Personal de soporte (el *backoffice* está dentro de la app, no hay Django admin
 ## Tests
 
 ```bash
-cd backend && uv run pytest -n 4 --cov                 # 564 tests (+1 que se salta sin Kafka)
-cd frontend && npx ng test --watch=false                # 16 tests
+cd backend && uv run pytest -n 4 --cov                 # 594 tests (+1 que se salta sin Kafka)
+cd frontend && npx ng test --watch=false                # 19 tests
 # punta a punta (módulo 82): una vez, crea la BD de E2E
 docker compose exec db createdb -U gastos gastos_e2e
 cd backend && DJANGO_SETTINGS_MODULE=config.settings.e2e uv run python manage.py migrate
@@ -152,6 +152,14 @@ uv run cli/gastos_cli.py login     # abre el navegador: entra (demo@example.com)
 uv run cli/gastos_cli.py hogares
 uv run cli/gastos_cli.py gasto 1 --cuenta 1 --importe -3.20 --concepto Café
 uv run cli/gastos_cli.py logout    # revoca el refresh token en el servidor
+```
+
+Ejercicios: «Aplicaciones conectadas» en el menú de la cuenta (retirar el acceso a una aplicación), la rotación de la clave de los ID tokens (`docs/runbook.md`) y el *device flow* para una máquina sin navegador:
+
+```bash
+uv run python manage.py crear_cliente_oauth "Gastos CLI (dispositivo)" --tipo dispositivo \
+    --client-id gastos-cli-dispositivo --scopes "gastos:leer gastos:escribir"
+uv run cli/gastos_cli.py login --dispositivo   # te da un código para http://localhost:8000/api/oauth/device/
 ```
 
 En producción, el emisor es `https://gastos.tudominio.com/api/oauth` (`OAUTH_ISSUER` en `infra/entornos/`, la clave en `infra/secretos/`) y el CLI se apunta allí con `GASTOS_EMISOR`.

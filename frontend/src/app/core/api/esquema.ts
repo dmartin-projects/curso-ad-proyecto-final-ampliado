@@ -4,6 +4,40 @@
  */
 
 export interface paths {
+    "/api/v1/auth/aplicaciones/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Las aplicaciones a las que has dado acceso a tu cuenta, con lo que pueden hacer. */
+        get: operations["auth_aplicaciones_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/aplicaciones/{client_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Retira el acceso a una aplicación: sus tokens dejan de valer al momento. */
+        delete: operations["auth_aplicaciones_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/cambiar-password/": {
         parameters: {
             query?: never;
@@ -1150,6 +1184,15 @@ export interface components {
         Actualizadas: {
             actualizadas: number;
         };
+        AplicacionConectada: {
+            client_id: string;
+            nombre: string;
+            scopes: string[];
+            /** Format: date-time */
+            desde: string;
+            /** Format: date-time */
+            ultimo_uso: string;
+        };
         Auditoria: {
             readonly id: number;
             /** Format: date-time */
@@ -2055,6 +2098,45 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    auth_aplicaciones_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AplicacionConectada"][];
+                };
+            };
+        };
+    };
+    auth_aplicaciones_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                client_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     auth_cambiar_password_create: {
         parameters: {
             query?: never;

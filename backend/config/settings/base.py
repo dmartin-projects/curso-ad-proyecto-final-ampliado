@@ -229,14 +229,36 @@ SESSION_COOKIE_PATH = CSRF_COOKIE_PATH = "/api/oauth/"
 # El modelo Application de django-oauth-toolkit es "swappable": la migración de oauth (ClienteOAuth) lo referencia
 # por este ajuste, que tiene que existir aunque usemos el de serie
 OAUTH2_PROVIDER_APPLICATION_MODEL = "oauth2_provider.Application"
+
+
+def urls_del_emisor(emisor: str) -> dict:
+    """Lo que depende de la URL pública del authorization server (e2e.py y prod.py la cambian: lo vuelven a aplicar)."""
+    return {
+        "OIDC_ISS_ENDPOINT": emisor,
+        # Ejercicio 3 (device flow): adónde va la persona a escribir el código; con él ya puesto, para un QR
+        "OAUTH_DEVICE_VERIFICATION_URI": f"{emisor}/device/",
+        "OAUTH_DEVICE_VERIFICATION_URI_COMPLETE": f"{emisor}/device/?user_code={{user_code}}",
+    }
+
+
 OAUTH2_PROVIDER = {
     "OIDC_ENABLED": True,
-    "OIDC_ISS_ENDPOINT": OAUTH_ISSUER,
+    **urls_del_emisor(OAUTH_ISSUER),
     # La clave privada que firma los ID tokens (RS256); la pública, en el JWKS. `manage.py generar_clave_oidc`
     "OIDC_RSA_PRIVATE_KEY": env.str("OIDC_RSA_PRIVATE_KEY", multiline=True, default=""),
+    # Ejercicio 2: las claves que ya no firman (o todavía no), pero se publican en el JWKS: rotar sin cortes (runbook)
+    "OIDC_RSA_PRIVATE_KEYS_INACTIVE": [
+        clave.replace("\\n", "\n") for clave in env.list("OIDC_RSA_PRIVATE_KEYS_INACTIVE", default=[])
+    ],
     "OIDC_RESPONSE_TYPES_SUPPORTED": ["code"],  # solo authorization code: ni implicit ni hybrid
     "OIDC_TOKEN_ENDPOINT_AUTH_METHODS_SUPPORTED": ["client_secret_basic", "client_secret_post", "none"],
-    "OAUTH2_GRANT_TYPES_SUPPORTED": ["authorization_code", "refresh_token", "client_credentials"],
+    "OAUTH2_GRANT_TYPES_SUPPORTED": [
+        "authorization_code",
+        "refresh_token",
+        "client_credentials",
+        "urn:ietf:params:oauth:grant-type:device_code",  # ejercicio 3
+    ],
+    "DEVICE_FLOW_INTERVAL": 5,  # segundos entre consultas del dispositivo (más deprisa: slow_down)
     "OAUTH2_RESPONSE_TYPES_SUPPORTED": ["code"],
     "SCOPES": {
         "openid": _("Saber quién eres (tu identificador en Gastos)"),

@@ -14,9 +14,10 @@ class ClienteOAuth(models.Model):
         NATIVA = "nativa", _("Aplicación nativa (CLI, escritorio, móvil)")
         WEB = "web", _("Aplicación web con backend")
         SERVICIO = "servicio", _("Servicio (máquina a máquina)")
+        DISPOSITIVO = "dispositivo", _("Dispositivo sin navegador (device flow)")  # ejercicio 3
 
     aplicacion = models.OneToOneField(APPLICATION_MODEL, on_delete=models.CASCADE, related_name="cliente_gastos")
-    tipo = models.CharField(_("tipo"), max_length=10, choices=Tipo)
+    tipo = models.CharField(_("tipo"), max_length=12, choices=Tipo)
     scopes = ArrayField(models.CharField(max_length=40), verbose_name=_("scopes permitidos"))
     creado = models.DateTimeField(default=timezone.now)
 

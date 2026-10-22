@@ -74,6 +74,16 @@ Con la vieja en *fallbacks*, lo firmado antes (enlaces de recuperación de contr
 
 Los JWT se firman con `JWT_SIGNING_KEY`, no con `SECRET_KEY`: rotar esta no cierra las sesiones de la app. Para cerrarlas todas (filtración de `JWT_SIGNING_KEY`), cambia `JWT_SIGNING_KEY`: todos los usuarios tendrán que volver a entrar.
 
+## Rotar la clave de los ID tokens (módulo 90, ejercicio 2)
+
+Los ID tokens del *authorization server* van firmados con `OIDC_RSA_PRIVATE_KEY`; las aplicaciones los verifican con la clave pública del JWKS (`/api/oauth/.well-known/jwks.json`), que eligen por el `kid` de la cabecera y guardan en caché hasta una hora (`Cache-Control: max-age=3600`). Para cambiarla sin que ningún cliente rechace un token bueno, en tres despliegues:
+
+1. **Publicar la nueva sin usarla.** `uv run python manage.py generar_clave_oidc` (en tu máquina) y `sops edit infra/secretos/produccion.env`: la nueva en `OIDC_RSA_PRIVATE_KEYS_INACTIVE`. Desplegar. El JWKS tiene dos claves; se sigue firmando con la vieja.
+2. **Firmar con la nueva**, pasada al menos una hora (que todas las cachés del JWKS la tengan): la nueva en `OIDC_RSA_PRIVATE_KEY` y la vieja en `OIDC_RSA_PRIVATE_KEYS_INACTIVE`. Desplegar. Los ID tokens ya emitidos (con el `kid` viejo) siguen verificándose.
+3. **Retirar la vieja**, pasado lo que dura un ID token (10 minutos): `OIDC_RSA_PRIVATE_KEYS_INACTIVE` vacío. Desplegar.
+
+Los access y refresh tokens no cambian: son opacos (no van firmados). **Si la clave se filtró**, ve directo al paso 3 con una clave nueva: los ID tokens en vuelo dejarán de verificarse (los clientes que vuelvan a pedir el JWKS por el `kid` desconocido no encontrarán la vieja), que es lo que quieres.
+
 ## Rotar una clave de age (módulo 86, ejercicio 3)
 
 Cuando alguien deja el equipo, se cambia el secreto `SOPS_AGE_KEY` de un environment o una clave pudo filtrarse:

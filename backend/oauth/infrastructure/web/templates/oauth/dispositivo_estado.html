@@ -1,0 +1,12 @@
+{% extends "oauth/base.html" %}
+{% load i18n %}
+{% block titulo %}{% translate "Conectar un dispositivo" %}{% endblock %}
+{% block contenido %}
+  {% if object.status == "authorized" %}
+    <h1>{% translate "Dispositivo conectado" %}</h1>
+    <p>{% translate "Ya puedes volver al dispositivo: en unos segundos tendrá acceso." %}</p>
+  {% else %}
+    <h1>{% translate "No has dado acceso" %}</h1>
+    <p>{% translate "El dispositivo no podrá usar tu cuenta." %}</p>
+  {% endif %}
+{% endblock %}

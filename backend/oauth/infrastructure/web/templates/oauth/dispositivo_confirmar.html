@@ -1,0 +1,17 @@
+{% extends "oauth/base.html" %}
+{% load i18n %}
+{% block titulo %}{% translate "Conectar un dispositivo" %}{% endblock %}
+{% block contenido %}
+  <h1>{% blocktranslate with nombre=application.name %}¿Conectar «{{ nombre }}» a tu cuenta?{% endblocktranslate %}</h1>
+  <p class="suave">{% blocktranslate with email=user.email %}Has entrado como {{ email }}.{% endblocktranslate %}</p>
+  <p>{% translate "Podrá, en tu nombre:" %}</p>
+  <ul>{% for descripcion in scopes_descriptions %}<li>{{ descripcion }}</li>{% endfor %}</ul>
+  <p class="suave">{% translate "En cada hogar, nunca más de lo que te permite tu rol. Puedes retirarle el acceso cuando quieras." %}</p>
+  <form method="post">
+    {% csrf_token %}
+    <div class="acciones">
+      <button type="submit" name="action" value="deny" class="secundario">{% translate "Cancelar" %}</button>
+      <button type="submit" name="action" value="accept" class="principal">{% translate "Permitir" %}</button>
+    </div>
+  </form>
+{% endblock %}

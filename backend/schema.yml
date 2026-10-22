@@ -3,6 +3,44 @@ info:
   title: API Gastos
   version: 1.0.0
 paths:
+  /api/v1/auth/aplicaciones/:
+    get:
+      operationId: auth_aplicaciones_list
+      description: Las aplicaciones a las que has dado acceso a tu cuenta, con lo
+        que pueden hacer.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AplicacionConectada'
+          description: ''
+  /api/v1/auth/aplicaciones/{client_id}/:
+    delete:
+      operationId: auth_aplicaciones_destroy
+      description: 'Retira el acceso a una aplicación: sus tokens dejan de valer al
+        momento.'
+      parameters:
+      - in: path
+        name: client_id
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/auth/cambiar-password/:
     post:
       operationId: auth_cambiar_password_create
@@ -3137,6 +3175,29 @@ components:
           type: integer
       required:
       - actualizadas
+    AplicacionConectada:
+      type: object
+      properties:
+        client_id:
+          type: string
+        nombre:
+          type: string
+        scopes:
+          type: array
+          items:
+            type: string
+        desde:
+          type: string
+          format: date-time
+        ultimo_uso:
+          type: string
+          format: date-time
+      required:
+      - client_id
+      - desde
+      - nombre
+      - scopes
+      - ultimo_uso
     Auditoria:
       type: object
       properties:

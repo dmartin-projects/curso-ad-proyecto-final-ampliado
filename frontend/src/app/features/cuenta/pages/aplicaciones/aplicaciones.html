@@ -1,0 +1,28 @@
+<h1 class="mb-1 text-2xl font-medium">Aplicaciones conectadas</h1>
+<p class="mb-4 text-sm text-texto-suave">
+  Pueden usar tu cuenta en tu nombre, y nunca más de lo que te permite tu rol en cada hogar.
+</p>
+<ul class="divide-y rounded-lg border">
+  @for (a of aplicaciones.data() ?? []; track a.client_id) {
+    <li class="flex items-start gap-3 p-3">
+      <mat-icon class="mt-1">apps</mat-icon>
+      <div class="flex-1">
+        <span class="block font-medium">{{ a.nombre }}</span>
+        <ul class="list-disc pl-5 text-sm">
+          @for (s of a.scopes; track s) {
+            <li>{{ describir(s) }}</li>
+          }
+        </ul>
+        <span class="block text-xs text-texto-suave"
+          >Desde {{ a.desde | date: 'mediumDate' }} · último uso
+          {{ a.ultimo_uso | date: 'short' }}</span
+        >
+      </div>
+      <button mat-stroked-button (click)="retirar(a)" [disabled]="retirada.isPending()">
+        Retirar acceso
+      </button>
+    </li>
+  } @empty {
+    <li class="p-3 text-texto-suave">Ninguna aplicación tiene acceso a tu cuenta.</li>
+  }
+</ul>

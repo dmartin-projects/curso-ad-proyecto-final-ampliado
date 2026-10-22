@@ -2,7 +2,7 @@ import { createHash, randomBytes } from 'node:crypto';
 
 import { expect, Page, test } from '@playwright/test';
 
-import { DEMO } from './ayuda';
+import { DEMO, entrar } from './ayuda';
 
 /**
  * Módulo 90: Gastos como authorization server. Una aplicación (gastos-cli) pide acceso y el usuario entra y consiente
@@ -83,4 +83,39 @@ test('si el usuario cancela, la aplicación recibe access_denied', async ({ page
   await page.getByRole('button', { name: 'Cancelar' }).click();
   await expect.poll(() => vuelta()?.searchParams.get('error')).toBe('access_denied');
   expect(vuelta()!.searchParams.has('code')).toBe(false);
+});
+
+// Ejercicio 1: el usuario ve a qué aplicaciones ha dado acceso y se lo retira desde la app
+test('aplicaciones conectadas: retirar el acceso corta el token al momento', async ({
+  page,
+  request,
+}) => {
+  const { verifier, challenge } = pkce();
+  const vuelta = await pedirAcceso(page, challenge);
+  await page.getByRole('button', { name: 'Permitir' }).click();
+  await expect.poll(() => vuelta()?.searchParams.get('code')).toBeTruthy();
+  const tokens = await (
+    await request.post('/api/oauth/token/', {
+      form: {
+        grant_type: 'authorization_code',
+        code: vuelta()!.searchParams.get('code')!,
+        redirect_uri: VUELTA,
+        client_id: 'gastos-cli',
+        code_verifier: verifier,
+      },
+    })
+  ).json();
+  const conToken = { headers: { Authorization: `Bearer ${tokens.access_token}` } };
+  expect((await request.get('/api/v1/hogares/', conToken)).status()).toBe(200);
+
+  await entrar(page);
+  await page.getByRole('button', { name: 'Mi cuenta' }).click();
+  await page.getByRole('menuitem', { name: 'Aplicaciones conectadas' }).click();
+  const fila = page.getByRole('listitem').filter({ hasText: 'Gastos CLI' });
+  await expect(fila).toContainText('Ver los movimientos, las cuentas y el resumen de tus hogares');
+  await fila.getByRole('button', { name: 'Retirar acceso' }).click();
+  await page.getByRole('alertdialog').getByRole('button', { name: 'Retirar acceso' }).click();
+  await expect(page.getByText('Ninguna aplicación tiene acceso a tu cuenta.')).toBeVisible();
+
+  expect((await request.get('/api/v1/hogares/', conToken)).status()).toBe(401);
 });

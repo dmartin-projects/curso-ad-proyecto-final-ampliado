@@ -5,6 +5,7 @@
 from django.urls import include, path
 
 urlpatterns = [
+    path("auth/aplicaciones/", include("oauth.infrastructure.api.v1.urls")),  # ejercicio 1 del módulo 90
     path("auth/", include("usuarios.infrastructure.api.v1.urls")),
     path("", include("hogares.infrastructure.api.v1.urls")),
     path("", include("finanzas.infrastructure.api.v1.urls")),

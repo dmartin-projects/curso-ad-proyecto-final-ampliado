@@ -361,6 +361,7 @@ id = "oauth-adapters"
 name = "Los adapters de oauth son suyos (las demás APIs solo usan su autenticación, sus permisos y AceptaOAuth)"
 type = "protected"
 protected_modules = [
+    "oauth.infrastructure.api.v1",
     "oauth.infrastructure.crypto",
     "oauth.infrastructure.database",
     "oauth.infrastructure.server",

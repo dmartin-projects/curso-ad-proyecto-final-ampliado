@@ -14,6 +14,7 @@ Es una app NATIVA (RFC 8252): un public client, sin secreto (cualquiera puede le
 
 Uso:  uv run cli/gastos_cli.py login | hogares | movimientos 3 | gasto 3 --cuenta 5 --importe -12.50 --concepto Pan
       | quien | logout          (GASTOS_EMISOR=https://gastos.tudominio.com/api/oauth para producción)
+      login --dispositivo       sin navegador en esta máquina (por SSH): device authorization grant (ejercicio 3)
 """
 
 import argparse
@@ -25,6 +26,7 @@ import json
 import os
 import secrets
 import sys
+import time
 import webbrowser
 from datetime import date
 from pathlib import Path
@@ -34,6 +36,8 @@ import httpx
 import jwt
 
 CLIENT_ID = "gastos-cli"  # público: identifica a la app, no la autentica
+CLIENT_ID_DISPOSITIVO = "gastos-cli-dispositivo"  # ejercicio 3: otro cliente (en el servidor, un flujo por cliente)
+DEVICE_CODE = "urn:ietf:params:oauth:grant-type:device_code"
 SCOPES = "openid email gastos:leer gastos:escribir"
 EMISOR = os.environ.get("GASTOS_EMISOR", "http://localhost:8000/api/oauth")
 ESPERA_LOGIN = 300  # segundos para completar el login en el navegador
@@ -240,34 +244,86 @@ def login(http: httpx.Client, almacen, *, emisor: str = EMISOR, scopes: str = SC
         tokens["id_token"], jwks=jwks_con_kid(http, meta, tokens["id_token"]), emisor=emisor, client_id=CLIENT_ID,
         nonce=nonce,
     )  # fmt: skip
-    almacen.guardar(emisor, tokens["refresh_token"])  # el access token NO se guarda: vive lo que dura el comando
+    guardar_sesion(almacen, emisor, CLIENT_ID, tokens["refresh_token"])  # el access token NO: vive lo que el comando
     return claims
+
+
+# Ejercicio 3: la sesión guarda también el client_id con el que se emitió el refresh token (solo vale para ese cliente)
+def guardar_sesion(almacen, emisor: str, client_id: str, refresh_token: str) -> None:
+    almacen.guardar(emisor, json.dumps({"client_id": client_id, "refresh_token": refresh_token}))
+
+
+def leer_sesion(almacen, emisor: str) -> tuple[str, str] | None:
+    guardado = almacen.leer(emisor)
+    if guardado is None:
+        return None
+    sesion = json.loads(guardado)
+    return sesion["client_id"], sesion["refresh_token"]
+
+
+def login_dispositivo(
+    http: httpx.Client, almacen, *, emisor: str = EMISOR, scopes: str = "gastos:leer gastos:escribir",
+    dormir=time.sleep, avisar=print,
+) -> None:  # fmt: skip
+    """Ejercicio 3, device authorization grant (RFC 8628): sin navegador aquí. Se enseña un código, la persona lo
+    escribe en su móvil u ordenador, y mientras tanto se pregunta al servidor cada `interval` segundos."""
+    meta = descubrir(http, emisor)
+    r = http.post(meta["device_authorization_endpoint"], data={"client_id": CLIENT_ID_DISPOSITIVO, "scope": scopes})
+    if r.status_code != 200:
+        raise ErrorOAuth(f"El servidor no da un código: {r.text}")
+    d = r.json()
+    codigo = d["user_code"]
+    avisar(f"En tu móvil u ordenador, abre {d['verification_uri']} y escribe el código {codigo[:4]}-{codigo[4:]}")
+    intervalo, limite = d.get("interval", 5), time.monotonic() + d["expires_in"]
+    while time.monotonic() < limite:
+        dormir(intervalo)  # antes de la primera también: preguntar antes de tiempo es slow_down
+        r = http.post(
+            meta["token_endpoint"],
+            data={"grant_type": DEVICE_CODE, "device_code": d["device_code"], "client_id": CLIENT_ID_DISPOSITIVO},
+        )
+        if r.status_code == 200:
+            guardar_sesion(almacen, emisor, CLIENT_ID_DISPOSITIVO, r.json()["refresh_token"])
+            return
+        match r.json().get("error"):
+            case "authorization_pending":
+                continue
+            case "slow_down":
+                intervalo += 5  # RFC 8628 §3.5: cinco segundos más, desde ahora y para siempre
+            case "access_denied":
+                raise ErrorOAuth("Has cancelado el acceso desde el otro dispositivo.")
+            case "expired_token":
+                raise ErrorOAuth("El código ha caducado: vuelve a empezar.")
+            case otro:
+                raise ErrorOAuth(f"El servidor dice {otro}.")
+    raise ErrorOAuth("El código ha caducado: vuelve a empezar.")
 
 
 def access_token(http: httpx.Client, almacen, *, emisor: str = EMISOR) -> str:
     """Un access token nuevo con el refresh token guardado, que ROTA: se guarda el nuevo (el viejo ya no vale)."""
-    refresh = almacen.leer(emisor)
-    if refresh is None:
+    sesion = leer_sesion(almacen, emisor)
+    if sesion is None:
         raise ErrorOAuth("No has entrado: gastos-cli login")
+    client_id, refresh = sesion
     meta = descubrir(http, emisor)
     r = http.post(
-        meta["token_endpoint"], data={"grant_type": "refresh_token", "refresh_token": refresh, "client_id": CLIENT_ID}
+        meta["token_endpoint"], data={"grant_type": "refresh_token", "refresh_token": refresh, "client_id": client_id}
     )
     if r.status_code == 400 and r.json().get("error") == "invalid_grant":
         almacen.borrar(emisor)
         raise ErrorOAuth("La sesión ha caducado o se ha revocado: gastos-cli login")
     r.raise_for_status()
     tokens = r.json()
-    almacen.guardar(emisor, tokens["refresh_token"])
+    guardar_sesion(almacen, emisor, client_id, tokens["refresh_token"])
     return tokens["access_token"]
 
 
 def logout(http: httpx.Client, almacen, *, emisor: str = EMISOR) -> None:
     """Revoca el refresh token en el servidor (RFC 7009) y lo borra de aquí. Revocarlo revoca su familia."""
-    refresh = almacen.leer(emisor)
-    if refresh is not None:
+    sesion = leer_sesion(almacen, emisor)
+    if sesion is not None:
+        client_id, refresh = sesion
         meta = descubrir(http, emisor)
-        data = {"token": refresh, "token_type_hint": "refresh_token", "client_id": CLIENT_ID}
+        data = {"token": refresh, "token_type_hint": "refresh_token", "client_id": client_id}
         http.post(meta["revocation_endpoint"], data=data).raise_for_status()
     almacen.borrar(emisor)
 
@@ -287,7 +343,9 @@ def llamar(http: httpx.Client, almacen, metodo: str, ruta: str, *, emisor: str =
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="gastos-cli", description="Gastos desde la terminal (OAuth 2.1 + OIDC)")
     sub = p.add_subparsers(dest="orden", required=True)
-    sub.add_parser("login")
+    sub.add_parser("login").add_argument(
+        "--dispositivo", action="store_true", help="sin navegador aquí: con un código en otro dispositivo"
+    )
     sub.add_parser("logout")
     sub.add_parser("quien")
     sub.add_parser("hogares")
@@ -305,6 +363,9 @@ def main(argv=None) -> int:
     with httpx.Client(timeout=10) as http:
         try:
             match args.orden:
+                case "login" if args.dispositivo:
+                    login_dispositivo(http, almacen)
+                    print("Dispositivo conectado.")
                 case "login":
                     claims = login(http, almacen)
                     print(f"Has entrado como {claims.get('email', claims['sub'])}.")
@@ -315,6 +376,8 @@ def main(argv=None) -> int:
                     token = access_token(http, almacen)
                     meta = descubrir(http, EMISOR)
                     r = http.get(meta["userinfo_endpoint"], headers={"Authorization": f"Bearer {token}"})
+                    if r.status_code in (401, 403):  # una sesión de dispositivo (ejercicio 3) no tiene el scope openid
+                        raise ErrorOAuth("Esta sesión no incluye tu identidad (scope openid).")
                     print(json.dumps(r.raise_for_status().json(), indent=2, ensure_ascii=False))
                 case "hogares":
                     for h in llamar(http, almacen, "GET", "/hogares/").json()["results"]:

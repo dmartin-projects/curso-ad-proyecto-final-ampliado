@@ -1,0 +1,20 @@
+{% extends "oauth/base.html" %}
+{% load i18n %}
+{% block titulo %}{% translate "Conectar un dispositivo" %}{% endblock %}
+{% block contenido %}
+  <h1>{% translate "Conectar un dispositivo" %}</h1>
+  <p>{% translate "Escribe el código que te enseña el dispositivo (la terminal, la tele…)." %}</p>
+  <p class="error">{% translate "Hazlo solo si has empezado tú el inicio de sesión en ese dispositivo. Nunca escribas un código que te haya dado otra persona: le darías acceso a tu cuenta." %}</p>
+  <form method="post">
+    {% csrf_token %}
+    <label for="id_user_code">{% translate "Código" %}</label>
+    <input type="text" name="user_code" id="id_user_code" value="{{ form.user_code.value|default:'' }}"
+           autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" required autofocus>
+    {% if demasiados_intentos %}
+      <p class="error" role="alert">{% translate "Demasiados intentos. Espera un minuto y vuelve a probar." %}</p>
+    {% elif form.errors %}
+      <p class="error" role="alert">{% translate "Ese código no existe, ha caducado o ya se ha usado." %}</p>
+    {% endif %}
+    <div class="acciones"><button type="submit" class="principal">{% translate "Continuar" %}</button></div>
+  </form>
+{% endblock %}

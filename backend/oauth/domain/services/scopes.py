@@ -5,7 +5,8 @@ from core.domain.enums.rol import Rol
 from oauth.domain.enums.scope import Scope
 
 IDENTIDAD = frozenset({Scope.OPENID, Scope.PROFILE, Scope.EMAIL})
-DEL_USUARIO = IDENTIDAD | {Scope.GASTOS_LEER, Scope.GASTOS_ESCRIBIR}
+DE_LA_API = frozenset({Scope.GASTOS_LEER, Scope.GASTOS_ESCRIBIR})
+DEL_USUARIO = IDENTIDAD | DE_LA_API
 DE_SERVICIO = frozenset({Scope.OPERACIONES_LEER})
 
 # Lo máximo que cada scope permite en un hogar. Ninguno llega a ADMIN: invitar, expulsar, cambiar roles o borrar el

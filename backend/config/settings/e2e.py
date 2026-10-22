@@ -34,5 +34,6 @@ REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {**REST_FRAMEWORK["DEFAULT_THROTTLE_R
 EXIGIR_CASOS_DE_USO = True  # módulo 88: los E2E también fallan si algo escribe sin use case
 # Módulo 90: el authorization server, en el origen de la app (como en producción, donde Vercel reenvía /api/*),
 # y una clave de firma nueva en cada arranque
-OAUTH_ISSUER = OAUTH2_PROVIDER["OIDC_ISS_ENDPOINT"] = "http://localhost:4200/api/oauth"
+OAUTH_ISSUER = "http://localhost:4200/api/oauth"
+OAUTH2_PROVIDER.update(urls_del_emisor(OAUTH_ISSUER))
 OAUTH2_PROVIDER["OIDC_RSA_PRIVATE_KEY"] = nueva_clave_pem()

@@ -8,6 +8,7 @@ import json
 import stat
 import threading
 import time
+from datetime import UTC, datetime
 from html.parser import HTMLParser
 from pathlib import Path
 
@@ -19,6 +20,7 @@ from jwcrypto import jwk
 
 from conftest import CuentaFactory, HogarFactory, MembresiaFactory, UsuarioFactory
 from finanzas.models import Movimiento
+from oauth.domain.enums.tipo_cliente import TipoCliente
 from oauth.infrastructure.crypto.claves import nueva_clave_pem
 from oauth.tests.infrastructure.flujo import registrar
 
@@ -112,20 +114,20 @@ def test_login_y_la_api_desde_la_terminal(emisor, ana, almacen):
         # El refresh token, guardado y solo para ti
         ruta = almacen.ruta
         assert stat.S_IMODE(ruta.stat().st_mode) == 0o600 and stat.S_IMODE(ruta.parent.stat().st_mode) == 0o700
-        primero = almacen.leer(emisor)
-        assert primero.startswith("gst_rt_")
+        client_id, primero = cli.leer_sesion(almacen, emisor)
+        assert client_id == "gastos-cli" and primero.startswith("gst_rt_")
 
         # Cada orden pide un access token nuevo con el refresh token, que rota
         hogares = cli.llamar(http, almacen, "GET", "/hogares/", emisor=emisor).json()["results"]
         assert [h["nombre"] for h in hogares] == ["Casa"]
-        assert almacen.leer(emisor) != primero
+        assert cli.leer_sesion(almacen, emisor)[1] != primero
 
         datos = {"cuenta": cuenta.pk, "importe": "-3.20", "concepto": "Café", "fecha": "2026-10-20"}
         r = cli.llamar(http, almacen, "POST", f"/hogares/{hogar.pk}/movimientos/", emisor=emisor, json=datos)
         assert Movimiento.objects.get(pk=r.json()["id"]).creado_por == usuario
 
         # Cerrar sesión revoca en el servidor: el refresh token ya no sirve ni aunque alguien lo hubiera copiado
-        copiado = almacen.leer(emisor)
+        _, copiado = cli.leer_sesion(almacen, emisor)
         cli.logout(http, almacen, emisor=emisor)
         assert almacen.leer(emisor) is None
         r = http.post(
@@ -159,7 +161,7 @@ def test_una_vuelta_de_otro_servidor_se_rechaza(emisor, ana, almacen):
 def test_la_sesion_revocada_en_el_servidor(emisor, ana, almacen):
     with httpx.Client(timeout=10) as http:
         cli.login(http, almacen, emisor=emisor, abrir=navegador())
-        refresh = almacen.leer(emisor)
+        _, refresh = cli.leer_sesion(almacen, emisor)
         http.post(f"{emisor}/revoke_token/", data={"token": refresh, "client_id": "gastos-cli"})
         with pytest.raises(cli.ErrorOAuth, match="caducado o se ha revocado"):
             cli.access_token(http, almacen, emisor=emisor)
@@ -260,3 +262,76 @@ def test_el_almacen_sin_llavero_es_un_archivo_600(tmp_path):
     almacen.borrar("https://a")
     assert (almacen.leer("https://a"), almacen.leer("https://b")) == (None, "gst_rt_2")
     assert stat.S_IMODE(almacen.ruta.stat().st_mode) == 0o600
+
+
+def test_si_el_kid_no_esta_en_el_jwks_se_vuelve_a_pedir_una_vez(clave):
+    """Ejercicio 2: el servidor ha rotado su clave y el JWKS que teníamos (de una caché) aún no trae la nueva."""
+    pem, jwks_nuevo = clave
+    peticiones = []
+
+    def servidor(request):
+        peticiones.append(request.headers.get("Cache-Control"))
+        return httpx.Response(200, json={"keys": []} if len(peticiones) == 1 else jwks_nuevo)
+
+    with httpx.Client(transport=httpx.MockTransport(servidor)) as http:
+        jwks = cli.jwks_con_kid(http, {"jwks_uri": "https://gastos.example.com/jwks"}, firmar(pem))
+    assert jwks == jwks_nuevo and peticiones == [None, "no-cache"]
+
+
+# ── Ejercicio 3: login --dispositivo (device authorization grant) ──
+def test_login_desde_un_dispositivo_sin_navegador(emisor, ana, almacen, time_machine):
+    registrar(
+        "gastos-cli-dispositivo", tipo=TipoCliente.DISPOSITIVO, scopes="gastos:leer gastos:escribir", redirect_uris=()
+    )
+    time_machine.move_to(datetime.now(UTC), tick=True)  # el reloj sigue corriendo; dormir() lo adelanta
+    mensajes, personas = [], []
+
+    def avisar(mensaje):  # la terminal enseña el código; la persona lo escribe en su móvil (otro hilo)
+        mensajes.append(mensaje)
+        codigo = mensaje.rsplit(" ", 1)[1]
+
+        def en_el_movil():
+            with httpx.Client(follow_redirects=True, timeout=10) as nav:
+                login = nav.get(f"{emisor}/device/")
+                datos = campos(login.text) | {"username": "ana@example.com", "password": "clave-segura-123"}
+                pantalla = nav.post(str(login.url), data=datos)
+                confirmar = nav.post(str(pantalla.url), data=campos(pantalla.text) | {"user_code": codigo})
+                nav.post(str(confirmar.url), data=campos(confirmar.text) | {"action": "accept"})
+
+        personas.append(threading.Thread(target=en_el_movil, daemon=True))
+        personas[-1].start()
+
+    def dormir(segundos):  # el reloj del servidor avanza lo que el CLI espera (sin esperar de verdad)
+        personas[-1].join(timeout=10)  # (y la persona termina antes de la segunda pregunta)
+        time_machine.shift(segundos)
+
+    with httpx.Client(timeout=10) as http:
+        cli.login_dispositivo(http, almacen, emisor=emisor, dormir=dormir, avisar=avisar)
+        assert "/api/oauth/device/ y escribe el código " in mensajes[0]
+        assert cli.leer_sesion(almacen, emisor)[0] == "gastos-cli-dispositivo"
+        hogares = cli.llamar(http, almacen, "GET", "/hogares/", emisor=emisor).json()[
+            "results"
+        ]  # renueva con SU cliente
+        assert [h["nombre"] for h in hogares] == ["Casa"]
+
+
+@pytest.mark.parametrize(
+    "errores, mensaje",
+    [(["slow_down", "access_denied"], "Has cancelado"), (["authorization_pending", "expired_token"], "caducado")],
+)
+def test_login_desde_un_dispositivo_errores(errores, mensaje):
+    """El servidor dice que espere más (slow_down: +5 s), que todavía no (authorization_pending) o que no."""
+    pendientes, esperas = list(errores), []
+
+    def servidor(request):
+        if request.url.path.endswith("openid-configuration"):
+            return httpx.Response(200, json={"issuer": "https://g/api/oauth", "device_authorization_endpoint":
+                                             "https://g/d", "token_endpoint": "https://g/t"})  # fmt: skip
+        if request.url.path == "/d":
+            return httpx.Response(200, json={"device_code": "x", "user_code": "ABCDEFGH", "verification_uri": "v",
+                                             "interval": 5, "expires_in": 600})  # fmt: skip
+        return httpx.Response(400, json={"error": pendientes.pop(0)})
+
+    with httpx.Client(transport=httpx.MockTransport(servidor)) as http, pytest.raises(cli.ErrorOAuth, match=mensaje):
+        cli.login_dispositivo(http, None, emisor="https://g/api/oauth", dormir=esperas.append, avisar=lambda m: None)
+    assert esperas == ([5, 10] if errores[0] == "slow_down" else [5, 5])

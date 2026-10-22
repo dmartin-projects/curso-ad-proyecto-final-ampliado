@@ -12,6 +12,13 @@ from oauth.infrastructure.database.models.cliente_oauth_model import ClienteOAut
 
 Application = get_application_model()
 
+GRANT = {  # un flujo por tipo de cliente
+    TipoCliente.NATIVA: Application.GRANT_AUTHORIZATION_CODE,
+    TipoCliente.WEB: Application.GRANT_AUTHORIZATION_CODE,
+    TipoCliente.SERVICIO: Application.GRANT_CLIENT_CREDENTIALS,
+    TipoCliente.DISPOSITIVO: Application.GRANT_DEVICE_CODE,  # ejercicio 3
+}
+
 
 class ClienteCommandRepositoryORM(IClienteCommandRepository):
     def existe(self, client_id):
@@ -22,15 +29,11 @@ class ClienteCommandRepositoryORM(IClienteCommandRepository):
         aplicacion = Application(
             name=cliente.nombre,
             client_type=Application.CLIENT_CONFIDENTIAL if cliente.tipo.confidencial else Application.CLIENT_PUBLIC,
-            authorization_grant_type=(
-                Application.GRANT_AUTHORIZATION_CODE
-                if cliente.tipo.con_usuario
-                else Application.GRANT_CLIENT_CREDENTIALS
-            ),
+            authorization_grant_type=GRANT[cliente.tipo],
             redirect_uris=" ".join(cliente.redirect_uris),
             # El ID token, firmado con la clave privada del servidor (RS256): cualquiera lo verifica con la pública
             # (JWKS). HS256 usaría el client secret como clave: imposible en un public client.
-            algorithm=Application.RS256_ALGORITHM if cliente.tipo.con_usuario else Application.NO_ALGORITHM,
+            algorithm=Application.RS256_ALGORITHM if cliente.tipo.con_redirect else Application.NO_ALGORITHM,
             client_secret=secreto,
             hash_client_secret=True,  # en la base de datos, solo su hash (como una contraseña)
             skip_authorization=False,  # siempre la pantalla de consentimiento

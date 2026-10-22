@@ -83,6 +83,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./features/notificaciones/pages/notificaciones/notificaciones'),
       },
+      // Módulo 90 (ejercicio 1): a qué aplicaciones has dado acceso a tu cuenta
+      {
+        path: 'aplicaciones',
+        loadComponent: () => import('./features/cuenta/pages/aplicaciones/aplicaciones'),
+      },
       // Backoffice (módulos 79 y 81): solo el personal; el código ni se descarga para los demás
       {
         path: 'soporte',

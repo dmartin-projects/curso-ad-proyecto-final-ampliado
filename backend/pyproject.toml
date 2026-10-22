@@ -188,6 +188,16 @@ type = "forbidden"
 source_modules = ["backoffice.domain", "backoffice.application"]
 forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios"]
 
+# ── Ejercicio 2 del módulo 88: los procesos no se conocen entre sí ──
+# Tickets, importaciones e informes trabajan sobre finanzas y hogares, y avisan por sus signals; ninguno importa a
+# otro (ni directa ni indirectamente). Si mañana importaciones necesita algo de tickets, es una decisión de diseño:
+# se cambia aquí, a la vista de todos.
+[[tool.importlinter.contracts]]
+id = "procesos-independientes"
+name = "Tickets, importaciones e informes no dependen unos de otros"
+type = "independence"
+modules = ["tickets", "importaciones", "informes"]
+
 # ── 4. Lo que una app ofrece a las demás ──
 # Su contenedor (use cases) con sus InputDTOs y su dominio; para leer, sus modelos (<app>/models.py) y sus query
 # services (database/repositories/*_query_service_orm.py); sus signals (el contrato de sus avisos) y, de hogares, la

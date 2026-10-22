@@ -10,6 +10,10 @@ class IMembresiaCommandRepository(ABC):
         """De ESE hogar, o MiembroNoEncontradoException."""
 
     @abstractmethod
+    def del_usuario(self, hogar_id: int, usuario_id: int, *, bloquear: bool = False) -> Membresia:
+        """La membresía de esa persona en ese hogar, o MiembroNoEncontradoException (ejercicio 1 del módulo 88)."""
+
+    @abstractmethod
     def admins(self, hogar_id: int) -> int:
         """Cuántos administradores tiene, con sus filas BLOQUEADAS hasta el final de la transacción."""
 

@@ -742,7 +742,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** @description /hogares/{h}/miembros/: ver (todos), cambiar rol y expulsar (admin). */
+        /** @description /hogares/{h}/miembros/: ver (todos), cambiar rol y expulsar (admin), salir (cualquiera). */
         get: operations["hogares_miembros_list"];
         put?: never;
         post?: never;
@@ -760,14 +760,14 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** @description /hogares/{h}/miembros/: ver (todos), cambiar rol y expulsar (admin). */
+        /** @description /hogares/{h}/miembros/: ver (todos), cambiar rol y expulsar (admin), salir (cualquiera). */
         put: operations["hogares_miembros_update"];
         post?: never;
-        /** @description /hogares/{h}/miembros/: ver (todos), cambiar rol y expulsar (admin). */
+        /** @description /hogares/{h}/miembros/: ver (todos), cambiar rol y expulsar (admin), salir (cualquiera). */
         delete: operations["hogares_miembros_destroy"];
         options?: never;
         head?: never;
-        /** @description /hogares/{h}/miembros/: ver (todos), cambiar rol y expulsar (admin). */
+        /** @description /hogares/{h}/miembros/: ver (todos), cambiar rol y expulsar (admin), salir (cualquiera). */
         patch: operations["hogares_miembros_partial_update"];
         trace?: never;
     };
@@ -780,8 +780,25 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description /hogares/{h}/miembros/: ver (todos), cambiar rol y expulsar (admin). */
+        /** @description /hogares/{h}/miembros/: ver (todos), cambiar rol y expulsar (admin), salir (cualquiera). */
         post: operations["hogares_miembros_invitar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hogares/{hogar_pk}/miembros/salir/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description /hogares/{h}/miembros/: ver (todos), cambiar rol y expulsar (admin), salir (cualquiera). */
+        post: operations["hogares_miembros_salir_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -3625,6 +3642,26 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Invitacion"];
                 };
+            };
+        };
+    };
+    hogares_miembros_salir_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

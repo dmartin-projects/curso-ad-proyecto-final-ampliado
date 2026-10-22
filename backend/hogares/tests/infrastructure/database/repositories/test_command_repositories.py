@@ -76,6 +76,9 @@ def test_miembros(entorno):
     assert not entorno.miembros.es_miembro(otro.id, usuario_id=entorno.ana)
     with pytest.raises(MiembroNoEncontradoException):
         entorno.miembros.obtener(otro.id, luis.id)
+    assert entorno.miembros.del_usuario(h.id, entorno.luis, bloquear=True).id == luis.id
+    with pytest.raises(MiembroNoEncontradoException):
+        entorno.miembros.del_usuario(otro.id, entorno.luis)
     luis.rol = Rol.LECTOR
     entorno.miembros.guardar(luis)
     assert (

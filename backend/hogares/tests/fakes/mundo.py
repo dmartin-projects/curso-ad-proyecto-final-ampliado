@@ -6,6 +6,7 @@ from datetime import UTC, datetime
 
 from core.domain.enums.rol import Rol
 from core.domain.vo.actor import Actor
+from core.tests.fakes.auditoria_fake import AuditoriaFake
 from core.tests.fakes.publicador_eventos_fake import PublicadorEventosFake
 from core.tests.fakes.reloj_fake import RelojFake
 from core.tests.fakes.unidad_de_trabajo_fake import UnidadDeTrabajoFake
@@ -16,6 +17,7 @@ from hogares.application.eliminar_hogar_use_case.eliminar_hogar_use_case import 
 from hogares.application.expulsar_miembro_use_case.expulsar_miembro_use_case import ExpulsarMiembroUseCase
 from hogares.application.invitar_use_case.invitar_use_case import InvitarUseCase
 from hogares.application.modificar_hogar_use_case.modificar_hogar_use_case import ModificarHogarUseCase
+from hogares.application.salir_del_hogar_use_case.salir_del_hogar_use_case import SalirDelHogarUseCase
 from hogares.domain.bo.membresia import Membresia
 from hogares.tests.fakes.hogar_command_repository_fake import HogarCommandRepositoryFake
 from hogares.tests.fakes.invitacion_command_repository_fake import InvitacionCommandRepositoryFake
@@ -33,13 +35,15 @@ class Mundo:
     def __init__(self, emails=None):
         self.hogares, self.miembros = HogarCommandRepositoryFake(), MembresiaCommandRepositoryFake(emails)
         self.invitaciones, self.eventos = InvitacionCommandRepositoryFake(), PublicadorEventosFake()
-        self.uow = UnidadDeTrabajoFake(self.hogares, self.miembros, self.invitaciones, self.eventos)
+        self.auditoria = AuditoriaFake()
+        self.uow = UnidadDeTrabajoFake(self.hogares, self.miembros, self.invitaciones, self.eventos, self.auditoria)
         comun = {"miembros": self.miembros, "eventos": self.eventos, "uow": self.uow}
         self.crear = CrearHogarUseCase(hogares=self.hogares, **comun)
         self.modificar = ModificarHogarUseCase(hogares=self.hogares, **comun)
         self.eliminar = EliminarHogarUseCase(hogares=self.hogares, **comun)
-        self.cambiar_rol = CambiarRolUseCase(**comun)
-        self.expulsar = ExpulsarMiembroUseCase(**comun)
+        self.cambiar_rol = CambiarRolUseCase(auditoria=self.auditoria, **comun)
+        self.expulsar = ExpulsarMiembroUseCase(auditoria=self.auditoria, **comun)
+        self.salir = SalirDelHogarUseCase(auditoria=self.auditoria, **comun)
         invitaciones = {"invitaciones": self.invitaciones, "reloj": RelojFake(AHORA.date(), AHORA), **comun}
         self.invitar, self.aceptar = InvitarUseCase(**invitaciones), AceptarInvitacionUseCase(**invitaciones)
 

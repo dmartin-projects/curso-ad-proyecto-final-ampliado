@@ -18,6 +18,12 @@ class MembresiaCommandRepositoryFake(AlmacenEnMemoria, IMembresiaCommandReposito
             raise MiembroNoEncontradoException()
         return copia(m)
 
+    def del_usuario(self, hogar_id, usuario_id, *, bloquear=False):
+        for m in self._datos.values():
+            if (m.hogar_id, m.usuario_id) == (hogar_id, usuario_id):
+                return copia(m)
+        raise MiembroNoEncontradoException()
+
     def admins(self, hogar_id):
         return sum(1 for m in self._datos.values() if m.hogar_id == hogar_id and m.rol == Rol.ADMIN)
 

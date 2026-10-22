@@ -1,5 +1,6 @@
 # hogares/infrastructure/container.py — composition root de los hogares (módulo 88)
 from core.infrastructure.clock.reloj_django import RelojDjango
+from core.infrastructure.database.auditoria_django import AuditoriaDjango
 from core.infrastructure.database.unidad_de_trabajo_django import UnidadDeTrabajoDjango
 from eventos.infrastructure import container as eventos
 from hogares.application.aceptar_invitacion_use_case.aceptar_invitacion_use_case import AceptarInvitacionUseCase
@@ -26,6 +27,8 @@ from hogares.application.obtener_invitacion_use_case.i_obtener_invitacion_use_ca
 from hogares.application.obtener_invitacion_use_case.obtener_invitacion_use_case import ObtenerInvitacionUseCase
 from hogares.application.obtener_miembro_use_case.i_obtener_miembro_use_case import IObtenerMiembroUseCase
 from hogares.application.obtener_miembro_use_case.obtener_miembro_use_case import ObtenerMiembroUseCase
+from hogares.application.salir_del_hogar_use_case.i_salir_del_hogar_use_case import ISalirDelHogarUseCase
+from hogares.application.salir_del_hogar_use_case.salir_del_hogar_use_case import SalirDelHogarUseCase
 from hogares.infrastructure.database.repositories.hogar_command_repository_orm import HogarCommandRepositoryORM
 from hogares.infrastructure.database.repositories.hogar_query_service_orm import HogarQueryServiceORM
 from hogares.infrastructure.database.repositories.invitacion_command_repository_orm import (
@@ -63,12 +66,21 @@ def eliminar_hogar() -> IEliminarHogarUseCase:
 
 
 # ── Los miembros ──
+def _miembros() -> dict:
+    """Los cambios de miembros se auditan: quién cambió el rol de quién, quién sacó a quién (ejercicio 3)."""
+    return {"miembros": MembresiaCommandRepositoryORM(), "auditoria": AuditoriaDjango(), **_transaccion_y_eventos()}
+
+
 def cambiar_rol() -> ICambiarRolUseCase:
-    return CambiarRolUseCase(miembros=MembresiaCommandRepositoryORM(), **_transaccion_y_eventos())
+    return CambiarRolUseCase(**_miembros())
 
 
 def expulsar_miembro() -> IExpulsarMiembroUseCase:
-    return ExpulsarMiembroUseCase(miembros=MembresiaCommandRepositoryORM(), **_transaccion_y_eventos())
+    return ExpulsarMiembroUseCase(**_miembros())
+
+
+def salir_del_hogar() -> ISalirDelHogarUseCase:
+    return SalirDelHogarUseCase(**_miembros())
 
 
 # ── Las invitaciones ──

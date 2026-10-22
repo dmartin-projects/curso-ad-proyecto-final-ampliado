@@ -165,19 +165,6 @@ def test_dos_subidas_simultaneas_del_mismo_extracto(escenario, subir, monkeypatc
     assert r.status_code == 400 and r.json()["errors"]["archivo"] == ["Este extracto ya se importó."]
 
 
-def test_borrar_un_hogar_con_importaciones_y_tickets(escenario, subir, cliente):
-    from tickets.models import Ticket
-
-    hogar, roles, cuenta = escenario
-    subir(hogar, roles["miembro"], cuenta)
-    Ticket.objects.create(
-        hogar=hogar, cuenta=cuenta, archivo="tickets/x.jpg", nombre_original="x.jpg", tipo="image/jpeg"
-    )
-    # Importacion.cuenta y Ticket.cuenta son RESTRICT: borrar el hogar entero sí puede (y no da un 500)
-    assert cliente(roles["admin"]).delete(f"/api/v1/hogares/{hogar.pk}/").status_code == 204
-    assert not Importacion.objects.filter(hogar=hogar).exists() and not Ticket.objects.filter(hogar=hogar).exists()
-
-
 def test_archivo_binario_se_rechaza_y_csv_ilegible_acaba_en_error(escenario, subir):
     hogar, roles, cuenta = escenario
     assert subir(hogar, roles["miembro"], cuenta, b"PK\x03\x04\x00\x00", "extracto.xlsx").status_code == 400

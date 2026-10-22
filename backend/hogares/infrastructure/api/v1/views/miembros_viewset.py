@@ -16,6 +16,8 @@ from hogares.application.obtener_invitacion_use_case.dtos.obtener_invitacion_inp
     ObtenerInvitacionInputDTO,
 )
 from hogares.application.obtener_miembro_use_case.dtos.obtener_miembro_input_dto import ObtenerMiembroInputDTO
+from hogares.application.salir_del_hogar_use_case.dtos.salir_del_hogar_input_dto import SalirDelHogarInputDTO
+from hogares.application.salir_del_hogar_use_case.salir_del_hogar_use_case import SalirDelHogarUseCase
 from hogares.infrastructure import container
 from hogares.infrastructure.api.base.hogar_desde_url_mixin import HogarDesdeUrlMixin
 from hogares.infrastructure.api.base.rol_en_hogar import RolEnHogar
@@ -34,7 +36,7 @@ class MiembrosViewSet(
     mixins.DestroyModelMixin,
     viewsets.GenericViewSet,
 ):
-    """/hogares/{h}/miembros/: ver (todos), cambiar rol y expulsar (admin)."""
+    """/hogares/{h}/miembros/: ver (todos), cambiar rol y expulsar (admin), salir (cualquiera)."""
 
     serializer_class = MiembroSerializer
     permission_classes = [IsAuthenticated, RolEnHogar]
@@ -45,6 +47,7 @@ class MiembrosViewSet(
         "DELETE": MembresiaModel.Rol.ADMIN,
         "POST": MembresiaModel.Rol.ADMIN,
     }
+    roles_por_accion = {"salir": SalirDelHogarUseCase.rol_minimo}  # el del use case: 403 antes de nada
     pagination_class = None
 
     def get_queryset(self):
@@ -89,3 +92,9 @@ class MiembrosViewSet(
         )
         respuesta = InvitacionSerializer(invitacion_presenter.presentar(leida)).data
         return Response(respuesta, status=status.HTTP_201_CREATED)
+
+    @extend_schema(request=None, responses={204: None})
+    @action(detail=False, methods=["post"])
+    def salir(self, request, *args, **kwargs):
+        container.salir_del_hogar().ejecutar(SalirDelHogarInputDTO(self.hogar.pk, self.actor))
+        return Response(status=status.HTTP_204_NO_CONTENT)

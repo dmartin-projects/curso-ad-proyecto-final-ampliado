@@ -22,6 +22,13 @@ class MembresiaCommandRepositoryORM(IMembresiaCommandRepository):
             raise MiembroNoEncontradoException()
         return membresia_a_bo(fila)
 
+    def del_usuario(self, hogar_id, usuario_id, *, bloquear=False):
+        consulta = MembresiaModel.objects.filter(hogar_id=hogar_id, usuario_id=usuario_id)
+        fila = (consulta.select_for_update() if bloquear else consulta).first()
+        if fila is None:
+            raise MiembroNoEncontradoException()
+        return membresia_a_bo(fila)
+
     def admins(self, hogar_id: int) -> int:
         # FOR UPDATE de los administradores (como el módulo 71): dos peticiones a la vez no pueden quitar cada una a
         # uno de los dos últimos. (list(): PostgreSQL no admite FOR UPDATE con COUNT)

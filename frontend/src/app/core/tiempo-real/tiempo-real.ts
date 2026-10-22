@@ -21,7 +21,7 @@ import {
 } from 'rxjs';
 import { webSocket } from 'rxjs/webSocket';
 
-import { Notificacion } from '../api/tipos';
+import { Notificacion, TicketWs } from '../api/tipos';
 import { AuthStore } from '../auth/auth-store';
 
 /** Mensajes que envía el consumer de Channels (módulo 76). */
@@ -39,7 +39,19 @@ export type MensajeWs =
 
 export type EstadoConexion = 'desconectado' | 'conectando' | 'conectado';
 
-const urlBase = () => `${location.protocol === 'https:' ? 'wss' : 'ws'}://${location.host}/ws`;
+/**
+ * Dónde abrir el socket (módulo 86). En producción y staging la página está en Vercel, que no reenvía
+ * WebSockets: el backend de cada entorno dice su URL pública en el ticket. Sin ella (desarrollo, E2E),
+ * el mismo host que la página, que el proxy de `ng serve` lleva a Django.
+ */
+export function urlWebSocket(
+  { ticket, url }: TicketWs,
+  pagina: Pick<Location, 'protocol' | 'host'>,
+) {
+  const base =
+    url ?? `${pagina.protocol === 'https:' ? 'wss' : 'ws'}://${pagina.host}/ws/notificaciones/`;
+  return `${base}?ticket=${encodeURIComponent(ticket)}`;
+}
 
 /**
  * Una única conexión WebSocket para toda la app, solo mientras hay sesión:
@@ -58,12 +70,12 @@ export class TiempoReal {
 
   private readonly conexion$: Observable<MensajeWs> = defer(() => {
     this._estado.set('conectando');
-    return this.http.post<{ ticket: string }>('/api/v1/notificaciones/ws-ticket/', null);
+    return this.http.post<TicketWs>('/api/v1/notificaciones/ws-ticket/', null);
   }).pipe(
-    switchMap(({ ticket }) => {
+    switchMap((respuesta) => {
       const cerrado = new Subject<void>();
       const socket = webSocket<MensajeWs | { accion: 'ping' }>({
-        url: `${urlBase()}/notificaciones/?ticket=${ticket}`,
+        url: urlWebSocket(respuesta, location),
         openObserver: { next: () => this._estado.set('conectado') },
         closeObserver: {
           next: () => {

@@ -1,0 +1,27 @@
+#cloud-config
+# infra/terraform/cloud-init.yaml — la preparación de la VM la primera vez que arranca (módulos 67, 68 y 86).
+# Solo se aplica al CREAR la VM (oci.tf ignora sus cambios después).
+package_update: true
+package_upgrade: true
+packages: [ca-certificates, curl, unattended-upgrades, fail2ban, rclone]
+
+write_files:
+  - path: /etc/ssh/sshd_config.d/01-endurecer.conf # "01-": el primer valor gana (módulo 67)
+    content: |
+      PasswordAuthentication no
+      PermitRootLogin no
+
+runcmd:
+  # Las imágenes de Ubuntu de Oracle rechazan todo salvo SSH (módulo 68): 80/443 antes del REJECT, y guardar
+  # ANTES de instalar Docker (si no, se guardarían también sus reglas)
+  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 80 -j ACCEPT
+  - iptables -I INPUT 6 -m state --state NEW -p tcp --dport 443 -j ACCEPT
+  - iptables -I INPUT 6 -m state --state NEW -p udp --dport 443 -j ACCEPT
+  - netfilter-persistent save
+  - curl -fsSL https://get.docker.com | sh
+  - usermod -aG docker ubuntu
+  - fallocate -l 4G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile
+  - echo '/swapfile none swap sw 0 0' >> /etc/fstab
+  - mkdir -p /opt/gastos/produccion /opt/gastos/staging /opt/gastos/edge
+  - chown -R ubuntu:ubuntu /opt/gastos
+  - systemctl restart ssh

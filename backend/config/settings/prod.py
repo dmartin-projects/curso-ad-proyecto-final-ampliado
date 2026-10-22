@@ -9,7 +9,9 @@ CSRF_TRUSTED_ORIGINS = env.list("DJANGO_CSRF_TRUSTED_ORIGINS")
 FRONTEND_URL = env("FRONTEND_URL")  # enlaces de los correos: sin valor por defecto, que no salgan a localhost
 
 # ── HTTPS detrás del proxy (módulos 29 y 65) ──
-SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")  # lo pone Caddy (no se fía del que llega)
+# USE_X_FORWARDED_HOST sigue en False (módulo 86): el Host que valida Django es el de la API, el que pone Vercel
+# al reenviar. Las URLs que el navegador ve (los enlaces de los correos) salen de FRONTEND_URL.
 SECURE_SSL_REDIRECT = True
 SECURE_REDIRECT_EXEMPT = [r"^health/"]  # las sondas de Docker hablan HTTP dentro de la red interna
 SESSION_COOKIE_SECURE = CSRF_COOKIE_SECURE = True
@@ -83,7 +85,10 @@ IA_API_KEY = env("IA_API_KEY")
 LOGGING["handlers"]["consola"]["formatter"] = "json"
 
 # ── DRF (módulos 32 y 36) ──
-REST_FRAMEWORK["NUM_PROXIES"] = 1  # la IP real para el throttling llega en X-Forwarded-For (Caddy)
+# La IP del navegador, para el throttling, en X-Forwarded-For. Con el frontend en Vercel (módulo 86) hay DOS
+# proxies (Vercel → Caddy), pero Caddy deja UNA sola IP: la que manda Vercel si la petición trae su secreto, o
+# la de quien conecta si no. Si Caddy añadiera la suya, la última sería la de Vercel: un contador para todos.
+REST_FRAMEWORK["NUM_PROXIES"] = 1
 # El esquema y Swagger, solo para el personal (en desarrollo, abiertos)
 SPECTACULAR_SETTINGS["SERVE_PERMISSIONS"] = ["rest_framework.permissions.IsAdminUser"]
 

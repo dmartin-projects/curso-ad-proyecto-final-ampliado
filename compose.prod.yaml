@@ -1,5 +1,9 @@
-# compose.prod.yaml — producción en una sola VM (módulos 64, 68 y 83)
-name: gastos # nombre del proyecto: contenedores gastos-web-1…, volúmenes gastos_pgdata… (distinto de gastos-dev)
+# compose.prod.yaml — un ENTORNO de Gastos en la VM (módulos 64, 68, 83 y 86)
+# Módulo 86: el mismo archivo para producción y staging. Cada uno en su directorio (/opt/gastos/produccion,
+# /opt/gastos/staging) con su .env, que da el nombre del proyecto: contenedores, volúmenes y red propios
+# (gastos_pgdata, gastos-staging_pgdata…). Producción sigue llamándose "gastos": los volúmenes del módulo 83.
+# La puerta (Caddy, puertos 80/443) ya no está aquí: es compartida, compose.edge.yaml.
+name: ${COMPOSE_PROJECT_NAME:?Falta COMPOSE_PROJECT_NAME en .env (gastos o gastos-staging)}
 x-backend: &backend
   image: ghcr.io/${GHCR_OWNER}/gastos-backend:${VERSION:-latest}
   env_file: .env
@@ -56,6 +60,9 @@ services:
     depends_on: *tras-migrar
     environment:
       DB_POOL_MAX: "4" # pool de conexiones por proceso (prod.py): ASGI + CONN_MAX_AGE agota PostgreSQL
+      # Módulo 86: que uvicorn crea el X-Forwarded-For de Caddy (por defecto solo el de 127.0.0.1). Así los logs
+      # de acceso dicen la IP del navegador, no la de Caddy. Seguro: a la web solo llega Caddy (red interna)
+      FORWARDED_ALLOW_IPS: "*"
       OTEL_SERVICE_NAME: gastos-web # módulo 84: cada proceso, con su nombre en Grafana
     healthcheck:
       test: ["CMD", "curl", "-fsS", "http://localhost:8000/health/ready/"]
@@ -63,6 +70,10 @@ services:
       timeout: 5s
       start_period: 20s
     expose: ["8000"]
+    networks:
+      default:
+      edge: # módulo 86: Caddy (compose.edge.yaml) la encuentra como web-produccion o web-staging
+        aliases: ["web-${ENTORNO:?Falta ENTORNO en .env}"]
     deploy:
       resources:
         limits: { memory: 1g }
@@ -142,7 +153,7 @@ services:
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
       KAFKA_LOG_DIRS: /var/lib/kafka/data
       # Memoria: la JVM, acotada. El resto lo usa Kafka a través de la caché de disco del sistema operativo
-      KAFKA_HEAP_OPTS: -Xms384m -Xmx384m
+      KAFKA_HEAP_OPTS: ${KAFKA_HEAP_OPTS:--Xms384m -Xmx384m} # módulo 86: staging, menos (entornos/staging.env)
     volumes: [kafkadata:/var/lib/kafka/data]
     expose: ["9092"]
     healthcheck:
@@ -188,6 +199,10 @@ services:
       <<: *estadisticas-entorno
       OTEL_SERVICE_NAME: estadisticas-api
     expose: ["8000"]
+    networks:
+      default:
+      edge:
+        aliases: ["estadisticas-${ENTORNO}"]
     depends_on:
       estadisticas-migrate: { condition: service_completed_successfully }
     deploy:
@@ -260,21 +275,13 @@ services:
       interval: 30s
       retries: 5
 
-  proxy: # Caddy + la SPA (infra/proxy.Dockerfile); el único que publica puertos
-    image: ghcr.io/${GHCR_OWNER}/gastos-proxy:${VERSION:-latest}
-    restart: unless-stopped
-    environment:
-      DOMINIO: ${DOMINIO}
-      ACME_EMAIL: ${ACME_EMAIL}
-    ports: ["80:80", "443:443", "443:443/udp"] # 443/udp: HTTP/3
-    volumes: [caddydata:/data, caddyconfig:/config]
-    depends_on:
-      web: { condition: service_healthy }
+networks:
+  edge: # módulo 86: la red compartida con Caddy (la crea desplegar.sh). Solo web y estadisticas-api están en ella
+    name: gastos-edge
+    external: true
 
 volumes:
   kafkadata: # módulo 85
   pgdata:
   redisdata:
   rabbitdata:
-  caddydata:
-  caddyconfig:

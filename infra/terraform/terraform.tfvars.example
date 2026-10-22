@@ -1,0 +1,12 @@
+# infra/terraform/terraform.tfvars.example — cópialo a terraform.tfvars (en .gitignore) y rellénalo (módulo 86)
+oci_region        = "eu-madrid-1"
+compartment_ocid  = "ocid1.tenancy.oc1..aaaa…"
+ssh_clave_publica = "ssh-ed25519 AAAA… tu@mac"
+dominio           = "tudominio.com"
+vercel_equipo     = "tu-equipo-de-vercel"
+github_repo       = "tu-usuario/gastos"
+# Los secretos NO van aquí: TF_VAR_origen_secreto_produccion y TF_VAR_origen_secreto_staging (desde SOPS)
+# Correo (Resend → Domains → gastos.tudominio.com): sin estos dos, no se crean sus registros
+# resend_mx      = "feedback-smtp.eu-west-1.amazonses.com"
+# resend_dkim    = "p=MIGfMA0GCSqGSIb3DQEB…"
+# dmarc_informes = "dmarc@tudominio.com"

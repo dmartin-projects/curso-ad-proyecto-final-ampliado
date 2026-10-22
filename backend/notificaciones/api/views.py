@@ -1,3 +1,4 @@
+from django.conf import settings
 from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import mixins, serializers, status, viewsets
 from rest_framework.decorators import action
@@ -58,6 +59,11 @@ class TicketWebSocketView(APIView):
 
     @extend_schema(request=None, responses={201: TicketWsSerializer})
     def post(self, request, *args, **kwargs):
-        return Response(
-            {"ticket": crear_ticket(request.user), "caduca_en": DURACION_TICKET}, status=status.HTTP_201_CREATED
-        )
+        datos = {
+            "ticket": crear_ticket(request.user),
+            "caduca_en": DURACION_TICKET,
+            # Módulo 86: con el frontend en Vercel, el socket va directo a la API (Vercel no reenvía WebSockets).
+            # La URL la pone el backend de cada entorno: el mismo frontend vale para staging y producción.
+            "url": settings.WS_URL or None,
+        }
+        return Response(datos, status=status.HTTP_201_CREATED)

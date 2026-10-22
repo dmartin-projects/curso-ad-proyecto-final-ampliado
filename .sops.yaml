@@ -1,0 +1,13 @@
+# .sops.yaml — quién puede descifrar cada archivo de infra/secretos/ (módulo 86).
+# Cada entorno, con DOS destinatarios (recipients) de age: tú (tu clave, en tu Mac y en tu gestor de
+# contraseñas) y la clave de ESE entorno (en el GitHub Environment del mismo nombre, secreto SOPS_AGE_KEY).
+# Así el job de staging no puede descifrar producción. Tras cambiar destinatarios: sops updatekeys <archivo>.
+creation_rules:
+  - path_regex: infra/secretos/produccion\.env$
+    age: >-
+      age1TU_CLAVE_PUBLICA_PERSONAL,
+      age1LA_CLAVE_PUBLICA_DE_PRODUCCION
+  - path_regex: infra/secretos/staging\.env$
+    age: >-
+      age1TU_CLAVE_PUBLICA_PERSONAL,
+      age1LA_CLAVE_PUBLICA_DE_STAGING

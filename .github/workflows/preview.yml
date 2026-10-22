@@ -1,0 +1,45 @@
+# .github/workflows/preview.yml — una preview de Vercel por cada pull request (módulo 86)
+# El frontend del PR, contra la API de STAGING (las variables "preview" de Vercel). El backend del PR no se
+# despliega: si el PR cambia la API, la preview no lo verá hasta que llegue a main (y a staging).
+name: Preview
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write # para comentar el enlace
+
+concurrency: # un push nuevo al PR cancela la preview anterior a medio hacer
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  vercel:
+    # Los PR desde un fork no reciben secretos: sin VERCEL_TOKEN no hay preview
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    environment:
+      name: preview
+      url: ${{ steps.desplegar.outputs.url }}
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - id: desplegar
+        run: echo "url=$(infra/vercel-desplegar.sh preview)" >> "$GITHUB_OUTPUT"
+      - name: Comentar el enlace en el PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          URL: ${{ steps.desplegar.outputs.url }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          texto="🔍 Preview: $URL (API de staging · commit ${GITHUB_SHA::7})"
+          gh pr comment "$PR" --edit-last --body "$texto" || gh pr comment "$PR" --body "$texto"

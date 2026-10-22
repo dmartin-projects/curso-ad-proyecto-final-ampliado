@@ -9,10 +9,10 @@ Estado comprobado: 173 tests de *backend* (cobertura 93,6 %), 20 de *frontend* (
 ```
 backend/            Django 6.1 + DRF + Celery + Channels (módulos 71-79)
 frontend/           Angular 22 (módulos 80-81), Playwright en e2e/ (módulo 82)
-infra/              Caddyfile, proxy.Dockerfile, csp.mjs, desplegar.sh, backup.sh (módulo 83)
+infra/              Caddyfile, csp.mjs, desplegar.sh, backup.sh (módulos 83 y 86); entornos/, secretos/, terraform/ (86)
 compose.yaml        infraestructura de desarrollo: PostgreSQL, Redis, RabbitMQ, S3 (RustFS), Mailpit
-compose.prod.yaml   producción (módulo 83)
-docs/               runbook.md (operar producción, módulo 83)
+compose.prod.yaml   un entorno de la VM: producción o staging (módulos 83 y 86); compose.edge.yaml: Caddy (86)
+docs/               runbook.md (operar producción, módulos 83 y 86)
 .github/workflows/  ci.yml (con el job E2E) y release.yml
 ```
 
@@ -89,3 +89,16 @@ OTEL_SERVICE_NAME=gastos-worker uv run celery -A config worker -l info -Q ocr,de
 ```
 
 En producción, el servicio `collector` de `compose.prod.yaml` envía a Grafana Cloud con las variables `GRAFANA_CLOUD_*` de `.env.example`.
+
+**86 · Despliegue profesional.** El *frontend* en Vercel (una preview por *pull request*), la API en la VM de Oracle con dos entornos (staging y producción) detrás de un único Caddy, la infraestructura en Terraform y los secretos cifrados con SOPS:
+
+```
+frontend/vercel.json          rewrite de /api y /estadisticas a la API de cada entorno, cabeceras, CSP y caché
+compose.prod.yaml             UN entorno (el .env dice cuál); compose.edge.yaml: Caddy, la puerta de los dos
+infra/entornos/*.env          configuración en claro;  infra/secretos/*.env: secretos cifrados (SOPS + age)
+infra/terraform/              VM y red (Oracle), proyecto y variables (Vercel), DNS (Hostinger); terraform test
+infra/local/vercel-local.mjs  un "Vercel" local para ensayar la topología entera en tu máquina
+.github/workflows/            preview.yml (PR), staging.yml (main), produccion.yml (etiqueta v*, con aprobación)
+```
+
+Los pasos con tus cuentas (Oracle, Vercel, Hostinger, GitHub) están en el módulo 86 del curso.

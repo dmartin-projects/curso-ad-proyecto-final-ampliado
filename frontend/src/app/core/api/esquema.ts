@@ -1971,6 +1971,8 @@ export interface components {
             ticket: string;
             /** @description Segundos */
             caduca_en: number;
+            /** @description Dónde abrir el WebSocket (módulo 86). null: en el mismo host que la página */
+            url: string | null;
         };
         TokenObtainPairRequest: {
             email: string;

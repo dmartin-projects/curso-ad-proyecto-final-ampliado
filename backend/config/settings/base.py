@@ -130,6 +130,15 @@ CHANNEL_LAYERS = {
         },
     }
 }
+# ── WebSocket con el frontend en Vercel (módulo 86) ──
+# Vercel no hace de proxy de WebSockets: el navegador abre el socket DIRECTAMENTE contra la API. Por eso
+# la URL pública viaja en el ticket (WS_URL) y el Origin que llega es el de Vercel, no el de la API.
+# Sin configurar (desarrollo, E2E, tests): el mismo host que la página y orígenes = ALLOWED_HOSTS, como antes.
+WS_URL = env("WS_URL", default="")  # wss://api.gastos.tudominio.com/ws/notificaciones/
+WS_ORIGENES = env.list("WS_ORIGENES", default=[])  # orígenes exactos: https://gastos.tudominio.com
+# Las previews de UN proyecto de Vercel: https://<proyecto>-<9 letras o cifras>-<equipo>.vercel.app (staging)
+VERCEL_PREVIEW_PROYECTO = env("VERCEL_PREVIEW_PROYECTO", default="")
+VERCEL_PREVIEW_EQUIPO = env("VERCEL_PREVIEW_EQUIPO", default="")
 CELERY_BROKER_URL = env("CELERY_BROKER_URL", default="amqp://guest:guest@localhost:5672//")
 CELERY_RESULT_BACKEND = env("CELERY_RESULT_BACKEND", default="redis://localhost:6379/0")
 CELERY_TIMEZONE = TIME_ZONE

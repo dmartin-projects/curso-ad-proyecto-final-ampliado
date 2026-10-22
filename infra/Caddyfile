@@ -1,64 +1,75 @@
-# infra/Caddyfile — el proxy del proyecto (módulos 65 y 83)
-# DOMINIO y ACME_EMAIL llegan como variables de entorno del contenedor (compose.prod.yaml)
+# infra/Caddyfile — la puerta de la VM (módulos 65, 83 y 86): SOLO la API, para los dos entornos
+# Angular ya no está aquí (lo sirve Vercel). Cada entorno se registra con su edge.env, que escribe
+# desplegar.sh: API_HOST_PRODUCCION, ORIGEN_SECRETO_PRODUCCION, API_HOST_STAGING, ORIGEN_SECRETO_STAGING.
+# Un entorno que aún no existe se queda en un host .invalid solo HTTP (sin pedir certificados).
 {
+	{$CADDY_GLOBAL}
 	email {$ACME_EMAIL}
 }
 
-{$DOMINIO} {
+# args[0]: la web (Django) del entorno; args[1]: su servicio de estadísticas; args[2]: el secreto de Vercel
+(api) {
 	encode zstd gzip
-	# La CSP: la genera infra/csp.mjs en el build con los hashes de autoCsp (cambian con cada versión de index.html)
-	import /etc/caddy/csp.caddy
 
 	header {
 		Strict-Transport-Security "max-age=31536000; includeSubDomains"
 		X-Content-Type-Options "nosniff"
 		Referrer-Policy "same-origin"
 		X-Frame-Options "DENY"
-		Permissions-Policy "geolocation=(), microphone=()"
 		-Server
 	}
 
-	# API, WebSockets y sondas → Django (no hay /admin: el backoffice está en la app, módulo 79)
-	@django path /api/* /ws/* /health/*
-	handle @django {
-		request_body {
-			max_size 12MB # tickets de hasta 10 MB (módulo 74) + la envoltura multipart
+	request_body {
+		max_size 12MB # tickets de hasta 10 MB (módulo 74) + la envoltura multipart
+	}
+
+	# /api y /estadisticas, SOLO a través de Vercel: el rewrite añade X-Origen-Vercel con el secreto del
+	# entorno. Directo, 403: así la IP de X-Real-IP (la pone Vercel) es de fiar y nadie se salta Vercel.
+	@vercel {
+		path /api/* /estadisticas/*
+		header X-Origen-Vercel {args[2]}
+	}
+	@directo path /api/* /estadisticas/*
+
+	handle @vercel {
+		# Para Django, UNA sola IP: la del navegador (NUM_PROXIES = 1). Sin esto, Caddy añadiría la de
+		# Vercel detrás y el throttling contaría a todos los usuarios como uno.
+		handle /estadisticas/* {
+			reverse_proxy {args[1]} {
+				header_up X-Forwarded-For {http.request.header.X-Real-IP}
+				header_up -X-Origen-Vercel
+			}
 		}
-		reverse_proxy web:8000 {
+		handle {
+			reverse_proxy {args[0]} {
+				header_up X-Forwarded-For {http.request.header.X-Real-IP}
+				header_up X-Request-ID {http.request.uuid}
+				header_up -X-Origen-Vercel
+			}
+		}
+	}
+	handle @directo {
+		respond "La API se usa a traves de la web" 403
+	}
+
+	# El WebSocket (Vercel no lo reenvía: el navegador viene directo, módulo 86) y las sondas de salud.
+	# X-Forwarded-For: la IP de quien conecta (Caddy ignora la que traiga la petición).
+	@abierto path /ws/* /health/*
+	handle @abierto {
+		reverse_proxy {args[0]} {
 			header_up X-Request-ID {http.request.uuid}
 		}
 	}
 
-	# Módulo 85: el servicio de estadísticas (FastAPI). Si está caído, Caddy responde 502 SOLO aquí: el resto
-	# de la aplicación sigue funcionando (y la tarjeta de Angular dice "no disponible")
-	handle /estadisticas/* {
-		reverse_proxy estadisticas-api:8000
-	}
-
-	# La SPA de Angular (y sus fuentes, en /fuentes)
-	root * /srv/frontend
-
-	# main-NLPK26ND.js, chunk-C-wDPNTR.js, roboto-latin-400-normal-LOX3CHMS.woff2: el nombre cambia con el contenido
-	@conHash {
-		path_regexp -[0-9A-Za-z_-]{8}\.(js|css|woff2?)$
-		file
-	}
-	handle @conHash {
-		header Cache-Control "public, max-age=31536000, immutable"
-		file_server
-	}
-	# Uno con hash que no existe (un chunk de la versión anterior, pedido por una pestaña abierta antes del
-	# despliegue): 404 de verdad, NUNCA index.html, o el navegador intentaría ejecutar HTML como JavaScript
-	@hashPerdido path_regexp -[0-9A-Za-z_-]{8}\.(js|css|woff2?)$
-	handle @hashPerdido {
+	handle {
 		respond 404
 	}
+}
 
-	# Todo lo demás (index.html, también cuando responde a /hogares/3/tickets; ngsw.json; el manifest…)
-	# se revalida siempre: es lo que dice QUÉ versión cargar
-	handle {
-		header Cache-Control "no-cache"
-		try_files {path} /index.html
-		file_server
-	}
+{$API_HOST_PRODUCCION:http://produccion.invalid} {
+	import api web-produccion:8000 estadisticas-produccion:8000 {$ORIGEN_SECRETO_PRODUCCION:sin-configurar}
+}
+
+{$API_HOST_STAGING:http://staging.invalid} {
+	import api web-staging:8000 estadisticas-staging:8000 {$ORIGEN_SECRETO_STAGING:sin-configurar}
 }

@@ -154,6 +154,42 @@ jobs:
       - run: npx ng build --configuration production          # falla si se superan los budgets (módulo 57)
       - run: npm audit --audit-level=high
         continue-on-error: true
+  infra: # módulo 86: Terraform, scripts, secretos cifrados y la configuración de Vercel
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.17.0
+      - name: Terraform (formato, validez y tests con providers simulados, sin credenciales ni estado)
+        working-directory: infra/terraform
+        run: |
+          terraform fmt -check -recursive
+          terraform init -backend=false -input=false
+          terraform validate
+          terraform test
+      - name: Scripts
+        run: shellcheck infra/*.sh
+      - name: Los secretos están cifrados
+        run: |
+          curl -fsSLo /usr/local/bin/sops https://github.com/getsops/sops/releases/download/v3.13.3/sops-v3.13.3.linux.amd64
+          chmod +x /usr/local/bin/sops
+          for f in infra/secretos/produccion.env infra/secretos/staging.env; do
+            [ -f "$f" ] || continue                          # aún sin crear: nada que comprobar
+            sops filestatus "$f" | grep -q '"encrypted":true' || { echo "::error file=$f::¡$f está EN CLARO!"; exit 1; }
+          done
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: vercel.json (lo compila la CLI de Vercel, sin cuenta)
+        working-directory: frontend
+        run: |
+          npm ci
+          mkdir -p .vercel && echo '{"projectId":"_","orgId":"_","settings":{}}' > .vercel/project.json
+          npx --yes vercel@65.1.0 build --yes
+          jq -e '.routes[] | select(.handle == "filesystem")' .vercel/output/config.json > /dev/null
+          node ../infra/csp.mjs .vercel/output > /dev/null    # la CSP con los hashes de autoCsp (como al desplegar)
+
   e2e:
     needs: [backend, frontend]                 # solo si lo rápido ya pasa: E2E es lo más lento
     runs-on: ubuntu-latest

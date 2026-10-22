@@ -1,0 +1,116 @@
+# .github/workflows/staging.yml — cada commit de main que pasa el CI, a staging (módulos 66, 83 y 86)
+# Imágenes con la etiqueta sha-<commit> → backend en /opt/gastos/staging → frontend en staging.gastos.<dominio>.
+# Producción usará ESTAS MISMAS imágenes (produccion.yml solo les pone la etiqueta de la versión).
+name: Staging
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency: staging # nunca dos despliegues a la vez en el mismo entorno
+
+jobs:
+  imagenes:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
+    strategy:
+      matrix:
+        include:
+          - nombre: backend
+            contexto: backend
+          - nombre: estadisticas # módulo 85
+            contexto: estadisticas
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }} # el commit que pasó el CI, no el último de main
+      - uses: docker/setup-qemu-action@v3 # arm64 emulado: la VM gratuita de Oracle es ARM
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Etiqueta del commit
+        id: etiqueta
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        run: echo "version=sha-${SHA::7}" >> "$GITHUB_OUTPUT"
+      - uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.contexto }}
+          platforms: linux/arm64,linux/amd64
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/gastos-${{ matrix.nombre }}:${{ steps.etiqueta.outputs.version }}
+          cache-from: type=gha,scope=${{ matrix.nombre }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.nombre }}
+
+  backend:
+    needs: imagenes
+    runs-on: ubuntu-latest
+    environment: staging # sus secretos: SOPS_AGE_KEY (la clave de staging), SERVIDOR_*
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Instalar SOPS
+        run: |
+          curl -fsSLo /usr/local/bin/sops https://github.com/getsops/sops/releases/download/v3.13.3/sops-v3.13.3.linux.amd64
+          chmod +x /usr/local/bin/sops
+      - name: Generar el .env (configuración + secretos descifrados)
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: |
+          umask 077
+          { cat infra/entornos/staging.env; sops decrypt infra/secretos/staging.env; } > entorno.env
+      - name: Copiar al servidor
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVIDOR_HOST }}
+          username: ${{ secrets.SERVIDOR_USUARIO }}
+          key: ${{ secrets.SERVIDOR_SSH_KEY }}
+          source: "entorno.env,compose.prod.yaml,compose.edge.yaml,infra/Caddyfile,infra/desplegar.sh,infra/backup.sh,infra/estadisticas-bd.sh,infra/observabilidad/otelcol.prod.yaml"
+          target: /opt/gastos/staging
+      - name: Desplegar
+        uses: appleboy/ssh-action@v1
+        env:
+          SHA: ${{ github.event.workflow_run.head_sha }}
+        with:
+          host: ${{ secrets.SERVIDOR_HOST }}
+          username: ${{ secrets.SERVIDOR_USUARIO }}
+          key: ${{ secrets.SERVIDOR_SSH_KEY }}
+          envs: SHA
+          script: |
+            cd /opt/gastos/staging
+            install -m 600 entorno.env .env && rm entorno.env
+            VERSION="sha-${SHA::7}" ./infra/desplegar.sh
+      - name: Borrar el .env del runner
+        if: always()
+        run: rm -f entorno.env
+
+  frontend:
+    needs: backend # el frontend nuevo, cuando su API ya está
+    runs-on: ubuntu-latest
+    environment:
+      name: staging
+      url: https://staging.gastos.${{ vars.DOMINIO }}
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: infra/vercel-desplegar.sh preview "staging.gastos.${{ vars.DOMINIO }}"

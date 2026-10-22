@@ -46,3 +46,6 @@ Thumbs.db
 # Playwright
 /test-results/
 /playwright-report/
+
+# Vercel (módulo 86): lo que crean "vercel pull" y "vercel build"
+.vercel

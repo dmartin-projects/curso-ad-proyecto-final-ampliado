@@ -1,0 +1,34 @@
+# compose.edge.yaml — la puerta de la VM (módulo 86): Caddy, el ÚNICO que publica puertos 80/443, delante de
+# los dos entornos. Vive en /opt/gastos/edge; cada desplegar.sh lo actualiza y registra su entorno (edge.env).
+name: gastos-edge
+services:
+  caddy:
+    image: caddy:2.10-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443", "443:443/udp"] # 443/udp: HTTP/3
+    env_file: # host y secreto de cada entorno; el que aún no exista se queda sin configurar
+      - path: ../produccion/edge.env
+        required: false
+      - path: ../staging/edge.env
+        required: false
+    environment:
+      CADDY_GLOBAL: ${CADDY_GLOBAL:-} # vacío en la VM; "local_certs" para ensayar en local (certificados propios)
+    volumes:
+      # el DIRECTORIO, no el archivo: montar un archivo suelto ata el contenedor a su inodo, y un editor, sed -i
+      # o git lo sustituyen por otro: caddy reload seguiría leyendo el viejo (comprobado en el módulo 86)
+      - ./caddy:/etc/caddy:ro
+      - caddydata:/data # los certificados: que sobrevivan a recrear el contenedor (límites de Let's Encrypt)
+      - caddyconfig:/config
+    networks: [edge]
+    logging:
+      driver: json-file
+      options: { max-size: "10m", max-file: "3" }
+
+networks:
+  edge:
+    name: gastos-edge
+    external: true # la crea desplegar.sh: la comparten Caddy y la web de cada entorno
+
+volumes:
+  caddydata:
+  caddyconfig:

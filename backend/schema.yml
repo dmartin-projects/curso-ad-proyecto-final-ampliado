@@ -5089,9 +5089,15 @@ components:
         caduca_en:
           type: integer
           description: Segundos
+        url:
+          type: string
+          nullable: true
+          description: 'Dónde abrir el WebSocket (módulo 86). null: en el mismo host
+            que la página'
       required:
       - caduca_en
       - ticket
+      - url
     TokenObtainPairRequest:
       type: object
       properties:

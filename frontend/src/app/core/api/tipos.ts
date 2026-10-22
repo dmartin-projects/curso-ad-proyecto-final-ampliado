@@ -26,6 +26,7 @@ export type FilaImportacion = S['FilaImportacion'];
 export type Dashboard = S['Dashboard'];
 export type Informe = S['Informe'];
 export type Notificacion = S['Notificacion'];
+export type TicketWs = S['TicketWs'];
 
 export type Rol = 'admin' | 'miembro' | 'lector';
 

@@ -1,0 +1,10 @@
+# infra/terraform/estado.oci.hcl.example — dónde guardar el estado de Terraform (módulo 86). Cópialo a
+# estado.oci.hcl y: terraform init -backend-config=estado.oci.hcl
+# El bucket se crea UNA vez a mano (el estado no puede guardarse en algo que él mismo crea), privado y con
+# versionado: Storage → Buckets → Create, y luego "Object Versioning: Enable".
+bucket              = "gastos-tfstate"
+namespace           = "TU_NAMESPACE" # Tenancy details → Object storage namespace
+region              = "eu-madrid-1"
+key                 = "gastos/terraform.tfstate"
+auth                = "APIKey"
+config_file_profile = "DEFAULT"

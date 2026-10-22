@@ -1,0 +1,31 @@
+# infra/terraform/importar.tf.example — si la VM, la red y la IP ya existen (las creaste a mano en el módulo 68),
+# no las crees otra vez: cópialo a importar.tf, pon los OCID (consola de Oracle) y "terraform plan" dirá
+# "will be imported" en vez de "will be created". Tras el primer apply, borra importar.tf.
+import {
+  to = oci_core_vcn.gastos
+  id = "ocid1.vcn.oc1.eu-madrid-1.aaaa…"
+}
+import {
+  to = oci_core_internet_gateway.gastos
+  id = "ocid1.internetgateway.oc1.eu-madrid-1.aaaa…"
+}
+import {
+  to = oci_core_route_table.publica
+  id = "ocid1.routetable.oc1.eu-madrid-1.aaaa…"
+}
+import {
+  to = oci_core_security_list.publica
+  id = "ocid1.securitylist.oc1.eu-madrid-1.aaaa…"
+}
+import {
+  to = oci_core_subnet.publica
+  id = "ocid1.subnet.oc1.eu-madrid-1.aaaa…"
+}
+import {
+  to = oci_core_instance.gastos
+  id = "ocid1.instance.oc1.eu-madrid-1.aaaa…"
+}
+import {
+  to = oci_core_public_ip.gastos
+  id = "ocid1.publicip.oc1.eu-madrid-1.aaaa…"
+}

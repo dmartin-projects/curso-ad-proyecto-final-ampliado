@@ -1,0 +1,105 @@
+# .github/workflows/produccion.yml — una versión a producción, con aprobación (módulos 66, 83 y 86)
+#   git tag v1.4.0 <commit que ya está en staging> && git push --tags
+# No se construye nada: las imágenes de ESE commit (sha-…) ya pasaron por staging; se les pone la etiqueta
+# 1.4.0. El environment "produccion" de GitHub exige que lo apruebes tú (Required reviewers) antes de seguir.
+name: Producción
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency: produccion
+
+jobs:
+  imagenes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Promocionar las imágenes probadas en staging
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          origen="sha-${GITHUB_SHA::7}"
+          version="${GITHUB_REF_NAME#v}"
+          for nombre in backend estadisticas; do
+            img="ghcr.io/$OWNER/gastos-$nombre"
+            # Sin la imagen del commit, el commit no pasó por staging (o falló el CI): no se despliega
+            docker buildx imagetools inspect "$img:$origen" > /dev/null \
+              || { echo "::error::$img:$origen no existe: ¿ese commit pasó por staging?"; exit 1; }
+            docker buildx imagetools create -t "$img:$version" -t "$img:latest" "$img:$origen"
+          done
+
+  backend:
+    needs: imagenes
+    runs-on: ubuntu-latest
+    environment: produccion # aprobación manual + SOPS_AGE_KEY (la de producción) y SERVIDOR_*
+    steps:
+      - uses: actions/checkout@v4
+      - name: Instalar SOPS
+        run: |
+          curl -fsSLo /usr/local/bin/sops https://github.com/getsops/sops/releases/download/v3.13.3/sops-v3.13.3.linux.amd64
+          chmod +x /usr/local/bin/sops
+      - name: Generar el .env (configuración + secretos descifrados)
+        env:
+          SOPS_AGE_KEY: ${{ secrets.SOPS_AGE_KEY }}
+        run: |
+          umask 077
+          { cat infra/entornos/produccion.env; sops decrypt infra/secretos/produccion.env; } > entorno.env
+      - name: Copiar al servidor
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVIDOR_HOST }}
+          username: ${{ secrets.SERVIDOR_USUARIO }}
+          key: ${{ secrets.SERVIDOR_SSH_KEY }}
+          source: "entorno.env,compose.prod.yaml,compose.edge.yaml,infra/Caddyfile,infra/desplegar.sh,infra/backup.sh,infra/estadisticas-bd.sh,infra/observabilidad/otelcol.prod.yaml"
+          target: /opt/gastos/produccion
+      - name: Desplegar
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SERVIDOR_HOST }}
+          username: ${{ secrets.SERVIDOR_USUARIO }}
+          key: ${{ secrets.SERVIDOR_SSH_KEY }}
+          script: |
+            cd /opt/gastos/produccion
+            install -m 600 entorno.env .env && rm entorno.env
+            VERSION=${{ github.ref_name }} ./infra/desplegar.sh
+      - name: Borrar el .env del runner
+        if: always()
+        run: rm -f entorno.env
+
+  frontend:
+    needs: backend
+    runs-on: ubuntu-latest
+    environment:
+      name: produccion
+      url: https://gastos.${{ vars.DOMINIO }}
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ vars.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ vars.VERCEL_PROJECT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: infra/vercel-desplegar.sh production
+      - name: La web llega a la API (Vercel → Caddy → Django)
+        env:
+          DOMINIO: ${{ vars.DOMINIO }}
+        run: |
+          # Sin cookie, el refresh responde el 401 de Django ("Sin sesión"): el rewrite y el secreto funcionan.
+          # Un 403 sería Caddy rechazando el secreto; un 404 o HTML, que el rewrite no se aplica.
+          respuesta=$(curl -s -X POST "https://gastos.$DOMINIO/api/v1/auth/refresh/")
+          echo "$respuesta"
+          echo "$respuesta" | grep -q "Sin sesión"

@@ -1,30 +1,40 @@
-# Runbook de Gastos (producción)
+# Runbook de Gastos (producción y staging)
 
-Servidor: `/opt/gastos` (usuario `despliegue`). Todo se hace desde ahí:
+Servidor: `/opt/gastos` (usuario `despliegue`), con un directorio por entorno (módulo 86):
+
+```
+/opt/gastos/produccion   compose.prod.yaml, infra/, .env (lo genera el despliegue), .version-actual
+/opt/gastos/staging      lo mismo, con su .env: otro proyecto de Compose (gastos-staging), otra BD
+/opt/gastos/edge         Caddy: la única puerta (80/443) para api.gastos.… y api.staging.gastos.…
+```
+
+Todo se hace desde el directorio del entorno. Su `.env` dice qué archivo y qué proyecto de Compose usar:
 
 ```bash
-cd /opt/gastos
-alias dc='docker compose -f compose.prod.yaml'   # usa VERSION de .env, que desplegar.sh mantiene al día
+cd /opt/gastos/produccion     # o /opt/gastos/staging
+alias dc='docker compose'     # COMPOSE_FILE, COMPOSE_PROJECT_NAME y VERSION, del .env
 ```
+
+El `.env` del servidor **no se edita a mano**: lo regenera cada despliegue a partir de `infra/entornos/<entorno>.env` (en claro) e `infra/secretos/<entorno>.env` (cifrado con SOPS). Un cambio a mano se pierde en el siguiente despliegue.
 
 ## Ver el estado
 
 ```bash
 dc ps                                   # todo "Up"; web, worker y worker-ocr "(healthy)"
-curl -fsS https://$DOMINIO/health/ready/ # 200 = BD y Redis bien
+curl -fsS https://api.gastos.tudominio.com/health/ready/   # 200 = BD y Redis bien
 dc logs --since 15m web | grep '"levelname": "ERROR"'
 docker stats --no-stream && df -h /
 ```
 
 ## Desplegar una versión
 
-Lo normal: crear la etiqueta `vX.Y.Z` en GitHub y dejar que `release.yml` construya, publique y despliegue. A mano, en el servidor:
+Lo normal (módulo 86): cada *merge* a `main` que pasa el CI va solo a **staging** (`staging.yml`). Para **producción**, una etiqueta en un commit que ya está en staging: `git tag v1.4.0 && git push --tags`; `produccion.yml` espera tu aprobación en GitHub (*environment* `produccion`) y despliega las mismas imágenes. A mano, en el servidor (con el `.env` ya generado):
 
 ```bash
-VERSION=v1.4.0 ./infra/desplegar.sh
+cd /opt/gastos/produccion && VERSION=v1.4.0 ./infra/desplegar.sh
 ```
 
-El script descarga las imágenes, ejecuta las migraciones con el código nuevo, levanta los servicios y comprueba `/health/ready/` durante 60 s. Si no responde, **vuelve solo** a la versión anterior (`.version-actual`) y termina con error.
+El script registra el entorno en Caddy, descarga las imágenes, ejecuta las migraciones con el código nuevo, levanta los servicios y comprueba `https://<API_HOST>/health/ready/` a través de Caddy durante 60 s. Si no responde, **vuelve solo** a la versión anterior (`.version-actual`) y termina con error.
 
 ## Volver atrás
 
@@ -43,7 +53,7 @@ Las copias se hacen a las 03:15 (`crontab -l`) en `r2:gastos-backups/postgres/` 
 rclone ls r2:gastos-backups/postgres/ | sort -k2 | tail -5
 rclone copy r2:gastos-backups/postgres/gastos-2026-10-18-0315.dump /tmp/
 dc stop web worker worker-ocr beat tasks-worker           # que nadie escriba mientras tanto
-dc exec -T db pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists --no-owner \
+dc exec -T db sh -c 'pg_restore -U "$POSTGRES_USER" -d "$POSTGRES_DB" --clean --if-exists --no-owner' \
   < /tmp/gastos-2026-10-18-0315.dump
 dc up -d web worker worker-ocr beat tasks-worker
 rm /tmp/gastos-2026-10-18-0315.dump
@@ -56,9 +66,9 @@ Ensayo (una vez al trimestre, fuera de producción): restaurar la última copia 
 Si se ha filtrado o toca rotarla. Sin cortes para los usuarios:
 
 1. Generar la nueva: `python3 -c "import secrets; print(secrets.token_urlsafe(50))"`.
-2. En `.env`: la nueva en `DJANGO_SECRET_KEY` y la **vieja** en `DJANGO_SECRET_KEY_FALLBACKS`.
-3. `dc up -d web worker worker-ocr beat tasks-worker` (recrea los contenedores con el entorno nuevo).
-4. Pasados unos días (lo que duran los enlaces de recuperación y las sesiones), vaciar `DJANGO_SECRET_KEY_FALLBACKS` y repetir el paso 3.
+2. En tu máquina, `sops edit infra/secretos/produccion.env`: la nueva en `DJANGO_SECRET_KEY` y la **vieja** en `DJANGO_SECRET_KEY_FALLBACKS`. Commit y PR.
+3. Desplegar (nueva versión, o volver a lanzar el job de producción): el `.env` se regenera y `desplegar.sh` recrea los contenedores con el entorno nuevo.
+4. Pasados unos días (lo que duran los enlaces de recuperación y las sesiones), vaciar `DJANGO_SECRET_KEY_FALLBACKS` y repetir los pasos 2 y 3.
 
 Con la vieja en *fallbacks*, lo firmado antes (enlaces de recuperación de contraseña, valores firmados) sigue valiendo; sin ella, deja de valer (comprobado). **Si la clave se filtró**, sáltate el periodo de gracia: vacía *fallbacks* desde el principio.
 
@@ -87,4 +97,5 @@ Los logs de los contenedores rotan solos (10 MB × 3 por servicio). Si es Postgr
 ## Contactos y accesos
 
 - Errores: Sentry (proyecto `gastos`). Disponibilidad: UptimeRobot. Copias y tareas: Healthchecks.io.
-- Secretos: el gestor de contraseñas del equipo, entrada "Gastos — producción (.env)".
+- Secretos: cifrados en el repositorio (`infra/secretos/`, SOPS + age). Las claves age: la tuya en el gestor de contraseñas ("Gastos — clave age personal"); las de cada entorno, en GitHub → Settings → Environments → `staging`/`produccion` → `SOPS_AGE_KEY` (y una copia en el gestor).
+- Rotar el secreto entre Vercel y Caddy (`ORIGEN_SECRETO`): `sops edit` → `terraform apply` con `version_secretos` + 1 (Vercel) → desplegar el entorno (Caddy). Entre los dos pasos, la web de ese entorno recibe 403 de la API: hazlo seguido.

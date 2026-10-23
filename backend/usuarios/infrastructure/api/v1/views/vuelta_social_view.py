@@ -2,6 +2,7 @@
 #
 # Una NAVEGACIÓN del navegador: traduce los errores del dominio a una redirección a la SPA (?error_social=<codigo>) en
 # vez de dejárselos al exception handler, que responde JSON.
+from django.contrib.auth import get_user_model, login
 from django.utils.cache import add_never_cache_headers
 from rest_framework.parsers import FormParser
 
@@ -10,12 +11,14 @@ from usuarios.application.completar_login_social_use_case.dtos.completar_login_s
     CompletarLoginSocialInputDTO,
 )
 from usuarios.application.iniciar_sesion_use_case.dtos.iniciar_sesion_input_dto import IniciarSesionInputDTO
+from usuarios.domain.enums.canal import Canal
 from usuarios.domain.enums.proposito import Proposito
 from usuarios.domain.enums.proveedor import Proveedor
 from usuarios.infrastructure import container
 from usuarios.infrastructure.api.v1.views.a_la_spa import a_la_spa
 from usuarios.infrastructure.api.v1.views.cookie_refresh import poner_cookie_refresh
 from usuarios.infrastructure.api.v1.views.cookie_social import cookie_social
+from usuarios.infrastructure.api.v1.views.rutas_autorizacion import LOGIN_AUTORIZACION
 from usuarios.infrastructure.api.v1.views.vista_publica_auth import VistaPublicaAuth
 
 
@@ -39,6 +42,13 @@ class VueltaSocialView(VistaPublicaAuth):
             hecho = container.completar_login_social().ejecutar(entrada)
             if hecho.proposito is Proposito.VINCULAR:
                 respuesta = a_la_spa("/acceso", vinculada=proveedor)
+            elif hecho.proposito is Proposito.AUTORIZAR:
+                # Ejercicio 3: la sesión del authorization server (la de Django, cookie solo para /api/oauth/), por
+                # el mismo IniciarSesionUseCase; y de vuelta a /authorize, que enseñará el consentimiento
+                container.iniciar_sesion().ejecutar(IniciarSesionInputDTO(hecho.usuario_id, Canal.AUTORIZACION))
+                usuario = get_user_model().objects.get(pk=hecho.usuario_id)
+                login(request, usuario, backend="django.contrib.auth.backends.ModelBackend")
+                respuesta = a_la_spa(hecho.volver)
             else:
                 # Los MISMOS tokens que con la contraseña: el refresh, en su cookie; el access lo pide la SPA al
                 # arrancar (POST /auth/refresh/, como tras un F5). Los del proveedor ni se guardan ni llegan aquí
@@ -46,8 +56,14 @@ class VueltaSocialView(VistaPublicaAuth):
                 respuesta = a_la_spa(hecho.volver)
                 poner_cookie_refresh(respuesta, sesion.refresh)
         except DominioException as error:  # su `codigo` viaja a la SPA (?error_social=…)
-            pagina = "/acceso" if error.contexto.get("proposito") is Proposito.VINCULAR else "/login"
-            respuesta = a_la_spa(pagina, error_social=error.codigo, proveedor=proveedor)
+            match error.contexto.get("proposito"):
+                case Proposito.VINCULAR:
+                    respuesta = a_la_spa("/acceso", error_social=error.codigo, proveedor=proveedor)
+                case Proposito.AUTORIZAR:  # ejercicio 3: al login del authorization server, con la misma petición
+                    datos = {"next": error.contexto["volver"], "error_social": error.codigo, "proveedor": proveedor}
+                    respuesta = a_la_spa(LOGIN_AUTORIZACION, **datos)
+                case _:
+                    respuesta = a_la_spa("/login", error_social=error.codigo, proveedor=proveedor)
         respuesta.delete_cookie(**cookie)  # gastada (la transacción ya no existe en el servidor)
         add_never_cache_headers(respuesta)
         return respuesta

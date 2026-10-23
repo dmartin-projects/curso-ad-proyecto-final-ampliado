@@ -288,3 +288,81 @@ def test_lista_de_proveedores_con_el_origen_de_la_app(proveedores):
         "proveedores": [{"id": "google", "nombre": "Google"}, {"id": "github", "nombre": "GitHub"},
                         {"id": "apple", "nombre": "Apple"}],
     }  # fmt: skip
+
+
+# ── Ejercicio 2: el aviso al vincular ──
+
+
+def test_al_vincular_llega_un_aviso_al_email_de_gastos(proveedores, django_capture_on_commit_callbacks, mailoutbox):
+    luis = UsuarioFactory(email="luis@trabajo.example")
+    r = con_sesion(luis).post(S + "github/vincular/")
+    navegador = Client()
+    navegador.cookies["social_github"] = r.cookies["social_github"].value
+    with django_capture_on_commit_callbacks(execute=True):
+        vuelta(navegador, "github", proveedores.github.autorizar(r.json()["url"]))
+    (aviso,) = mailoutbox
+    assert aviso.to == ["luis@trabajo.example"]  # el de Gastos, no el de GitHub
+    assert aviso.subject == "Has vinculado GitHub a tu cuenta de Gastos"
+    assert "(ana@gmail.com)" in aviso.body and "https://gastos.example/acceso" in aviso.body
+
+
+# ── Ejercicio 3: entrar con un proveedor en el authorization server (módulo 90) ──
+
+
+def test_una_cuenta_sin_contrasena_autoriza_una_aplicacion_entrando_con_google(proveedores):
+    from oauth.tests.infrastructure.flujo import peticion, pkce, registrar
+
+    login_google(Client(), proveedores.google)  # ana: creada con Google, sin contraseña
+    registrar()  # gastos-cli
+    navegador = Client()
+    autorizar = navegador.get("/api/oauth/authorize/", peticion(pkce()[1]))
+    login = navegador.get(autorizar["Location"])  # el login del authorization server, con su `next`
+    siguiente = parse_qs(urlsplit(autorizar["Location"]).query)["next"][0]  # /api/oauth/authorize/?response_type=…
+    ida = dict(login.context["proveedores"])["Google"]
+    assert parse_qs(urlsplit(ida).query) == {"para": ["autorizar"], "volver": [siguiente]}
+    r = navegador.get(ida)
+    r = vuelta(navegador, "google", proveedores.google.autorizar(r["Location"]))
+    url, _ = destino(r)
+    assert url == f"{SPA}/api/oauth/authorize/"  # de vuelta a la misma petición de autorización
+    assert r.cookies["sessionid"]["path"] == "/api/oauth/" and "refresh" not in r.cookies  # la sesión del AS, no la SPA
+    consentimiento = navegador.get(r["Location"].removeprefix(SPA))
+    assert consentimiento.status_code == 200
+    assert "ana@gmail.com" in consentimiento.content.decode()  # «Has entrado como ana@gmail.com»
+
+
+def test_desde_el_authorization_server_solo_se_vuelve_a_authorize(proveedores):
+    navegador = Client()
+    ida = navegador.get(S + "google/entrar/", {"para": "autorizar", "volver": "https://otra.example/"})["Location"]
+    r = vuelta(navegador, "google", proveedores.google.autorizar(ida))
+    assert destino(r) == (f"{SPA}/api/oauth/login/", {})
+
+
+def test_un_error_vuelve_al_login_del_authorization_server_con_su_peticion(proveedores):
+    UsuarioFactory(email="ana@gmail.com")
+    navegador = Client()
+    siguiente = "/api/oauth/authorize/?client_id=gastos-cli"
+    ida = navegador.get(S + "google/entrar/", {"para": "autorizar", "volver": siguiente})["Location"]
+    r = vuelta(navegador, "google", proveedores.google.autorizar(ida))
+    assert destino(r) == (
+        f"{SPA}/api/oauth/login/", {"next": siguiente, "error_social": "cuenta_existente", "proveedor": "google"}
+    )  # fmt: skip
+    pagina = navegador.get(r["Location"].removeprefix(SPA))
+    assert "Ya hay una cuenta con ese email: entra con tu contraseña." in pagina.content.decode()
+
+
+def test_el_login_con_contrasena_del_authorization_server_pasa_por_iniciar_sesion(monkeypatch):
+    from usuarios.domain.enums.canal import Canal
+    from usuarios.infrastructure import container
+
+    llamadas = []
+    original = container.iniciar_sesion
+
+    class Espia:
+        def ejecutar(self, entrada):
+            llamadas.append((entrada.usuario_id, entrada.canal))
+            return original().ejecutar(entrada)
+
+    monkeypatch.setattr(container, "iniciar_sesion", Espia)
+    ana = UsuarioFactory(email="ana@example.com")
+    r = Client().post("/api/oauth/login/", {"username": "ana@example.com", "password": "clave-segura-123"})
+    assert r.status_code == 302 and llamadas == [(ana.pk, Canal.AUTORIZACION)]

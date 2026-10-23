@@ -56,11 +56,11 @@ class Mundo:
         self.github = ProveedorIdentidadFake(Proveedor.GITHUB)
         self.proveedores = ProveedoresFake(self.google, self.github)
         self.transacciones, self.identidades = TransaccionesFake(), IdentidadCommandRepositoryFake()
-        self.uow_social = UnidadDeTrabajoFake(self.cuentas, self.identidades)
+        self.uow_social = UnidadDeTrabajoFake(self.cuentas, self.identidades, self.eventos)
         self.empezar = EmpezarLoginSocialUseCase(proveedores=self.proveedores, transacciones=self.transacciones)
         self.completar = CompletarLoginSocialUseCase(
             proveedores=self.proveedores, transacciones=self.transacciones, identidades=self.identidades,
-            cuentas=self.cuentas, uow=self.uow_social,
+            cuentas=self.cuentas, eventos=self.eventos, uow=self.uow_social,
         )  # fmt: skip
         self.desvincular = DesvincularUseCase(identidades=self.identidades, cuentas=self.cuentas, uow=self.uow_social)
         self.establecer = EstablecerContrasenaUseCase(cuentas=self.cuentas, politica=politica)

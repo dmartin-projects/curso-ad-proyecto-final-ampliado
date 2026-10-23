@@ -116,6 +116,7 @@ def completar_login_social() -> ICompletarLoginSocialUseCase:
         transacciones=TransaccionesEnCache(),
         identidades=IdentidadCommandRepositoryORM(),
         cuentas=CuentaCommandRepositoryORM(),
+        eventos=PublicadorEventosDjango(),  # ejercicio 2: el aviso al vincular
         uow=UnidadDeTrabajoDjango(),
     )
 

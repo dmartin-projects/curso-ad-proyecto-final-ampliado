@@ -36,13 +36,25 @@ class ProveedorOIDC(ClienteOAuth):
         """Los `iss` que se aceptan en un ID token: el emisor, exacto."""
         return [self.emisor]
 
+    # Ejercicio 1: tres puntos de extensión para un emisor que no es una URL fija (Microsoft, multi-tenant)
+    def issuer_del_discovery(self) -> str:
+        return self.emisor
+
+    def iss_valido(self, iss: str, claims: dict) -> bool:
+        """El `iss` del ID token (con sus claims al lado)."""
+        return iss in self.emisores()
+
+    def iss_de_respuesta_valido(self, iss: str) -> bool:
+        """El `iss` de la vuelta (RFC 9207), antes de canjear el code: todavía no hay ID token."""
+        return iss in self.emisores()
+
     # ── El discovery y el JWKS, una hora en la caché (como un navegador con Cache-Control) ──
 
     def _metadatos(self) -> dict:
         clave = f"social:discovery:{self.emisor}"
         if (metadatos := cache.get(clave)) is None:
             metadatos = self._json("GET", f"{self.emisor}/.well-known/openid-configuration")
-            if metadatos.get("issuer") != self.emisor:  # los endpoints de OTRO emisor: no se usa ninguno
+            if metadatos.get("issuer") != self.issuer_del_discovery():  # los endpoints de OTRO emisor: no se usa
                 logger.warning("%s: el discovery dice issuer=%r", self.proveedor, metadatos.get("issuer"))
                 raise LoginSocialNoValidoException()
             cache.set(clave, metadatos, UNA_HORA)
@@ -68,11 +80,14 @@ class ProveedorOIDC(ClienteOAuth):
     def completar(self, transaccion: TransaccionSocial, parametros: dict[str, str]) -> PerfilExterno:
         # RFC 9207: si el proveedor dice quién responde, tiene que ser él (mix-up). Además, cada proveedor tiene su
         # propia redirect URI y la transacción recuerda a cuál se fue: la respuesta de uno no se canjea en otro
-        if "iss" in parametros and parametros["iss"] not in self.emisores():
+        iss = parametros.get("iss")
+        if iss is not None and not self.iss_de_respuesta_valido(iss):
             raise LoginSocialNoValidoException()
         verifier = transaccion.code_verifier if self._pkce() else None
         tokens = self._canjear(self._metadatos()["token_endpoint"], parametros.get("code"), verifier)
         claims = self.validar_id_token(tokens.get("id_token"), transaccion.nonce, tokens["access_token"])
+        if iss is not None and iss != claims["iss"]:  # y el que firma el ID token es el mismo que ha respondido
+            raise LoginSocialNoValidoException()
         return self._perfil(claims, parametros)
 
     def validar_id_token(self, id_token: str | None, nonce: str, access_token: str | None = None) -> dict:
@@ -87,9 +102,9 @@ class ProveedorOIDC(ClienteOAuth):
                 token.claims,
                 token.header,
                 # CodeIDToken exige que estén iss, sub, aud, exp e iat, y comprueba exp e iat; los VALORES de iss y aud
-                # solo si se le dan: se le dan los dos
+                # solo si se le dan: se le dan los dos (iss, con una función: ejercicio 1)
                 options={
-                    "iss": {"essential": True, "values": self.emisores()},
+                    "iss": {"essential": True, "validate": lambda claims, iss: self.iss_valido(iss, claims)},
                     "aud": {"essential": True, "value": self.client_id},
                 },
                 # Y con estos, nonce (si se pasa, el del token tiene que ser ese), azp y at_hash

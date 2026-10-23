@@ -93,3 +93,34 @@ test('Apple vuelve con un POST (form_post) y la sesión se abre igual', async ({
   await page.getByRole('button', { name: 'Mi cuenta' }).click();
   await expect(page.getByText('x7k2@privaterelay.appleid.com')).toBeVisible();
 });
+
+// Ejercicio 3: una cuenta creada con Google (sin contraseña) autoriza una aplicación entrando con Google en el
+// authorization server (las páginas de Django del módulo 90), no en la SPA
+test('una cuenta sin contraseña autoriza el CLI entrando con Google', async ({ page }) => {
+  await conProveedor(page, 'Google', 'google-cli', {
+    email: 'cli@gmail.example',
+    email_verified: true,
+  });
+  await expect(page).toHaveURL(/\/hogares/);
+
+  let vuelta: URL | undefined;
+  await page.route('http://127.0.0.1:53682/**', (r) => {
+    vuelta = new URL(r.request().url());
+    return r.fulfill({ body: 'Listo. Vuelve a la terminal.' });
+  });
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id: 'gastos-cli',
+    redirect_uri: 'http://127.0.0.1:53682/callback',
+    scope: 'openid email gastos:leer',
+    state: 'estado-e2e',
+    code_challenge: 'E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM',
+    code_challenge_method: 'S256',
+  });
+  await page.goto(`/api/oauth/authorize/?${params}`);
+  await page.getByRole('link', { name: 'Continuar con Google' }).click();
+  await enElProveedor(page, 'google-cli', { email: 'cli@gmail.example', email_verified: true });
+  await expect(page.getByText('cli@gmail.example')).toBeVisible(); // «Has entrado como…»
+  await page.getByRole('button', { name: 'Permitir' }).click();
+  await expect.poll(() => vuelta?.searchParams.get('code')).toBeTruthy();
+});

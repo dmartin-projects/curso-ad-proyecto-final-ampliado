@@ -16,8 +16,10 @@ from usuarios.application.establecer_contrasena_use_case.dtos.establecer_contras
     EstablecerContrasenaInputDTO,
 )
 from usuarios.application.iniciar_sesion_use_case.dtos.iniciar_sesion_input_dto import IniciarSesionInputDTO
+from usuarios.domain.enums.canal import Canal
 from usuarios.domain.enums.proposito import Proposito
 from usuarios.domain.enums.proveedor import Proveedor
+from usuarios.domain.events.proveedor_vinculado_event import ProveedorVinculadoEvent
 from usuarios.domain.exceptions.acceso_cancelado_exception import AccesoCanceladoException
 from usuarios.domain.exceptions.contrasena_no_valida_exception import ContrasenaNoValidaException
 from usuarios.domain.exceptions.cuenta_desactivada_exception import CuentaDesactivadaException
@@ -104,7 +106,7 @@ def test_si_cancela_o_el_proveedor_falla_no_hay_cuenta_y_se_sabe_para_que_era():
     mundo = Mundo()
     with pytest.raises(AccesoCanceladoException) as e:
         vuelta(mundo, ida(mundo), error="access_denied", code=None)
-    assert e.value.contexto == {"proposito": Proposito.ENTRAR}
+    assert e.value.contexto == {"proposito": Proposito.ENTRAR, "volver": "/"}  # (volver: ejercicio 3)
     mundo.google.fallo = LoginSocialNoValidoException()
     with pytest.raises(LoginSocialNoValidoException):
         vuelta(mundo, ida(mundo))
@@ -180,3 +182,33 @@ def test_iniciar_sesion_es_el_mismo_para_todos_y_no_abre_cuentas_desactivadas():
     mundo.cuentas.usuarios[1]["activo"] = False  # desactivada por soporte
     with pytest.raises(CuentaDesactivadaException):
         mundo.iniciar_sesion.ejecutar(IniciarSesionInputDTO(1))
+
+
+# ── Ejercicio 2: el aviso al vincular ──
+
+
+def test_vincular_un_proveedor_avisa_y_entrar_o_crear_la_cuenta_no():
+    mundo = Mundo()
+    vuelta(mundo, ida(mundo))  # cuenta nueva con Google: nada que avisar (no había cuenta)
+    vuelta(mundo, ida(mundo))  # entrar: tampoco
+    assert mundo.eventos.de_tipo(ProveedorVinculadoEvent) == []
+    mundo.github.perfil = PerfilExterno(Proveedor.GITHUB, "583231", "ana@github.example", True)
+    vuelta(mundo, ida(mundo, Proveedor.GITHUB, proposito=Proposito.VINCULAR, usuario_id=1), Proveedor.GITHUB)
+    vuelta(mundo, ida(mundo, Proveedor.GITHUB, proposito=Proposito.VINCULAR, usuario_id=1), Proveedor.GITHUB)
+    assert mundo.eventos.de_tipo(ProveedorVinculadoEvent) == [
+        ProveedorVinculadoEvent(1, "GitHub", "ana@github.example")
+    ]
+
+
+# ── Ejercicio 3: la sesión del authorization server, por el mismo sitio ──
+
+
+def test_iniciar_sesion_en_el_authorization_server_no_emite_tokens_pero_comprueba_lo_mismo():
+    mundo = Mundo()
+    vuelta(mundo, ida(mundo))
+    assert (
+        mundo.iniciar_sesion.ejecutar(IniciarSesionInputDTO(1, Canal.AUTORIZACION)) is None
+    )  # la sesión la abre Django
+    mundo.cuentas.usuarios[1]["activo"] = False
+    with pytest.raises(CuentaDesactivadaException):
+        mundo.iniciar_sesion.ejecutar(IniciarSesionInputDTO(1, Canal.AUTORIZACION))

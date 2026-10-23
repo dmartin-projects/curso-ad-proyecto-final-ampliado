@@ -14,6 +14,7 @@ class Proveedor(StrEnum):
     GOOGLE = "google"
     GITHUB = "github"
     APPLE = "apple"
+    MICROSOFT = "microsoft"  # ejercicio 1
 
     @classmethod
     def de(cls, texto: str) -> "Proveedor":
@@ -25,4 +26,4 @@ class Proveedor(StrEnum):
 
     @property
     def nombre(self) -> str:
-        return {"google": "Google", "github": "GitHub", "apple": "Apple"}[self.value]
+        return {"google": "Google", "github": "GitHub", "apple": "Apple", "microsoft": "Microsoft"}[self.value]

@@ -11,8 +11,9 @@ from usuarios.domain.exceptions.proveedor_no_disponible_exception import Proveed
 from usuarios.infrastructure.providers.apple import Apple
 from usuarios.infrastructure.providers.github import GitHub
 from usuarios.infrastructure.providers.google import Google
+from usuarios.infrastructure.providers.microsoft import Microsoft
 
-CLASES = {Proveedor.GOOGLE: Google, Proveedor.GITHUB: GitHub, Proveedor.APPLE: Apple}
+CLASES = {Proveedor.GOOGLE: Google, Proveedor.GITHUB: GitHub, Proveedor.APPLE: Apple, Proveedor.MICROSOFT: Microsoft}
 
 
 def vuelta(proveedor: Proveedor) -> str:

@@ -17,7 +17,7 @@ Es Gastos (módulos 70-83) con las ampliaciones de las Partes 6 y 7 encima. **Ca
 
 La Parte 7 (el agente de IA) se añadirá aquí con el mismo formato cuando esté terminada.
 
-Estado comprobado al terminar el módulo 91: 686 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (sin cambios desde el 89), 37 de *frontend* (Vitest) y 16 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones (25 contratos).
+Estado comprobado al terminar el módulo 91 (con sus ejercicios): 697 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (sin cambios desde el 89), 37 de *frontend* (Vitest) y 17 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones (25 contratos).
 
 ## Estructura
 
@@ -84,7 +84,7 @@ Personal de soporte (el *backoffice* está dentro de la app, no hay Django admin
 ## Tests
 
 ```bash
-cd backend && uv run pytest -n 4 --cov                 # 685 tests (+1 que se salta sin Kafka)
+cd backend && uv run pytest -n 4 --cov                 # 696 tests (+1 que se salta sin Kafka)
 cd frontend && npx ng test --watch=false                # 27 tests
 # punta a punta (módulo 82): una vez, crea la BD de E2E
 docker compose exec db createdb -U gastos gastos_e2e
@@ -178,3 +178,5 @@ cd ../frontend && npx ng serve                       # http://localhost:4200/log
 ```
 
 La vuelta es siempre `{FRONTEND_URL}/api/v1/auth/social/<proveedor>/vuelta/` (en local, a través del *proxy* de `ng serve`). GitHub admite `http://localhost:4200/…` como vuelta: crea una OAuth App (o una GitHub App) y pon `GITHUB_CLIENT_ID` y `GITHUB_CLIENT_SECRET`. Apple solo acepta vueltas `https` con dominio: se prueba en staging. Los pasos con tus cuentas de Google, GitHub y Apple están en el módulo 91 del curso; en producción, los `client_id` van en `infra/entornos/` y los secretos (y la clave `.p8` de Apple) en `infra/secretos/`. Las *previews* de Vercel no ofrecen el login social: su URL no está registrada en ningún proveedor.
+
+Ejercicios: Microsoft Entra ID como cuarto proveedor (`MICROSOFT_CLIENT_ID` y `MICROSOFT_CLIENT_SECRET`; vuelta `…/social/microsoft/vuelta/`), un aviso por email al vincular un proveedor (en local llega a Mailpit, http://localhost:8025) y «Continuar con Google» también en el login del *authorization server* del módulo 90, para que una cuenta sin contraseña pueda autorizar el CLI (`uv run cli/gastos_cli.py login` y, en la pantalla de Gastos, «Continuar con Google»).

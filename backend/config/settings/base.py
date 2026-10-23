@@ -326,6 +326,11 @@ SOCIAL_LOGIN = {
         "clave_privada": env.str("APPLE_PRIVATE_KEY", multiline=True, default=""),  # el .p8, en una línea con \n
         "emisor": env("APPLE_EMISOR", default="https://appleid.apple.com"),
     },
+    "microsoft": {  # ejercicio 1: Microsoft Entra ID, cuentas personales y de empresa (el endpoint `common`)
+        "client_id": env("MICROSOFT_CLIENT_ID", default=""),
+        "client_secret": env("MICROSOFT_CLIENT_SECRET", default=""),
+        "emisor": env("MICROSOFT_EMISOR", default="https://login.microsoftonline.com/common/v2.0"),
+    },
 }
 SOCIAL_LOGIN_SEGUNDOS = 600  # lo que puede tardar la persona en el proveedor (la transacción y su cookie)
 

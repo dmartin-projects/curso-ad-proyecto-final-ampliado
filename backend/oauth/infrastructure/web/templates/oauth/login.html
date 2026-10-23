@@ -18,4 +18,12 @@
     {% endif %}
     <div class="acciones"><button type="submit" class="principal">{% translate "Entrar" %}</button></div>
   </form>
+  {# Módulo 91, ejercicio 3: una cuenta creada con Google no tiene contraseña; también tiene que poder autorizar #}
+  {% if proveedores %}
+    <p class="suave separador">{% translate "o" %}</p>
+    {% for nombre, url in proveedores %}
+      <a class="proveedor" href="{{ url }}">{% blocktranslate %}Continuar con {{ nombre }}{% endblocktranslate %}</a>
+    {% endfor %}
+  {% endif %}
+  {% if error_social %}<p class="error" role="alert">{{ error_social }}</p>{% endif %}
 {% endblock %}

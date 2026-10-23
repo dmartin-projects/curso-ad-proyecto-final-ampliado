@@ -50,6 +50,8 @@ class VueltaSocialView(VistaPublicaAuth):
             hecho = container.completar_login_social().ejecutar(entrada)
             if hecho.proposito is Proposito.VINCULAR:
                 respuesta = a_la_spa("/acceso", vinculada=proveedor)
+            elif hecho.proposito is Proposito.REAUTENTICAR:  # módulo 92, ej. 3: de vuelta a la página, ya confirmado
+                respuesta = a_la_spa(hecho.volver, reautenticada=proveedor)
             elif hecho.proposito is Proposito.AUTORIZAR:
                 # Ejercicio 3: la sesión del authorization server (la de Django, cookie solo para /api/oauth/), por
                 # el mismo IniciarSesionUseCase; y de vuelta a /authorize, que enseñará el consentimiento
@@ -81,6 +83,8 @@ class VueltaSocialView(VistaPublicaAuth):
             match error.contexto.get("proposito"):
                 case Proposito.VINCULAR:
                     respuesta = a_la_spa("/acceso", error_social=error.codigo, proveedor=proveedor)
+                case Proposito.REAUTENTICAR:  # módulo 92, ejercicio 3
+                    respuesta = a_la_spa(error.contexto["volver"], error_social=error.codigo, proveedor=proveedor)
                 case Proposito.AUTORIZAR:  # ejercicio 3: al login del authorization server, con la misma petición
                     datos = {"next": error.contexto["volver"], "error_social": error.codigo, "proveedor": proveedor}
                     respuesta = a_la_spa(LOGIN_AUTORIZACION, **datos)

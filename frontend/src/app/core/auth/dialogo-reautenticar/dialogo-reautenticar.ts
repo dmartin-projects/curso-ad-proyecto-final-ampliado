@@ -9,6 +9,7 @@ import { lastValueFrom } from 'rxjs';
 
 import { FactoresReautenticacion } from '../../api/tipos';
 import { ErrorApi } from '../../http/errores';
+import { AuthStore } from '../auth-store';
 import { esCancelacion, Passkeys } from '../passkeys';
 import { Navegador, Social } from '../social';
 
@@ -29,6 +30,7 @@ export class DialogoReautenticar {
   private readonly http = inject(HttpClient);
   private readonly ref = inject<MatDialogRef<DialogoReautenticar, boolean>>(MatDialogRef);
   private readonly navegador = inject(Navegador);
+  private readonly auth = inject(AuthStore);
   protected readonly passkeys = inject(Passkeys);
   protected readonly social = inject(Social);
   protected readonly factores = signal<FactoresReautenticacion | null>(null);
@@ -67,9 +69,21 @@ export class DialogoReautenticar {
     }
   }
 
-  /** Sin contraseña ni passkeys: una entrada nueva con su proveedor (vuelve a esta misma página). */
-  protected conProveedor(proveedor: string) {
-    this.navegador.ir(this.social.urlEntrar(proveedor, location.pathname));
+  /** Ejercicio 3: la ida al proveedor para ESTA sesión (con el JWT); a la vuelta, la sesión ya es reciente. */
+  protected async conProveedor(proveedor: string) {
+    const { url } = await lastValueFrom(
+      this.http.post<{ url: string }>(
+        `/api/v1/auth/social/${encodeURIComponent(proveedor)}/reautenticar/`,
+        { volver: location.pathname },
+      ),
+    );
+    this.navegador.ir(url);
+  }
+
+  /** Sin nada con qué confirmarlo (GitHub no dice cuándo se autenticó): una sesión nueva lo es por definición. */
+  protected salir() {
+    this.ref.close(false);
+    this.auth.logout();
   }
 
   private async enviar(datos: object) {

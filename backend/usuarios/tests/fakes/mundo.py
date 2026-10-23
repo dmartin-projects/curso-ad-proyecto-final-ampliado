@@ -1,4 +1,4 @@
-"""Los fakes de las cuentas y los use cases montados con ellos (módulos 88, 91 y 92). Contract tests:
+"""Los fakes de las cuentas y los use cases montados con ellos (módulos 88, 91 y 92, y sus ejercicios). Contract tests:
 tests/infrastructure/database/repositories/test_command_repositories.py."""
 
 from core.tests.fakes.publicador_eventos_fake import PublicadorEventosFake
@@ -30,6 +30,7 @@ from usuarios.application.establecer_contrasena_use_case.establecer_contrasena_u
 from usuarios.application.iniciar_sesion_use_case.iniciar_sesion_use_case import IniciarSesionUseCase
 from usuarios.application.pedir_reto_use_case.pedir_reto_use_case import PedirRetoUseCase
 from usuarios.application.reautenticar_use_case.reautenticar_use_case import ReautenticarUseCase
+from usuarios.application.regenerar_codigos_use_case.regenerar_codigos_use_case import RegenerarCodigosUseCase
 from usuarios.application.registrar_passkey_use_case.registrar_passkey_use_case import RegistrarPasskeyUseCase
 from usuarios.application.renovar_sesion_use_case.renovar_sesion_use_case import RenovarSesionUseCase
 from usuarios.application.shared.apertura_de_sesion import AperturaDeSesion
@@ -73,7 +74,10 @@ class Mundo:
         enlace = {"cuentas": self.cuentas, "politica": politica, "enlaces": enlaces}
         self.registrar = SolicitarRegistroUseCase(**correo)
         self.completar_registro = CompletarRegistroUseCase(**enlace)
-        self.segundos = SegundoFactorCommandRepositoryFake()  # (módulo 92: también los usa la recuperación)
+        self.segundos = (
+            SegundoFactorCommandRepositoryFake()
+        )  # (módulo 92: también los usan la recuperación y el ejercicio 3)
+        self.reloj = RelojDelSistemaFake()
         self.solicitar = SolicitarRecuperacionUseCase(**correo)
         self.confirmar = ConfirmarRecuperacionUseCase(
             **enlace, sesiones=self.sesiones, segundos=self.segundos, eventos=self.eventos, uow=self.uow
@@ -87,13 +91,16 @@ class Mundo:
         self.proveedores = ProveedoresFake(self.google, self.github)
         self.transacciones, self.identidades = TransaccionesFake(), IdentidadCommandRepositoryFake()
         self.uow_social = UnidadDeTrabajoFake(self.cuentas, self.identidades, self.eventos)
-        self.empezar = EmpezarLoginSocialUseCase(proveedores=self.proveedores, transacciones=self.transacciones)
+        self.empezar = EmpezarLoginSocialUseCase(
+            proveedores=self.proveedores, transacciones=self.transacciones, reloj=self.reloj
+        )
         self.completar = CompletarLoginSocialUseCase(
             proveedores=self.proveedores, transacciones=self.transacciones, identidades=self.identidades,
-            cuentas=self.cuentas, eventos=self.eventos, uow=self.uow_social,
+            cuentas=self.cuentas, eventos=self.eventos, uow=self.uow_social, sesiones=self.sesiones,
+            segundos=self.segundos, reloj=self.reloj,
         )  # fmt: skip
         # Módulo 92
-        self.totp, self.codigos, self.reloj = TotpFake(), CodigosDeRecuperacionFake(), RelojDelSistemaFake()
+        self.totp, self.codigos = TotpFake(), CodigosDeRecuperacionFake()
         self.passkeys, self.webauthn, self.retos, self.pendientes = (
             PasskeyCommandRepositoryFake(), WebAuthnFake(), RetosFake(), PendientesFake()
         )  # fmt: skip
@@ -129,6 +136,9 @@ class Mundo:
             reloj=self.reloj,
         )  # fmt: skip
         self.desactivar_mfa = DesactivarMfaUseCase(
+            segundos=self.segundos, codigos=self.codigos, eventos=self.eventos, uow=self.uow_mfa
+        )
+        self.regenerar_codigos = RegenerarCodigosUseCase(  # ejercicio 2
             segundos=self.segundos, codigos=self.codigos, eventos=self.eventos, uow=self.uow_mfa
         )
         web = {"passkeys": self.passkeys, "webauthn": self.webauthn, "retos": self.retos}

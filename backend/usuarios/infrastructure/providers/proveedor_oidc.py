@@ -1,14 +1,17 @@
-# usuarios/infrastructure/providers/proveedor_oidc.py — un OpenID Provider cualquiera (Google, Apple…) (módulo 91)
+# usuarios/infrastructure/providers/proveedor_oidc.py — un OpenID Provider cualquiera (Google, Apple…) (módulos 91 y 92)
 #
 # Del emisor (issuer) sale todo: el discovery da los endpoints, si admite PKCE y dónde está su JWKS. El ID token se
 # valida entero (OIDC Core §3.1.3.7): algoritmo de una lista blanca, firma con la clave del JWKS por `kid`, iss, aud,
 # exp/iat y nonce. Lo que no valida la librería si no se lo pides (aud), se le pide.
+import json
+
 from authlib.oidc.core import CodeIDToken
 from django.core.cache import cache
 from joserfc import jwt
 from joserfc.errors import InvalidKeyIdError, JoseError
 from joserfc.jwk import KeySet
 
+from usuarios.domain.enums.proposito import Proposito
 from usuarios.domain.exceptions.login_social_no_valido_exception import LoginSocialNoValidoException
 from usuarios.domain.vo.perfil_externo import PerfilExterno
 from usuarios.domain.vo.transaccion_social import TransaccionSocial
@@ -27,6 +30,13 @@ class ProveedorOIDC(ClienteOAuth):
     scope = "openid email profile"
     algoritmos = ("RS256",)  # lista blanca: nunca "none", nunca HS256 con la clave pública (confusión de algoritmos)
     parametros_extra: dict[str, str] = {}  # los propios de cada proveedor en la URL de autorización
+    # Módulo 92, ejercicio 3: para un step-up, que vuelva a autenticar (max_age=0, OIDC Core §3.1.2.1) y que el ID token
+    # diga cuándo (auth_time, pedido como claim esencial: Google solo lo da así). Lo que decide es auth_time.
+    reautentica = True
+    parametros_reautenticacion = {
+        "max_age": "0",
+        "claims": json.dumps({"id_token": {"auth_time": {"essential": True}}}),
+    }
 
     def __init__(self, *, emisor: str, **kwargs):
         super().__init__(**kwargs)
@@ -75,6 +85,8 @@ class ProveedorOIDC(ClienteOAuth):
 
     def url_de_autorizacion(self, transaccion: TransaccionSocial) -> str:
         extra = {"nonce": transaccion.nonce, "response_mode": self.modo_respuesta, **self.parametros_extra}
+        if transaccion.proposito is Proposito.REAUTENTICAR:  # módulo 92, ejercicio 3
+            extra |= self.parametros_reautenticacion
         return self._url(self._metadatos()["authorization_endpoint"], transaccion, pkce=self._pkce(), **extra)
 
     def completar(self, transaccion: TransaccionSocial, parametros: dict[str, str]) -> PerfilExterno:
@@ -124,4 +136,5 @@ class ProveedorOIDC(ClienteOAuth):
             email_verificado=es_cierto(claims.get("email_verified")),
             nombre=claims.get("given_name", ""),
             apellidos=claims.get("family_name", ""),
+            autenticado_en=claims.get("auth_time"),  # módulo 92, ejercicio 3
         )

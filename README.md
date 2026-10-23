@@ -18,7 +18,7 @@ Es Gastos (módulos 70-83) con las ampliaciones de las Partes 6 y 7 encima. **Ca
 
 La Parte 7 (el agente de IA) se añadirá aquí con el mismo formato cuando esté terminada.
 
-Estado comprobado al terminar el módulo 92: 829 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (sin cambios desde el 89), 48 de *frontend* (Vitest) y 21 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones (26 contratos).
+Estado comprobado al terminar el módulo 92 (con sus ejercicios): 845 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (sin cambios desde el 89), 48 de *frontend* (Vitest) y 21 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones (26 contratos).
 
 ## Estructura
 
@@ -85,7 +85,7 @@ Personal de soporte (el *backoffice* está dentro de la app, no hay Django admin
 ## Tests
 
 ```bash
-cd backend && uv run pytest -n 4 --cov                 # 828 tests (+1 que se salta sin Kafka)
+cd backend && uv run pytest -n 4 --cov                 # 844 tests (+1 que se salta sin Kafka)
 cd frontend && npx ng test --watch=false                # 38 tests
 # punta a punta (módulo 82): una vez, crea la BD de E2E
 docker compose exec db createdb -U gastos gastos_e2e
@@ -192,3 +192,5 @@ cd ../frontend && npx ng serve                       # http://localhost:4200 →
 ```
 
 Las *passkeys* funcionan en `http://localhost` (el navegador lo trata como un origen seguro) y quedan atadas a `localhost`: las de staging y producción son de su dominio (el `rp_id` es el host de `FRONTEND_URL`) y en las *previews* de Vercel no se ofrecen. Sin móvil a mano, Chrome tiene un autenticador virtual en DevTools (*More tools → WebAuthn*). Las acciones sensibles (cambiar la contraseña, activar el MFA, añadir una *passkey*, borrar un hogar…) piden confirmar quién eres si entraste hace más de 5 minutos (`REAUTENTICACION_SEGUNDOS`). Los avisos («nuevo inicio de sesión», «has activado…») llegan a Mailpit (http://localhost:8025). En producción, `MFA_CLAVES` va en `infra/secretos/` (rotarla: `docs/runbook.md`); al desplegar, los *refresh tokens* anteriores al 92 no llevan sesión y se vuelve a entrar una vez.
+
+Ejercicios: el *backoffice* exige al personal una sesión de dos factores (`manage.py personal` y, después, activar el MFA en «Seguridad»; una sesión abierta antes se sube de nivel confirmando con la app), códigos de recuperación nuevos desde «Seguridad» y el *step-up* de una cuenta sin contraseña con su proveedor (`max_age=0` y `auth_time` del ID token; con el proveedor falso de `compose.yaml`, escribe `"auth_time"` en los *claims*). En los E2E, `soporte@example.com` tiene el MFA activo con el secreto `JBSWY3DPEHPK3PXP` (`manage.py mfa_e2e`, solo con los ajustes de E2E).

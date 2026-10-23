@@ -1,4 +1,4 @@
-# usuarios/domain/vo/perfil_externo.py — quién dice el proveedor que es la persona (módulo 91)
+# usuarios/domain/vo/perfil_externo.py — quién dice el proveedor que es la persona (módulos 91 y 92)
 from dataclasses import dataclass
 
 from usuarios.domain.enums.proveedor import Proveedor
@@ -21,6 +21,7 @@ class PerfilExterno:
     email_verificado: bool = False
     nombre: str = ""
     apellidos: str = ""
+    autenticado_en: int | None = None  # módulo 92, ej. 3: el auth_time del ID token (cuándo pidió la contraseña)
 
     def __post_init__(self):
         if not self.sub:

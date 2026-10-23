@@ -9,19 +9,19 @@ URL = "/api/v1/backoffice/"
 
 
 @pytest.fixture
-def soporte(cliente):
+def soporte(sesion_con_mfa):
     usuario = UsuarioFactory(is_staff=True)
     usuario.groups.add(
         Group.objects.get(name="Soporte")
     )  # lo crea post_migrate (core/infrastructure/database/grupos.py)
-    c = cliente(usuario)
+    c = sesion_con_mfa(usuario)  # módulo 92, ejercicio 1: el personal, con dos factores
     c.usuario = usuario
     return c
 
 
 @pytest.fixture
-def superusuario(cliente):
-    return cliente(UsuarioFactory(is_staff=True, is_superuser=True))
+def superusuario(sesion_con_mfa):
+    return sesion_con_mfa(UsuarioFactory(is_staff=True, is_superuser=True))
 
 
 def ticket(hogar=None, estado=Ticket.Estado.ERROR, huella="a", **extra):

@@ -19,6 +19,7 @@ from usuarios.infrastructure.api.v1.serializers.seguridad_serializer import Segu
 from usuarios.infrastructure.api.v1.serializers.sesion_activa_serializer import SesionActivaSerializer
 from usuarios.infrastructure.api.v1.views.acceso_view import AccesoView
 from usuarios.infrastructure.api.v1.views.cerrar_las_demas_view import CerrarLasDemasView
+from usuarios.infrastructure.api.v1.views.codigos_recuperacion_view import CodigosRecuperacionView
 from usuarios.infrastructure.api.v1.views.completar_registro_view import CompletarRegistroView
 from usuarios.infrastructure.api.v1.views.confirmar_recuperacion_view import ConfirmarRecuperacionView
 from usuarios.infrastructure.api.v1.views.confirmar_totp_view import ConfirmarTotpView
@@ -31,6 +32,7 @@ from usuarios.infrastructure.api.v1.views.passkey_view import PasskeyView
 from usuarios.infrastructure.api.v1.views.passkeys_view import PasskeysView
 from usuarios.infrastructure.api.v1.views.proveedores_sociales_view import ProveedoresSocialesView
 from usuarios.infrastructure.api.v1.views.quitar_proveedor_view import QuitarProveedorView
+from usuarios.infrastructure.api.v1.views.reautenticar_social_view import ReautenticarSocialView
 from usuarios.infrastructure.api.v1.views.reautenticar_view import ReautenticarView
 from usuarios.infrastructure.api.v1.views.refresh_view import RefreshView
 from usuarios.infrastructure.api.v1.views.registro_view import RegistroView
@@ -76,6 +78,12 @@ Volver = OpenApiParameter(
 extend_schema_view(get=extend_schema(responses=ProveedoresSocialesSerializer))(ProveedoresSocialesView)
 extend_schema_view(get=extend_schema(parameters=[Volver], responses=Redireccion))(EntrarSocialView)
 extend_schema_view(post=extend_schema(request=None, responses=IdaAlProveedorSerializer))(VincularSocialView)
+extend_schema_view(  # módulo 92, ejercicio 3
+    post=extend_schema(
+        request=inline_serializer("Volver", {"volver": serializers.CharField(required=False)}),
+        responses=IdaAlProveedorSerializer,
+    )
+)(ReautenticarSocialView)
 extend_schema_view(get=extend_schema(responses=Redireccion), post=extend_schema(request=None, responses=Redireccion))(
     VueltaSocialView
 )
@@ -101,15 +109,12 @@ AltaTotp = inline_serializer(
 extend_schema_view(post=extend_schema(request=None, responses=AltaTotp), delete=extend_schema(responses={204: None}))(
     TotpView
 )
+Codigos = inline_serializer("CodigosRecuperacion", {"codigos": serializers.ListField(child=serializers.CharField())})
 extend_schema_view(
-    post=extend_schema(
-        request=inline_serializer("CodigoTotp", {"codigo": serializers.CharField()}),
-        responses=inline_serializer(
-            "CodigosRecuperacion", {"codigos": serializers.ListField(child=serializers.CharField())}
-        ),
-    )
+    post=extend_schema(request=inline_serializer("CodigoTotp", {"codigo": serializers.CharField()}), responses=Codigos)
 )(ConfirmarTotpView)
 extend_schema_view(post=extend_schema(request=None, responses=OpcionesWebAuthn))(RetoRegistroPasskeyView)
+extend_schema_view(post=extend_schema(request=None, responses=Codigos))(CodigosRecuperacionView)  # ejercicio 2
 extend_schema_view(
     post=extend_schema(
         request=inline_serializer(

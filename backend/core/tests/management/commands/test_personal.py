@@ -7,9 +7,9 @@ from core.models import RegistroAuditoria
 pytestmark = pytest.mark.django_db
 
 
-def test_dar_y_quitar_acceso_al_backoffice(api):
+def test_dar_y_quitar_acceso_al_backoffice(sesion_con_mfa):
     usuario = UsuarioFactory(email="ana@example.com")
-    api.force_authenticate(usuario)
+    api = sesion_con_mfa(usuario)  # módulo 92, ejercicio 1: el backoffice exige una sesión de dos factores
     assert api.get("/api/v1/backoffice/resumen/").status_code == 404  # para un usuario normal no existe
 
     call_command("personal", "ANA@example.com")  # el email, sin distinguir mayúsculas

@@ -16,12 +16,14 @@ from usuarios.application.establecer_contrasena_use_case.dtos.establecer_contras
     EstablecerContrasenaInputDTO,
 )
 from usuarios.application.iniciar_sesion_use_case.dtos.iniciar_sesion_input_dto import IniciarSesionInputDTO
+from usuarios.domain.bo.segundo_factor import SegundoFactor
 from usuarios.domain.enums.canal import Canal
 from usuarios.domain.enums.factor import Factor
 from usuarios.domain.enums.proposito import Proposito
 from usuarios.domain.enums.proveedor import Proveedor
 from usuarios.domain.events.proveedor_vinculado_event import ProveedorVinculadoEvent
 from usuarios.domain.exceptions.acceso_cancelado_exception import AccesoCanceladoException
+from usuarios.domain.exceptions.codigo_no_valido_exception import CodigoNoValidoException
 from usuarios.domain.exceptions.contrasena_no_valida_exception import ContrasenaNoValidaException
 from usuarios.domain.exceptions.cuenta_desactivada_exception import CuentaDesactivadaException
 from usuarios.domain.exceptions.cuenta_ya_existe_exception import CuentaYaExisteException
@@ -32,6 +34,7 @@ from usuarios.domain.exceptions.proveedor_no_disponible_exception import Proveed
 from usuarios.domain.exceptions.ultimo_metodo_de_acceso_exception import UltimoMetodoDeAccesoException
 from usuarios.domain.exceptions.ya_tiene_contrasena_exception import YaTieneContrasenaException
 from usuarios.domain.vo.perfil_externo import PerfilExterno
+from usuarios.tests.application.escenarios_mfa import cuenta_de_google, reautenticar_con_google
 from usuarios.tests.fakes.mundo import Mundo
 
 G = Proveedor.GOOGLE
@@ -212,3 +215,33 @@ def test_iniciar_sesion_en_el_authorization_server_no_emite_tokens_pero_comprueb
     mundo.cuentas.usuarios[1]["activo"] = False
     with pytest.raises(CuentaDesactivadaException):
         mundo.iniciar_sesion.ejecutar(cmd)
+
+
+def test_el_step_up_con_el_proveedor_si_ha_vuelto_a_autenticar():
+    mundo = Mundo()
+    ana, sid = cuenta_de_google(mundo)
+    antes = mundo.sesiones.autenticacion(sid).momento
+    hecho = reautenticar_con_google(mundo, ana, sid)
+    assert hecho.volver == "/seguridad" and mundo.sesiones.autenticacion(sid).momento > antes
+
+
+@pytest.mark.parametrize("autenticado_en", [None, 1_000_000_000])  # sin auth_time; o el de una sesión de hace años
+def test_sin_una_autenticacion_nueva_no_vale(autenticado_en):
+    from usuarios.domain.exceptions.reautenticacion_no_reciente_exception import ReautenticacionNoRecienteException
+
+    mundo = Mundo()
+    ana, sid = cuenta_de_google(mundo)
+    with pytest.raises(ReautenticacionNoRecienteException):
+        reautenticar_con_google(mundo, ana, sid, autenticado_en=autenticado_en)
+
+
+def test_el_step_up_con_el_proveedor_es_con_su_identidad_y_sin_mfa():
+    from usuarios.domain.exceptions.identidad_de_otra_cuenta_exception import IdentidadDeOtraCuentaException
+
+    mundo = Mundo()
+    ana, sid = cuenta_de_google(mundo)
+    with pytest.raises(IdentidadDeOtraCuentaException):  # el Google de otra persona no confirma que eres tú
+        reautenticar_con_google(mundo, ana, sid, sub="sub-de-otro")
+    mundo.segundos.guardados[ana] = SegundoFactor(ana, "SECRETO", activo=True)
+    with pytest.raises(CodigoNoValidoException):  # con MFA, el step-up es con el segundo factor
+        reautenticar_con_google(mundo, ana, sid, sub="sub-ana")

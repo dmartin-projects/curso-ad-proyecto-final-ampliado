@@ -1,4 +1,4 @@
-# usuarios/application/ports/i_proveedor_identidad.py — un proveedor de identidad: Google, GitHub, Apple… (módulo 91)
+# usuarios/application/ports/i_proveedor_identidad.py — un proveedor de identidad: Google, GitHub, Apple… (módulos 91 y 92)
 from abc import ABC, abstractmethod
 
 from usuarios.domain.enums.proveedor import Proveedor
@@ -12,6 +12,9 @@ class IProveedorIdentidad(ABC):
 
     proveedor: Proveedor
     modo_respuesta: str | None = None  # cómo vuelve el navegador: en la query (None) o con un POST ("form_post")
+    reautentica: bool = (
+        False  # módulo 92, ej. 3: puede volver a pedir la contraseña y decir cuándo (max_age, auth_time)
+    )
 
     @abstractmethod
     def url_de_autorizacion(self, transaccion: TransaccionSocial) -> str:

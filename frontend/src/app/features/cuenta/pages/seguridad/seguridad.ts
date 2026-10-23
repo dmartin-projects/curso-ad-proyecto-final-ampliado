@@ -78,6 +78,19 @@ export default class Seguridad {
     this.alta.set(await lastValueFrom(this.api.empezarTotp()));
   }
 
+  /** Ejercicio 2: códigos nuevos (los anteriores dejan de valer). Acción sensible: el step-up, si hace falta. */
+  protected async regenerar() {
+    const seguro = await this.confirmaciones.preguntar(
+      '¿Generar códigos de recuperación nuevos?',
+      'Los que tienes ahora dejarán de valer.',
+      'Generar',
+    );
+    if (!seguro) return;
+    const { codigos } = await lastValueFrom(this.api.regenerarCodigos());
+    this.codigos.set(codigos);
+    await this.refrescar();
+  }
+
   protected async desactivar() {
     const seguro = await this.confirmaciones.preguntar(
       '¿Desactivar la verificación en dos pasos?',

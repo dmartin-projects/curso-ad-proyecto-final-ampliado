@@ -89,6 +89,8 @@ from usuarios.application.pedir_reto_use_case.i_pedir_reto_use_case import IPedi
 from usuarios.application.pedir_reto_use_case.pedir_reto_use_case import PedirRetoUseCase
 from usuarios.application.reautenticar_use_case.i_reautenticar_use_case import IReautenticarUseCase
 from usuarios.application.reautenticar_use_case.reautenticar_use_case import ReautenticarUseCase
+from usuarios.application.regenerar_codigos_use_case.i_regenerar_codigos_use_case import IRegenerarCodigosUseCase
+from usuarios.application.regenerar_codigos_use_case.regenerar_codigos_use_case import RegenerarCodigosUseCase
 from usuarios.application.registrar_passkey_use_case.i_registrar_passkey_use_case import IRegistrarPasskeyUseCase
 from usuarios.application.registrar_passkey_use_case.registrar_passkey_use_case import RegistrarPasskeyUseCase
 from usuarios.application.renovar_sesion_use_case.i_renovar_sesion_use_case import IRenovarSesionUseCase
@@ -186,7 +188,9 @@ def listar_proveedores() -> IListarProveedoresUseCase:
 
 
 def empezar_login_social() -> IEmpezarLoginSocialUseCase:
-    return EmpezarLoginSocialUseCase(proveedores=ProveedoresConfigurados(), transacciones=TransaccionesEnCache())
+    return EmpezarLoginSocialUseCase(
+        proveedores=ProveedoresConfigurados(), transacciones=TransaccionesEnCache(), reloj=RelojDjango()
+    )
 
 
 def completar_login_social() -> ICompletarLoginSocialUseCase:
@@ -197,6 +201,9 @@ def completar_login_social() -> ICompletarLoginSocialUseCase:
         cuentas=CuentaCommandRepositoryORM(),
         eventos=PublicadorEventosDjango(),  # ejercicio 2: el aviso al vincular
         uow=UnidadDeTrabajoDjango(),
+        sesiones=SesionesORM(),  # módulo 92, ejercicio 3: el step-up con el proveedor
+        segundos=SegundoFactorCommandRepositoryORM(),
+        reloj=RelojDjango(),
     )
 
 
@@ -305,6 +312,13 @@ def confirmar_totp() -> IConfirmarTotpUseCase:
 
 def desactivar_mfa() -> IDesactivarMfaUseCase:
     return DesactivarMfaUseCase(
+        segundos=SegundoFactorCommandRepositoryORM(), codigos=CodigosDeRecuperacionORM(),
+        eventos=PublicadorEventosDjango(), uow=UnidadDeTrabajoDjango(),
+    )  # fmt: skip
+
+
+def regenerar_codigos() -> IRegenerarCodigosUseCase:  # ejercicio 2
+    return RegenerarCodigosUseCase(
         segundos=SegundoFactorCommandRepositoryORM(), codigos=CodigosDeRecuperacionORM(),
         eventos=PublicadorEventosDjango(), uow=UnidadDeTrabajoDjango(),
     )  # fmt: skip

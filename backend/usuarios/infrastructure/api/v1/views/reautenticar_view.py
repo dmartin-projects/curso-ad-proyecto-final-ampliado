@@ -1,4 +1,4 @@
-# usuarios/infrastructure/api/v1/views/reautenticar_view.py — el step-up: volver a demostrar quién eres (módulo 92)
+# usuarios/infrastructure/api/v1/views/reautenticar_view.py — el step-up: volver a demostrar quién eres (módulo 92 y su ejercicio 3)
 from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -21,8 +21,10 @@ class ReautenticarView(APIView):
         factores = container.obtener_factores().ejecutar(ObtenerFactoresInputDTO(request.user.pk))
         admitidos = ["totp", "passkey"] if factores.totp else ["contrasena", "passkey"]
         disponibles = [f for f in factores.lista if f in admitidos]
+        # Sin MFA ni contraseña ni passkeys, con un proveedor que pueda volver a pedir la contraseña (ejercicio 3)
+        reautentican = {p.id for p in container.listar_proveedores().ejecutar() if p.reautentica}
         acceso = container.obtener_acceso().ejecutar(ObtenerAccesoInputDTO(request.user.pk))
-        proveedores = [i.proveedor for i in acceso.identidades]
+        proveedores = [] if factores.totp else [i.proveedor for i in acceso.identidades if i.proveedor in reautentican]
         return Response(
             {"factores": disponibles, "proveedores": proveedores, "max_age": settings.REAUTENTICACION_SEGUNDOS}
         )

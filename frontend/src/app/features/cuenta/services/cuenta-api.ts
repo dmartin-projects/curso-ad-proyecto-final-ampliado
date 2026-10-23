@@ -58,6 +58,11 @@ export class CuentaApi {
     return this.http.post<{ codigos: string[] }>('/api/v1/auth/seguridad/totp/confirmar/', datos);
   }
 
+  /** Ejercicio 2: códigos de recuperación nuevos (los anteriores dejan de valer). */
+  regenerarCodigos() {
+    return this.http.post<{ codigos: string[] }>('/api/v1/auth/seguridad/recuperacion/', null);
+  }
+
   desactivarTotp() {
     return this.http.delete('/api/v1/auth/seguridad/totp/');
   }

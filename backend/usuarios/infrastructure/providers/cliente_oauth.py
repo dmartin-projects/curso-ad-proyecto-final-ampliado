@@ -28,6 +28,7 @@ class ClienteOAuth(IProveedorIdentidad):
     scope: str
     autenticacion = "client_secret_basic"  # cómo se autentica Gastos en el token endpoint (RFC 6749 §2.3.1)
     modo_respuesta: str | None = None  # cómo vuelve el navegador: en la query (None) o con un POST ("form_post")
+    reautentica = False  # módulo 92, ej. 3: OAuth 2.0 a secas no dice cuándo se autenticó la persona
 
     def __init__(self, *, client_id: str, client_secret: str = "", vuelta: str):
         self.client_id, self.client_secret, self.vuelta = client_id, client_secret, vuelta

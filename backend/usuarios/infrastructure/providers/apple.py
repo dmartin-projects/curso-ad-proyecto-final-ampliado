@@ -25,6 +25,9 @@ class Apple(ProveedorOIDC):
     )
     modo_respuesta = "form_post"
     autenticacion = "client_secret_post"  # el único que anuncia su discovery
+    # Módulo 92, ejercicio 3: su petición de autorización no recoge max_age ni prompt: no se puede forzar que vuelva a
+    # pedir la contraseña, así que no se ofrece para el step-up
+    reautentica = False
 
     def __init__(self, *, equipo: str, clave_id: str, clave_privada: str, **kwargs):
         super().__init__(**kwargs)  # client_id = el Services ID (com.tudominio.gastos.web)

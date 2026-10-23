@@ -5,6 +5,7 @@ from usuarios.infrastructure.api.v1 import esquema  # noqa: F401  (registra la d
 from usuarios.infrastructure.api.v1.views.acceso_view import AccesoView
 from usuarios.infrastructure.api.v1.views.cambiar_password_view import CambiarPasswordView
 from usuarios.infrastructure.api.v1.views.cerrar_las_demas_view import CerrarLasDemasView
+from usuarios.infrastructure.api.v1.views.codigos_recuperacion_view import CodigosRecuperacionView
 from usuarios.infrastructure.api.v1.views.completar_registro_view import CompletarRegistroView
 from usuarios.infrastructure.api.v1.views.confirmar_recuperacion_view import ConfirmarRecuperacionView
 from usuarios.infrastructure.api.v1.views.confirmar_totp_view import ConfirmarTotpView
@@ -17,6 +18,7 @@ from usuarios.infrastructure.api.v1.views.passkey_view import PasskeyView
 from usuarios.infrastructure.api.v1.views.passkeys_view import PasskeysView
 from usuarios.infrastructure.api.v1.views.proveedores_sociales_view import ProveedoresSocialesView
 from usuarios.infrastructure.api.v1.views.quitar_proveedor_view import QuitarProveedorView
+from usuarios.infrastructure.api.v1.views.reautenticar_social_view import ReautenticarSocialView
 from usuarios.infrastructure.api.v1.views.reautenticar_view import ReautenticarView
 from usuarios.infrastructure.api.v1.views.refresh_view import RefreshView
 from usuarios.infrastructure.api.v1.views.registro_view import RegistroView
@@ -48,6 +50,9 @@ urlpatterns = [
     path("social/", ProveedoresSocialesView.as_view(), name="social-proveedores"),
     path("social/<str:proveedor>/entrar/", EntrarSocialView.as_view(), name="social-entrar"),
     path("social/<str:proveedor>/vincular/", VincularSocialView.as_view(), name="social-vincular"),
+    path(
+        "social/<str:proveedor>/reautenticar/", ReautenticarSocialView.as_view(), name="social-reautenticar"
+    ),  # 92 ej. 3
     path("social/<str:proveedor>/vuelta/", VueltaSocialView.as_view(), name="social-vuelta"),
     path("acceso/", AccesoView.as_view(), name="auth-acceso"),
     path("acceso/<str:proveedor>/", QuitarProveedorView.as_view(), name="auth-acceso-proveedor"),
@@ -60,6 +65,7 @@ urlpatterns = [
     path("seguridad/", SeguridadView.as_view(), name="auth-seguridad"),
     path("seguridad/totp/", TotpView.as_view(), name="auth-totp"),
     path("seguridad/totp/confirmar/", ConfirmarTotpView.as_view(), name="auth-totp-confirmar"),
+    path("seguridad/recuperacion/", CodigosRecuperacionView.as_view(), name="auth-recuperacion"),  # ej. 2
     path("seguridad/passkeys/reto/", RetoRegistroPasskeyView.as_view(), name="auth-passkeys-reto"),
     path("seguridad/passkeys/", PasskeysView.as_view(), name="auth-passkeys"),
     path("seguridad/passkeys/<int:passkey_id>/", PasskeyView.as_view(), name="auth-passkey-borrar"),

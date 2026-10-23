@@ -550,6 +550,23 @@ paths:
                 type: object
                 additionalProperties: {}
           description: Opciones de WebAuthn (JSON, para parse…FromJSON)
+  /api/v1/auth/seguridad/recuperacion/:
+    post:
+      operationId: auth_seguridad_recuperacion_create
+      description: 'Ejercicio 2: códigos de recuperación nuevos (acción sensible:
+        quien los tenga, se salta el móvil).'
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodigosRecuperacion'
+          description: ''
   /api/v1/auth/seguridad/totp/:
     post:
       operationId: auth_seguridad_totp_create
@@ -693,6 +710,38 @@ paths:
       responses:
         '302':
           description: Redirección (al proveedor, o de vuelta a la SPA)
+  /api/v1/auth/social/{proveedor}/reautenticar/:
+    post:
+      operationId: auth_social_reautenticar_create
+      description: |-
+        Módulo 92, ejercicio 3: POST con el JWT de la SPA: la URL del proveedor para confirmar quién eres (step-up de una
+        cuenta sin contraseña). A la vuelta, la sesión de este JWT queda reautenticada y se vuelve a `volver`.
+      parameters:
+      - in: path
+        name: proveedor
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VolverRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/VolverRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdaAlProveedor'
+          description: ''
   /api/v1/auth/social/{proveedor}/vincular/:
     post:
       operationId: auth_social_vincular_create
@@ -6066,6 +6115,12 @@ components:
       - is_staff
       - last_login
       - nombre
+    VolverRequest:
+      type: object
+      properties:
+        volver:
+          type: string
+          minLength: 1
   securitySchemes:
     cookieAuth:
       type: apiKey

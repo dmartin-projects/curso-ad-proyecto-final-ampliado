@@ -19,14 +19,18 @@
     @if (f.factores.includes('passkey') && passkeys.disponible()) {
       <button mat-stroked-button class="w-full" (click)="conPasskey()">Usar una passkey</button>
     }
-    @if (!f.factores.length) {
+    @if (!f.factores.length && f.proveedores.length) {
+      <!-- Ejercicio 3: una cuenta sin contraseña lo confirma con su proveedor (max_age=0 y auth_time) -->
       <p class="text-sm">
-        Tu cuenta no tiene contraseña: vuelve a entrar con
-        {{ social.nombre(f.proveedores[0]) }}.
+        Tu cuenta no tiene contraseña: confírmalo en {{ social.nombre(f.proveedores[0]) }}. Volverás
+        aquí; repite entonces lo que ibas a hacer.
       </p>
       <button mat-stroked-button class="w-full" (click)="conProveedor(f.proveedores[0])">
-        Entrar con {{ social.nombre(f.proveedores[0]) }}
+        Confirmar con {{ social.nombre(f.proveedores[0]) }}
       </button>
+    } @else if (!f.factores.length) {
+      <p class="text-sm">Sal y vuelve a entrar para confirmarlo.</p>
+      <button mat-stroked-button class="w-full" (click)="salir()">Salir</button>
     }
   }
   @if (error()) {

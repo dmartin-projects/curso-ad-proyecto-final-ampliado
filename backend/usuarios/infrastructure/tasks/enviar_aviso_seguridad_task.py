@@ -32,6 +32,8 @@ AVISOS = {  # lazy: se traducen al usarse, en el idioma de cada usuario
         "abiertas. Las aplicaciones a las que diste acceso lo conservan: si no reconoces alguna, retírasela en "
         "%(aplicaciones)s."
     ),
+    # Ejercicio 2
+    "codigos_regenerados": gettext_lazy("Has generado códigos de recuperación nuevos: los anteriores ya no valen."),
 }
 
 

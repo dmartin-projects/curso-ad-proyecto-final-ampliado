@@ -1,4 +1,4 @@
-# usuarios/tests/fakes/proveedor_identidad_fake.py — IProveedorIdentidad en memoria (módulo 91)
+# usuarios/tests/fakes/proveedor_identidad_fake.py — IProveedorIdentidad en memoria (módulos 91 y 92)
 from usuarios.application.ports.i_proveedor_identidad import IProveedorIdentidad
 from usuarios.domain.enums.proveedor import Proveedor
 from usuarios.domain.exceptions.login_social_no_valido_exception import LoginSocialNoValidoException
@@ -10,6 +10,7 @@ class ProveedorIdentidadFake(IProveedorIdentidad):
 
     def __init__(self, proveedor=Proveedor.GOOGLE):
         self.proveedor = proveedor
+        self.reautentica = proveedor is not Proveedor.GITHUB  # módulo 92, ejercicio 3
         self.perfil = PerfilExterno(proveedor, "sub-ana", "ana@gmail.com", True, "Ana", "García")
         self.fallo: Exception | None = None
         self.transacciones, self.completadas = [], []

@@ -12,7 +12,8 @@ def test_hogares_con_contadores_y_miembros(soporte, django_assert_max_num_querie
     m = MembresiaFactory()
     MovimientoFactory.create_batch(3, cuenta=CuentaFactory(hogar=m.hogar))
     HogarFactory.create_batch(5)
-    with django_assert_max_num_queries(5):  # sin N+1 aunque haya muchos hogares
+    # sin N+1 aunque haya muchos hogares (6: con el JWT de verdad, su usuario y su sesión de dos factores, módulo 92)
+    with django_assert_max_num_queries(6):
         r = soporte.get(URL + "hogares/", {"ordering": "-num_movimientos"})
     assert r.data["results"][0] | {"num_miembros": 1, "num_movimientos": 3} == r.data["results"][0]
     detalle = soporte.get(URL + f"hogares/{m.hogar_id}/").data

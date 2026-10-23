@@ -97,6 +97,32 @@ def sesion(db):
 
 
 @pytest.fixture
+def sesion_con_mfa(db):
+    """sesion_con_mfa(usuario) → APIClient de una sesión de dos factores (contraseña + TOTP), con el MFA activado.
+    Ejercicio 1 del módulo 92: el backoffice la exige al personal."""
+    from usuarios.application.completar_segundo_factor_use_case.dtos.completar_segundo_factor_input_dto import (
+        CompletarSegundoFactorInputDTO,
+    )
+    from usuarios.application.iniciar_sesion_use_case.dtos.iniciar_sesion_input_dto import IniciarSesionInputDTO
+    from usuarios.domain.enums.canal import Canal
+    from usuarios.domain.enums.factor import Factor
+    from usuarios.infrastructure import container
+    from usuarios.tests.infrastructure.ayudas_mfa import activar_mfa, codigo
+
+    def _sesion(usuario):
+        secreto, _ = activar_mfa(usuario)
+        pendiente = container.iniciar_sesion().ejecutar(IniciarSesionInputDTO(usuario.pk, Factor.CONTRASENA))
+        entrada = CompletarSegundoFactorInputDTO(pendiente.clave, Canal.SPA, Factor.TOTP, codigo(secreto))
+        abierta, _ = container.completar_segundo_factor().ejecutar(entrada)
+        c = APIClient()
+        c.credentials(HTTP_AUTHORIZATION=f"Bearer {abierta.tokens.access}")
+        c.secreto = secreto
+        return c
+
+    return _sesion
+
+
+@pytest.fixture
 def hogar_con_roles(db):
     """Un hogar con un admin, un miembro, un lector y un usuario ajeno."""
     hogar = HogarFactory()

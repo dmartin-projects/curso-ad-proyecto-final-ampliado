@@ -3,7 +3,6 @@
 DJANGO_SETTINGS_MODULE=config.settings.e2e uv run python manage.py runserver 8000
 """
 
-from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -57,6 +56,7 @@ SOCIAL_LOGIN["apple"] |= {
     .decode(),
     "emisor": f"{OIDC_FALSO}/apple",
 }
-# Módulo 92: la clave del cifrado de los secretos TOTP, nueva en cada arranque. Las passkeys, para el origen de la SPA
-# (http://localhost:4200, rp_id localhost: WebAuthn admite http en localhost)
-MFA_CLAVES = [Fernet.generate_key().decode()]
+# Módulo 92: la clave del cifrado de los secretos TOTP. Fija y sin valor (solo E2E): preparar_e2e (que activa el MFA
+# del personal, ejercicio 1) y runserver son dos procesos y tienen que leer lo mismo. Las passkeys, para el origen de la
+# SPA (http://localhost:4200, rp_id localhost: WebAuthn admite http en localhost)
+MFA_CLAVES = ["ZTJlLXNpbi12YWxvci1uaS1zZWNyZXRvLTAxMjM0NTY="]

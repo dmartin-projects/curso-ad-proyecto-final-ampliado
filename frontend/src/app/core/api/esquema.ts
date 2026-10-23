@@ -408,6 +408,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/seguridad/recuperacion/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Ejercicio 2: códigos de recuperación nuevos (acción sensible: quien los tenga, se salta el móvil). */
+        post: operations["auth_seguridad_recuperacion_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/seguridad/totp/": {
         parameters: {
             query?: never;
@@ -519,6 +536,26 @@ export interface paths {
         get: operations["auth_social_entrar_retrieve"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/social/{proveedor}/reautenticar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Módulo 92, ejercicio 3: POST con el JWT de la SPA: la URL del proveedor para confirmar quién eres (step-up de una
+         *     cuenta sin contraseña). A la vuelta, la sesión de este JWT queda reautenticada y se vuelve a `volver`.
+         */
+        post: operations["auth_social_reautenticar_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -2569,6 +2606,9 @@ export interface components {
              */
             readonly last_login: string | null;
         };
+        VolverRequest: {
+            volver?: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -3184,6 +3224,25 @@ export interface operations {
             };
         };
     };
+    auth_seguridad_recuperacion_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodigosRecuperacion"];
+                };
+            };
+        };
+    };
     auth_seguridad_totp_create: {
         parameters: {
             query?: never;
@@ -3342,6 +3401,32 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    auth_social_reautenticar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                proveedor: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["VolverRequest"];
+                "multipart/form-data": components["schemas"]["VolverRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdaAlProveedor"];
+                };
             };
         };
     };

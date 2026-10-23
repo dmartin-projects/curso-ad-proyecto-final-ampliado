@@ -392,3 +392,24 @@ def test_aviso_por_email_al_entrar_desde_un_dispositivo_nuevo(django_capture_on_
     (aviso,) = mail.outbox
     assert aviso.to == ["ana@example.com"] and aviso.subject == "Nuevo inicio de sesión en tu cuenta de Gastos"
     assert "Safari en iOS (red 127.0.0.0/24)" in aviso.body and "/sesiones" in aviso.body
+
+
+# ── Ejercicio 2: códigos de recuperación nuevos ──
+
+
+def test_regenerar_los_codigos_con_step_up(time_machine, django_capture_on_commit_callbacks):
+    ana = UsuarioFactory()
+    secreto, viejos = activar_mfa(ana)
+    c = navegador()
+    login(c, ana)
+    spa = con_access(navegador(), c.post(A + "mfa/", {"factor": "totp", "codigo": codigo(secreto)}))
+    with django_capture_on_commit_callbacks(execute=True):
+        nuevos = spa.post(A + "seguridad/recuperacion/").json()["codigos"]
+    assert len(nuevos) == 10 and not set(nuevos) & set(viejos)
+    assert "Has generado códigos de recuperación nuevos" in mail.outbox[-1].body
+    time_machine.move_to(datetime.now(UTC) + timedelta(minutes=6))
+    assert spa.post(A + "seguridad/recuperacion/").json()["type"] == "reautenticacion_requerida"
+    c = navegador()
+    login(c, ana)
+    assert c.post(A + "mfa/", {"factor": "recuperacion", "codigo": viejos[0]}).status_code == 400
+    assert c.post(A + "mfa/", {"factor": "recuperacion", "codigo": nuevos[0]}).status_code == 200

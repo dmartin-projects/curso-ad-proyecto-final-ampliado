@@ -1,8 +1,6 @@
-import { createHmac } from 'node:crypto';
-
 import { Browser, expect, Page, test } from '@playwright/test';
 
-import { simularEstadisticas } from './ayuda';
+import { simularEstadisticas, totp } from './ayuda';
 
 /**
  * Módulo 92: la verificación en dos pasos, las passkeys, el step-up y las sesiones, en un navegador de verdad.
@@ -13,20 +11,6 @@ const cuenta = (nombre: string) => ({
   email: `${nombre}@example.com`,
   password: `${nombre}-clave-e2e`,
 });
-
-/** RFC 6238: HMAC-SHA1(secreto, paso de 30 s), truncado a 6 cifras. `desfase` en segundos. */
-function totp(secreto: string, desfase = 0): string {
-  const alfabeto = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
-  const bits = [...secreto.replace(/=+$/, '')]
-    .map((c) => alfabeto.indexOf(c).toString(2).padStart(5, '0'))
-    .join('');
-  const clave = Buffer.from(bits.match(/.{8}/g)!.map((b) => parseInt(b, 2)));
-  const paso = Buffer.alloc(8);
-  paso.writeBigUInt64BE(BigInt(Math.floor((Date.now() / 1000 + desfase) / 30)));
-  const hmac = createHmac('sha1', clave).update(paso).digest();
-  const desde = hmac[hmac.length - 1] & 0x0f;
-  return String((hmac.readUInt32BE(desde) & 0x7fffffff) % 1_000_000).padStart(6, '0');
-}
 
 async function conContrasena(page: Page, usuario: { email: string; password: string }) {
   await simularEstadisticas(page);

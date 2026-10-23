@@ -48,3 +48,33 @@ def registrar_passkey(mundo, usuario_id, credencial="cred-1", sincronizada=False
 def firma(mundo, opciones, credencial="cred-1", contador=1, uv=True, manija=None, usuario_id=1):
     return {"id": credencial, "challenge": opciones["challenge"], "firma": "buena", "contador": contador, "uv": uv,
             "manija": manija if manija is not None else mundo.passkeys.manija(usuario_id)}  # fmt: skip
+
+
+def reautenticar_con_google(mundo, usuario_id, sid, **perfil):
+    from dataclasses import replace
+
+    from usuarios.application.completar_login_social_use_case.dtos.completar_login_social_input_dto import (
+        CompletarLoginSocialInputDTO,
+    )
+    from usuarios.application.empezar_login_social_use_case.dtos.empezar_login_social_input_dto import (
+        EmpezarLoginSocialInputDTO,
+    )
+    from usuarios.domain.enums.proposito import Proposito
+    from usuarios.domain.enums.proveedor import Proveedor
+
+    cmd = EmpezarLoginSocialInputDTO(Proveedor.GOOGLE, Proposito.REAUTENTICAR, "/seguridad", usuario_id, sid)
+    ida = mundo.empezar.ejecutar(cmd)
+    transaccion = mundo.google.transacciones[-1]
+    mundo.google.perfil = replace(mundo.google.perfil, **({"autenticado_en": transaccion.desde} | perfil))
+    parametros = {"state": transaccion.state, "code": "c"}
+    return mundo.completar.ejecutar(CompletarLoginSocialInputDTO(Proveedor.GOOGLE, ida.clave, parametros))
+
+
+def cuenta_de_google(mundo):
+    from usuarios.domain.enums.proveedor import Proveedor
+    from usuarios.domain.vo.perfil_externo import PerfilExterno
+
+    ana = mundo.cuentas.crear_verificada(email="ana@gmail.com", nombre="Ana", apellidos="")
+    mundo.identidades.vincular(ana, PerfilExterno(Proveedor.GOOGLE, "sub-ana", "ana@gmail.com", True))
+    sesion = entrar(mundo, ana, Factor.PROVEEDOR)
+    return ana, sesion.sid

@@ -4,9 +4,7 @@
 <h2 class="mb-2 text-lg font-medium">Verificación en dos pasos</h2>
 @if (codigos(); as lista) {
   <div role="status" class="mb-6 rounded-lg border p-4">
-    <p class="mb-2 font-medium">
-      Verificación en dos pasos activada. Guarda estos códigos de recuperación:
-    </p>
+    <p class="mb-2 font-medium">Guarda estos códigos de recuperación:</p>
     <p class="mb-2 text-sm">
       Cada uno vale una vez, si no tienes el móvil. No se volverán a enseñar.
     </p>
@@ -49,7 +47,11 @@
   @if (s.mfa) {
     <p class="mb-2 flex items-center gap-2"><mat-icon>verified_user</mat-icon> Activada.</p>
     <p class="mb-2 text-sm">Te quedan {{ s.codigos_restantes }} códigos de recuperación.</p>
-    <button mat-stroked-button class="mb-6" (click)="desactivar()">Desactivar</button>
+    <div class="mb-6 flex flex-wrap gap-2">
+      <!-- Ejercicio 2: si se te acaban o crees que alguien los ha visto -->
+      <button mat-stroked-button (click)="regenerar()">Generar códigos nuevos</button>
+      <button mat-stroked-button (click)="desactivar()">Desactivar</button>
+    </div>
   } @else {
     <p class="mb-2 text-sm">
       Además de tu contraseña, un código de tu móvil al entrar. Si alguien averigua tu contraseña,

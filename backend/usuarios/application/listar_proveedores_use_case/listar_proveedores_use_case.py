@@ -11,4 +11,7 @@ class ListarProveedoresUseCase(IListarProveedoresUseCase):
         self.proveedores = proveedores
 
     def ejecutar(self) -> list[ProveedorOutputDTO]:
-        return [ProveedorOutputDTO(p.value, p.nombre) for p in self.proveedores.disponibles()]
+        return [
+            ProveedorOutputDTO(p.value, p.nombre, self.proveedores.de(p).reautentica)
+            for p in self.proveedores.disponibles()
+        ]

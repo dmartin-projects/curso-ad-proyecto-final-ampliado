@@ -1,4 +1,4 @@
-# core/infrastructure/api/exceptions/manejador_errores.py — los errores, en el formato de la API (módulos 38, 87 y 88)
+# core/infrastructure/api/exceptions/manejador_errores.py — los errores, en el formato de la API (módulos 38, 87, 88 y 92)
 import logging
 
 from django.core.exceptions import ValidationError as DjangoValidationError
@@ -75,7 +75,11 @@ def manejador_errores(exc, context):
             tipo, titulo = TITULOS[400]
             mensajes = getattr(exc, "mensajes", None) or [str(exc.mensaje)]  # varios motivos (una contraseña débil)
             return _problema(400, tipo, titulo, errors={exc.campo: mensajes})
-        return _problema(exc.status, exc.codigo, exc.mensaje, detail=exc.contexto or None)
+        # Módulo 92: algunos llevan sus cabeceras (el WWW-Authenticate del step-up) y un 429, su Retry-After
+        cabeceras = dict(getattr(exc, "cabeceras", None) or {})
+        if exc.status == 429 and "segundos" in exc.contexto:
+            cabeceras["Retry-After"] = str(exc.contexto["segundos"])
+        return _problema(exc.status, exc.codigo, exc.mensaje, detail=exc.contexto or None, headers=cabeceras or None)
 
     # 2. ValidationError de Django (validate_password, full_clean, validadores de modelo) → 400
     if isinstance(exc, DjangoValidationError):

@@ -31,6 +31,11 @@ export type AplicacionConectada = S['AplicacionConectada']; // módulo 90, ejerc
 export type ProveedoresSociales = S['ProveedoresSociales']; // módulo 91
 export type Acceso = S['Acceso'];
 export type IdentidadVinculada = S['IdentidadVinculada'];
+export type Seguridad = S['Seguridad']; // módulo 92
+export type PasskeyRegistrada = S['PasskeyRegistrada'];
+export type SesionActiva = S['SesionActiva'];
+export type AltaTotp = S['AltaTotp'];
+export type FactoresReautenticacion = S['FactoresReautenticacion'];
 
 export type Rol = 'admin' | 'miembro' | 'lector';
 

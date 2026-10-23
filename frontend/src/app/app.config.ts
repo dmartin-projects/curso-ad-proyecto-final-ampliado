@@ -17,6 +17,7 @@ import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-exper
 import { routes } from './app.routes';
 import { authInterceptor } from './core/auth/auth.interceptor';
 import { AuthStore } from './core/auth/auth-store';
+import { reautenticacionInterceptor } from './core/auth/reautenticacion';
 import { cabecerasInterceptor } from './core/http/cabeceras';
 import { erroresInterceptor } from './core/http/errores';
 import { provideServiceWorker } from '@angular/service-worker';
@@ -32,10 +33,16 @@ export const appConfig: ApplicationConfig = {
       withInMemoryScrolling({ scrollPositionRestoration: 'enabled' }),
     ),
     // withXhr: el progreso de SUBIDA de los tickets solo lo da XMLHttpRequest (fetch no lo informa, módulo 51)
-    // Orden: la respuesta recorre la lista al revés → auth ve el 401 antes de que errores lo convierta en ErrorApi
+    // Orden: la respuesta recorre la lista al revés → auth ve el 401 antes de que errores lo convierta en ErrorApi; y
+    // antes que auth, reautenticacion (módulo 92): el 401 del step-up se resuelve (y se repite) donde nace
     provideHttpClient(
       withXhr(),
-      withInterceptors([cabecerasInterceptor, erroresInterceptor, authInterceptor]),
+      withInterceptors([
+        cabecerasInterceptor,
+        erroresInterceptor,
+        authInterceptor,
+        reautenticacionInterceptor,
+      ]),
     ),
     provideTanStackQuery(
       new QueryClient({

@@ -1,4 +1,4 @@
-# oauth/infrastructure/web/urls.py — el authorization server, en /api/oauth/ (módulo 90)
+# oauth/infrastructure/web/urls.py — el authorization server, en /api/oauth/ (módulos 90 y 92)
 #
 # Bajo /api/ porque en producción la SPA (Vercel) reenvía /api/* a Django: así el emisor (issuer) es el dominio de la
 # app (https://gastos.tudominio.com/api/oauth), como las cookies de sesión de estas páginas.
@@ -15,12 +15,14 @@ from oauth.infrastructure.web.views.estado_dispositivo_view import EstadoDisposi
 from oauth.infrastructure.web.views.iniciar_sesion_view import IniciarSesionView
 from oauth.infrastructure.web.views.introducir_codigo_view import IntroducirCodigoView
 from oauth.infrastructure.web.views.pedir_codigo_view import PedirCodigoView
+from oauth.infrastructure.web.views.segundo_factor_view import SegundoFactorView
 from oauth.infrastructure.web.views.token_view import TokenView
 
 app_name = "oauth2_provider"  # django-oauth-toolkit resuelve sus URLs (discovery) con este namespace
 
 urlpatterns = [
     path("login/", IniciarSesionView.as_view(), name="login"),
+    path("segundo-factor/", SegundoFactorView.as_view(), name="segundo-factor"),  # módulo 92
     path("salir/", CerrarSesionView.as_view(), name="salir"),
     path("authorize/", AutorizarView.as_view(), name="authorize"),
     path("token/", TokenView.as_view(), name="token"),

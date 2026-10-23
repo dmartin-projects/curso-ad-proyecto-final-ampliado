@@ -8,7 +8,8 @@ from conftest import CuentaFactory, MembresiaFactory, MovimientoFactory
 from core.models import RegistroAuditoria
 from hogares.models import Invitacion
 from notificaciones.models import Notificacion
-from usuarios.models import IdentidadExterna
+from usuarios.models import IdentidadExterna, Passkey, SegundoFactor, Sesion
+from usuarios.tests.infrastructure.ayudas_mfa import activar_mfa
 
 pytestmark = pytest.mark.django_db
 CLAVE = "clave-de-staging-123"
@@ -22,6 +23,8 @@ def datos_reales():
     Invitacion.objects.create(hogar=m.hogar, email="luis@gmail.com", invitado_por=m.usuario)
     Notificacion.objects.create(usuario=m.usuario, tipo="informe_listo", titulo="Tu informe, Ana")
     IdentidadExterna.objects.create(usuario=m.usuario, proveedor="google", sub="1081", email="ana.garcia@gmail.com")
+    activar_mfa(m.usuario)  # módulo 92
+    Passkey.objects.create(usuario=m.usuario, credencial_id=b"c", clave_publica=b"k", nombre="Móvil")
     RegistroAuditoria.objects.create(
         usuario=m.usuario, accion="crear", objeto=mov, representacion=str(mov), cambios={"notas": mov.notas}
     )
@@ -44,6 +47,7 @@ def test_anonimiza_y_conserva_lo_util(datos_reales, monkeypatch):
     assert Invitacion.objects.get().email.endswith("@staging.invalid")
     assert not Notificacion.objects.exists() and not RegistroAuditoria.objects.exists()
     assert not IdentidadExterna.objects.exists()  # módulo 91
+    assert not (SegundoFactor.objects.exists() or Passkey.objects.exists() or Sesion.objects.exists())  # módulo 92
     assert authenticate(email=m.usuario.email, password=CLAVE) == m.usuario  # se puede entrar como él
 
 

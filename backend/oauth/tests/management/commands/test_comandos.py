@@ -4,12 +4,11 @@ from io import StringIO
 
 import pytest
 from django.core.management import CommandError, call_command
-from django.test import Client
 from jwcrypto import jwk
 
 from conftest import UsuarioFactory
 from oauth.models import ClienteOAuth
-from oauth.tests.infrastructure.flujo import peticion, pkce, registrar
+from oauth.tests.infrastructure.flujo import con_sesion, peticion, pkce, registrar
 
 pytestmark = pytest.mark.django_db
 
@@ -52,8 +51,7 @@ def test_no_eres_tu():
     """En la pantalla de consentimiento, "Entra con otra cuenta" cierra la sesión del authorization server y vuelve
     al login con la misma petición."""
     registrar()
-    navegador = Client()
-    navegador.force_login(UsuarioFactory())
+    navegador = con_sesion(UsuarioFactory())
     _, challenge = pkce()
     pantalla = navegador.get("/api/oauth/authorize/", peticion(challenge))
     siguiente = pantalla.context["request"].get_full_path()

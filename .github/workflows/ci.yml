@@ -36,7 +36,7 @@ jobs:
       DATABASE_URL: postgres://gastos:gastos@localhost:5432/gastos
       REDIS_URL: redis://localhost:6379/1
       DJANGO_SECRET_KEY: ci-no-es-secreto
-      JWT_SIGNING_KEY: ci-no-es-secreto
+      JWT_SIGNING_KEY: ci-clave-jwt-de-al-menos-32-bytes-no-es-secreta
 
     steps:
       - uses: actions/checkout@v4
@@ -88,6 +88,7 @@ jobs:
           SENTRY_DSN: ""
           OAUTH_ISSUER: https://gastos.example.com/api/oauth # módulo 90
           OIDC_RSA_PRIVATE_KEY: ci # el check no la lee: solo tiene que existir
+          MFA_CLAVES: ci # módulo 92: ídem
         run: uv run python manage.py check --deploy --fail-level WARNING
 
       - name: Auditoría de dependencias
@@ -102,7 +103,7 @@ jobs:
     env:
       DJANGO_SETTINGS_MODULE: config.settings.test
       DJANGO_SECRET_KEY: ci-no-es-secreto
-      JWT_SIGNING_KEY: ci-no-es-secreto
+      JWT_SIGNING_KEY: ci-clave-jwt-de-al-menos-32-bytes-no-es-secreta
       DATABASE_URL: postgres://nadie:nada@localhost:1/no_existe # si un test de dominio tocara la BD, fallaría
     steps:
       - uses: actions/checkout@v4
@@ -248,7 +249,7 @@ jobs:
     env:
       DATABASE_URL: postgres://gastos:gastos@localhost:5432/gastos_e2e
       DJANGO_SECRET_KEY: ci-no-es-secreto
-      JWT_SIGNING_KEY: ci-no-es-secreto
+      JWT_SIGNING_KEY: ci-clave-jwt-de-al-menos-32-bytes-no-es-secreta
       CELERY_RESULT_BACKEND: redis://localhost:6379/0
 
     steps:

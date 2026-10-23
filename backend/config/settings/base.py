@@ -28,7 +28,6 @@ DJANGO_APPS = [
 ]
 TERCEROS = [
     "rest_framework",
-    "rest_framework_simplejwt.token_blacklist",
     "django_filters",
     "drf_spectacular",
     "channels",
@@ -60,6 +59,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "oauth.infrastructure.web.middleware.sesion_vigente.SesionVigente",  # módulo 92: la sesión del authorization server, viva
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
@@ -180,7 +180,8 @@ TASKS = {"default": {"BACKEND": "django_tasks_db.DatabaseBackend", "QUEUES": ["d
 # ── DRF ──
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        # El JWT de simplejwt; desde el módulo 92, el access de una sesión cerrada se rechaza ya (no a los 10 min)
+        "usuarios.infrastructure.api.authentication.jwt_con_sesion.JWTConSesion",
         "rest_framework.authentication.SessionAuthentication",
     ],
     "DEFAULT_PERMISSION_CLASSES": ["rest_framework.permissions.IsAuthenticated"],
@@ -203,6 +204,8 @@ REST_FRAMEWORK = {
         "recuperar": "3/hour",
         "subidas": "60/hour",
         "social": "20/min",  # módulo 91: empezar un inicio de sesión con un proveedor
+        "mfa": "10/min",  # módulo 92: el segundo factor y el step-up (además del bloqueo por cuenta)
+        "passkey": "20/min",  # módulo 92: entrar con una passkey (cada reto se guarda en Redis)
     },
     "EXCEPTION_HANDLER": "core.infrastructure.api.exceptions.manejador_errores.manejador_errores",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
@@ -212,7 +215,9 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=10),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
     "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
+    # Módulo 92: el refresh rotado deja de valer porque su Sesion ya recuerda otro (refresh_jti), y uno reutilizado
+    # cierra la sesión: la lista negra de simplejwt (que guardaba cada refresh entero en la BD) ya no hace falta
+    "BLACKLIST_AFTER_ROTATION": False,
     "UPDATE_LAST_LOGIN": True,
     "SIGNING_KEY": env("JWT_SIGNING_KEY"),
     "AUTH_HEADER_TYPES": ("Bearer",),
@@ -333,6 +338,16 @@ SOCIAL_LOGIN = {
     },
 }
 SOCIAL_LOGIN_SEGUNDOS = 600  # lo que puede tardar la persona en el proveedor (la transacción y su cookie)
+
+# ── MFA, passkeys, step-up y sesiones (módulo 92) ──
+# Las claves (Fernet) que cifran los secretos TOTP en la base de datos: cifra la primera, descifran todas (rotación:
+# docs/runbook.md). `manage.py generar_clave_mfa`. Sin ellas no se puede activar el MFA.
+MFA_CLAVES = env.list("MFA_CLAVES", default=[])
+MFA_PENDIENTE_SEGUNDOS = 300  # entre la contraseña (o el proveedor) y el segundo factor
+REAUTENTICACION_SEGUNDOS = 300  # una acción sensible exige haberse autenticado hace menos de esto (step-up)
+# El rp_id de WebAuthn: por defecto, el host de FRONTEND_URL (las passkeys quedan atadas a ese dominio). El origen que
+# se comprueba en cada ceremonia es el de FRONTEND_URL
+WEBAUTHN_RP_ID = env("WEBAUTHN_RP_ID", default="")
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "API Gastos",

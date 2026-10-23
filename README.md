@@ -14,10 +14,11 @@ Es Gastos (módulos 70-83) con las ampliaciones de las Partes 6 y 7 encima. **Ca
 | **89 · Hexagonal en el microservicio FastAPI** | El servicio de estadísticas con **la misma estructura** que las apps del monolito: interfaces ABC, un paquete por *use case* con DTOs de Pydantic, `database/` con modelos y repositorios de SQLAlchemy, `api/v1|v2/` con *routers* y *schemas*, `Depends` sobre `container.py` como *composition root*, API versionada y Alembic comprobado en los tests | `estadisticas/estadisticas/`, `docs/arquitectura.md` §12 |
 | **90 · OAuth 2.1 y OpenID Connect** | Gastos como *authorization server* (django-oauth-toolkit): *authorization code* + PKCE, *refresh tokens* con rotación y detección de reutilización, *client credentials*, ID tokens RS256 con JWKS y *discovery*, y el RFC 9700 activado; login y consentimiento en páginas de Django; la API como *resource server* (scope **y** rol en el hogar); `gastos-cli`, un cliente nativo escrito a mano | `backend/oauth/`, `cli/gastos_cli.py`, `docs/arquitectura.md` §1 y §3 |
 | **91 · Social login (Google, GitHub, Apple)** | Gastos como **cliente** OIDC (*Relying Party*) con Authlib y el patrón BFF: Django hace la ida y la vuelta (`state`, `nonce`, PKCE), canjea el *code* con su secreto y valida el ID token; los *tokens* del proveedor no llegan al navegador y la SPA recibe los mismos *tokens* que con la contraseña. Google (OIDC), GitHub (OAuth 2.0 + su API, solo emails verificados) y Apple (`form_post` y *client secret* JWT ES256). Identidades por (proveedor, `sub`), sin vincular nunca por email; «Métodos de acceso» para vincular, desvincular (nunca el último) y establecer contraseña | `backend/usuarios/infrastructure/providers/`, `backend/usuarios/application/empezar_login_social_use_case/` y `completar_login_social_use_case/`, `frontend/src/app/features/cuenta/pages/acceso/acceso.ts` |
+| **92 · MFA y login moderno** | Verificación en dos pasos con TOTP (secreto cifrado con Fernet, un código una vez, ±30 s) y códigos de recuperación con hash; *passkeys* (WebAuthn con py_webauthn y la API nativa del navegador) como segundo factor y para entrar sin contraseña (también en el autorrelleno); un único `IniciarSesionUseCase` para las cuatro puertas (contraseña y proveedor, en la SPA y en el *authorization server*), con `amr`/`acr` en el ID token; *step-up* (RFC 9470) para las acciones sensibles; sesiones con nombre (dispositivo, red, último uso), «cerrar las demás», caducidad y detección de reutilización del *refresh token* (RFC 9700, sin guardar ningún *token* en la base de datos); aviso por email de un dispositivo nuevo y de los fallos del segundo factor; bloqueo progresivo del segundo factor con techo (NIST SP 800-63B-4) | `backend/usuarios/application/iniciar_sesion_use_case/` (y los demás *use cases* de sesiones, MFA y *passkeys*), `backend/usuarios/infrastructure/mfa/`, `frontend/src/app/features/cuenta/pages/seguridad/seguridad.ts`, `frontend/src/app/core/auth/reautenticacion.ts` |
 
 La Parte 7 (el agente de IA) se añadirá aquí con el mismo formato cuando esté terminada.
 
-Estado comprobado al terminar el módulo 91 (con sus ejercicios): 697 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (sin cambios desde el 89), 37 de *frontend* (Vitest) y 17 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones (25 contratos).
+Estado comprobado al terminar el módulo 92: 829 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (sin cambios desde el 89), 48 de *frontend* (Vitest) y 21 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones (26 contratos).
 
 ## Estructura
 
@@ -84,8 +85,8 @@ Personal de soporte (el *backoffice* está dentro de la app, no hay Django admin
 ## Tests
 
 ```bash
-cd backend && uv run pytest -n 4 --cov                 # 696 tests (+1 que se salta sin Kafka)
-cd frontend && npx ng test --watch=false                # 27 tests
+cd backend && uv run pytest -n 4 --cov                 # 828 tests (+1 que se salta sin Kafka)
+cd frontend && npx ng test --watch=false                # 38 tests
 # punta a punta (módulo 82): una vez, crea la BD de E2E
 docker compose exec db createdb -U gastos gastos_e2e
 cd backend && DJANGO_SETTINGS_MODULE=config.settings.e2e uv run python manage.py migrate
@@ -180,3 +181,14 @@ cd ../frontend && npx ng serve                       # http://localhost:4200/log
 La vuelta es siempre `{FRONTEND_URL}/api/v1/auth/social/<proveedor>/vuelta/` (en local, a través del *proxy* de `ng serve`). GitHub admite `http://localhost:4200/…` como vuelta: crea una OAuth App (o una GitHub App) y pon `GITHUB_CLIENT_ID` y `GITHUB_CLIENT_SECRET`. Apple solo acepta vueltas `https` con dominio: se prueba en staging. Los pasos con tus cuentas de Google, GitHub y Apple están en el módulo 91 del curso; en producción, los `client_id` van en `infra/entornos/` y los secretos (y la clave `.p8` de Apple) en `infra/secretos/`. Las *previews* de Vercel no ofrecen el login social: su URL no está registrada en ningún proveedor.
 
 Ejercicios: Microsoft Entra ID como cuarto proveedor (`MICROSOFT_CLIENT_ID` y `MICROSOFT_CLIENT_SECRET`; vuelta `…/social/microsoft/vuelta/`), un aviso por email al vincular un proveedor (en local llega a Mailpit, http://localhost:8025) y «Continuar con Google» también en el login del *authorization server* del módulo 90, para que una cuenta sin contraseña pueda autorizar el CLI (`uv run cli/gastos_cli.py login` y, en la pantalla de Gastos, «Continuar con Google»).
+
+**92 · MFA, passkeys, step-up y sesiones.** En «Mi cuenta → Seguridad», la verificación en dos pasos (escanea el QR con cualquier app TOTP: Google Authenticator, 1Password, Aegis…) y las *passkeys*; en «Mi cuenta → Sesiones», dónde está abierta la cuenta. En local hace falta la clave que cifra los secretos TOTP (en `.env.example` hay una de desarrollo):
+
+```bash
+cd backend
+grep -q MFA_CLAVES .env || uv run python manage.py generar_clave_mfa >> .env   # si tu .env es de antes del 92
+uv run python manage.py migrate && uv run python manage.py runserver
+cd ../frontend && npx ng serve                       # http://localhost:4200 → Mi cuenta → Seguridad
+```
+
+Las *passkeys* funcionan en `http://localhost` (el navegador lo trata como un origen seguro) y quedan atadas a `localhost`: las de staging y producción son de su dominio (el `rp_id` es el host de `FRONTEND_URL`) y en las *previews* de Vercel no se ofrecen. Sin móvil a mano, Chrome tiene un autenticador virtual en DevTools (*More tools → WebAuthn*). Las acciones sensibles (cambiar la contraseña, activar el MFA, añadir una *passkey*, borrar un hogar…) piden confirmar quién eres si entraste hace más de 5 minutos (`REAUTENTICACION_SEGUNDOS`). Los avisos («nuevo inicio de sesión», «has activado…») llegan a Mailpit (http://localhost:8025). En producción, `MFA_CLAVES` va en `infra/secretos/` (rotarla: `docs/runbook.md`); al desplegar, los *refresh tokens* anteriores al 92 no llevan sesión y se vuelve a entrar una vez.

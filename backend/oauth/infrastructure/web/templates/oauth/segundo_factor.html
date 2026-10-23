@@ -1,0 +1,27 @@
+{% extends "oauth/base.html" %}
+{% load i18n %}
+{% block titulo %}{% translate "Verificación en dos pasos" %}{% endblock %}
+{% block contenido %}
+  <h1>{% translate "Verificación en dos pasos" %}</h1>
+  <p class="suave">{% translate "Escribe el código de 6 cifras de tu app de autenticación." %}</p>
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}">
+    <input type="hidden" name="factor" value="totp">
+    <label for="id_codigo">{% translate "Código" %}</label>
+    <input type="text" name="codigo" id="id_codigo" inputmode="numeric" autocomplete="one-time-code" maxlength="7" required autofocus>
+    {% if error %}<p class="error" role="alert">{{ error }}</p>{% endif %}
+    <div class="acciones"><button type="submit" class="principal">{% translate "Verificar" %}</button></div>
+  </form>
+  <details>
+    <summary class="suave">{% translate "¿No tienes el móvil? Usa un código de recuperación" %}</summary>
+    <form method="post">
+      {% csrf_token %}
+      <input type="hidden" name="next" value="{{ next }}">
+      <input type="hidden" name="factor" value="recuperacion">
+      <label for="id_recuperacion">{% translate "Código de recuperación" %}</label>
+      <input type="text" name="codigo" id="id_recuperacion" autocomplete="off" required>
+      <div class="acciones"><button type="submit" class="secundario">{% translate "Usar código" %}</button></div>
+    </form>
+  </details>
+{% endblock %}

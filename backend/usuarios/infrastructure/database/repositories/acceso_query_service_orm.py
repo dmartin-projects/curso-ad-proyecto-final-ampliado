@@ -1,4 +1,4 @@
-# usuarios/infrastructure/database/repositories/acceso_query_service_orm.py — «Métodos de acceso» (módulo 91)
+# usuarios/infrastructure/database/repositories/acceso_query_service_orm.py — «Métodos de acceso» (módulos 91 y 92)
 from usuarios.domain.enums.proveedor import Proveedor
 from usuarios.domain.read_models.acceso import Acceso
 from usuarios.domain.read_models.identidad_vinculada import IdentidadVinculada
@@ -6,6 +6,7 @@ from usuarios.domain.repositories.i_acceso_query_service import IAccesoQueryServ
 from usuarios.infrastructure.database.models.identidad_externa_model import (
     IdentidadExterna as IdentidadExternaModel,
 )
+from usuarios.infrastructure.database.models.passkey_model import Passkey as PasskeyModel
 from usuarios.infrastructure.database.models.usuario_model import Usuario as UsuarioModel
 
 
@@ -18,4 +19,5 @@ class AccesoQueryServiceORM(IAccesoQueryService):
                 IdentidadVinculada(f.proveedor, Proveedor(f.proveedor).nombre, f.email, f.creada, f.ultimo_uso)
                 for f in filas
             ),
+            passkeys=PasskeyModel.objects.filter(usuario_id=usuario_id).count(),
         )

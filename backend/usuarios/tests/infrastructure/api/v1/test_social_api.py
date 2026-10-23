@@ -220,8 +220,15 @@ def test_apple_cancelado(proveedores):
 
 
 def con_sesion(usuario) -> APIClient:
+    """La SPA con una sesión de verdad, recién abierta: vincular, desvincular y establecer contraseña son acciones
+    sensibles (módulo 92) y miran cuándo se autenticó la sesión."""
+    from usuarios.application.iniciar_sesion_use_case.dtos.iniciar_sesion_input_dto import IniciarSesionInputDTO
+    from usuarios.domain.enums.factor import Factor
+    from usuarios.infrastructure import container
+
+    abierta = container.iniciar_sesion().ejecutar(IniciarSesionInputDTO(usuario.pk, Factor.CONTRASENA))
     c = APIClient()
-    c.force_authenticate(usuario)
+    c.credentials(HTTP_AUTHORIZATION=f"Bearer {abierta.tokens.access}")
     return c
 
 
@@ -267,7 +274,7 @@ def test_metodos_de_acceso_sin_quedarse_nunca_sin_ninguno(proveedores):
     assert api.post(A + "establecer-password/", {"nueva": "una-clave-muy-larga-77"}).status_code == 204
     assert api.post(A + "establecer-password/", {"nueva": "otra-clave-muy-larga"}).status_code == 409
     assert api.delete(A + "acceso/google/").status_code == 204
-    assert api.get(A + "acceso/").json() == {"contrasena": True, "identidades": []}
+    assert api.get(A + "acceso/").json() == {"contrasena": True, "identidades": [], "passkeys": 0}
     assert api.delete(A + "acceso/google/").status_code == 404
     r = APIClient().post(A + "login/", {"email": "ana@gmail.com", "password": "una-clave-muy-larga-77"})
     assert r.status_code == 200
@@ -358,9 +365,9 @@ def test_el_login_con_contrasena_del_authorization_server_pasa_por_iniciar_sesio
     original = container.iniciar_sesion
 
     class Espia:
-        def ejecutar(self, entrada):
-            llamadas.append((entrada.usuario_id, entrada.canal))
-            return original().ejecutar(entrada)
+        def ejecutar(self, cmd):
+            llamadas.append((cmd.usuario_id, cmd.canal))
+            return original().ejecutar(cmd)
 
     monkeypatch.setattr(container, "iniciar_sesion", Espia)
     ana = UsuarioFactory(email="ana@example.com")

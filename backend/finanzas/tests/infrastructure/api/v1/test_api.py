@@ -264,11 +264,11 @@ def test_borrar_una_cuenta_con_movimientos(cliente, escenario):
     assert c.delete(f"{url(hogar, 'cuentas')}{vacia.pk}/").status_code == 204
 
 
-def test_borrar_un_hogar_con_movimientos(cliente, escenario):
+def test_borrar_un_hogar_con_movimientos(sesion, escenario):
     hogar, roles, cuenta, *_ = escenario
     MovimientoFactory(cuenta=cuenta)
     # RESTRICT (y no PROTECT): la cuenta no se borra sola, pero sí con su hogar, que se lleva también sus movimientos
-    assert cliente(roles["admin"]).delete(f"/api/v1/hogares/{hogar.pk}/").status_code == 204
+    assert sesion(roles["admin"]).delete(f"/api/v1/hogares/{hogar.pk}/").status_code == 204
     assert not Movimiento.objects.filter(hogar_id=hogar.pk).exists()
 
 

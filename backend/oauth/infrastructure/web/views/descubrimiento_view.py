@@ -1,7 +1,9 @@
-# oauth/infrastructure/web/views/descubrimiento_view.py — /.well-known/openid-configuration (módulo 90)
+# oauth/infrastructure/web/views/descubrimiento_view.py — /.well-known/openid-configuration (módulos 90 y 92)
 import json
 
 from oauth2_provider.views import ConnectDiscoveryInfoView
+
+from usuarios.domain.services.factores import ACR_MULTIFACTOR, ACR_UN_FACTOR
 
 
 class DescubrimientoView(ConnectDiscoveryInfoView):
@@ -17,6 +19,9 @@ class DescubrimientoView(ConnectDiscoveryInfoView):
         respuesta = super().get(request, *args, **kwargs)
         datos = json.loads(respuesta.content)
         datos["id_token_signing_alg_values_supported"] = ["RS256"]
+        # Módulo 92: los ID tokens dicen cómo se autenticó la persona
+        datos["acr_values_supported"] = [ACR_UN_FACTOR, ACR_MULTIFACTOR]
+        datos["claims_supported"] = sorted({*datos.get("claims_supported", []), "amr", "acr", "auth_time"})
         datos["revocation_endpoint"] = self._get_endpoint_url(request, "revoke-token", required=True)
         # Ejercicio 3: dónde pide su código un dispositivo (RFC 8628 §4)
         datos["device_authorization_endpoint"] = self._get_endpoint_url(request, "device-authorization", required=True)

@@ -23,6 +23,8 @@ paths:
   /api/v1/auth/acceso/{proveedor}/:
     delete:
       operationId: auth_acceso_destroy
+      description: 'Una acción sensible: con la sesión de la SPA y una autenticación
+        reciente (si no: 401 y el reto del RFC 9470).'
       parameters:
       - in: path
         name: proveedor
@@ -159,7 +161,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Access'
+                $ref: '#/components/schemas/Inicio'
           description: ''
   /api/v1/auth/logout/:
     post:
@@ -232,6 +234,159 @@ paths:
               schema:
                 $ref: '#/components/schemas/Usuario'
           description: ''
+  /api/v1/auth/mfa/:
+    get:
+      operationId: auth_mfa_retrieve
+      description: 'GET: con qué se puede completar (la pantalla de la SPA tras volver
+        de un proveedor). POST: completarlo.'
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Factores'
+          description: ''
+    post:
+      operationId: auth_mfa_create
+      description: 'GET: con qué se puede completar (la pantalla de la SPA tras volver
+        de un proveedor). POST: completarlo.'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SegundoFactorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SegundoFactorRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inicio'
+          description: ''
+  /api/v1/auth/mfa/reto/:
+    post:
+      operationId: auth_mfa_reto_create
+      description: 'Las opciones de WebAuthn para usar una passkey como segundo factor:
+        solo las de esa cuenta.'
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Opciones de WebAuthn (JSON, para parse…FromJSON)
+  /api/v1/auth/passkey/:
+    post:
+      operationId: auth_passkey_create
+      description: 'Base para login/refresh/registro: no autentica la petición, pero
+        responde 401 (no 403).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RespuestaWebAuthnRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RespuestaWebAuthnRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Inicio'
+          description: ''
+  /api/v1/auth/passkey/reto/:
+    post:
+      operationId: auth_passkey_reto_create
+      description: 'Base para login/refresh/registro: no autentica la petición, pero
+        responde 401 (no 403).'
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Opciones de WebAuthn (JSON, para parse…FromJSON)
+  /api/v1/auth/reautenticar/:
+    get:
+      operationId: auth_reautenticar_retrieve
+      description: 'GET: con qué puede confirmar esta sesión. POST: confirmarlo (la
+        sesión vuelve a ser "reciente").'
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FactoresReautenticacion'
+          description: ''
+    post:
+      operationId: auth_reautenticar_create
+      description: 'GET: con qué puede confirmar esta sesión. POST: confirmarlo (la
+        sesión vuelve a ser "reciente").'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SegundoFactorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SegundoFactorRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/reautenticar/reto/:
+    post:
+      operationId: auth_reautenticar_reto_create
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Opciones de WebAuthn (JSON, para parse…FromJSON)
   /api/v1/auth/recuperar-password/:
     post:
       operationId: auth_recuperar_password_create
@@ -317,6 +472,188 @@ paths:
               schema:
                 $ref: '#/components/schemas/Detalle'
           description: ''
+  /api/v1/auth/seguridad/:
+    get:
+      operationId: auth_seguridad_retrieve
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Seguridad'
+          description: ''
+  /api/v1/auth/seguridad/passkeys/:
+    post:
+      operationId: auth_seguridad_passkeys_create
+      description: 'Una acción sensible: con la sesión de la SPA y una autenticación
+        reciente (si no: 401 y el reto del RFC 9470).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasskeyNuevaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PasskeyNuevaRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PasskeyCreada'
+          description: ''
+  /api/v1/auth/seguridad/passkeys/{passkey_id}/:
+    delete:
+      operationId: auth_seguridad_passkeys_destroy
+      description: 'Una acción sensible: con la sesión de la SPA y una autenticación
+        reciente (si no: 401 y el reto del RFC 9470).'
+      parameters:
+      - in: path
+        name: passkey_id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/seguridad/passkeys/reto/:
+    post:
+      operationId: auth_seguridad_passkeys_reto_create
+      description: 'Una acción sensible: con la sesión de la SPA y una autenticación
+        reciente (si no: 401 y el reto del RFC 9470).'
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: Opciones de WebAuthn (JSON, para parse…FromJSON)
+  /api/v1/auth/seguridad/totp/:
+    post:
+      operationId: auth_seguridad_totp_create
+      description: Un secreto nuevo (sin activar todavía) con su QR.
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AltaTotp'
+          description: ''
+    delete:
+      operationId: auth_seguridad_totp_destroy
+      description: 'Una acción sensible: con la sesión de la SPA y una autenticación
+        reciente (si no: 401 y el reto del RFC 9470).'
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/seguridad/totp/confirmar/:
+    post:
+      operationId: auth_seguridad_totp_confirmar_create
+      description: 'Una acción sensible: con la sesión de la SPA y una autenticación
+        reciente (si no: 401 y el reto del RFC 9470).'
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CodigoTotpRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CodigoTotpRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CodigosRecuperacion'
+          description: ''
+  /api/v1/auth/sesiones/:
+    get:
+      operationId: auth_sesiones_list
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SesionActiva'
+          description: ''
+  /api/v1/auth/sesiones/{sid}/:
+    delete:
+      operationId: auth_sesiones_destroy
+      parameters:
+      - in: path
+        name: sid
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/auth/sesiones/cerrar-las-demas/:
+    post:
+      operationId: auth_sesiones_cerrar_las_demas_create
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cerradas'
+          description: ''
   /api/v1/auth/social/:
     get:
       operationId: auth_social_retrieve
@@ -359,8 +696,9 @@ paths:
   /api/v1/auth/social/{proveedor}/vincular/:
     post:
       operationId: auth_social_vincular_create
-      description: 'POST con el JWT de la SPA: la URL del proveedor para vincularlo
-        a MI cuenta. La SPA navega a ella.'
+      description: |-
+        POST con el JWT de la SPA: la URL del proveedor para vincularlo a MI cuenta. La SPA navega a ella. Añade una
+        forma de entrar: es una acción sensible.
       parameters:
       - in: path
         name: proveedor
@@ -3321,9 +3659,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/IdentidadVinculada'
+        passkeys:
+          type: integer
       required:
       - contrasena
       - identidades
+      - passkeys
     Access:
       type: object
       properties:
@@ -3338,6 +3679,19 @@ components:
           type: integer
       required:
       - actualizadas
+    AltaTotp:
+      type: object
+      properties:
+        secreto:
+          type: string
+        uri:
+          type: string
+        qr:
+          type: string
+      required:
+      - qr
+      - secreto
+      - uri
     AplicacionConectada:
       type: object
       properties:
@@ -3506,6 +3860,30 @@ components:
           title: Es de ingresos
       required:
       - nombre
+    Cerradas:
+      type: object
+      properties:
+        cerradas:
+          type: integer
+      required:
+      - cerradas
+    CodigoTotpRequest:
+      type: object
+      properties:
+        codigo:
+          type: string
+          minLength: 1
+      required:
+      - codigo
+    CodigosRecuperacion:
+      type: object
+      properties:
+        codigos:
+          type: array
+          items:
+            type: string
+      required:
+      - codigos
     Comercio:
       type: object
       properties:
@@ -3774,6 +4152,44 @@ components:
         * `revisar` - Pendiente de revisión
         * `procesado` - Procesado
         * `error` - Error
+    FactorEnum:
+      enum:
+      - totp
+      - recuperacion
+      - passkey
+      - contrasena
+      type: string
+      description: |-
+        * `totp` - totp
+        * `recuperacion` - recuperacion
+        * `passkey` - passkey
+        * `contrasena` - contrasena
+    Factores:
+      type: object
+      properties:
+        factores:
+          type: array
+          items:
+            type: string
+      required:
+      - factores
+    FactoresReautenticacion:
+      type: object
+      properties:
+        factores:
+          type: array
+          items:
+            type: string
+        proveedores:
+          type: array
+          items:
+            type: string
+        max_age:
+          type: integer
+      required:
+      - factores
+      - max_age
+      - proveedores
     FilaImportacion:
       type: object
       properties:
@@ -4170,6 +4586,14 @@ components:
       required:
       - estado
       - mes
+    Inicio:
+      type: object
+      properties:
+        access:
+          type: string
+        segundo_factor:
+          type: array
+          items: {}
     Invitacion:
       type: object
       properties:
@@ -4898,6 +5322,44 @@ components:
           type: integer
         page_size:
           type: integer
+    PasskeyCreada:
+      type: object
+      properties:
+        id:
+          type: integer
+      required:
+      - id
+    PasskeyNuevaRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+        respuesta: {}
+      required:
+      - respuesta
+    PasskeyRegistrada:
+      type: object
+      properties:
+        id:
+          type: integer
+        nombre:
+          type: string
+        sincronizada:
+          type: boolean
+        creada:
+          type: string
+          format: date-time
+        ultimo_uso:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - creada
+      - id
+      - nombre
+      - sincronizada
+      - ultimo_uso
     PatchedCategoriaRequest:
       type: object
       description: 'Limita los campos relacionados al hogar de la URL: no se puede
@@ -5189,6 +5651,12 @@ components:
         repetir_ocr:
           type: boolean
           default: false
+    RespuestaWebAuthnRequest:
+      type: object
+      properties:
+        respuesta: {}
+      required:
+      - respuesta
     ResultadoLote:
       type: object
       properties:
@@ -5233,6 +5701,64 @@ components:
         * `admin` - Administrador
         * `miembro` - Miembro
         * `lector` - Solo lectura
+    SegundoFactorRequest:
+      type: object
+      properties:
+        factor:
+          $ref: '#/components/schemas/FactorEnum'
+        codigo:
+          type: string
+          maxLength: 200
+        respuesta: {}
+      required:
+      - factor
+    Seguridad:
+      type: object
+      properties:
+        mfa:
+          type: boolean
+        codigos_restantes:
+          type: integer
+        passkeys:
+          type: array
+          items:
+            $ref: '#/components/schemas/PasskeyRegistrada'
+      required:
+      - codigos_restantes
+      - mfa
+      - passkeys
+    SesionActiva:
+      type: object
+      properties:
+        sid:
+          type: string
+        canal:
+          type: string
+        dispositivo:
+          type: string
+        ip:
+          type: string
+        creada:
+          type: string
+          format: date-time
+        ultimo_uso:
+          type: string
+          format: date-time
+        factores:
+          type: array
+          items:
+            type: string
+        actual:
+          type: boolean
+      required:
+      - actual
+      - canal
+      - creada
+      - dispositivo
+      - factores
+      - ip
+      - sid
+      - ultimo_uso
     SubirImportacionRequest:
       type: object
       description: 'Limita los campos relacionados al hogar de la URL: no se puede

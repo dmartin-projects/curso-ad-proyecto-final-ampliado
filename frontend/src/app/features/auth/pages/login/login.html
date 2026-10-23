@@ -5,7 +5,8 @@
       <form [formRoot]="f" class="mt-4 flex flex-col gap-2">
         <mat-form-field>
           <mat-label>Email</mat-label>
-          <input matInput type="email" autocomplete="username" [formField]="f.email" />
+          <!-- "webauthn": el navegador ofrece aquí las passkeys de Gastos (conditional UI, módulo 92) -->
+          <input matInput type="email" autocomplete="username webauthn" [formField]="f.email" />
           @if (f.email().touched() && f.email().invalid()) {
             <mat-error>{{ f.email().errors()[0].message }}</mat-error>
           }
@@ -24,6 +25,12 @@
         }
         <button mat-flat-button type="submit" [disabled]="f().submitting()">Entrar</button>
       </form>
+      <!-- Módulo 92: sin contraseña. Solo en el dominio de la app: las passkeys están atadas a él (rp_id) -->
+      @if (conPasskeys()) {
+        <button mat-stroked-button class="mt-2 w-full" (click)="entrarConPasskey()">
+          Entrar con una passkey
+        </button>
+      }
       <p class="mt-4 flex flex-wrap justify-between gap-2 text-sm">
         <a routerLink="/recuperar" class="underline">¿Has olvidado tu contraseña?</a>
         <a routerLink="/registro" class="underline">Crear cuenta</a>

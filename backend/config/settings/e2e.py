@@ -3,6 +3,7 @@
 DJANGO_SETTINGS_MODULE=config.settings.e2e uv run python manage.py runserver 8000
 """
 
+from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 
@@ -33,7 +34,10 @@ IA_BASE_URL = "http://localhost:8000/e2e/ia/"
 IA_API_KEY = "e2e"
 
 # Los tests entran muchas veces por minuto: el límite real de "login" (5/min, módulo 35) los haría fallar
-REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {**REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"], "login": "1000/min"}
+REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
+    **REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"],
+    **{alcance: "1000/min" for alcance in ("login", "mfa", "passkey")},
+}
 EXIGIR_CASOS_DE_USO = True  # módulo 88: los E2E también fallan si algo escribe sin use case
 # Módulo 90: el authorization server, en el origen de la app (como en producción, donde Vercel reenvía /api/*),
 # y una clave de firma nueva en cada arranque
@@ -53,3 +57,6 @@ SOCIAL_LOGIN["apple"] |= {
     .decode(),
     "emisor": f"{OIDC_FALSO}/apple",
 }
+# Módulo 92: la clave del cifrado de los secretos TOTP, nueva en cada arranque. Las passkeys, para el origen de la SPA
+# (http://localhost:4200, rp_id localhost: WebAuthn admite http en localhost)
+MFA_CLAVES = [Fernet.generate_key().decode()]

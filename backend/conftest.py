@@ -80,6 +80,23 @@ def cliente():
 
 
 @pytest.fixture
+def sesion(db):
+    """sesion(usuario) → APIClient con el access token de una sesión de verdad (módulo 92). Para las acciones
+    sensibles (step-up): miran cuándo se autenticó esa sesión, y force_authenticate no abre ninguna."""
+    from usuarios.application.iniciar_sesion_use_case.dtos.iniciar_sesion_input_dto import IniciarSesionInputDTO
+    from usuarios.domain.enums.factor import Factor
+    from usuarios.infrastructure import container
+
+    def _sesion(usuario):
+        abierta = container.iniciar_sesion().ejecutar(IniciarSesionInputDTO(usuario.pk, Factor.CONTRASENA))
+        c = APIClient()
+        c.credentials(HTTP_AUTHORIZATION=f"Bearer {abierta.tokens.access}")
+        return c
+
+    return _sesion
+
+
+@pytest.fixture
 def hogar_con_roles(db):
     """Un hogar con un admin, un miembro, un lector y un usuario ajeno."""
     hogar = HogarFactory()

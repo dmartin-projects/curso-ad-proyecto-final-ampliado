@@ -19,6 +19,20 @@ import { SIN_AUTH, SIN_AVISO_ERROR } from '../http/contexto';
 
 const SIN_TOKEN = () => new HttpContext().set(SIN_AUTH, true).set(SIN_AVISO_ERROR, true);
 
+/** Módulo 92: lo que contesta un inicio de sesión: la sesión, o que falta el segundo factor (y con qué darlo). */
+interface RespuestaInicio {
+  access?: string;
+  segundo_factor?: string[];
+}
+export type Inicio = { dentro: true } | { dentro: false; factores: string[] };
+
+/** El segundo paso: un código (TOTP o de recuperación) o la respuesta de una passkey. */
+export interface SegundoFactor {
+  factor: 'totp' | 'recuperacion' | 'passkey';
+  codigo?: string;
+  respuesta?: AuthenticationResponseJSON;
+}
+
 /**
  * Sesión: el access token vive SOLO en memoria (una signal); el refresh, en una cookie HttpOnly
  * que el navegador envía sola a /api/v1/auth/ (módulos 35 y 51). Nada en localStorage.
@@ -36,17 +50,66 @@ export class AuthStore {
 
   private refrescoEnCurso: Observable<string> | null = null;
 
-  login(email: string, password: string) {
-    return this.http
-      .post<{ access: string }>(
+  /** Con MFA, la contraseña no da la sesión: el backend deja el login a medias (cookie HttpOnly) y dice con qué seguir. */
+  login(email: string, password: string): Observable<Inicio> {
+    return this.iniciar(
+      this.http.post<RespuestaInicio>(
         '/api/v1/auth/login/',
         { email, password },
         { context: SIN_TOKEN() },
-      )
-      .pipe(
-        tap((r) => this._access.set(r.access)),
-        switchMap(() => this.cargarUsuario()),
-      );
+      ),
+    );
+  }
+
+  /** Módulo 92: con qué se puede completar un login a medias (o un error, si ese primer paso ha caducado). */
+  factoresPendientes() {
+    return this.http.get<{ factores: string[] }>('/api/v1/auth/mfa/', { context: SIN_TOKEN() });
+  }
+
+  /** Módulo 92: el reto que firma la passkey del segundo paso. */
+  retoSegundoFactor() {
+    return this.http.post<PublicKeyCredentialRequestOptionsJSON>('/api/v1/auth/mfa/reto/', null, {
+      context: SIN_TOKEN(),
+    });
+  }
+
+  /** Módulo 92: el segundo paso del login (la cookie del primero la manda el navegador). */
+  completarSegundoFactor(datos: SegundoFactor): Observable<Inicio> {
+    return this.iniciar(
+      this.http.post<RespuestaInicio>('/api/v1/auth/mfa/', datos, { context: SIN_TOKEN() }),
+    );
+  }
+
+  /** Módulo 92: el reto que firma una passkey para entrar sin contraseña. */
+  retoPasskey() {
+    return this.http.post<PublicKeyCredentialRequestOptionsJSON>(
+      '/api/v1/auth/passkey/reto/',
+      null,
+      {
+        context: SIN_TOKEN(),
+      },
+    );
+  }
+
+  /** Módulo 92: entrar con una passkey, sin contraseña. */
+  entrarConPasskey(respuesta: AuthenticationResponseJSON): Observable<Inicio> {
+    return this.iniciar(
+      this.http.post<RespuestaInicio>(
+        '/api/v1/auth/passkey/',
+        { respuesta },
+        { context: SIN_TOKEN() },
+      ),
+    );
+  }
+
+  private iniciar(peticion: Observable<RespuestaInicio>): Observable<Inicio> {
+    return peticion.pipe(
+      switchMap((r): Observable<Inicio> => {
+        if (!r.access) return of({ dentro: false, factores: r.segundo_factor ?? [] });
+        this._access.set(r.access);
+        return this.cargarUsuario().pipe(map(() => ({ dentro: true }) as const));
+      }),
+    );
   }
 
   /** Una sola petición de refresh aunque la pidan varias peticiones a la vez. */

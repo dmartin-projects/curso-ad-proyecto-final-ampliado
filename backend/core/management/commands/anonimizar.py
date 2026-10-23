@@ -4,8 +4,9 @@
 
 Lo usa infra/staging-desde-produccion.sh justo después de restaurar en staging la copia de producción.
 Quita lo que identifica a alguien (emails, nombres, IBAN, notas, texto de los tickets, notificaciones y
-auditoría) y lo que no debe viajar de un entorno a otro (sesiones, refresh tokens, el outbox de eventos y, desde el
-módulo 91, las cuentas de Google, GitHub o Apple vinculadas).
+auditoría) y lo que no debe viajar de un entorno a otro (sesiones, refresh tokens, el outbox de eventos, desde el
+módulo 91 las cuentas de Google, GitHub o Apple vinculadas y, desde el 92, el segundo factor, las passkeys y las
+sesiones de Gastos, que son las que hacen valer cada refresh token).
 Los importes, fechas, categorías y conceptos se quedan: es lo que hace útil probar con datos de verdad.
 Todos los usuarios quedan con la misma contraseña (la que diga STAGING_PASSWORD) para poder entrar como ellos.
 """
@@ -18,15 +19,23 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 from django.db.models import CharField, F, Value
 from django.db.models.functions import Cast, Concat
-from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
 from core.models import RegistroAuditoria
 from eventos.models import EventoPendiente
 from finanzas.models import Cuenta, Movimiento
 from hogares.models import Hogar, Invitacion
 from notificaciones.models import Notificacion
+from oauth.models import AutenticacionDeConcesion
 from tickets.models import Ticket
-from usuarios.models import IdentidadExterna, Usuario
+from usuarios.models import (
+    CodigoRecuperacion,
+    IdentidadExterna,
+    ManijaWebAuthn,
+    Passkey,
+    SegundoFactor,
+    Sesion,
+    Usuario,
+)
 
 
 def _con_id(prefijo: str, sufijo: str = ""):
@@ -63,10 +72,16 @@ class Command(BaseCommand):
                 "notificaciones": Notificacion.objects.all().delete()[0],
                 "auditoría": RegistroAuditoria.objects.all().delete()[0],
                 "sesiones": Session.objects.all().delete()[0],
-                "refresh tokens": OutstandingToken.objects.all().delete()[0],  # y su lista negra (CASCADE)
                 "outbox": EventoPendiente.objects.all().delete()[0],  # los de producción, publicados o no
                 # Módulo 91: su email y su `sub` identifican a la persona; y con ellos, su Google entraría en staging
                 "identidades externas": IdentidadExterna.objects.all().delete()[0],
+                # Módulo 92: con el MFA de producción nadie entraría en staging (su secreto está cifrado con la clave
+                # de producción, que staging no tiene), y las passkeys son del dominio de producción (su rp_id)
+                "segundos factores": SegundoFactor.objects.all().delete()[0],
+                "códigos de recuperación": CodigoRecuperacion.objects.all().delete()[0],
+                "passkeys": Passkey.objects.all().delete()[0] + ManijaWebAuthn.objects.all().delete()[0],
+                "sesiones de Gastos": Sesion.objects.all().delete()[0],
+                "autenticaciones OAuth": AutenticacionDeConcesion.objects.all().delete()[0],
             }
         self.stdout.write(f"{usuarios} usuarios anonimizados; borrado: {borrados}")
         self.stdout.write("Siguiente: publicar_estado (staging tiene topics nuevos) y reconstruir las estadísticas")

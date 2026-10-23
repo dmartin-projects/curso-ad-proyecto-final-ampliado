@@ -1,4 +1,4 @@
-# usuarios/domain/read_models/acceso.py — las formas de entrar de una cuenta (módulo 91)
+# usuarios/domain/read_models/acceso.py — las formas de entrar de una cuenta (módulos 91 y 92)
 from dataclasses import dataclass
 
 from usuarios.domain.read_models.identidad_vinculada import IdentidadVinculada
@@ -8,3 +8,4 @@ from usuarios.domain.read_models.identidad_vinculada import IdentidadVinculada
 class Acceso:
     contrasena: bool
     identidades: tuple[IdentidadVinculada, ...] = ()
+    passkeys: int = 0  # módulo 92: también son formas de entrar

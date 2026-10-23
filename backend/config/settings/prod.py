@@ -37,6 +37,9 @@ OAUTH2_PROVIDER.update(urls_del_emisor(OAUTH_ISSUER))
 OAUTH2_PROVIDER["OIDC_RSA_PRIVATE_KEY"] = env.str("OIDC_RSA_PRIVATE_KEY", multiline=True)
 # (OIDC_RSA_PRIVATE_KEYS_INACTIVE, el de base.py: vacío salvo mientras se rota la clave, ejercicio 2 y runbook)
 
+# ── MFA (módulo 92): sin la clave, nadie podría activar la verificación en dos pasos. Sin valor por defecto ──
+MFA_CLAVES = env.list("MFA_CLAVES")
+
 # ── Base de datos: pool en la web (ASGI) ──
 # Con gunicorn + UvicornWorker cada petición síncrona corre en un hilo, y con CONN_MAX_AGE cada hilo se
 # queda SU conexión abierta hasta 60 s: con carga, PostgreSQL responde "too many clients" (medido en el

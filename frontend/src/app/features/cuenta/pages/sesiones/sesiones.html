@@ -1,0 +1,33 @@
+<h1 class="mb-1 text-2xl font-medium">Sesiones</h1>
+<p class="mb-4 text-sm text-texto-suave">
+  Dónde está abierta tu cuenta. Si no reconoces alguna, ciérrala.
+</p>
+@if (sesiones.data(); as lista) {
+  <ul class="mb-4 divide-y rounded-lg border">
+    @for (s of lista; track s.sid) {
+      <li class="flex items-center gap-3 p-3">
+        <mat-icon>{{ s.canal === 'spa' ? 'devices' : 'apps' }}</mat-icon>
+        <div class="flex-1">
+          <span class="block font-medium">
+            {{ s.dispositivo }}{{ s.canal === 'spa' ? '' : ' · dar acceso a aplicaciones' }}
+            @if (s.actual) {
+              <span class="text-sm text-texto-suave">(esta)</span>
+            }
+          </span>
+          <span class="block text-xs text-texto-suave">
+            Red {{ s.ip || 'desconocida' }} · con {{ factores(s) }} · último uso
+            {{ s.ultimo_uso | date: 'short' }}
+          </span>
+        </div>
+        @if (!s.actual) {
+          <button mat-stroked-button (click)="cerrar.mutate(s)" [disabled]="cerrar.isPending()">
+            Cerrar
+          </button>
+        }
+      </li>
+    }
+  </ul>
+  @if (hayOtras()) {
+    <button mat-flat-button (click)="cerrarLasDemas.mutate()">Cerrar las demás sesiones</button>
+  }
+}

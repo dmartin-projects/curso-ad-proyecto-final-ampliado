@@ -31,6 +31,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
+        /** @description Una acción sensible: con la sesión de la SPA y una autenticación reciente (si no: 401 y el reto del RFC 9470). */
         delete: operations["auth_acceso_destroy"];
         options?: never;
         head?: never;
@@ -170,6 +171,109 @@ export interface paths {
         patch: operations["auth_me_partial_update"];
         trace?: never;
     };
+    "/api/v1/auth/mfa/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description GET: con qué se puede completar (la pantalla de la SPA tras volver de un proveedor). POST: completarlo. */
+        get: operations["auth_mfa_retrieve"];
+        put?: never;
+        /** @description GET: con qué se puede completar (la pantalla de la SPA tras volver de un proveedor). POST: completarlo. */
+        post: operations["auth_mfa_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/mfa/reto/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Las opciones de WebAuthn para usar una passkey como segundo factor: solo las de esa cuenta. */
+        post: operations["auth_mfa_reto_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/passkey/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base para login/refresh/registro: no autentica la petición, pero responde 401 (no 403). */
+        post: operations["auth_passkey_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/passkey/reto/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base para login/refresh/registro: no autentica la petición, pero responde 401 (no 403). */
+        post: operations["auth_passkey_reto_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/reautenticar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description GET: con qué puede confirmar esta sesión. POST: confirmarlo (la sesión vuelve a ser "reciente"). */
+        get: operations["auth_reautenticar_retrieve"];
+        put?: never;
+        /** @description GET: con qué puede confirmar esta sesión. POST: confirmarlo (la sesión vuelve a ser "reciente"). */
+        post: operations["auth_reautenticar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/reautenticar/reto/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_reautenticar_reto_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/recuperar-password/": {
         parameters: {
             query?: never;
@@ -237,6 +341,156 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/seguridad/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["auth_seguridad_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/seguridad/passkeys/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Una acción sensible: con la sesión de la SPA y una autenticación reciente (si no: 401 y el reto del RFC 9470). */
+        post: operations["auth_seguridad_passkeys_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/seguridad/passkeys/{passkey_id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Una acción sensible: con la sesión de la SPA y una autenticación reciente (si no: 401 y el reto del RFC 9470). */
+        delete: operations["auth_seguridad_passkeys_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/seguridad/passkeys/reto/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Una acción sensible: con la sesión de la SPA y una autenticación reciente (si no: 401 y el reto del RFC 9470). */
+        post: operations["auth_seguridad_passkeys_reto_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/seguridad/totp/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Un secreto nuevo (sin activar todavía) con su QR. */
+        post: operations["auth_seguridad_totp_create"];
+        /** @description Una acción sensible: con la sesión de la SPA y una autenticación reciente (si no: 401 y el reto del RFC 9470). */
+        delete: operations["auth_seguridad_totp_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/seguridad/totp/confirmar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Una acción sensible: con la sesión de la SPA y una autenticación reciente (si no: 401 y el reto del RFC 9470). */
+        post: operations["auth_seguridad_totp_confirmar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/sesiones/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["auth_sesiones_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/sesiones/{sid}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["auth_sesiones_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/sesiones/cerrar-las-demas/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_sesiones_cerrar_las_demas_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/social/": {
         parameters: {
             query?: never;
@@ -280,7 +534,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** @description POST con el JWT de la SPA: la URL del proveedor para vincularlo a MI cuenta. La SPA navega a ella. */
+        /**
+         * @description POST con el JWT de la SPA: la URL del proveedor para vincularlo a MI cuenta. La SPA navega a ella. Añade una
+         *     forma de entrar: es una acción sensible.
+         */
         post: operations["auth_social_vincular_create"];
         delete?: never;
         options?: never;
@@ -1299,12 +1556,18 @@ export interface components {
         Acceso: {
             contrasena: boolean;
             identidades: components["schemas"]["IdentidadVinculada"][];
+            passkeys: number;
         };
         Access: {
             access: string;
         };
         Actualizadas: {
             actualizadas: number;
+        };
+        AltaTotp: {
+            secreto: string;
+            uri: string;
+            qr: string;
         };
         AplicacionConectada: {
             client_id: string;
@@ -1367,6 +1630,15 @@ export interface components {
             orden?: number;
             /** Es de ingresos */
             es_ingreso?: boolean;
+        };
+        Cerradas: {
+            cerradas: number;
+        };
+        CodigoTotpRequest: {
+            codigo: string;
+        };
+        CodigosRecuperacion: {
+            codigos: string[];
         };
         Comercio: {
             readonly id: number;
@@ -1478,6 +1750,22 @@ export interface components {
          * @enum {string}
          */
         EstadoTicketEnum: "pendiente" | "procesando" | "revisar" | "procesado" | "error";
+        /**
+         * @description * `totp` - totp
+         *     * `recuperacion` - recuperacion
+         *     * `passkey` - passkey
+         *     * `contrasena` - contrasena
+         * @enum {string}
+         */
+        FactorEnum: "totp" | "recuperacion" | "passkey" | "contrasena";
+        Factores: {
+            factores: string[];
+        };
+        FactoresReautenticacion: {
+            factores: string[];
+            proveedores: string[];
+            max_age: number;
+        };
         FilaImportacion: {
             readonly id: number;
             readonly numero: number;
@@ -1615,6 +1903,10 @@ export interface components {
         InformeEncolado: {
             mes: string;
             estado: string;
+        };
+        Inicio: {
+            access?: string;
+            segundo_factor?: unknown[];
         };
         Invitacion: {
             readonly id: number;
@@ -1972,6 +2264,22 @@ export interface components {
             page?: number;
             page_size?: number;
         };
+        PasskeyCreada: {
+            id: number;
+        };
+        PasskeyNuevaRequest: {
+            nombre?: string;
+            respuesta: unknown;
+        };
+        PasskeyRegistrada: {
+            id: number;
+            nombre: string;
+            sincronizada: boolean;
+            /** Format: date-time */
+            creada: string;
+            /** Format: date-time */
+            ultimo_uso: string | null;
+        };
         /** @description Limita los campos relacionados al hogar de la URL: no se puede apuntar a datos de otro hogar (módulo 33). */
         PatchedCategoriaRequest: {
             nombre?: string;
@@ -2095,6 +2403,9 @@ export interface components {
             /** @default false */
             repetir_ocr: boolean;
         };
+        RespuestaWebAuthnRequest: {
+            respuesta: unknown;
+        };
         ResultadoLote: {
             hechos: number;
             omitidos: number;
@@ -2114,6 +2425,28 @@ export interface components {
          * @enum {string}
          */
         RolEnum: "admin" | "miembro" | "lector";
+        SegundoFactorRequest: {
+            factor: components["schemas"]["FactorEnum"];
+            codigo?: string;
+            respuesta?: unknown;
+        };
+        Seguridad: {
+            mfa: boolean;
+            codigos_restantes: number;
+            passkeys: components["schemas"]["PasskeyRegistrada"][];
+        };
+        SesionActiva: {
+            sid: string;
+            canal: string;
+            dispositivo: string;
+            ip: string;
+            /** Format: date-time */
+            creada: string;
+            /** Format: date-time */
+            ultimo_uso: string;
+            factores: string[];
+            actual: boolean;
+        };
         /** @description Limita los campos relacionados al hogar de la URL: no se puede apuntar a datos de otro hogar (módulo 33). */
         SubirImportacionRequest: {
             /** Format: binary */
@@ -2411,7 +2744,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["Access"];
+                    "application/json": components["schemas"]["Inicio"];
                 };
             };
         };
@@ -2497,6 +2830,181 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Usuario"];
+                };
+            };
+        };
+    };
+    auth_mfa_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Factores"];
+                };
+            };
+        };
+    };
+    auth_mfa_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SegundoFactorRequest"];
+                "multipart/form-data": components["schemas"]["SegundoFactorRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Inicio"];
+                };
+            };
+        };
+    };
+    auth_mfa_reto_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Opciones de WebAuthn (JSON, para parse…FromJSON) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    auth_passkey_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RespuestaWebAuthnRequest"];
+                "multipart/form-data": components["schemas"]["RespuestaWebAuthnRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Inicio"];
+                };
+            };
+        };
+    };
+    auth_passkey_reto_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Opciones de WebAuthn (JSON, para parse…FromJSON) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    auth_reautenticar_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FactoresReautenticacion"];
+                };
+            };
+        };
+    };
+    auth_reautenticar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SegundoFactorRequest"];
+                "multipart/form-data": components["schemas"]["SegundoFactorRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_reautenticar_reto_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Opciones de WebAuthn (JSON, para parse…FromJSON) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
                 };
             };
         };
@@ -2587,6 +3095,210 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Detalle"];
+                };
+            };
+        };
+    };
+    auth_seguridad_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Seguridad"];
+                };
+            };
+        };
+    };
+    auth_seguridad_passkeys_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasskeyNuevaRequest"];
+                "multipart/form-data": components["schemas"]["PasskeyNuevaRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PasskeyCreada"];
+                };
+            };
+        };
+    };
+    auth_seguridad_passkeys_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                passkey_id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_seguridad_passkeys_reto_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Opciones de WebAuthn (JSON, para parse…FromJSON) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    auth_seguridad_totp_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AltaTotp"];
+                };
+            };
+        };
+    };
+    auth_seguridad_totp_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_seguridad_totp_confirmar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CodigoTotpRequest"];
+                "multipart/form-data": components["schemas"]["CodigoTotpRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CodigosRecuperacion"];
+                };
+            };
+        };
+    };
+    auth_sesiones_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SesionActiva"][];
+                };
+            };
+        };
+    };
+    auth_sesiones_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                sid: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_sesiones_cerrar_las_demas_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Cerradas"];
                 };
             };
         };

@@ -1,14 +1,18 @@
-# oauth/infrastructure/web/views/autorizar_view.py — /authorize: la pantalla de consentimiento (módulo 90)
-from datetime import datetime
+# oauth/infrastructure/web/views/autorizar_view.py — /authorize: la pantalla de consentimiento (módulos 90 y 92)
+from datetime import UTC, datetime
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-from django.contrib.auth import logout
 from django.contrib.auth.views import redirect_to_login
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from oauth2_provider.models import get_application_model
 from oauth2_provider.settings import oauth2_settings
 from oauth2_provider.views import AuthorizationView
+
+from usuarios.application.obtener_factores_use_case.dtos.obtener_factores_input_dto import ObtenerFactoresInputDTO
+from usuarios.domain.services.factores import ACR_MULTIFACTOR
+from usuarios.infrastructure import container as cuentas
+from usuarios.infrastructure.api.sessions.sesion_de_django import SESION_DJANGO, salir_de_django
 
 # Lo que la URL de /authorize no puede decidir, o que ya se ha cumplido al volver del login
 NO_VUELVEN_AL_AUTHORIZE = ("approval_prompt", "prompt", "max_age")
@@ -20,7 +24,8 @@ class AutorizarView(AuthorizationView):
     - Volver a pedir la contraseña cuando el cliente lo pide (`prompt=login`) o cuando la autenticación del navegador
       es más antigua de lo que admite (`max_age`): OIDC Core §3.1.2.1 dice que el servidor DEBE hacerlo, no solo
       contarlo en `auth_time`. Antes se cierra la sesión: el login de Gastos devuelve aquí, sin preguntar, a quien ya
-      la tiene (redirect_authenticated_user).
+      la tiene (redirect_authenticated_user). Módulo 92: y cuando pide el multifactor (`acr_values`) y la sesión es
+      de un factor.
     - El consentimiento lo decide el servidor, no la URL.
     """
 
@@ -47,8 +52,10 @@ class AutorizarView(AuthorizationView):
         return self.volver_a_entrar(self.request)
 
     def autenticado_en(self, request) -> datetime | None:
-        """Cuándo demostró quién es la sesión de este navegador: el `auth_time` de su ID token."""
-        return request.user.last_login
+        """Cuándo demostró quién es la sesión de este navegador: el `auth_time` de su ID token (módulo 92: el de su
+        sesión de Gastos, el que viaja con el code hasta el ID token)."""
+        datos = request.session.get(SESION_DJANGO)
+        return datetime.fromtimestamp(datos["auth_time"], UTC) if datos else None
 
     def reautenticacion(self, request):
         """None si la sesión vale para esta petición; si no, la respuesta: al login (sin la sesión de ahora) o, con
@@ -61,18 +68,25 @@ class AutorizarView(AuthorizationView):
         caducada = max_age is not None and (
             autenticado_en is None or (timezone.now() - autenticado_en).total_seconds() > int(max_age)
         )
+        # Módulo 92: con `acr_values=urn:gastos:acr:mfa`, una sesión de un factor tampoco vale: otra vez al login, que
+        # ahora pide el segundo factor. Si la cuenta no tiene TOTP (estas páginas no usan passkeys), no hay forma de
+        # cumplirlo: login_required, como un `prompt=none` sin sesión (OIDC Core §3.1.2.6)
+        datos = request.session.get(SESION_DJANGO) or {}
+        un_factor = ACR_MULTIFACTOR in request.GET.get("acr_values", "").split() and datos.get("acr") != ACR_MULTIFACTOR
+        if un_factor and not cuentas.obtener_factores().ejecutar(ObtenerFactoresInputDTO(request.user.pk)).totp:
+            return self.error_oidc(request, "login_required")
         if "none" in prompt:
             # Sin pantallas no se puede volver a entrar (login_required) ni consentir: Gastos pregunta siempre
             # (REQUEST_APPROVAL_PROMPT), así que una sesión válida tampoco basta (consent_required)
-            return self.error_oidc(request, "login_required" if caducada else "consent_required")
-        if "login" in prompt or caducada:
+            return self.error_oidc(request, "login_required" if caducada or un_factor else "consent_required")
+        if "login" in prompt or caducada or un_factor:
             return self.volver_a_entrar(request)
         return None
 
     def volver_a_entrar(self, request):
         """Cierra la sesión de este navegador (si no, el login lo devolvería aquí sin pedir nada) y manda al login.
         Al volver, la misma petición sin `prompt` ni `max_age`: la autenticación que piden ya es la de ahora."""
-        logout(request)
+        salir_de_django(request)  # módulo 92: la de Django y su sesión de Gastos
         consulta = [
             (k, v) for k, v in parse_qsl(request.META.get("QUERY_STRING", "")) if k not in NO_VUELVEN_AL_AUTHORIZE
         ]
@@ -92,6 +106,12 @@ class AutorizarView(AuthorizationView):
         parametros = {"error": error} | ({"state": request.GET["state"]} if request.GET.get("state") else {})
         separador = "&" if "?" in redirect_uri else "?"
         return self.redirect(redirect_uri + separador + urlencode(parametros), aplicacion)
+
+    def create_authorization_response(self, request, scopes, credentials, allow):
+        """Módulo 92: cómo se autenticó quien da el acceso (amr, acr, auth_time) viaja con el code hasta el ID token.
+        oauthlib copia cada credencial a su Request: el validador la guarda junto al code (server/validador_gastos.py)."""
+        credentials = {**credentials, "autenticacion": request.session.get(SESION_DJANGO)}
+        return super().create_authorization_response(request, scopes, credentials, allow)
 
     def redirect(self, redirect_to, application):
         """La vuelta al cliente lleva siempre `iss` (RFC 9207 §2): DOT 3.4 lo pone en las respuestas con code, pero

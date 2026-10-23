@@ -66,7 +66,7 @@ export default class Acceso implements OnInit {
 
   protected readonly esElUltimo = computed(() => {
     const a = this.acceso.data();
-    return !!a && !a.contrasena && a.identidades.length === 1;
+    return !!a && !a.contrasena && a.identidades.length === 1 && a.passkeys === 0; // (las passkeys: módulo 92)
   });
 
   protected readonly desvinculando = injectMutation(() => ({

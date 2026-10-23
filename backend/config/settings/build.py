@@ -3,7 +3,7 @@
 import os
 
 for variable in ("DJANGO_SECRET_KEY", "JWT_SIGNING_KEY", "IA_API_KEY", "S3_BUCKET", "S3_ACCESS_KEY", "S3_SECRET_KEY",
-                 "SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD", "OIDC_RSA_PRIVATE_KEY"):  # fmt: skip
+                 "SMTP_HOST", "SMTP_USER", "SMTP_PASSWORD", "OIDC_RSA_PRIVATE_KEY", "MFA_CLAVES"):  # fmt: skip
     os.environ.setdefault(variable, "solo-para-el-build")
 for variable in ("DJANGO_CSRF_TRUSTED_ORIGINS", "FRONTEND_URL", "S3_ENDPOINT_URL", "OAUTH_ISSUER"):
     os.environ.setdefault(variable, "https://build.invalid")

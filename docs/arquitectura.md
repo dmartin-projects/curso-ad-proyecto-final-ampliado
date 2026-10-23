@@ -67,13 +67,15 @@ Las demás apps tienen el mismo árbol; las carpetas de `infrastructure/` que fi
 |---|---|---|
 | `infrastructure/finanzas/` | El *adapter* hacia OTRA app (*anti-corruption layer*): `gastos_en_finanzas.py` → `GastosEnFinanzas(IGastos)`, `movimientos_en_finanzas.py` → `MovimientosEnFinanzas(IMovimientos)` | tickets, importaciones |
 | `infrastructure/ocr/`, `ia/`, `lectores/`, `pdf/` | *Adapters* de salida a servicios externos: `LectorTesseract`, `ExtractorIA` (con su cliente, sus *serializers* de validación y sus excepciones), `LectorDeArchivos` (CSV y PDF de cualquier banco), `MaquetadorWeasyPrint` | tickets, importaciones, informes |
-| `infrastructure/auth/` | Lo que ya resuelve Django detrás de un port: `PoliticaDeContrasenasDjango`, `SesionesSimpleJWT`, `EnlacesDjango`, `TokensSimpleJWT` | usuarios |
-| `infrastructure/providers/`, `cache/` | El social login (módulo 91): un *adapter* por proveedor de identidad (`Google`, `GitHub`, `Apple` sobre `ProveedorOIDC` y `ClienteOAuth`, con Authlib y joserfc) y `ProveedoresConfigurados(IProveedores)`; la transacción entre la ida y la vuelta, en la caché (`TransaccionesEnCache`) | usuarios |
+| `infrastructure/auth/` | Lo que ya resuelve Django detrás de un port: `PoliticaDeContrasenasDjango`, `EnlacesDjango`, `TokensSimpleJWT` | usuarios |
+| `infrastructure/providers/`, `cache/` | El social login (módulo 91): un *adapter* por proveedor de identidad (`Google`, `GitHub`, `Apple` sobre `ProveedorOIDC` y `ClienteOAuth`, con Authlib y joserfc) y `ProveedoresConfigurados(IProveedores)`; la transacción entre la ida y la vuelta, en la caché (`TransaccionesEnCache`; desde el módulo 92, también el login a medias y los retos de WebAuthn: `PendientesEnCache`, `RetosEnCache`) | usuarios |
+| `infrastructure/mfa/` | El segundo factor (módulo 92): TOTP con pyotp (`TotpPyotp`), las passkeys con py_webauthn (`WebAuthnDuo`) y el QR del alta (`CodigoQrSegno`). Los secretos TOTP se cifran en `database/cifrado.py`; las sesiones y los códigos de recuperación son *adapters* de BD que no son repositorios (`database/services/`: `SesionesORM`, `CodigosDeRecuperacionORM`) | usuarios |
+| `infrastructure/api/{authentication,permissions,sessions}/` | Lo que usuarios ofrece a las demás apps (módulo 92): `JWTConSesion` (el access de una sesión cerrada ya no vale), `AutenticacionReciente` (el *step-up*) y la sesión de Django de las páginas del *authorization server* atada a su sesión de Gastos | usuarios |
 | `infrastructure/websocket/` | Adapter de entrada de Channels: `consumers.py`, `middleware.py` (el ticket de un solo uso), `origenes.py`, `routing.py` | notificaciones |
 | `infrastructure/realtime/`, `i18n/` | *Adapters* de salida: la *channel layer* (`tiempo_real.py`, `grupos.py`) y `TraductorDjango(ITraductor)` | notificaciones |
 | `infrastructure/metrics/` | Métricas de negocio de OpenTelemetry (*gauges* que leen un use case de consulta) | tickets, eventos |
 | `infrastructure/messaging/` + `relay/` | El *outbox* (`OutboxDjango(IOutbox)`), Kafka (`BrokerKafka(IBroker)`) y el *relay* que publica los pendientes | eventos |
-| `infrastructure/web/` | Adapter de entrada con páginas de Django: el login y el consentimiento del *authorization server* (`views/`, `urls.py`, `templates/`) y los *endpoints* de django-oauth-toolkit (módulo 90) | oauth |
+| `infrastructure/web/` | Adapter de entrada con páginas de Django: el login, el segundo factor (módulo 92) y el consentimiento del *authorization server* (`views/`, `urls.py`, `templates/`, y `middleware/`: su sesión sigue a la de Gastos) y los *endpoints* de django-oauth-toolkit (módulo 90) | oauth |
 | `infrastructure/server/`, `crypto/` | Lo que se enchufa en los ajustes de django-oauth-toolkit (`ValidadorGastos`, `ScopesPorCliente`, los generadores de tokens) y la clave que firma los ID tokens | oauth |
 | `infrastructure/api/{authentication,permissions,views}/` | La API como *resource server*: `AutenticacionOAuth`, `ScopeRequerido`, `EsServicio` y el *mixin* `AceptaOAuth`, que usan las views de las demás apps | oauth |
 
@@ -140,7 +142,7 @@ Lo comprueba `uv run lint-imports` (contratos en `backend/pyproject.toml`, *job*
    infrastructure.metrics | infrastructure.web` → `infrastructure.websocket` → `infrastructure.tasks` →
    `infrastructure.relay` → `infrastructure.container` → `infrastructure.messaging | infrastructure.finanzas |
    infrastructure.server | infrastructure.providers` → `infrastructure.cache | infrastructure.realtime` → `infrastructure.database | auth |
-   crypto | ocr | ia | lectores | pdf | i18n | signals.<app>_signals` → `application` → `domain`. Nunca hacia
+   crypto | mfa | ocr | ia | lectores | pdf | i18n | signals.<app>_signals` → `application` → `domain`. Nunca hacia
    arriba.
 3. `core.domain` y `core.application` no importan ninguna app.
 4. El núcleo de una app (`domain` + `application`) no importa ninguna otra app (un contrato `<app>-nucleo` por
@@ -150,11 +152,16 @@ Lo comprueba `uv run lint-imports` (contratos en `backend/pyproject.toml`, *job*
    `container`, sus InputDTOs, su `domain`, sus modelos (`<app>.models`, para FK y lecturas), sus query services
    (`database/repositories/*_query_service_orm.py`), sus signals (`signals/<app>_signals.py`); de hogares,
    `api/base/` (la base de las vistas anidadas), y de oauth, `api/authentication/`, `api/permissions/` y
-   `api/views/acepta_oauth.py` (la autenticación OAuth y los scopes de la API). El ACL (`infrastructure/finanzas/`) también es de su app. `config`
-   monta las URLs y el ASGI.
+   `api/views/acepta_oauth.py` (la autenticación OAuth y los scopes de la API); de usuarios (módulo 92),
+   `api/authentication/`, `api/permissions/` y `api/sessions/` (el JWT con su sesión, el *step-up* y la sesión de
+   Django del *authorization server*). El ACL (`infrastructure/finanzas/`) también es de su app. `config` monta las
+   URLs y el ASGI.
 6. (Módulo 91) En `usuarios`, solo `infrastructure/providers` importa Authlib, joserfc o httpx: ninguna view,
    repositorio o *adapter* de cuentas habla directamente con Google, GitHub o Apple (ni toca sus tokens). Authlib y
    joserfc, además, prohibidos en todos los núcleos (regla 1).
+7. (Módulo 92) En `usuarios`, solo `infrastructure/mfa` importa pyotp, webauthn (py_webauthn) o segno: las firmas de
+   las passkeys y los códigos TOTP se comprueban detrás de sus ports (`IWebAuthn`, `ITotp`), en un solo sitio. Esas
+   librerías y `cryptography`, además, prohibidas en todos los núcleos (regla 1).
 
 Una app nueva se añade a `root_packages`, a `containers` del contrato de capas y con sus contratos 4 y 5.
 
@@ -268,6 +275,7 @@ case cuesta microsegundos. En un test con base de datos, una pieza se cambia con
 | Excepción de un adapter | La que no es del dominio (`TransitorioIAException`, `CircuitoAbiertoException`, `SinTransaccionException`) vive en un archivo junto a su adapter, con el mismo sufijo. |
 | Entre apps | Una app pide a otra con el contenedor de la otra, desde su `infrastructure/finanzas/` (*anti-corruption layer*), que traduce a sus propios tipos (un ticket habla de su `total`; finanzas, de un `importe` negativo). Escribir en las tablas de otra app con el ORM está prohibido; leerlas, con sus modelos o sus query services, no. |
 | Social login (módulo 91) | Gastos es el cliente (Relying Party) y el patrón es BFF: Django hace la ida y la vuelta, canjea el code con su secreto y valida el ID token; los tokens del proveedor no salen del *adapter*. Port `IProveedorIdentidad` (un *adapter* por proveedor) que devuelve un `PerfilExterno` ya comprobado; la identidad es (proveedor, `sub`), nunca el email. `CompletarLoginSocialUseCase` decide (dominio: `decidir_entrada`, `decidir_vinculo`) e `IniciarSesionUseCase` emite los tokens de la SPA: es el único sitio donde se emiten, también tras la contraseña. |
+| Sesiones, MFA y *step-up* (módulo 92) | `IniciarSesionUseCase` es el único sitio donde se abre una sesión (SPA o *authorization server*, contraseña, proveedor o passkey): con MFA activo y un primer factor que no basta, devuelve un `SegundoFactorPendienteOutputDTO` (clave en una cookie HttpOnly o en la sesión de Django del AS) y la sesión la abre `CompletarSegundoFactorUseCase`; los dos terminan en `AperturaDeSesion` (`application/shared/`). Cada sesión tiene nombre (`sid` en el refresh y el access de simplejwt; en la sesión de Django del AS) y una fila `Sesion` con sus factores, su `autenticada` (el auth_time), su caducidad y el jti de su refresh vigente: solo ese la renueva, y uno ya rotado que vuelve la cierra (detección de reutilización, RFC 9700); la base de datos no guarda ningún refresh token. Las acciones sensibles llevan `AutenticacionReciente` (*step-up*, RFC 9470); `ReautenticarUseCase` renueva el momento sin tokens nuevos. El secreto TOTP se cifra en el repositorio (MultiFernet, `MFA_CLAVES`); los códigos de recuperación, con PBKDF2 (selector + verificador). |
 | Actor de un proceso | `Actor.sistema(en_nombre_de=usuario_id)` en tareas que trabajan para alguien (lo creado queda a su nombre); `Actor.soporte(usuario_id)` en el backoffice (rol ADMIN en cualquier hogar, auditado con su usuario). |
 | Escrituras sin use case | Movimientos, presupuestos, categorías y membresías tienen eventos que solo publica el use case. Sus receivers de `post_save`/`post_delete` son una alarma (`vigilar`, en `core/infrastructure/signals/red_de_seguridad.py`): lanzan `EscrituraSinCasoDeUsoException` con `EXIGIR_CASOS_DE_USO=True` (dev, tests, E2E) y en producción dejan un error en el log. El repositorio marca lo que guarda (`publicados_por_caso_de_uso`) y lo que escribe en bloque va dentro de `en_un_caso_de_uso()`; los datos de partida de un test (factories), dentro de `escrituras_directas()`. |
 | Cascadas | Lo que borra la base de datos por cascada (borrar un hogar) no pasa por los use cases de los hijos: los receivers lo detectan con el argumento `origin` de `post_delete` (`es_cascada`) y publican solo lo imprescindible (tombstones). |
@@ -295,7 +303,7 @@ apps) sin PostgreSQL.
 |---|---|---|---|
 | finanzas | movimientos, categorías, presupuestos, cuentas (al borrar) | — | su contenedor (también `apuntar_movimientos`, `conciliar_…`, `eliminar_movimientos`, `descartar_propuestos`), query services, `finanzas_signals` |
 | hogares | hogares, membresías, invitaciones | — | su contenedor, query services, `hogares_signals`, `api/base/` |
-| usuarios | registro, recuperación, contraseña, social login y sesiones (módulo 91) | — | `usuarios.models`, su contenedor (`iniciar_sesion`) |
+| usuarios | registro, recuperación, contraseña, social login (módulo 91), sesiones, MFA y passkeys (módulo 92) | — | `usuarios.models`, su contenedor (`iniciar_sesion`, `completar_segundo_factor`, `obtener_factores`…), `JWTConSesion`, `AutenticacionReciente` y la sesión de Django del *authorization server* (`api/sessions/`) |
 | tickets | tickets | `IGastos` → finanzas | `tickets_signals`, `TicketQueryServiceORM` (los atascados) |
 | importaciones | importaciones y sus filas | `IMovimientos` → finanzas | `importaciones_signals` |
 | informes | informes mensuales | lee el dashboard y los movimientos del mes (query services de finanzas) | `informes_signals` |

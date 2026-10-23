@@ -36,10 +36,25 @@ def correos(request):
     return JsonResponse({"correos": [{"asunto": m.subject, "cuerpo": m.body} for m in enviados if para in m.to]})
 
 
+@csrf_exempt
+def envejecer_sesiones(request):
+    """Módulo 92: que las sesiones abiertas se autenticaran hace una hora (el step-up pide 5 minutos). En un E2E no se
+    puede esperar, y el momento está en el servidor, no en el navegador."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from usuarios.models import Sesion
+
+    n = Sesion.objects.filter(cerrada__isnull=True).update(autenticada=timezone.now() - timedelta(hours=1))
+    return JsonResponse({"envejecidas": n})
+
+
 # en E2E los archivos están en disco (en producción, URLs firmadas de S3/R2): Django los sirve con DEBUG
 urlpatterns = [
     path("e2e/ia/chat/completions", ia_falsa),
     path("e2e/correos", correos),
+    path("e2e/sesiones/envejecer", envejecer_sesiones),
     *urls_normales,
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]

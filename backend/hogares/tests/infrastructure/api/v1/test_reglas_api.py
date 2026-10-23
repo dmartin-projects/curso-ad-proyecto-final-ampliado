@@ -30,10 +30,10 @@ def test_una_zona_horaria_que_no_existe_es_un_400_y_no_un_dashboard_roto(cliente
     assert c.patch(f"{URL}{hogar.pk}/", {"zona_horaria": "Atlantic/Canary"}).status_code == 200
 
 
-def test_borrar_un_hogar_deja_un_tombstone_por_movimiento_y_membresia(cliente, hogar_con_roles):
+def test_borrar_un_hogar_deja_un_tombstone_por_movimiento_y_membresia(sesion, hogar_con_roles):
     # La cascada no pasa por ningún use case: la cubren los receivers de cascada de eventos (módulo 88)
     hogar, roles = hogar_con_roles
-    c = cliente(roles["admin"])
+    c = sesion(roles["admin"])  # borrar el hogar exige una autenticación reciente (módulo 92)
     cuenta = CuentaFactory(hogar=hogar)
     ids = {
         c.post(
@@ -51,7 +51,7 @@ def test_borrar_un_hogar_deja_un_tombstone_por_movimiento_y_membresia(cliente, h
     }
 
 
-def test_borrar_un_hogar_con_importaciones_y_tickets(cliente, hogar_con_roles):
+def test_borrar_un_hogar_con_importaciones_y_tickets(sesion, hogar_con_roles):
     # Importacion.cuenta y Ticket.cuenta son RESTRICT: borrar el hogar entero sí puede (y no da un 500).
     # Aquí y no en los tests de importaciones o de tickets: esas apps no se conocen entre sí (import-linter)
     from importaciones.models import Importacion
@@ -65,7 +65,7 @@ def test_borrar_un_hogar_con_importaciones_y_tickets(cliente, hogar_con_roles):
     Ticket.objects.create(
         hogar=hogar, cuenta=cuenta, archivo="tickets/x.jpg", nombre_original="x.jpg", tipo="image/jpeg"
     )
-    assert cliente(roles["admin"]).delete(f"{URL}{hogar.pk}/").status_code == 204
+    assert sesion(roles["admin"]).delete(f"{URL}{hogar.pk}/").status_code == 204
     assert not Importacion.objects.filter(hogar=hogar).exists() and not Ticket.objects.filter(hogar=hogar).exists()
 
 

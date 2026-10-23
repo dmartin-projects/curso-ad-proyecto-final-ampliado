@@ -5,15 +5,15 @@ export const SOPORTE = { email: 'soporte@example.com', password: 'soporte12345' 
 
 /**
  * Login por la interfaz en cada test. No sirve guardar la sesión con `storageState`: el refresh token ROTA
- * en cada uso (ROTATE_REFRESH_TOKENS + BLACKLIST_AFTER_ROTATION, módulo 35) y la cookie guardada quedaría
- * en la lista negra tras el primer test.
+ * en cada uso (ROTATE_REFRESH_TOKENS, módulo 35) y la cookie guardada ya no valdría tras el primer test (desde
+ * el módulo 92, además, un refresh ya rotado que vuelve cierra su sesión: detección de reutilización).
  */
 export async function entrar(page: Page, usuario = DEMO, estadisticas = simularEstadisticas) {
   await estadisticas(page);
   await page.goto('/login');
   await page.getByLabel('Email').fill(usuario.email);
   await page.getByLabel('Contraseña').fill(usuario.password);
-  await page.getByRole('button', { name: 'Entrar' }).click();
+  await page.getByRole('button', { name: 'Entrar', exact: true }).click(); // (no «Entrar con una passkey»)
   await expect(page).not.toHaveURL(/login/);
 }
 

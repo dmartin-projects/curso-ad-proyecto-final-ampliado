@@ -1,5 +1,14 @@
-# oauth/infrastructure/server/validador_gastos.py — las reglas de Gastos dentro de oauthlib (OAUTH2_VALIDATOR_CLASS, módulo 90)
+# oauth/infrastructure/server/validador_gastos.py — las reglas de Gastos dentro de oauthlib (OAUTH2_VALIDATOR_CLASS,
+# módulos 90 y 92): sin scopes por defecto, cuentas desactivadas fuera, claims del usuario y, desde el 92, amr, acr y
+# auth_time de la autenticación real
+import hashlib
+from datetime import UTC, datetime
+
 from oauth2_provider.oauth2_validators import OAuth2Validator
+
+from oauth.infrastructure.database.models.autenticacion_de_concesion_model import (
+    AutenticacionDeConcesion as AutenticacionDeConcesionModel,
+)
 
 
 class ValidadorGastos(OAuth2Validator):
@@ -25,3 +34,48 @@ class ValidadorGastos(OAuth2Validator):
             "locale": lambda r: r.user.idioma,
             "zoneinfo": lambda r: r.user.zona_horaria,
         }
+
+    # ── Módulo 92: el ID token cuenta cómo se autenticó la persona (amr, acr) y cuándo (auth_time) ──
+    # django-oauth-toolkit pone auth_time = last_login (el último login en cualquier sitio, también en la SPA) y no
+    # emite amr ni acr. La autenticación real llega con el consentimiento (AutorizarView la añade a las credenciales),
+    # se guarda con el code, pasa a la familia de refresh tokens al canjearlo y de ahí sale a cada ID token.
+
+    def save_authorization_code(self, client_id, code, request, *args, **kwargs):
+        super().save_authorization_code(client_id, code, request, *args, **kwargs)
+        if datos := getattr(request, "autenticacion", None):
+            AutenticacionDeConcesionModel.objects.create(
+                codigo=_hash(code["code"]), amr=datos["amr"], acr=datos["acr"],
+                auth_time=datetime.fromtimestamp(datos["auth_time"], UTC),
+            )  # fmt: skip
+
+    def validate_code(self, client_id, code, client, request, *args, **kwargs):
+        valido = super().validate_code(client_id, code, client, request, *args, **kwargs)
+        if valido:
+            request.autenticacion = AutenticacionDeConcesionModel.objects.filter(codigo=_hash(code)).first()
+        return valido
+
+    def _create_refresh_token(self, request, refresh_token_code, access_token, previous_refresh_token):
+        refresh = super()._create_refresh_token(request, refresh_token_code, access_token, previous_refresh_token)
+        autenticacion = getattr(request, "autenticacion", None)
+        if previous_refresh_token is None and autenticacion is not None:  # el primero de la familia: el del canje
+            AutenticacionDeConcesionModel.objects.filter(pk=autenticacion.pk).update(
+                codigo=None, familia=refresh.token_family
+            )
+        return refresh
+
+    def get_id_token_dictionary(self, token, token_handler, request):
+        claims, caduca = super().get_id_token_dictionary(token, token_handler, request)
+        autenticacion = getattr(request, "autenticacion", None)
+        if autenticacion is None and (refresh := getattr(request, "refresh_token_instance", None)):
+            autenticacion = AutenticacionDeConcesionModel.objects.filter(familia=refresh.token_family).first()
+        if autenticacion is not None:
+            claims |= {
+                "auth_time": int(autenticacion.auth_time.timestamp()),
+                "amr": list(autenticacion.amr),
+                "acr": autenticacion.acr,
+            }
+        return claims, caduca
+
+
+def _hash(code: str) -> str:
+    return hashlib.sha256(code.encode()).hexdigest()  # como los tokens: el code, ni siquiera mientras vive

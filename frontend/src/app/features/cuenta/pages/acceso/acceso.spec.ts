@@ -18,6 +18,7 @@ const SOLO_GOOGLE: DatosAcceso = {
       ultimo_uso: '2026-10-22T18:30:00Z',
     },
   ],
+  passkeys: 0,
 };
 
 /** Módulo 91: «Métodos de acceso». */
@@ -132,7 +133,11 @@ describe('Métodos de acceso', () => {
     boton(fixture, 'Desvincular').click();
     const r = await peticion('/api/v1/auth/acceso/google/', 'DELETE');
     r.flush(null, { status: 204, statusText: 'No Content' });
-    (await peticion('/api/v1/auth/acceso/')).flush({ contrasena: true, identidades: [] });
+    (await peticion('/api/v1/auth/acceso/')).flush({
+      contrasena: true,
+      identidades: [],
+      passkeys: 0,
+    });
     await vi.waitFor(async () => {
       await fixture.whenStable();
       expect(fixture.nativeElement.textContent).not.toContain('ana@gmail.com');

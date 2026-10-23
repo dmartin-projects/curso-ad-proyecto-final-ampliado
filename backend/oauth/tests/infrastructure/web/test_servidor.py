@@ -16,7 +16,17 @@ from oauth2_provider.models import AccessToken, Application, RefreshToken
 from conftest import UsuarioFactory
 from oauth.domain.enums.tipo_cliente import TipoCliente
 from oauth.models import ClienteOAuth
-from oauth.tests.infrastructure.flujo import canjear, consentir, peticion, pkce, refrescar, registrar, tokens, vuelta
+from oauth.tests.infrastructure.flujo import (
+    canjear,
+    con_sesion,
+    consentir,
+    peticion,
+    pkce,
+    refrescar,
+    registrar,
+    tokens,
+    vuelta,
+)
 
 pytestmark = pytest.mark.django_db
 EMISOR = "http://localhost:8000/api/oauth"
@@ -34,9 +44,7 @@ def ana():
 
 @pytest.fixture
 def navegador(ana):
-    c = Client()
-    c.force_login(ana)
-    return c
+    return con_sesion(ana)
 
 
 def jwks():
@@ -251,8 +259,7 @@ def test_la_pantalla_de_consentimiento(cli, navegador):
 
 def test_el_consentimiento_exige_el_token_csrf(cli, ana):
     """Sin CSRF, una página cualquiera podría enviar "Permitir" en nombre de un usuario con la sesión abierta."""
-    navegador = Client(enforce_csrf_checks=True)
-    navegador.force_login(ana)
+    navegador = con_sesion(ana, Client(enforce_csrf_checks=True))
     _, challenge = pkce()
     datos = navegador.get("/api/oauth/authorize/", peticion(challenge)).context["form"].initial
     r = navegador.post("/api/oauth/authorize/", {k: v for k, v in datos.items() if v is not None} | {"allow": "on"})

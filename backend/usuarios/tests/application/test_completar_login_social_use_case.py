@@ -17,6 +17,7 @@ from usuarios.application.establecer_contrasena_use_case.dtos.establecer_contras
 )
 from usuarios.application.iniciar_sesion_use_case.dtos.iniciar_sesion_input_dto import IniciarSesionInputDTO
 from usuarios.domain.enums.canal import Canal
+from usuarios.domain.enums.factor import Factor
 from usuarios.domain.enums.proposito import Proposito
 from usuarios.domain.enums.proveedor import Proveedor
 from usuarios.domain.events.proveedor_vinculado_event import ProveedorVinculadoEvent
@@ -178,10 +179,10 @@ def test_establecer_una_contrasena_a_una_cuenta_sin_ella():
 def test_iniciar_sesion_es_el_mismo_para_todos_y_no_abre_cuentas_desactivadas():
     mundo = Mundo()
     vuelta(mundo, ida(mundo))
-    assert mundo.iniciar_sesion.ejecutar(IniciarSesionInputDTO(1)).refresh == "refresh-1"
+    assert mundo.iniciar_sesion.ejecutar(IniciarSesionInputDTO(1, Factor.PROVEEDOR)).tokens.refresh == "refresh-1"
     mundo.cuentas.usuarios[1]["activo"] = False  # desactivada por soporte
     with pytest.raises(CuentaDesactivadaException):
-        mundo.iniciar_sesion.ejecutar(IniciarSesionInputDTO(1))
+        mundo.iniciar_sesion.ejecutar(IniciarSesionInputDTO(1, Factor.PROVEEDOR))
 
 
 # ── Ejercicio 2: el aviso al vincular ──
@@ -206,9 +207,8 @@ def test_vincular_un_proveedor_avisa_y_entrar_o_crear_la_cuenta_no():
 def test_iniciar_sesion_en_el_authorization_server_no_emite_tokens_pero_comprueba_lo_mismo():
     mundo = Mundo()
     vuelta(mundo, ida(mundo))
-    assert (
-        mundo.iniciar_sesion.ejecutar(IniciarSesionInputDTO(1, Canal.AUTORIZACION)) is None
-    )  # la sesión la abre Django
+    cmd = IniciarSesionInputDTO(1, Factor.CONTRASENA, Canal.AUTORIZACION)
+    assert mundo.iniciar_sesion.ejecutar(cmd).tokens is None  # la sesión la abre Django
     mundo.cuentas.usuarios[1]["activo"] = False
     with pytest.raises(CuentaDesactivadaException):
-        mundo.iniciar_sesion.ejecutar(IniciarSesionInputDTO(1, Canal.AUTORIZACION))
+        mundo.iniciar_sesion.ejecutar(cmd)

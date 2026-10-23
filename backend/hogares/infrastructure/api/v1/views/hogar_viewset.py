@@ -1,4 +1,4 @@
-# hogares/infrastructure/api/v1/views/hogar_viewset.py — adapter de entrada HTTP (módulos 36, 71, 88 y 90)
+# hogares/infrastructure/api/v1/views/hogar_viewset.py — adapter de entrada HTTP (módulos 36, 71, 88, 90 y 92)
 #
 # Escribir: serializer → InputDTO → use case de comando. Leer (el listado, el detalle y la response de un POST o un
 # PATCH): use case de consulta → OutputDTO → presenter → el mismo serializer. Sigue siendo un ModelViewSet: rutas,
@@ -21,6 +21,7 @@ from hogares.infrastructure.database.models.hogar_model import Hogar as HogarMod
 from hogares.infrastructure.database.models.membresia_model import Membresia as MembresiaModel
 from oauth.domain.enums.scope import Scope
 from oauth.infrastructure.api.views.acepta_oauth import AceptaOAuth
+from usuarios.infrastructure.api.permissions.autenticacion_reciente import AutenticacionReciente
 
 
 class HogarViewSet(AceptaOAuth, viewsets.ModelViewSet):
@@ -76,3 +77,5 @@ class HogarViewSet(AceptaOAuth, viewsets.ModelViewSet):
         super().check_object_permissions(request, obj)
         if request.method not in ("GET", "HEAD", "OPTIONS") and obj.mi_rol != MembresiaModel.Rol.ADMIN:
             self.permission_denied(request, message="Solo los administradores pueden modificar el hogar.")
+        if self.action == "destroy":  # módulo 92: borrar un hogar es irreversible: step-up (y después del rol)
+            AutenticacionReciente().has_permission(request, self)

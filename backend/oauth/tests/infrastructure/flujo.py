@@ -10,6 +10,11 @@ from django.test import Client
 from oauth.application.registrar_cliente_use_case.dtos.registrar_cliente_input_dto import RegistrarClienteInputDTO
 from oauth.domain.enums.tipo_cliente import TipoCliente
 from oauth.infrastructure import container
+from usuarios.application.iniciar_sesion_use_case.dtos.iniciar_sesion_input_dto import IniciarSesionInputDTO
+from usuarios.domain.enums.canal import Canal
+from usuarios.domain.enums.factor import Factor
+from usuarios.infrastructure import container as cuentas
+from usuarios.infrastructure.api.sessions.sesion_de_django import SESION_DJANGO, datos_de_sesion
 
 REDIRECT = "http://127.0.0.1/callback"  # la registrada; en cada petición, con un puerto (RFC 8252 §7.3)
 REDIRECT_CON_PUERTO = "http://127.0.0.1:53682/callback"
@@ -75,10 +80,21 @@ def refrescar(refresh_token, client_id="gastos-cli"):
     return Client().post("/api/oauth/token/", datos)
 
 
+def con_sesion(usuario, navegador: Client | None = None) -> Client:
+    """Un navegador que ya ha entrado en el authorization server, como tras su login (módulo 92: con la sesión de
+    Gastos que abre IniciarSesionUseCase; una sesión de Django sin ella no vale). Sin MFA: con MFA, lo prueba su test."""
+    navegador = navegador or Client()
+    sesion = cuentas.iniciar_sesion().ejecutar(IniciarSesionInputDTO(usuario.pk, Factor.CONTRASENA, Canal.AUTORIZACION))
+    navegador.force_login(usuario)
+    datos = navegador.session
+    datos[SESION_DJANGO] = datos_de_sesion(sesion)
+    datos.save()
+    return navegador
+
+
 def tokens(usuario, scope="openid email gastos:leer", client_id="gastos-cli") -> dict:
     """El flujo entero (el usuario ya ha entrado y consiente): la respuesta del token endpoint."""
-    navegador = Client()
-    navegador.force_login(usuario)
+    navegador = con_sesion(usuario)
     verifier, challenge = pkce()
     code = vuelta(consentir(navegador, peticion(challenge, scope=scope, client_id=client_id)))["code"]
     respuesta = canjear(code, verifier, client_id=client_id)

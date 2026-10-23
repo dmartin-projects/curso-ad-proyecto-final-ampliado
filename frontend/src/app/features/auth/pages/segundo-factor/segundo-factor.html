@@ -1,0 +1,48 @@
+<div class="grid min-h-full place-items-center p-4">
+  <mat-card class="w-full max-w-sm">
+    <mat-card-header><mat-card-title>Verificación en dos pasos</mat-card-title></mat-card-header>
+    <mat-card-content>
+      @if (caducado()) {
+        <p role="alert" class="mt-4">El inicio de sesión ha caducado.</p>
+        <a mat-flat-button class="mt-2" routerLink="/login">Volver a entrar</a>
+      } @else {
+        <p class="mt-4 mb-2 text-sm">
+          {{
+            conRecuperacion()
+              ? 'Escribe uno de tus códigos de recuperación.'
+              : 'Escribe el código de 6 cifras de tu app de autenticación.'
+          }}
+        </p>
+        <form [formRoot]="f" class="flex flex-col gap-2">
+          <mat-form-field>
+            <mat-label>{{ conRecuperacion() ? 'Código de recuperación' : 'Código' }}</mat-label>
+            <input
+              matInput
+              [attr.inputmode]="conRecuperacion() ? null : 'numeric'"
+              autocomplete="one-time-code"
+              [formField]="f.codigo"
+            />
+          </mat-form-field>
+          @if (error()) {
+            <p role="alert" class="text-sm text-error">{{ error() }}</p>
+          }
+          <button mat-flat-button type="submit" [disabled]="f().submitting()">Verificar</button>
+        </form>
+        @if (factores().includes('passkey') && passkeys.disponible()) {
+          <button mat-stroked-button class="mt-2 w-full" (click)="conPasskey()">
+            Usar una passkey
+          </button>
+        }
+        @if (factores().includes('recuperacion')) {
+          <button mat-button class="mt-2 w-full" (click)="conRecuperacion.set(!conRecuperacion())">
+            {{
+              conRecuperacion()
+                ? 'Usar el código de la app'
+                : '¿No tienes el móvil? Usa un código de recuperación'
+            }}
+          </button>
+        }
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

@@ -1,0 +1,92 @@
+<h1 class="mb-1 text-2xl font-medium">Seguridad</h1>
+<p class="mb-6 text-sm text-texto-suave">La verificación en dos pasos y tus passkeys.</p>
+
+<h2 class="mb-2 text-lg font-medium">Verificación en dos pasos</h2>
+@if (codigos(); as lista) {
+  <div role="status" class="mb-6 rounded-lg border p-4">
+    <p class="mb-2 font-medium">
+      Verificación en dos pasos activada. Guarda estos códigos de recuperación:
+    </p>
+    <p class="mb-2 text-sm">
+      Cada uno vale una vez, si no tienes el móvil. No se volverán a enseñar.
+    </p>
+    <ul class="mb-4 grid grid-cols-2 gap-1 font-mono" aria-label="Códigos de recuperación">
+      @for (c of lista; track c) {
+        <li>{{ c }}</li>
+      }
+    </ul>
+    <button mat-flat-button (click)="codigos.set(null)">Ya los he guardado</button>
+  </div>
+} @else if (alta(); as a) {
+  <div class="mb-6 max-w-sm">
+    <p class="mb-2 text-sm">
+      Escanea el código con tu app de autenticación (Google Authenticator, 1Password, Authy…) y
+      escribe el código que te da.
+    </p>
+    <img
+      [src]="a.qr"
+      alt="Código QR para tu app de autenticación"
+      width="200"
+      height="200"
+      class="mb-2"
+    />
+    <p class="mb-4 text-sm">
+      ¿No puedes escanearlo? Escribe esta clave:
+      <code data-testid="secreto">{{ a.secreto }}</code>
+    </p>
+    <form [formRoot]="f" class="flex flex-col gap-2">
+      <mat-form-field>
+        <mat-label>Código de 6 cifras</mat-label>
+        <input matInput inputmode="numeric" autocomplete="one-time-code" [formField]="f.codigo" />
+        @if (f.codigo().invalid()) {
+          <mat-error>{{ f.codigo().errors()[0].message }}</mat-error>
+        }
+      </mat-form-field>
+      <button mat-flat-button type="submit" [disabled]="f().submitting()">Activar</button>
+    </form>
+  </div>
+} @else if (seguridad.data(); as s) {
+  @if (s.mfa) {
+    <p class="mb-2 flex items-center gap-2"><mat-icon>verified_user</mat-icon> Activada.</p>
+    <p class="mb-2 text-sm">Te quedan {{ s.codigos_restantes }} códigos de recuperación.</p>
+    <button mat-stroked-button class="mb-6" (click)="desactivar()">Desactivar</button>
+  } @else {
+    <p class="mb-2 text-sm">
+      Además de tu contraseña, un código de tu móvil al entrar. Si alguien averigua tu contraseña,
+      no le basta.
+    </p>
+    <button mat-flat-button class="mb-6" (click)="empezar()">Activar</button>
+  }
+}
+
+<h2 class="mb-2 text-lg font-medium">Passkeys</h2>
+<p class="mb-2 text-sm text-texto-suave">
+  Entra con la huella, la cara o el PIN de tu dispositivo, sin contraseña. No se pueden usar en una
+  web falsa.
+</p>
+@if (seguridad.data(); as s) {
+  <ul class="mb-2 divide-y rounded-lg border">
+    @for (p of s.passkeys; track p.id) {
+      <li class="flex items-center gap-3 p-3">
+        <mat-icon>passkey</mat-icon>
+        <div class="flex-1">
+          <span class="block font-medium">{{ p.nombre }}</span>
+          <span class="block text-xs text-texto-suave">
+            Creada el {{ p.creada | date: 'mediumDate'
+            }}{{ p.sincronizada ? ' · sincronizada' : '' }}
+          </span>
+        </div>
+        <button mat-stroked-button (click)="borrar(p)">Quitar</button>
+      </li>
+    } @empty {
+      <li class="p-3 text-sm">Todavía no tienes ninguna.</li>
+    }
+  </ul>
+}
+@if (puedeAnadir()) {
+  <button mat-flat-button (click)="anadirPasskey()">Añadir una passkey</button>
+} @else {
+  <p class="text-sm text-texto-suave">
+    Las passkeys solo se pueden crear en {{ social.origen() }}.
+  </p>
+}

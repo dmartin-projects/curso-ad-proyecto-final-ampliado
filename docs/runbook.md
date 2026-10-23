@@ -84,6 +84,16 @@ Los ID tokens del *authorization server* van firmados con `OIDC_RSA_PRIVATE_KEY`
 
 Los access y refresh tokens no cambian: son opacos (no van firmados). **Si la clave se filtró**, ve directo al paso 3 con una clave nueva: los ID tokens en vuelo dejarán de verificarse (los clientes que vuelvan a pedir el JWKS por el `kid` desconocido no encontrarán la vieja), que es lo que quieres.
 
+## Rotar la clave de los secretos TOTP (módulo 92)
+
+Los secretos de la verificación en dos pasos están cifrados en la base de datos con `MFA_CLAVES` (Fernet: cifra la primera, descifran todas). Una copia de la base de datos sin la clave no sirve para generar códigos. Para cambiarla, sin que nadie se quede fuera:
+
+1. `uv run python manage.py generar_clave_mfa` (en tu máquina) y `sops edit infra/secretos/produccion.env`: `MFA_CLAVES=nueva,vieja`. Desplegar. Lo nuevo se cifra con la nueva; lo viejo se sigue leyendo.
+2. `docker compose exec web python manage.py rotar_clave_mfa`: vuelve a cifrar todos los secretos con la nueva.
+3. `MFA_CLAVES=nueva`. Desplegar.
+
+**Si la clave se filtró junto con una copia de la base de datos**, rotar no basta (con las dos, el atacante ya tiene los secretos): hay que desactivar el MFA de todas las cuentas y pedir a cada persona que lo active de nuevo (otro QR).
+
 ## Rotar una clave de age (módulo 86, ejercicio 3)
 
 Cuando alguien deja el equipo, se cambia el secreto `SOPS_AGE_KEY` de un environment o una clave pudo filtrarse:

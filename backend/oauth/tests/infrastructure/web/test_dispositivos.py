@@ -10,7 +10,7 @@ from rest_framework.test import APIClient
 
 from conftest import UsuarioFactory
 from oauth.domain.enums.tipo_cliente import TipoCliente
-from oauth.tests.infrastructure.flujo import registrar
+from oauth.tests.infrastructure.flujo import con_sesion, registrar
 
 pytestmark = pytest.mark.django_db
 DEVICE_CODE = "urn:ietf:params:oauth:grant-type:device_code"
@@ -36,9 +36,7 @@ def preguntar(device_code, client_id="gastos-tv"):
 
 
 def persona(usuario=None):
-    navegador = Client()
-    navegador.force_login(usuario or UsuarioFactory())
-    return navegador
+    return con_sesion(usuario or UsuarioFactory())
 
 
 def escribir_y_decidir(navegador, user_code, accion="accept"):

@@ -9,6 +9,12 @@ export const routes: Routes = [
     canMatch: [sinSesion],
     loadComponent: () => import('./features/auth/pages/login/login'),
   },
+  // Módulo 92: el segundo paso (tras la contraseña o la vuelta de un proveedor, si la cuenta tiene MFA)
+  {
+    path: 'login/segundo-factor',
+    canMatch: [sinSesion],
+    loadComponent: () => import('./features/auth/pages/segundo-factor/segundo-factor'),
+  },
   // Crear la cuenta y recuperar la contraseña: se pide un enlace por email y, desde él, se elige la contraseña
   {
     path: 'registro',
@@ -90,6 +96,15 @@ export const routes: Routes = [
       },
       // Módulo 91: la contraseña y las cuentas de Google, GitHub o Apple con las que se entra
       { path: 'acceso', loadComponent: () => import('./features/cuenta/pages/acceso/acceso') },
+      // Módulo 92: verificación en dos pasos y passkeys; y dónde está abierta la cuenta
+      {
+        path: 'seguridad',
+        loadComponent: () => import('./features/cuenta/pages/seguridad/seguridad'),
+      },
+      {
+        path: 'sesiones',
+        loadComponent: () => import('./features/cuenta/pages/sesiones/sesiones'),
+      },
       // Backoffice (módulos 79 y 81): solo el personal; el código ni se descarga para los demás
       {
         path: 'soporte',

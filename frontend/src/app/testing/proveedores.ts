@@ -6,6 +6,7 @@ import { provideRouter } from '@angular/router';
 import { provideTanStackQuery, QueryClient } from '@tanstack/angular-query-experimental';
 
 import { authInterceptor } from '../core/auth/auth.interceptor';
+import { reautenticacionInterceptor } from '../core/auth/reautenticacion';
 import { erroresInterceptor } from '../core/http/errores';
 
 /** Proveedores comunes de los tests: HTTP falso con los interceptores de verdad, router vacío y una caché nueva. */
@@ -17,7 +18,9 @@ export function proveedoresDeTest(
     // sin animaciones de Material (no hace falta @angular/animations, que está obsoleto)
     { provide: MATERIAL_ANIMATIONS, useValue: { animationsDisabled: true } },
     provideRouter([]),
-    provideHttpClient(withInterceptors([erroresInterceptor, authInterceptor])),
+    provideHttpClient(
+      withInterceptors([erroresInterceptor, authInterceptor, reautenticacionInterceptor]),
+    ),
     provideHttpClientTesting(),
     provideTanStackQuery(queryClient),
   ];

@@ -35,6 +35,15 @@ services:
     image: axllent/mailpit
     ports: ["1025:1025", "8025:8025"] # 8025: bandeja web
 
+  # Módulo 91: un proveedor OpenID Connect falso para el social login en local y en los E2E. Cada ruta es un emisor:
+  # http://localhost:8089/google, http://localhost:8089/apple… Su pantalla de login acepta cualquier usuario (el
+  # `sub`) y los claims que escribas (email, email_verified…)
+  oidc:
+    image: ghcr.io/navikt/mock-oauth2-server:6.1.2
+    environment:
+      JSON_CONFIG: '{"interactiveLogin": true}'
+    ports: ["8089:8080"]
+
 volumes:
   pgdata:
   s3data:

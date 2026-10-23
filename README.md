@@ -13,10 +13,11 @@ Es Gastos (módulos 70-83) con las ampliaciones de las Partes 6 y 7 encima. **Ca
 | **88 · Hexagonal en el resto del monolito** | Las mismas convenciones en hogares, usuarios, tickets, importaciones, informes, notificaciones, eventos y *backoffice*; *anti-corruption layer* entre apps; 22 contratos de import-linter | `backend/*/domain`, `backend/*/application`, `backend/pyproject.toml` |
 | **89 · Hexagonal en el microservicio FastAPI** | El servicio de estadísticas con **la misma estructura** que las apps del monolito: interfaces ABC, un paquete por *use case* con DTOs de Pydantic, `database/` con modelos y repositorios de SQLAlchemy, `api/v1|v2/` con *routers* y *schemas*, `Depends` sobre `container.py` como *composition root*, API versionada y Alembic comprobado en los tests | `estadisticas/estadisticas/`, `docs/arquitectura.md` §12 |
 | **90 · OAuth 2.1 y OpenID Connect** | Gastos como *authorization server* (django-oauth-toolkit): *authorization code* + PKCE, *refresh tokens* con rotación y detección de reutilización, *client credentials*, ID tokens RS256 con JWKS y *discovery*, y el RFC 9700 activado; login y consentimiento en páginas de Django; la API como *resource server* (scope **y** rol en el hogar); `gastos-cli`, un cliente nativo escrito a mano | `backend/oauth/`, `cli/gastos_cli.py`, `docs/arquitectura.md` §1 y §3 |
+| **91 · Social login (Google, GitHub, Apple)** | Gastos como **cliente** OIDC (*Relying Party*) con Authlib y el patrón BFF: Django hace la ida y la vuelta (`state`, `nonce`, PKCE), canjea el *code* con su secreto y valida el ID token; los *tokens* del proveedor no llegan al navegador y la SPA recibe los mismos *tokens* que con la contraseña. Google (OIDC), GitHub (OAuth 2.0 + su API, solo emails verificados) y Apple (`form_post` y *client secret* JWT ES256). Identidades por (proveedor, `sub`), sin vincular nunca por email; «Métodos de acceso» para vincular, desvincular (nunca el último) y establecer contraseña | `backend/usuarios/infrastructure/providers/`, `backend/usuarios/application/empezar_login_social_use_case/` y `completar_login_social_use_case/`, `frontend/src/app/features/cuenta/pages/acceso/acceso.ts` |
 
 La Parte 7 (el agente de IA) se añadirá aquí con el mismo formato cuando esté terminada.
 
-Estado comprobado al terminar el módulo 90 (con sus ejercicios): 595 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (sin cambios desde el 89), 29 de *frontend* (Vitest) y 13 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones (24 contratos).
+Estado comprobado al terminar el módulo 91: 686 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (sin cambios desde el 89), 37 de *frontend* (Vitest) y 16 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones (25 contratos).
 
 ## Estructura
 
@@ -26,7 +27,7 @@ estadisticas/       microservicio FastAPI que consume los events de Kafka (módu
 frontend/           Angular 22 (módulos 80-81), Playwright en e2e/ (módulo 82)
 cli/                gastos-cli: un cliente OAuth 2.1 + OIDC de la API, en un solo archivo (módulo 90)
 infra/              Caddyfile, csp.mjs, desplegar.sh, backup.sh (módulos 83 y 86); entornos/, secretos/, terraform/ (86)
-compose.yaml        infraestructura de desarrollo: PostgreSQL, Redis, RabbitMQ, S3 (RustFS), Mailpit
+compose.yaml        infraestructura de desarrollo: PostgreSQL, Redis, RabbitMQ, S3 (RustFS), Mailpit, un proveedor OIDC falso (91)
 compose.prod.yaml   un entorno de la VM: producción o staging (módulos 83 y 86); compose.edge.yaml: Caddy (86)
 docs/               runbook.md (operar producción, módulos 83 y 86), arquitectura.md (estructura hexagonal y convenciones, módulos 87-92)
 .github/workflows/  ci.yml (tests, E2E, lint-imports); preview, staging y producción (módulo 86)
@@ -83,12 +84,12 @@ Personal de soporte (el *backoffice* está dentro de la app, no hay Django admin
 ## Tests
 
 ```bash
-cd backend && uv run pytest -n 4 --cov                 # 594 tests (+1 que se salta sin Kafka)
-cd frontend && npx ng test --watch=false                # 19 tests
+cd backend && uv run pytest -n 4 --cov                 # 685 tests (+1 que se salta sin Kafka)
+cd frontend && npx ng test --watch=false                # 27 tests
 # punta a punta (módulo 82): una vez, crea la BD de E2E
 docker compose exec db createdb -U gastos gastos_e2e
 cd backend && DJANGO_SETTINGS_MODULE=config.settings.e2e uv run python manage.py migrate
-cd ../frontend && npx playwright install chromium && npx playwright test
+cd ../frontend && npx playwright install chromium && npx playwright test   # arranca también el proveedor OIDC falso (91)
 ```
 
 ## Arrancar las ampliaciones en local
@@ -163,3 +164,17 @@ uv run cli/gastos_cli.py login --dispositivo   # te da un código para http://lo
 ```
 
 En producción, el emisor es `https://gastos.tudominio.com/api/oauth` (`OAUTH_ISSUER` en `infra/entornos/`, la clave en `infra/secretos/`) y el CLI se apunta allí con `GASTOS_EMISOR`.
+
+**91 · Social login (Google, GitHub, Apple).** Gastos es además **cliente** de otros proveedores: «Continuar con Google» en el login y «Métodos de acceso» en el menú de la cuenta. En local, un proveedor OpenID Connect falso (`compose.yaml`: `oidc`) hace de Google (y de Apple en los E2E): su pantalla de login acepta cualquier usuario y los *claims* que escribas.
+
+```bash
+docker compose up -d oidc                            # http://localhost:8089/google/.well-known/openid-configuration
+# en backend/.env (están comentadas en .env.example):
+#   GOOGLE_CLIENT_ID=gastos-local  GOOGLE_CLIENT_SECRET=gastos-local  GOOGLE_EMISOR=http://localhost:8089/google
+cd backend && uv run python manage.py migrate && uv run python manage.py runserver
+cd ../frontend && npx ng serve                       # http://localhost:4200/login → «Continuar con Google»
+# en la pantalla del proveedor falso: un usuario cualquiera y, en claims, p. ej.
+#   {"email": "ana@gmail.com", "email_verified": true, "given_name": "Ana"}
+```
+
+La vuelta es siempre `{FRONTEND_URL}/api/v1/auth/social/<proveedor>/vuelta/` (en local, a través del *proxy* de `ng serve`). GitHub admite `http://localhost:4200/…` como vuelta: crea una OAuth App (o una GitHub App) y pon `GITHUB_CLIENT_ID` y `GITHUB_CLIENT_SECRET`. Apple solo acepta vueltas `https` con dominio: se prueba en staging. Los pasos con tus cuentas de Google, GitHub y Apple están en el módulo 91 del curso; en producción, los `client_id` van en `infra/entornos/` y los secretos (y la clave `.p8` de Apple) en `infra/secretos/`. Las *previews* de Vercel no ofrecen el login social: su URL no está registrada en ningún proveedor.

@@ -3,6 +3,40 @@ info:
   title: API Gastos
   version: 1.0.0
 paths:
+  /api/v1/auth/acceso/:
+    get:
+      operationId: auth_acceso_retrieve
+      description: 'Las formas de entrar de mi cuenta: la contraseña (si tiene) y
+        los proveedores vinculados.'
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Acceso'
+          description: ''
+  /api/v1/auth/acceso/{proveedor}/:
+    delete:
+      operationId: auth_acceso_destroy
+      parameters:
+      - in: path
+        name: proveedor
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/auth/aplicaciones/:
     get:
       operationId: auth_aplicaciones_list
@@ -82,6 +116,26 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/auth/establecer-password/:
+    post:
+      operationId: auth_establecer_password_create
+      tags:
+      - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EstablecerPasswordRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EstablecerPasswordRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/auth/login/:
     post:
       operationId: auth_login_create
@@ -93,10 +147,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TokenObtainPairRequest'
+              $ref: '#/components/schemas/TokenObtainRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TokenObtainPairRequest'
+              $ref: '#/components/schemas/TokenObtainRequest'
         required: true
       security:
       - {}
@@ -263,6 +317,103 @@ paths:
               schema:
                 $ref: '#/components/schemas/Detalle'
           description: ''
+  /api/v1/auth/social/:
+    get:
+      operationId: auth_social_retrieve
+      description: 'Los proveedores con los que se puede entrar, y el origen de la
+        app: fuera de él, la SPA no los ofrece.'
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProveedoresSociales'
+          description: ''
+  /api/v1/auth/social/{proveedor}/entrar/:
+    get:
+      operationId: auth_social_entrar_retrieve
+      description: 'GET /social/<proveedor>/entrar/?volver=/hogares/3: un enlace del
+        login de la SPA. Redirige al proveedor.'
+      parameters:
+      - in: path
+        name: proveedor
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: volver
+        schema:
+          type: string
+        description: Ruta de la SPA a la que volver tras entrar (solo rutas de Gastos)
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '302':
+          description: Redirección (al proveedor, o de vuelta a la SPA)
+  /api/v1/auth/social/{proveedor}/vincular/:
+    post:
+      operationId: auth_social_vincular_create
+      description: 'POST con el JWT de la SPA: la URL del proveedor para vincularlo
+        a MI cuenta. La SPA navega a ella.'
+      parameters:
+      - in: path
+        name: proveedor
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IdaAlProveedor'
+          description: ''
+  /api/v1/auth/social/{proveedor}/vuelta/:
+    get:
+      operationId: auth_social_vuelta_retrieve
+      description: La redirect URI registrada en el proveedor. GET (code y state en
+        la query) o, en Apple, POST (form_post).
+      parameters:
+      - in: path
+        name: proveedor
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '302':
+          description: Redirección (al proveedor, o de vuelta a la SPA)
+    post:
+      operationId: auth_social_vuelta_create
+      description: La redirect URI registrada en el proveedor. GET (code y state en
+        la query) o, en Apple, POST (form_post).
+      parameters:
+      - in: path
+        name: proveedor
+        schema:
+          type: string
+        required: true
+      tags:
+      - auth
+      security:
+      - {}
+      responses:
+        '302':
+          description: Redirección (al proveedor, o de vuelta a la SPA)
   /api/v1/backoffice/auditoria/:
     get:
       operationId: backoffice_auditoria_list
@@ -3161,6 +3312,18 @@ paths:
           description: ''
 components:
   schemas:
+    Acceso:
+      type: object
+      properties:
+        contrasena:
+          type: boolean
+        identidades:
+          type: array
+          items:
+            $ref: '#/components/schemas/IdentidadVinculada'
+      required:
+      - contrasena
+      - identidades
     Access:
       type: object
       properties:
@@ -3570,6 +3733,15 @@ components:
           minLength: 1
       required:
       - email
+    EstablecerPasswordRequest:
+      type: object
+      properties:
+        nueva:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - nueva
     EstadoImportacionEnum:
       enum:
       - pendiente
@@ -3792,6 +3964,36 @@ components:
       - num_miembros
       - num_movimientos
       - zona_horaria
+    IdaAlProveedor:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+      required:
+      - url
+    IdentidadVinculada:
+      type: object
+      properties:
+        proveedor:
+          type: string
+        nombre:
+          type: string
+        email:
+          type: string
+        desde:
+          type: string
+          format: date-time
+        ultimo_uso:
+          type: string
+          format: date-time
+          nullable: true
+      required:
+      - desde
+      - email
+      - nombre
+      - proveedor
+      - ultimo_uso
     IdsRequest:
       type: object
       properties:
@@ -4903,6 +5105,29 @@ components:
       - categoria
       - importe
       - mes
+    ProveedorSocial:
+      type: object
+      properties:
+        id:
+          type: string
+        nombre:
+          type: string
+      required:
+      - id
+      - nombre
+    ProveedoresSociales:
+      type: object
+      properties:
+        origen:
+          type: string
+          format: uri
+        proveedores:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProveedorSocial'
+      required:
+      - origen
+      - proveedores
     RecategorizarRequest:
       type: object
       description: 'Limita los campos relacionados al hogar de la URL: no se puede
@@ -5217,7 +5442,7 @@ components:
       - caduca_en
       - ticket
       - url
-    TokenObtainPairRequest:
+    TokenObtainRequest:
       type: object
       properties:
         email:

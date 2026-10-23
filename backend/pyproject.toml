@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "authlib>=1.9.1",
     "celery>=5.6.3",
     "channels-redis>=4.3.0",
     "channels[daphne]>=4.3.2",
@@ -97,7 +98,7 @@ id = "nucleo-sin-frameworks"
 name = "El dominio y la aplicación no conocen Django, DRF, Celery ni la base de datos"
 type = "forbidden"
 source_modules = ["*.domain", "*.application"]
-forbidden_modules = ["django", "rest_framework", "drf_spectacular", "django_filters", "celery", "channels", "psycopg", "opentelemetry", "confluent_kafka", "weasyprint", "pytesseract", "httpx"]
+forbidden_modules = ["django", "rest_framework", "drf_spectacular", "django_filters", "celery", "channels", "psycopg", "opentelemetry", "confluent_kafka", "weasyprint", "pytesseract", "httpx", "authlib", "joserfc"]
 
 [[tool.importlinter.contracts]]
 id = "nucleo-compartido"
@@ -118,7 +119,7 @@ layers = [
     "(infrastructure.tasks)", # adapter de entrada (Celery, django.tasks); los receivers encolan tareas
     "(infrastructure.relay)", # adapter de entrada del relay (eventos): el comando y la tarea lo llaman
     "(infrastructure.container)", # composition root: monta los use cases con los adapters de salida
-    "(infrastructure.messaging) | (infrastructure.finanzas) | (infrastructure.server)", # adapters de salida: el publicador de eventos, el ACL hacia finanzas, lo que se enchufa en django-oauth-toolkit…
+    "(infrastructure.messaging) | (infrastructure.finanzas) | (infrastructure.server) | (infrastructure.providers)", # adapters de salida: el publicador de eventos, el ACL hacia finanzas, lo que se enchufa en django-oauth-toolkit…
     "(infrastructure.cache) | (infrastructure.realtime)", # …la caché del dashboard, el aviso por WebSocket…
     "(infrastructure.database) | (infrastructure.auth) | (infrastructure.crypto) | (infrastructure.ocr) | (infrastructure.ia) | (infrastructure.lectores) | (infrastructure.pdf) | (infrastructure.i18n) | (infrastructure.signals.finanzas_signals) | (infrastructure.signals.hogares_signals) | (infrastructure.signals.tickets_signals) | (infrastructure.signals.importaciones_signals) | (infrastructure.signals.informes_signals)", # …la base de datos, los servicios externos y las signals que la app ofrece
     "(application)", # use cases, sus DTOs y los ports de la aplicación
@@ -195,6 +196,17 @@ name = "El núcleo de oauth no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["oauth.domain", "oauth.application"]
 forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice"]
+
+# ── Módulo 91: el social login. Con los proveedores (Authlib, joserfc, HTTP) solo hablan sus adapters ──
+# Los tokens de Google, GitHub o Apple no pueden aparecer en una view, un serializer o un repositorio si ninguno de ellos
+# importa siquiera las librerías con las que se piden (directamente: a través del contenedor, sí, como todo).
+[[tool.importlinter.contracts]]
+id = "usuarios-proveedores"
+name = "Solo infrastructure/providers habla con los proveedores de identidad"
+type = "forbidden"
+source_modules = ["usuarios.infrastructure.container", "usuarios.infrastructure.api", "usuarios.infrastructure.database", "usuarios.infrastructure.auth", "usuarios.infrastructure.cache"]
+forbidden_modules = ["authlib", "joserfc", "httpx"]
+allow_indirect_imports = true
 
 # ── Ejercicio 2 del módulo 88: los procesos no se conocen entre sí ──
 # Tickets, importaciones e informes trabajan sobre finanzas y hogares, y avisan por sus signals; ninguno importa a
@@ -339,9 +351,12 @@ type = "protected"
 protected_modules = [
     "usuarios.infrastructure.api.v1",
     "usuarios.infrastructure.auth",
+    "usuarios.infrastructure.cache",
     "usuarios.infrastructure.database.models",
     "usuarios.infrastructure.database.repositories.cuenta_command_repository_orm",
+    "usuarios.infrastructure.database.repositories.identidad_command_repository_orm",
     "usuarios.infrastructure.messaging",
+    "usuarios.infrastructure.providers",
     "usuarios.infrastructure.tasks",
 ]
 allowed_importers = ["usuarios", "config"]

@@ -239,6 +239,11 @@ jobs:
       redis:                                   # backend de resultados de Celery (el chord de importaciones)
         image: redis:7-alpine
         ports: ["6379:6379"]
+      oidc:                                    # módulo 91: el proveedor OIDC falso (Google y Apple en los E2E)
+        image: ghcr.io/navikt/mock-oauth2-server:6.1.2
+        env:
+          JSON_CONFIG: '{"interactiveLogin": true}'
+        ports: ["8089:8080"]
 
     env:
       DATABASE_URL: postgres://gastos:gastos@localhost:5432/gastos_e2e

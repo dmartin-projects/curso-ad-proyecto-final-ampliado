@@ -3,6 +3,9 @@
 DJANGO_SETTINGS_MODULE=config.settings.e2e uv run python manage.py runserver 8000
 """
 
+from cryptography.hazmat.primitives import serialization
+from cryptography.hazmat.primitives.asymmetric import ec
+
 from oauth.infrastructure.crypto.claves import nueva_clave_pem
 
 from .base import *  # noqa: F403
@@ -37,3 +40,16 @@ EXIGIR_CASOS_DE_USO = True  # módulo 88: los E2E también fallan si algo escrib
 OAUTH_ISSUER = "http://localhost:4200/api/oauth"
 OAUTH2_PROVIDER.update(urls_del_emisor(OAUTH_ISSUER))
 OAUTH2_PROVIDER["OIDC_RSA_PRIVATE_KEY"] = nueva_clave_pem()
+# Módulo 91: Google y Apple son el proveedor OIDC falso (ghcr.io/navikt/mock-oauth2-server, compose.yaml: oidc), un
+# emisor por proveedor. El "secreto" de Apple es un JWT ES256 firmado con una clave nueva en cada arranque
+OIDC_FALSO = env("OIDC_FALSO", default="http://localhost:8089")
+SOCIAL_LOGIN["google"] |= {"client_id": "gastos-e2e", "client_secret": "secreto-e2e", "emisor": f"{OIDC_FALSO}/google"}
+SOCIAL_LOGIN["apple"] |= {
+    "client_id": "com.example.gastos.web",
+    "equipo": "EQUIPO1234",
+    "clave_id": "CLAVE12345",
+    "clave_privada": ec.generate_private_key(ec.SECP256R1())
+    .private_bytes(serialization.Encoding.PEM, serialization.PrivateFormat.PKCS8, serialization.NoEncryption())
+    .decode(),
+    "emisor": f"{OIDC_FALSO}/apple",
+}

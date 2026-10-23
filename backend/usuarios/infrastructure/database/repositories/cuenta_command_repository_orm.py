@@ -1,4 +1,4 @@
-# usuarios/infrastructure/database/repositories/cuenta_command_repository_orm.py — ICuentaCommandRepository con el modelo de usuario de Django (módulo 88)
+# usuarios/infrastructure/database/repositories/cuenta_command_repository_orm.py — ICuentaCommandRepository con el modelo de usuario de Django (módulos 88 y 91)
 from django.contrib.auth import get_user_model
 from django.db import IntegrityError, transaction
 
@@ -41,3 +41,23 @@ class CuentaCommandRepositoryORM(ICuentaCommandRepository):
         usuario = self.Usuario.objects.get(pk=usuario_id)
         usuario.set_password(password)  # ⚠️ nunca usuario.password = password
         usuario.save(update_fields=["password"])
+
+    # ── Módulo 91 ──
+    def crear_verificada(self, *, email, nombre, apellidos):
+        try:
+            with transaction.atomic():
+                # password=None → set_unusable_password(): con contraseña no se entra (hasta que establezca una)
+                return self.Usuario.objects.create_user(
+                    email=email, nombre=nombre, apellidos=apellidos, password=None, is_active=True
+                ).pk
+        except IntegrityError as e:
+            raise EmailYaRegistradoException() from e
+
+    def activa(self, usuario_id):
+        return self.Usuario.objects.filter(pk=usuario_id, is_active=True).exists()
+
+    def tiene_contrasena(self, usuario_id):
+        return self.Usuario.objects.get(pk=usuario_id).has_usable_password()
+
+    def bloquear(self, usuario_id):
+        self.Usuario.objects.select_for_update().filter(pk=usuario_id).values_list("pk").first()

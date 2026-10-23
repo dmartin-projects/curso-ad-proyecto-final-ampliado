@@ -1,17 +1,33 @@
-# usuarios/infrastructure/api/v1/esquema.py (módulos 38 y 88)
+# usuarios/infrastructure/api/v1/esquema.py (módulos 38, 88 y 91)
 """Documentación OpenAPI de las vistas de autenticación (APIView sin serializer_class, módulo 38)."""
 
-from drf_spectacular.utils import extend_schema, extend_schema_view, inline_serializer
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+    extend_schema_view,
+    inline_serializer,
+)
 from rest_framework import serializers
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.serializers import TokenObtainSerializer
 
+from usuarios.infrastructure.api.v1.serializers.acceso_serializer import AccesoSerializer
+from usuarios.infrastructure.api.v1.serializers.ida_al_proveedor_serializer import IdaAlProveedorSerializer
+from usuarios.infrastructure.api.v1.serializers.proveedores_sociales_serializer import ProveedoresSocialesSerializer
+from usuarios.infrastructure.api.v1.views.acceso_view import AccesoView
 from usuarios.infrastructure.api.v1.views.completar_registro_view import CompletarRegistroView
 from usuarios.infrastructure.api.v1.views.confirmar_recuperacion_view import ConfirmarRecuperacionView
+from usuarios.infrastructure.api.v1.views.entrar_social_view import EntrarSocialView
+from usuarios.infrastructure.api.v1.views.establecer_password_view import EstablecerPasswordView
 from usuarios.infrastructure.api.v1.views.login_view import LoginView
 from usuarios.infrastructure.api.v1.views.logout_view import LogoutView
+from usuarios.infrastructure.api.v1.views.proveedores_sociales_view import ProveedoresSocialesView
+from usuarios.infrastructure.api.v1.views.quitar_proveedor_view import QuitarProveedorView
 from usuarios.infrastructure.api.v1.views.refresh_view import RefreshView
 from usuarios.infrastructure.api.v1.views.registro_view import RegistroView
 from usuarios.infrastructure.api.v1.views.solicitar_recuperacion_view import SolicitarRecuperacionView
+from usuarios.infrastructure.api.v1.views.vincular_social_view import VincularSocialView
+from usuarios.infrastructure.api.v1.views.vuelta_social_view import VueltaSocialView
 
 Access = inline_serializer("Access", {"access": serializers.CharField()})
 NuevaPassword = inline_serializer(
@@ -21,10 +37,25 @@ NuevaPassword = inline_serializer(
 Email = inline_serializer("Email", {"email": serializers.EmailField()})
 Detalle = inline_serializer("Detalle", {"detail": serializers.CharField()})
 
-extend_schema_view(post=extend_schema(request=TokenObtainPairSerializer, responses=Access))(LoginView)
+extend_schema_view(post=extend_schema(request=TokenObtainSerializer, responses=Access))(LoginView)
 extend_schema_view(post=extend_schema(request=None, responses=Access))(RefreshView)
 extend_schema_view(post=extend_schema(request=None, responses={204: None}))(LogoutView)
 extend_schema_view(post=extend_schema(responses={202: Detalle}))(RegistroView)
 extend_schema_view(post=extend_schema(request=NuevaPassword, responses={204: None}))(CompletarRegistroView)
 extend_schema_view(post=extend_schema(request=Email, responses=Detalle))(SolicitarRecuperacionView)
 extend_schema_view(post=extend_schema(request=NuevaPassword, responses={204: None}))(ConfirmarRecuperacionView)
+
+# Módulo 91. La ida y la vuelta son navegaciones del navegador: responden con una redirección (302)
+Redireccion = {302: OpenApiResponse(description="Redirección (al proveedor, o de vuelta a la SPA)")}
+Volver = OpenApiParameter(
+    "volver", str, description="Ruta de la SPA a la que volver tras entrar (solo rutas de Gastos)"
+)
+extend_schema_view(get=extend_schema(responses=ProveedoresSocialesSerializer))(ProveedoresSocialesView)
+extend_schema_view(get=extend_schema(parameters=[Volver], responses=Redireccion))(EntrarSocialView)
+extend_schema_view(post=extend_schema(request=None, responses=IdaAlProveedorSerializer))(VincularSocialView)
+extend_schema_view(get=extend_schema(responses=Redireccion), post=extend_schema(request=None, responses=Redireccion))(
+    VueltaSocialView
+)
+extend_schema_view(get=extend_schema(responses=AccesoSerializer))(AccesoView)
+extend_schema_view(delete=extend_schema(responses={204: None}))(QuitarProveedorView)
+extend_schema_view(post=extend_schema(responses={204: None}))(EstablecerPasswordView)

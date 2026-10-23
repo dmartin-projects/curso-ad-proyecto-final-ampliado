@@ -4,7 +4,8 @@
 
 Lo usa infra/staging-desde-produccion.sh justo después de restaurar en staging la copia de producción.
 Quita lo que identifica a alguien (emails, nombres, IBAN, notas, texto de los tickets, notificaciones y
-auditoría) y lo que no debe viajar de un entorno a otro (sesiones, refresh tokens, el outbox de eventos).
+auditoría) y lo que no debe viajar de un entorno a otro (sesiones, refresh tokens, el outbox de eventos y, desde el
+módulo 91, las cuentas de Google, GitHub o Apple vinculadas).
 Los importes, fechas, categorías y conceptos se quedan: es lo que hace útil probar con datos de verdad.
 Todos los usuarios quedan con la misma contraseña (la que diga STAGING_PASSWORD) para poder entrar como ellos.
 """
@@ -25,7 +26,7 @@ from finanzas.models import Cuenta, Movimiento
 from hogares.models import Hogar, Invitacion
 from notificaciones.models import Notificacion
 from tickets.models import Ticket
-from usuarios.models import Usuario
+from usuarios.models import IdentidadExterna, Usuario
 
 
 def _con_id(prefijo: str, sufijo: str = ""):
@@ -64,6 +65,8 @@ class Command(BaseCommand):
                 "sesiones": Session.objects.all().delete()[0],
                 "refresh tokens": OutstandingToken.objects.all().delete()[0],  # y su lista negra (CASCADE)
                 "outbox": EventoPendiente.objects.all().delete()[0],  # los de producción, publicados o no
+                # Módulo 91: su email y su `sub` identifican a la persona; y con ellos, su Google entraría en staging
+                "identidades externas": IdentidadExterna.objects.all().delete()[0],
             }
         self.stdout.write(f"{usuarios} usuarios anonimizados; borrado: {borrados}")
         self.stdout.write("Siguiente: publicar_estado (staging tiene topics nuevos) y reconstruir las estadísticas")

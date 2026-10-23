@@ -67,7 +67,8 @@ Las demás apps tienen el mismo árbol; las carpetas de `infrastructure/` que fi
 |---|---|---|
 | `infrastructure/finanzas/` | El *adapter* hacia OTRA app (*anti-corruption layer*): `gastos_en_finanzas.py` → `GastosEnFinanzas(IGastos)`, `movimientos_en_finanzas.py` → `MovimientosEnFinanzas(IMovimientos)` | tickets, importaciones |
 | `infrastructure/ocr/`, `ia/`, `lectores/`, `pdf/` | *Adapters* de salida a servicios externos: `LectorTesseract`, `ExtractorIA` (con su cliente, sus *serializers* de validación y sus excepciones), `LectorDeArchivos` (CSV y PDF de cualquier banco), `MaquetadorWeasyPrint` | tickets, importaciones, informes |
-| `infrastructure/auth/` | Lo que ya resuelve Django detrás de un port: `PoliticaDeContrasenasDjango`, `SesionesSimpleJWT`, `EnlacesDjango` | usuarios |
+| `infrastructure/auth/` | Lo que ya resuelve Django detrás de un port: `PoliticaDeContrasenasDjango`, `SesionesSimpleJWT`, `EnlacesDjango`, `TokensSimpleJWT` | usuarios |
+| `infrastructure/providers/`, `cache/` | El social login (módulo 91): un *adapter* por proveedor de identidad (`Google`, `GitHub`, `Apple` sobre `ProveedorOIDC` y `ClienteOAuth`, con Authlib y joserfc) y `ProveedoresConfigurados(IProveedores)`; la transacción entre la ida y la vuelta, en la caché (`TransaccionesEnCache`) | usuarios |
 | `infrastructure/websocket/` | Adapter de entrada de Channels: `consumers.py`, `middleware.py` (el ticket de un solo uso), `origenes.py`, `routing.py` | notificaciones |
 | `infrastructure/realtime/`, `i18n/` | *Adapters* de salida: la *channel layer* (`tiempo_real.py`, `grupos.py`) y `TraductorDjango(ITraductor)` | notificaciones |
 | `infrastructure/metrics/` | Métricas de negocio de OpenTelemetry (*gauges* que leen un use case de consulta) | tickets, eventos |
@@ -138,7 +139,7 @@ Lo comprueba `uv run lint-imports` (contratos en `backend/pyproject.toml`, *job*
    que una app no tiene van entre paréntesis, opcionales): `infrastructure.api | infrastructure.signals.receivers |
    infrastructure.metrics | infrastructure.web` → `infrastructure.websocket` → `infrastructure.tasks` →
    `infrastructure.relay` → `infrastructure.container` → `infrastructure.messaging | infrastructure.finanzas |
-   infrastructure.server` → `infrastructure.cache | infrastructure.realtime` → `infrastructure.database | auth |
+   infrastructure.server | infrastructure.providers` → `infrastructure.cache | infrastructure.realtime` → `infrastructure.database | auth |
    crypto | ocr | ia | lectores | pdf | i18n | signals.<app>_signals` → `application` → `domain`. Nunca hacia
    arriba.
 3. `core.domain` y `core.application` no importan ninguna app.
@@ -151,6 +152,9 @@ Lo comprueba `uv run lint-imports` (contratos en `backend/pyproject.toml`, *job*
    `api/base/` (la base de las vistas anidadas), y de oauth, `api/authentication/`, `api/permissions/` y
    `api/views/acepta_oauth.py` (la autenticación OAuth y los scopes de la API). El ACL (`infrastructure/finanzas/`) también es de su app. `config`
    monta las URLs y el ASGI.
+6. (Módulo 91) En `usuarios`, solo `infrastructure/providers` importa Authlib, joserfc o httpx: ninguna view,
+   repositorio o *adapter* de cuentas habla directamente con Google, GitHub o Apple (ni toca sus tokens). Authlib y
+   joserfc, además, prohibidos en todos los núcleos (regla 1).
 
 Una app nueva se añade a `root_packages`, a `containers` del contrato de capas y con sus contratos 4 y 5.
 
@@ -263,6 +267,7 @@ case cuesta microsegundos. En un test con base de datos, una pieza se cambia con
 | Tarea de django.tasks | Un archivo en `infrastructure/tasks/` con `@ruta_estable("<app>.tasks")` debajo de `@task` (la ruta es su identidad en la cola) y un `<app>/tasks.py` que la reexporta. El publicador la encola con `import_string(RUTA).enqueue(...)`; las de Celery, por su nombre (`current_app.tasks[NOMBRE]`), sin importar `tasks/` (está por encima). |
 | Excepción de un adapter | La que no es del dominio (`TransitorioIAException`, `CircuitoAbiertoException`, `SinTransaccionException`) vive en un archivo junto a su adapter, con el mismo sufijo. |
 | Entre apps | Una app pide a otra con el contenedor de la otra, desde su `infrastructure/finanzas/` (*anti-corruption layer*), que traduce a sus propios tipos (un ticket habla de su `total`; finanzas, de un `importe` negativo). Escribir en las tablas de otra app con el ORM está prohibido; leerlas, con sus modelos o sus query services, no. |
+| Social login (módulo 91) | Gastos es el cliente (Relying Party) y el patrón es BFF: Django hace la ida y la vuelta, canjea el code con su secreto y valida el ID token; los tokens del proveedor no salen del *adapter*. Port `IProveedorIdentidad` (un *adapter* por proveedor) que devuelve un `PerfilExterno` ya comprobado; la identidad es (proveedor, `sub`), nunca el email. `CompletarLoginSocialUseCase` decide (dominio: `decidir_entrada`, `decidir_vinculo`) e `IniciarSesionUseCase` emite los tokens de la SPA: es el único sitio donde se emiten, también tras la contraseña. |
 | Actor de un proceso | `Actor.sistema(en_nombre_de=usuario_id)` en tareas que trabajan para alguien (lo creado queda a su nombre); `Actor.soporte(usuario_id)` en el backoffice (rol ADMIN en cualquier hogar, auditado con su usuario). |
 | Escrituras sin use case | Movimientos, presupuestos, categorías y membresías tienen eventos que solo publica el use case. Sus receivers de `post_save`/`post_delete` son una alarma (`vigilar`, en `core/infrastructure/signals/red_de_seguridad.py`): lanzan `EscrituraSinCasoDeUsoException` con `EXIGIR_CASOS_DE_USO=True` (dev, tests, E2E) y en producción dejan un error en el log. El repositorio marca lo que guarda (`publicados_por_caso_de_uso`) y lo que escribe en bloque va dentro de `en_un_caso_de_uso()`; los datos de partida de un test (factories), dentro de `escrituras_directas()`. |
 | Cascadas | Lo que borra la base de datos por cascada (borrar un hogar) no pasa por los use cases de los hijos: los receivers lo detectan con el argumento `origin` de `post_delete` (`es_cascada`) y publican solo lo imprescindible (tombstones). |
@@ -290,7 +295,7 @@ apps) sin PostgreSQL.
 |---|---|---|---|
 | finanzas | movimientos, categorías, presupuestos, cuentas (al borrar) | — | su contenedor (también `apuntar_movimientos`, `conciliar_…`, `eliminar_movimientos`, `descartar_propuestos`), query services, `finanzas_signals` |
 | hogares | hogares, membresías, invitaciones | — | su contenedor, query services, `hogares_signals`, `api/base/` |
-| usuarios | registro, recuperación, contraseña | — | `usuarios.models` |
+| usuarios | registro, recuperación, contraseña, social login y sesiones (módulo 91) | — | `usuarios.models`, su contenedor (`iniciar_sesion`) |
 | tickets | tickets | `IGastos` → finanzas | `tickets_signals`, `TicketQueryServiceORM` (los atascados) |
 | importaciones | importaciones y sus filas | `IMovimientos` → finanzas | `importaciones_signals` |
 | informes | informes mensuales | lee el dashboard y los movimientos del mes (query services de finanzas) | `informes_signals` |

@@ -88,6 +88,8 @@ export const routes: Routes = [
         path: 'aplicaciones',
         loadComponent: () => import('./features/cuenta/pages/aplicaciones/aplicaciones'),
       },
+      // Módulo 91: la contraseña y las cuentas de Google, GitHub o Apple con las que se entra
+      { path: 'acceso', loadComponent: () => import('./features/cuenta/pages/acceso/acceso') },
       // Backoffice (módulos 79 y 81): solo el personal; el código ni se descarga para los demás
       {
         path: 'soporte',

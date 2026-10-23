@@ -1,4 +1,4 @@
-# usuarios/domain/repositories/i_cuenta_command_repository.py — lo que las cuentas necesitan de Django auth (módulo 88)
+# usuarios/domain/repositories/i_cuenta_command_repository.py — lo que las cuentas necesitan de Django auth (módulos 88 y 91)
 from abc import ABC, abstractmethod
 
 from usuarios.domain.enums.estado_cuenta import EstadoCuenta
@@ -29,3 +29,19 @@ class ICuentaCommandRepository(ABC):
     @abstractmethod
     def cambiar_contrasena(self, usuario_id: int, password: str) -> None:
         """Con hash. Cambiarla invalida los enlaces de recuperación ya enviados (el token depende del hash)."""
+
+    # Módulo 91: las cuentas que llegan de un proveedor
+    @abstractmethod
+    def crear_verificada(self, *, email: str, nombre: str, apellidos: str) -> int:
+        """Una cuenta ACTIVA (el proveedor ha verificado el email) y sin contraseña. Email repetido a la vez:
+        EmailYaRegistradoException."""
+
+    @abstractmethod
+    def activa(self, usuario_id: int) -> bool: ...
+
+    @abstractmethod
+    def tiene_contrasena(self, usuario_id: int) -> bool: ...
+
+    @abstractmethod
+    def bloquear(self, usuario_id: int) -> None:
+        """Hasta el final de la transacción, nadie más cambia las formas de entrar de esta cuenta."""

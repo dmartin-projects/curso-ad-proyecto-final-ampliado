@@ -197,7 +197,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "core.infrastructure.api.pagination.paginacion_estandar.PaginacionEstandar",
     "PAGE_SIZE": 20,
     "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.ScopedRateThrottle"],
-    "DEFAULT_THROTTLE_RATES": {"login": "5/min", "registro": "5/hour", "recuperar": "3/hour", "subidas": "60/hour"},
+    "DEFAULT_THROTTLE_RATES": {
+        "login": "5/min",
+        "registro": "5/hour",
+        "recuperar": "3/hour",
+        "subidas": "60/hour",
+        "social": "20/min",  # módulo 91: empezar un inicio de sesión con un proveedor
+    },
     "EXCEPTION_HANDLER": "core.infrastructure.api.exceptions.manejador_errores.manejador_errores",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
@@ -296,6 +302,32 @@ OAUTH2_PROVIDER = {
     "COMPLIANT_BCP_RFC9700_REDIRECT_URI_MATCHING": True,
     "COMPLIANT_BCP_RFC9700_PKCE_REQUIRED": True,
 }
+
+# ── Social login: Gastos como cliente (Relying Party) de Google, GitHub y Apple (módulo 91) ──
+# Un proveedor aparece en el login solo si tiene client_id. Su redirect URI, la que se registra en su consola, es
+# {FRONTEND_URL}/api/v1/auth/social/<proveedor>/vuelta/ (el dominio de la app: Vercel reenvía /api/* a Django).
+# En local y en los E2E, un proveedor OIDC falso (compose.yaml: oidc) hace de Google y de Apple.
+SOCIAL_LOGIN = {
+    "google": {
+        "client_id": env("GOOGLE_CLIENT_ID", default=""),
+        "client_secret": env("GOOGLE_CLIENT_SECRET", default=""),
+        "emisor": env("GOOGLE_EMISOR", default="https://accounts.google.com"),
+    },
+    "github": {
+        "client_id": env("GITHUB_CLIENT_ID", default=""),
+        "client_secret": env("GITHUB_CLIENT_SECRET", default=""),
+        "web": env("GITHUB_WEB", default="https://github.com"),
+        "api": env("GITHUB_API", default="https://api.github.com"),
+    },
+    "apple": {
+        "client_id": env("APPLE_SERVICES_ID", default=""),  # el Services ID: com.tudominio.gastos.web
+        "equipo": env("APPLE_TEAM_ID", default=""),
+        "clave_id": env("APPLE_KEY_ID", default=""),
+        "clave_privada": env.str("APPLE_PRIVATE_KEY", multiline=True, default=""),  # el .p8, en una línea con \n
+        "emisor": env("APPLE_EMISOR", default="https://appleid.apple.com"),
+    },
+}
+SOCIAL_LOGIN_SEGUNDOS = 600  # lo que puede tardar la persona en el proveedor (la transacción y su cookie)
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "API Gastos",

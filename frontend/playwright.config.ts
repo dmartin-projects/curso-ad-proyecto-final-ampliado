@@ -52,6 +52,14 @@ export default defineConfig({
       timeout: 120_000,
     },
     {
+      // Módulo 91: el proveedor OIDC falso (hace de Google y de Apple). En el CI es un service del job
+      command: 'docker compose -f ../compose.yaml up oidc',
+      url: 'http://localhost:8089/google/.well-known/openid-configuration',
+      reuseExistingServer: true,
+      stdout: 'ignore',
+      timeout: 120_000,
+    },
+    {
       command: 'npx ng serve --port 4200',
       url: 'http://localhost:4200',
       reuseExistingServer: !process.env['CI'],

@@ -4,6 +4,39 @@
  */
 
 export interface paths {
+    "/api/v1/auth/acceso/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Las formas de entrar de mi cuenta: la contraseña (si tiene) y los proveedores vinculados. */
+        get: operations["auth_acceso_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/acceso/{proveedor}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["auth_acceso_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/aplicaciones/": {
         parameters: {
             query?: never;
@@ -65,6 +98,22 @@ export interface paths {
         put?: never;
         /** @description Base para login/refresh/registro: no autentica la petición, pero responde 401 (no 403). */
         post: operations["auth_completar_registro_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/establecer-password/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_establecer_password_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -182,6 +231,75 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["auth_registro_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/social/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Los proveedores con los que se puede entrar, y el origen de la app: fuera de él, la SPA no los ofrece. */
+        get: operations["auth_social_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/social/{proveedor}/entrar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description GET /social/<proveedor>/entrar/?volver=/hogares/3: un enlace del login de la SPA. Redirige al proveedor. */
+        get: operations["auth_social_entrar_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/social/{proveedor}/vincular/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description POST con el JWT de la SPA: la URL del proveedor para vincularlo a MI cuenta. La SPA navega a ella. */
+        post: operations["auth_social_vincular_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/social/{proveedor}/vuelta/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description La redirect URI registrada en el proveedor. GET (code y state en la query) o, en Apple, POST (form_post). */
+        get: operations["auth_social_vuelta_retrieve"];
+        put?: never;
+        /** @description La redirect URI registrada en el proveedor. GET (code y state en la query) o, en Apple, POST (form_post). */
+        post: operations["auth_social_vuelta_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1178,6 +1296,10 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        Acceso: {
+            contrasena: boolean;
+            identidades: components["schemas"]["IdentidadVinculada"][];
+        };
         Access: {
             access: string;
         };
@@ -1333,6 +1455,9 @@ export interface components {
             /** Format: email */
             email: string;
         };
+        EstablecerPasswordRequest: {
+            nueva: string;
+        };
         /**
          * @description * `pendiente` - Pendiente
          *     * `analizando` - Analizando
@@ -1424,6 +1549,19 @@ export interface components {
             readonly num_movimientos: number;
             /** Format: date-time */
             readonly creado: string;
+        };
+        IdaAlProveedor: {
+            /** Format: uri */
+            url: string;
+        };
+        IdentidadVinculada: {
+            proveedor: string;
+            nombre: string;
+            email: string;
+            /** Format: date-time */
+            desde: string;
+            /** Format: date-time */
+            ultimo_uso: string | null;
         };
         IdsRequest: {
             ids: number[];
@@ -1925,6 +2063,15 @@ export interface components {
             /** Format: decimal */
             importe: string;
         };
+        ProveedorSocial: {
+            id: string;
+            nombre: string;
+        };
+        ProveedoresSociales: {
+            /** Format: uri */
+            origen: string;
+            proveedores: components["schemas"]["ProveedorSocial"][];
+        };
         /** @description Limita los campos relacionados al hogar de la URL: no se puede apuntar a datos de otro hogar (módulo 33). */
         RecategorizarRequest: {
             ids: number[];
@@ -2051,7 +2198,7 @@ export interface components {
             /** @description Dónde abrir el WebSocket (módulo 86). null: en el mismo host que la página */
             url: string | null;
         };
-        TokenObtainPairRequest: {
+        TokenObtainRequest: {
             email: string;
             password: string;
         };
@@ -2098,6 +2245,45 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    auth_acceso_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Acceso"];
+                };
+            };
+        };
+    };
+    auth_acceso_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                proveedor: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     auth_aplicaciones_list: {
         parameters: {
             query?: never;
@@ -2183,6 +2369,29 @@ export interface operations {
             };
         };
     };
+    auth_establecer_password_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EstablecerPasswordRequest"];
+                "multipart/form-data": components["schemas"]["EstablecerPasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     auth_login_create: {
         parameters: {
             query?: never;
@@ -2192,8 +2401,8 @@ export interface operations {
         };
         requestBody: {
             content: {
-                "application/json": components["schemas"]["TokenObtainPairRequest"];
-                "multipart/form-data": components["schemas"]["TokenObtainPairRequest"];
+                "application/json": components["schemas"]["TokenObtainRequest"];
+                "multipart/form-data": components["schemas"]["TokenObtainRequest"];
             };
         };
         responses: {
@@ -2379,6 +2588,109 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Detalle"];
                 };
+            };
+        };
+    };
+    auth_social_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProveedoresSociales"];
+                };
+            };
+        };
+    };
+    auth_social_entrar_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Ruta de la SPA a la que volver tras entrar (solo rutas de Gastos) */
+                volver?: string;
+            };
+            header?: never;
+            path: {
+                proveedor: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Redirección (al proveedor, o de vuelta a la SPA) */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_social_vincular_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                proveedor: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IdaAlProveedor"];
+                };
+            };
+        };
+    };
+    auth_social_vuelta_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                proveedor: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Redirección (al proveedor, o de vuelta a la SPA) */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_social_vuelta_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                proveedor: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Redirección (al proveedor, o de vuelta a la SPA) */
+            302: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

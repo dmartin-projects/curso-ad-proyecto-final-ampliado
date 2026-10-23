@@ -1,0 +1,69 @@
+<h1 class="mb-1 text-2xl font-medium">Métodos de acceso</h1>
+<p class="mb-4 text-sm text-texto-suave">Las formas de entrar en tu cuenta de Gastos.</p>
+@if (resultado(); as r) {
+  <p [attr.role]="r.bien ? 'status' : 'alert'" class="mb-4" [class.text-error]="!r.bien">
+    {{ r.texto }}
+  </p>
+}
+
+<h2 class="mb-2 text-lg font-medium">Contraseña</h2>
+@if (acceso.data(); as a) {
+  @if (a.contrasena) {
+    <p class="mb-6 flex items-center gap-2"><mat-icon>password</mat-icon> Tienes contraseña.</p>
+  } @else {
+    <p class="mb-2 text-sm">
+      Tu cuenta no tiene contraseña: entras con {{ nombres(a.identidades) }}. Si estableces una,
+      podrás entrar también con tu email.
+    </p>
+    <form [formRoot]="f" class="mb-6 flex max-w-sm flex-col gap-2">
+      <mat-form-field>
+        <mat-label>Contraseña nueva</mat-label>
+        <input matInput type="password" autocomplete="new-password" [formField]="f.nueva" />
+        @if (f.nueva().invalid()) {
+          <mat-error>{{ f.nueva().errors()[0].message }}</mat-error>
+        }
+      </mat-form-field>
+      <button mat-flat-button type="submit" [disabled]="f().submitting()">
+        Establecer contraseña
+      </button>
+    </form>
+  }
+
+  <h2 class="mb-2 text-lg font-medium">Cuentas vinculadas</h2>
+  <ul class="divide-y rounded-lg border">
+    @for (i of a.identidades; track i.proveedor) {
+      <li class="flex items-center gap-3 p-3">
+        <mat-icon>link</mat-icon>
+        <div class="flex-1">
+          <span class="block font-medium">{{ i.nombre }}</span>
+          <span class="block text-sm">{{ i.email }}</span>
+          <span class="block text-xs text-texto-suave"
+            >Vinculada el {{ i.desde | date: 'mediumDate' }}</span
+          >
+        </div>
+        <button
+          mat-stroked-button
+          (click)="desvincular(i)"
+          [disabled]="esElUltimo() || desvinculando.isPending()"
+          [attr.aria-describedby]="esElUltimo() ? 'ultimo' : null"
+        >
+          Desvincular
+        </button>
+      </li>
+    }
+    @for (p of sinVincular(); track p.id) {
+      <li class="flex items-center gap-3 p-3">
+        <mat-icon>link_off</mat-icon>
+        <span class="flex-1 font-medium">{{ p.nombre }}</span>
+        <button mat-stroked-button (click)="vincular(p.id)" [disabled]="!social.disponible()">
+          Vincular
+        </button>
+      </li>
+    }
+  </ul>
+  @if (esElUltimo()) {
+    <p id="ultimo" class="mt-2 text-sm text-texto-suave">
+      Es tu única forma de entrar: establece una contraseña o vincula otra cuenta antes de quitarla.
+    </p>
+  }
+}

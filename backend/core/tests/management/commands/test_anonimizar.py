@@ -8,6 +8,7 @@ from conftest import CuentaFactory, MembresiaFactory, MovimientoFactory
 from core.models import RegistroAuditoria
 from hogares.models import Invitacion
 from notificaciones.models import Notificacion
+from usuarios.models import IdentidadExterna
 
 pytestmark = pytest.mark.django_db
 CLAVE = "clave-de-staging-123"
@@ -20,6 +21,7 @@ def datos_reales():
     mov = MovimientoFactory(cuenta=cuenta, concepto="MERCADONA", notas="regalo para Luis", importe=-23)
     Invitacion.objects.create(hogar=m.hogar, email="luis@gmail.com", invitado_por=m.usuario)
     Notificacion.objects.create(usuario=m.usuario, tipo="informe_listo", titulo="Tu informe, Ana")
+    IdentidadExterna.objects.create(usuario=m.usuario, proveedor="google", sub="1081", email="ana.garcia@gmail.com")
     RegistroAuditoria.objects.create(
         usuario=m.usuario, accion="crear", objeto=mov, representacion=str(mov), cambios={"notas": mov.notas}
     )
@@ -41,6 +43,7 @@ def test_anonimiza_y_conserva_lo_util(datos_reales, monkeypatch):
     assert mov.notas == "" and mov.concepto == "MERCADONA" and mov.importe == -23  # lo útil, intacto
     assert Invitacion.objects.get().email.endswith("@staging.invalid")
     assert not Notificacion.objects.exists() and not RegistroAuditoria.objects.exists()
+    assert not IdentidadExterna.objects.exists()  # módulo 91
     assert authenticate(email=m.usuario.email, password=CLAVE) == m.usuario  # se puede entrar como él
 
 

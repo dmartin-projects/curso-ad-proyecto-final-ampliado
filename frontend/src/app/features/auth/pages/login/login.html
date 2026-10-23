@@ -28,6 +28,28 @@
         <a routerLink="/recuperar" class="underline">¿Has olvidado tu contraseña?</a>
         <a routerLink="/registro" class="underline">Crear cuenta</a>
       </p>
+      <!-- Módulo 91: Google, GitHub, Apple. Enlaces normales: la ida y la vuelta las hace Django -->
+      @if (social.proveedores().length) {
+        <div class="my-4 flex items-center gap-2 text-sm text-texto-suave">
+          <mat-divider class="flex-1" /> o <mat-divider class="flex-1" />
+        </div>
+        @if (social.disponible()) {
+          <div class="flex flex-col gap-2">
+            @for (p of social.proveedores(); track p.id) {
+              <a mat-stroked-button [href]="social.urlEntrar(p.id, volver())"
+                >Continuar con {{ p.nombre }}</a
+              >
+            }
+          </div>
+        } @else {
+          <p class="text-sm text-texto-suave">
+            El acceso con {{ nombres() }} solo está disponible en {{ social.origen() }}.
+          </p>
+        }
+      }
+      @if (errorSocial()) {
+        <p role="alert" class="mt-4 text-sm text-error">{{ errorSocial() }}</p>
+      }
     </mat-card-content>
   </mat-card>
 </div>

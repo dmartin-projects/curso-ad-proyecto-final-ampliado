@@ -55,7 +55,7 @@ def test_pide_una_tool_la_ejecuta_y_contesta(mundo):
     assert respuesta.texto == "Gastasteis 812,40 €."
     # La segunda vuelta lleva la pregunta, el turno del modelo y el resultado: el historial COMPLETO
     assert [m.rol for m in llm.peticiones[1].mensajes] == [RolMensaje.USUARIO, RolMensaje.MODELO, RolMensaje.TOOL]
-    assert "Hoy es 2026-10-29" in llm.peticiones[0].sistema
+    assert "Hoy es jueves, 29 de octubre de 2026" in llm.peticiones[0].sistema  # el system prompt (módulo 96)
     assert {t.nombre for t in llm.peticiones[0].tools} == {"resumen_mes", "gasto_por_categoria"}
 
 

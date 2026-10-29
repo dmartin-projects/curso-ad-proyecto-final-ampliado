@@ -1,4 +1,4 @@
-# asistente/application/agent/limites.py — las guardas del agent loop (módulo 94)
+# asistente/application/agent/limites.py — las guardas del agent loop (módulos 94 y 96)
 from dataclasses import dataclass
 
 
@@ -14,6 +14,8 @@ class Limites:
     max_caracteres_resultado: int = 6000  # ~1.500 tokens por resultado de tool: una red de seguridad
     # Ejercicio 1: pasados estos tokens (entrada + salida, sumando todas las vueltas), la siguiente vuelta es la última
     max_tokens: int | None = None
+    # Módulo 96: tokens (estimados) del historial que viaja en cada llamada; lo que no quepa, fuera (ventana.py)
+    max_tokens_historial: int = 3000
 
     def __post_init__(self):
         if self.max_iteraciones < 2:  # una para pedir tools y otra para contestar con sus resultados

@@ -1,4 +1,4 @@
-# asistente/application/agent/agente.py — el agent loop, escrito a mano (módulo 94)
+# asistente/application/agent/agente.py — el agent loop, escrito a mano (módulos 94 y 96)
 """Preguntar al modelo, ejecutar las tools que pide, devolverle los resultados y repetir hasta que conteste con texto.
 
     agente = Agente(llm=llm, tools=[ResumenMesTool(finanzas=…), …])
@@ -21,10 +21,12 @@ from collections.abc import Callable
 from traceback import format_tb
 
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
-from asistente.application.agent.instrucciones import instrucciones
+from asistente.application.agent.estructurar import estructurar
+from asistente.application.agent.instrucciones import VERSION, instrucciones
 from asistente.application.agent.limites import Limites
 from asistente.application.agent.observador_mudo import ObservadorMudo
 from asistente.application.agent.resultado_agente import ResultadoAgente
+from asistente.application.agent.ventana import ventana
 from asistente.application.ports.i_llm import ILLM
 from asistente.application.ports.i_observador_agente import IObservadorAgente
 from asistente.application.tools.tool import Tool
@@ -61,16 +63,20 @@ class Agente:
         self.observador = observador or ObservadorMudo()
         self.cronometro = cronometro
 
-    def responder(self, historial: tuple[Mensaje, ...], contexto: ContextoPregunta) -> ResultadoAgente:
+    def responder(
+        self, historial: tuple[Mensaje, ...], contexto: ContextoPregunta, estructurada: bool = False
+    ) -> ResultadoAgente:
         """`historial` es la conversación ENTERA (el modelo es stateless) y acaba con la pregunta del usuario. Lo
-        que hay que añadirle está en ResultadoAgente.nuevos; quien llama decide dónde guardarlo."""
+        que hay que añadirle está en ResultadoAgente.nuevos; quien llama decide dónde guardarlo. Viaja lo que cabe
+        en el presupuesto de contexto (ventana.py). Con `estructurada`, una llamada más da la respuesta en JSON."""
         inicio = self.cronometro()
-        mensajes, nuevos, llamadas, modelos = list(historial), [], [], []
+        sistema = instrucciones(contexto)  # el mismo en todas las vueltas: el prefijo que el proveedor cachea
+        mensajes, nuevos, llamadas, modelos = list(ventana(historial, self.limites.max_tokens_historial)), [], [], []
         uso = Uso()
         usos_por_tool: Counter[str] = Counter()
         ya_llamadas: set[tuple[str, str]] = set()
 
-        def terminar(texto: str, motivo: MotivoParada) -> ResultadoAgente:
+        def terminar(texto: str, motivo: MotivoParada, forma=None) -> ResultadoAgente:
             resultado = ResultadoAgente(
                 texto=texto,
                 nuevos=tuple(nuevos),
@@ -80,6 +86,7 @@ class Agente:
                 llamadas=tuple(llamadas),
                 modelos=tuple(modelos),
                 duracion_ms=int((self.cronometro() - inicio) * 1000),
+                estructurada=forma,
             )
             _registrar(resultado, contexto)
             return resultado
@@ -94,7 +101,7 @@ class Agente:
                 logger.warning("Agente: %s tokens y sin terminar; última vuelta, sin tools", uso.total)
             r = self.llm.generar(
                 PeticionLLM(
-                    sistema=instrucciones(contexto),
+                    sistema=sistema,
                     mensajes=tuple(mensajes),
                     tools=self.declaraciones,
                     usar_tools=not ultima,  # la última: ve las tools (el historial habla de ellas), no puede pedirlas
@@ -105,7 +112,14 @@ class Agente:
             modelos.append(r.modelo)
 
             if not r.llamadas:  # ha contestado (o no puede seguir): fin
-                return self._final(r, nuevos, terminar)
+                forma = None
+                if estructurada and r.motivo == MotivoFin.FIN:  # módulo 96: otra llamada, sin tools y con el schema
+                    forma, r2 = estructurar(self.llm, (*mensajes, r.mensaje))
+                    if r2 is not None:
+                        self.observador.respuesta(r2)
+                        uso += r2.uso
+                        modelos.append(r2.modelo)
+                return self._final(r, nuevos, terminar, forma)
             llamadas.extend(r.llamadas)
             if ultima:  # pidió tools aunque no podía: no se ejecutan (quedarían llamadas sin resultado)
                 logger.warning("Agente: sin respuesta tras %s iteraciones", iteracion)
@@ -128,7 +142,7 @@ class Agente:
         raise AssertionError("inalcanzable: la última iteración siempre termina")  # pragma: no cover
 
     @staticmethod
-    def _final(r, nuevos: list[Mensaje], terminar) -> ResultadoAgente:
+    def _final(r, nuevos: list[Mensaje], terminar, forma) -> ResultadoAgente:
         if r.motivo == MotivoFin.BLOQUEADA:
             texto = r.texto or BLOQUEADA
             nuevos.append(Mensaje.modelo(texto=texto))
@@ -136,7 +150,7 @@ class Agente:
         nuevos.append(r.mensaje)
         if r.motivo == MotivoFin.LIMITE_TOKENS:  # el texto llega a medias: quien llama decide qué enseñar
             return terminar(r.texto, MotivoParada.RESPUESTA_CORTADA)
-        return terminar(r.texto, MotivoParada.FIN)
+        return terminar(r.texto, MotivoParada.FIN, forma)
 
     def _ejecutar(self, llamada: LlamadaTool, contexto, usos: Counter, ya_llamadas: set) -> ResultadoTool:
         def error(texto: str) -> ResultadoTool:
@@ -217,6 +231,7 @@ def _registrar(r: ResultadoAgente, contexto: ContextoPregunta) -> None:
                 "tokens_razonamiento": r.uso.razonamiento,
                 "tokens_cache": r.uso.cache,
                 "duracion_ms": r.duracion_ms,
+                "prompt": VERSION,  # módulo 96: qué versión del prompt contestó (para comparar versiones, módulo 98)
             }
         },
     )

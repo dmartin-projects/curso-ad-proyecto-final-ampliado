@@ -1,4 +1,4 @@
-# asistente/management/commands/preguntar.py — hablar con los datos de un hogar desde la terminal (módulo 94)
+# asistente/management/commands/preguntar.py — hablar con los datos de un hogar desde la terminal (módulos 94 y 96)
 """manage.py preguntar "pregunta" --email … --hogar … — el agente completo: el modelo, sus tools y tus datos.
 
 Enseña cada paso: lo que pide el modelo, lo que devuelve cada tool, y al final las vueltas, los tokens y el coste.
@@ -6,6 +6,8 @@ Enseña cada paso: lo que pide el modelo, lo que devuelve cada tool, y al final 
     uv run python manage.py preguntar "¿Cuánto gastamos en septiembre?" --email demo@example.com --hogar 1
 """
 
+import json
+from dataclasses import asdict
 from decimal import Decimal
 
 from django.core.management.base import BaseCommand, CommandError
@@ -27,6 +29,9 @@ class Command(BaseCommand):
         parser.add_argument("--hogar", type=int, required=True, help="El id del hogar")
         parser.add_argument("--modelo", help="Un modelo concreto, sin reserva")
         parser.add_argument("--resultados", action="store_true", help="Enseñar lo que devuelve cada tool")
+        parser.add_argument(
+            "--estructurada", action="store_true", help="La respuesta también en JSON (una llamada más)"
+        )
 
     def handle(self, *args, **o):
         usuario = Usuario.objects.filter(email__iexact=o["email"]).first()
@@ -39,10 +44,12 @@ class Command(BaseCommand):
         pasos = Pasos(self, o["resultados"])
         agente = container.agente(pasos, modelo=o["modelo"])
         try:
-            r = agente.responder((Mensaje.usuario(o["pregunta"]),), contexto)
+            r = agente.responder((Mensaje.usuario(o["pregunta"]),), contexto, estructurada=o["estructurada"])
         except LLMException as e:
             raise CommandError(f"El asistente no está disponible: {e}") from e
         self.stdout.write(r.texto)
+        if r.estructurada:
+            self.stdout.write(json.dumps(asdict(r.estructurada), ensure_ascii=False, indent=2))
         u = r.uso
         self.stdout.write(
             self.style.HTTP_INFO(

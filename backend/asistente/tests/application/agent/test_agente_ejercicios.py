@@ -58,5 +58,6 @@ def test_una_linea_de_log_por_pregunta_sin_la_pregunta(mundo, caplog):
         "tokens_razonamiento": 0,
         "tokens_cache": 0,
         "duracion_ms": 0,
+        "prompt": "2026-10-29.1",  # módulo 96
     }
     assert "Cuánto" not in str(registro.__dict__)  # ni la pregunta ni la respuesta

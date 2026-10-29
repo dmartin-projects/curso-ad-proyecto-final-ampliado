@@ -6,7 +6,9 @@ from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.agent.limites import Limites
 from asistente.application.tools.buscar_movimientos_tool import BuscarMovimientosTool
 from asistente.application.tools.comparar_con_ipc_tool import CompararConIpcTool
+from asistente.application.tools.comparar_meses_tool import CompararMesesTool
 from asistente.application.tools.detalle_ticket_tool import DetalleTicketTool
+from asistente.application.tools.dias_festivos_tool import DiasFestivosTool
 from asistente.application.tools.estado_presupuestos_tool import EstadoPresupuestosTool
 from asistente.application.tools.gasto_por_categoria_tool import GastoPorCategoriaTool
 from asistente.application.tools.listar_categorias_tool import ListarCategoriasTool
@@ -17,6 +19,7 @@ from asistente.application.tools.tipo_de_cambio_tool import TipoDeCambioTool
 from asistente.application.tools.top_comercios_tool import TopComerciosTool
 from asistente.domain.read_models.hogar_del_usuario import HogarDelUsuario
 from asistente.tests.fakes.consultas_de_finanzas_fake import ConsultasDeFinanzasFake
+from asistente.tests.fakes.festivos_fake import FestivosFake
 from asistente.tests.fakes.indice_de_precios_fake import IndiceDePreciosFake
 from asistente.tests.fakes.llm_fake import LLMFake
 from asistente.tests.fakes.membresias_fake import MembresiasFake
@@ -55,6 +58,7 @@ class Mundo:
         self.tickets = TicketsFake()
         self.divisas = TipoDeCambioFake()
         self.precios = IndiceDePreciosFake()
+        self.festivos = FestivosFake()
         self.cronometro = Cronometro()
 
     def tools(self):
@@ -62,10 +66,11 @@ class Mundo:
         return [ResumenMesTool(finanzas=self.finanzas), GastoPorCategoriaTool(finanzas=self.finanzas)]
 
     def catalogo(self):
-        """Todas (módulo 95), sobre los fakes: lo mismo que monta container.tools() con los adapters."""
+        """Todas (módulo 95 y sus ejercicios), sobre los fakes: lo mismo que monta container.tools() con los adapters."""
         f = self.finanzas
         return [
             *self.tools(),
+            CompararMesesTool(finanzas=f),
             BuscarMovimientosTool(finanzas=f),
             TendenciaTool(finanzas=f),
             TopComerciosTool(finanzas=f),
@@ -75,6 +80,7 @@ class Mundo:
             DetalleTicketTool(tickets=self.tickets),
             TipoDeCambioTool(divisas=self.divisas),
             CompararConIpcTool(finanzas=f, precios=self.precios),
+            DiasFestivosTool(festivos=self.festivos),
         ]
 
     def agente(self, guion: list, limites: Limites | None = None, tools=None) -> tuple[Agente, LLMFake]:

@@ -16,7 +16,7 @@ class GastoPorCategoriaTool(Tool):
     descripcion = (
         "Gasto de un mes del hogar por categoría principal (las subcategorías suman en su principal), de mayor a menor, "
         "con su porcentaje. Para '¿en qué gastamos más en agosto?' o '¿cuánto se fue en supermercado?'. Para comparar "
-        "dos meses, llámala una vez por mes."
+        "dos meses, usa comparar_meses."
     )
     Argumentos = GastoPorCategoriaArgumentos
 

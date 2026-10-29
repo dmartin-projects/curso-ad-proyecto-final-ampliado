@@ -14,8 +14,13 @@ interactions:
       de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
       su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
       m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
-      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
-      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      dos meses, usa comparar_meses.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_meses\",\"description\":\"Compara
+      el gasto de dos meses por categor\xEDa principal: cu\xE1nto en cada uno y la
+      diferencia, de la que m\xE1s cambia a la que menos. 'con' es el mes de referencia
+      (sin \xE9l, el anterior a 'mes').\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"},\"con\":{\"description\":\"El
+      mes de referencia, AAAA-MM. Si no lo env\xEDas: el anterior a 'mes'.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
       movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
       la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
       para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
@@ -34,9 +39,9 @@ interactions:
       presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
       est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
       por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
-      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y
-      lo que llevabais el mismo d\xEDa del mes anterior. Es una estimaci\xF3n: dilo
-      as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y,
+      del mes anterior, lo que llevabais el mismo d\xEDa y su total (mes_anterior_total).
+      Es una estimaci\xF3n: dilo as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
       categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
       tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
       que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
@@ -55,7 +60,14 @@ interactions:
       Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
       nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
       cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
-      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}}]}"
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"description\":\"Los
+      festivos oficiales de un a\xF1o en Espa\xF1a: los nacionales y, con 'comunidad',
+      los de esa comunidad. Para explicar gastos de puentes y vacaciones o planear
+      los pr\xF3ximos.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"anio\":{\"description\":\"El
+      a\xF1o. Sin \xE9l: el a\xF1o en curso del hogar.\",\"type\":\"integer\"},\"comunidad\":{\"description\":\"C\xF3digo
+      ISO 3166-2 de la comunidad: ES-MD (Madrid), ES-CT (Catalu\xF1a)\u2026 Sin ella:
+      nacionales.\",\"type\":\"string\"},\"desde_hoy\":{\"default\":false,\"description\":\"true:
+      solo los que quedan desde hoy (\\\"\xBFqu\xE9 festivos nos quedan?\\\").\",\"type\":\"boolean\"}},\"type\":\"object\"}}}]}"
     headers:
       accept:
       - application/json
@@ -64,7 +76,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '6156'
+      - '7433'
       content-type:
       - application/json
       host:
@@ -93,21 +105,16 @@ interactions:
     uri: https://api.groq.com/openai/v1/chat/completions
   response:
     body:
-      string: "{\"id\":\"chatcmpl-7b47e1ac-b25a-4303-92d3-67349943e2bf\",\"object\":\"chat.completion\",\"created\":1793297713,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"reasoning\":\"User
-        asks: \\\"\xBFC\xF3mo vamos este mes? \xBFAcabaremos gastando m\xE1s que en
-        septiembre?\\\" We need current month is October 2026 (today 2026-10-29).
-        Need current month summary (gastos, ingresos, balance, n\xFAmero de movimientos,
-        variaci\xF3n del gasto frente al mes anterior). Also need forecast for month
-        end to compare with September actual total. And maybe compare forecast with
-        September total.\\n\\nWe have tools:\\n- resumen_mes for month summary.\\n-
-        prevision_fin_de_mes for forecast of current month.\\n- Maybe need September
-        total: we can get resumen_mes for 2026-09.\\n\\nSo steps:\\n1. Call resumen_mes
-        without month (defaults to current month) =\\u003e get October summary.\\n2.
-        Call resumen_mes with mes=\\\"2026-09\\\" =\\u003e get September summary.\\n3.
-        Call prevision_fin_de_mes to get forecast for October.\\n\\nThen we can answer:
-        describe how going this month (gasto, ingresos, balance, variation). And compare
-        forecast total vs September total, answer if will be more.\\n\\nLet's call
-        functions.\",\"tool_calls\":[{\"id\":\"fc_ea26e553-aaaa-4340-9690-8d7e83298b62\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-10\\\"}\"}}]},\"logprobs\":null,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"queue_time\":0.082907365,\"prompt_tokens\":1313,\"prompt_time\":0.060798873,\"completion_tokens\":250,\"completion_time\":0.526878537,\"total_tokens\":1563,\"total_time\":0.58767741,\"completion_tokens_details\":{\"reasoning_tokens\":219}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_e5b4e54fbb\",\"x_groq\":{\"id\":\"req_01m64dz1x6ej2v9tk8scck13w9\",\"seed\":354339291},\"service_tier\":\"on_demand\"}\n"
+      string: "{\"id\":\"chatcmpl-b84866a5-4473-428c-bd0d-9d47ad390409\",\"object\":\"chat.completion\",\"created\":1793302006,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"reasoning\":\"User
+        wants: \\\"\xBFC\xF3mo vamos este mes?\\\" means summary of current month
+        (October 2026). Also \\\"\xBFAcabaremos gastando m\xE1s que en septiembre?\\\"
+        Need forecast for end of month vs September total.\\n\\nWe need current month
+        data: use resumen_mes for current month (default). Also need forecast_fin_de_mes
+        for prediction. Then compare forecast total to September total. Need September
+        total: could use resumen_mes with mes=2026-09 to get total gasto (and maybe
+        ingresos). We'll get both.\\n\\nSteps: call resumen_mes for current month
+        (no param). Then call resumen_mes for 2026-09. Then call prevision_fin_de_mes.\\n\\nLet's
+        do calls.\",\"tool_calls\":[{\"id\":\"fc_7c85e418-68ef-4400-8f48-3440a4942e4c\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-10\\\"}\"}}]},\"logprobs\":null,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"queue_time\":0.250424519,\"prompt_tokens\":1576,\"prompt_time\":0.184092751,\"completion_tokens\":171,\"completion_time\":0.356101709,\"total_tokens\":1747,\"total_time\":0.54019446,\"completion_tokens_details\":{\"reasoning_tokens\":140}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c15aa9c1b7\",\"x_groq\":{\"id\":\"req_01m64j21esem685cg9tjtgqjjv\",\"seed\":492008980},\"service_tier\":\"on_demand\"}\n"
     headers:
       alt-svc:
       - h3=":443"; ma=86400
@@ -116,15 +123,15 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a5242a127ac4a159-IAD
+      - a52492dc6f2c7044-IAD
       connection:
       - keep-alive
       content-length:
-      - '1774'
+      - '1409'
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 18:15:13 GMT
+      - Thu, 29 Oct 2026 19:26:46 GMT
       server:
       - cloudflare
       strict-transport-security:
@@ -140,15 +147,15 @@ interactions:
       x-ratelimit-limit-tokens:
       - '8000'
       x-ratelimit-remaining-requests:
-      - '936'
+      - '873'
       x-ratelimit-remaining-tokens:
-      - '6508'
+      - '6154'
       x-ratelimit-reset-requests:
-      - 1h32m9.6s
+      - 3h2m52.8s
       x-ratelimit-reset-tokens:
-      - 11.19s
+      - 13.845s
       x-request-id:
-      - req_01m64dz1x6ej2v9tk8scck13w9
+      - req_01m64j21esem685cg9tjtgqjjv
     status:
       code: 200
       message: OK
@@ -159,7 +166,7 @@ interactions:
       para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
       y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
       den las tools.\"},{\"role\":\"user\",\"content\":\"\xBFC\xF3mo vamos este mes?
-      \xBFAcabaremos gastando m\xE1s que en septiembre?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_ea26e553-aaaa-4340-9690-8d7e83298b62\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-10\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_ea26e553-aaaa-4340-9690-8d7e83298b62\",\"content\":\"{\\\"mes\\\":\\\"2026-10\\\",\\\"gastos\\\":\\\"505.14\\\",\\\"ingresos\\\":\\\"2100.00\\\",\\\"balance\\\":\\\"1594.86\\\",\\\"movimientos\\\":7,\\\"gastos_mes_anterior\\\":\\\"776.59\\\",\\\"variacion_gastos_pct\\\":-35.0,\\\"mes_en_curso\\\":\\\"hasta
+      \xBFAcabaremos gastando m\xE1s que en septiembre?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_7c85e418-68ef-4400-8f48-3440a4942e4c\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-10\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_7c85e418-68ef-4400-8f48-3440a4942e4c\",\"content\":\"{\\\"mes\\\":\\\"2026-10\\\",\\\"gastos\\\":\\\"505.14\\\",\\\"ingresos\\\":\\\"2100.00\\\",\\\"balance\\\":\\\"1594.86\\\",\\\"movimientos\\\":7,\\\"gastos_mes_anterior\\\":\\\"776.59\\\",\\\"variacion_gastos_pct\\\":-35.0,\\\"mes_en_curso\\\":\\\"hasta
       el d\xEDa 29\\\"}\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
       de un mes del hogar: gastos, ingresos, balance, n\xFAmero de movimientos y variaci\xF3n
       del gasto frente al mes anterior. Para '\xBFcu\xE1nto gastamos en septiembre?'
@@ -168,8 +175,13 @@ interactions:
       de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
       su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
       m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
-      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
-      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      dos meses, usa comparar_meses.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_meses\",\"description\":\"Compara
+      el gasto de dos meses por categor\xEDa principal: cu\xE1nto en cada uno y la
+      diferencia, de la que m\xE1s cambia a la que menos. 'con' es el mes de referencia
+      (sin \xE9l, el anterior a 'mes').\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"},\"con\":{\"description\":\"El
+      mes de referencia, AAAA-MM. Si no lo env\xEDas: el anterior a 'mes'.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
       movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
       la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
       para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
@@ -188,9 +200,9 @@ interactions:
       presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
       est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
       por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
-      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y
-      lo que llevabais el mismo d\xEDa del mes anterior. Es una estimaci\xF3n: dilo
-      as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y,
+      del mes anterior, lo que llevabais el mismo d\xEDa y su total (mes_anterior_total).
+      Es una estimaci\xF3n: dilo as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
       categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
       tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
       que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
@@ -209,7 +221,14 @@ interactions:
       Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
       nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
       cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
-      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}}]}"
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"description\":\"Los
+      festivos oficiales de un a\xF1o en Espa\xF1a: los nacionales y, con 'comunidad',
+      los de esa comunidad. Para explicar gastos de puentes y vacaciones o planear
+      los pr\xF3ximos.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"anio\":{\"description\":\"El
+      a\xF1o. Sin \xE9l: el a\xF1o en curso del hogar.\",\"type\":\"integer\"},\"comunidad\":{\"description\":\"C\xF3digo
+      ISO 3166-2 de la comunidad: ES-MD (Madrid), ES-CT (Catalu\xF1a)\u2026 Sin ella:
+      nacionales.\",\"type\":\"string\"},\"desde_hoy\":{\"default\":false,\"description\":\"true:
+      solo los que quedan desde hoy (\\\"\xBFqu\xE9 festivos nos quedan?\\\").\",\"type\":\"boolean\"}},\"type\":\"object\"}}}]}"
     headers:
       accept:
       - application/json
@@ -218,7 +237,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '6644'
+      - '7921'
       content-type:
       - application/json
       host:
@@ -247,13 +266,10 @@ interactions:
     uri: https://api.groq.com/openai/v1/chat/completions
   response:
     body:
-      string: "{\"id\":\"chatcmpl-b5171b3a-b048-4c26-837a-560a390e6e5c\",\"object\":\"chat.completion\",\"created\":1793297715,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"reasoning\":\"We
-        need to answer: \\\"\xBFC\xF3mo vamos este mes? \xBFAcabaremos gastando m\xE1s
-        que en septiembre?\\\" We have October data (current month). Need also September
-        data to compare. The summary gave gastos_mes_anterior (seems previous month)
-        = 776.59, which is September? Actually month_en_curso is October; gastos_mes_anterior
-        presumably September. So we can compare. Also we could get September summary
-        for confirmation. Let's call resumen_mes for September.\",\"tool_calls\":[{\"id\":\"fc_40f1e92e-f906-40df-acff-2cecb17c25ad\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-09\\\"}\"}}]},\"logprobs\":null,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"queue_time\":0.147081693,\"prompt_tokens\":1410,\"prompt_time\":0.850038574,\"completion_tokens\":125,\"completion_time\":0.258736753,\"total_tokens\":1535,\"total_time\":1.108775327,\"prompt_tokens_details\":{\"cached_tokens\":256},\"completion_tokens_details\":{\"reasoning_tokens\":98}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_f640395b96\",\"x_groq\":{\"id\":\"req_01m64dz2nyecrvmxrje72pcms5\",\"seed\":247113405},\"service_tier\":\"on_demand\"}\n"
+      string: '{"id":"chatcmpl-ae222abd-9b28-4052-9aed-90a3ac90b56f","object":"chat.completion","created":1793302006,"model":"openai/gpt-oss-120b","choices":[{"index":0,"message":{"role":"assistant","reasoning":"We
+        need also September data to compare. Use resumen_mes for 2026-09.","tool_calls":[{"id":"fc_27a5cab8-1cfe-4658-8b9c-2296644c5b47","type":"function","function":{"name":"resumen_mes","arguments":"{\"mes\":\"2026-09\"}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.270938693,"prompt_tokens":1673,"prompt_time":0.107338175,"completion_tokens":44,"completion_time":0.092804934,"total_tokens":1717,"total_time":0.200143109,"completion_tokens_details":{"reasoning_tokens":19}},"usage_breakdown":null,"system_fingerprint":"fp_c868cf1eaa","x_groq":{"id":"req_01m64j22c5eb1a6ayzfmvx25gt","seed":1155752813},"service_tier":"on_demand"}
+
+        '
     headers:
       alt-svc:
       - h3=":443"; ma=86400
@@ -262,15 +278,15 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a5242a176b66a159-IAD
+      - a52492e24b377044-IAD
       connection:
       - keep-alive
       content-length:
-      - '1278'
+      - '854'
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 18:15:15 GMT
+      - Thu, 29 Oct 2026 19:26:46 GMT
       server:
       - cloudflare
       strict-transport-security:
@@ -286,15 +302,15 @@ interactions:
       x-ratelimit-limit-tokens:
       - '8000'
       x-ratelimit-remaining-requests:
-      - '935'
+      - '872'
       x-ratelimit-remaining-tokens:
-      - '4962'
+      - '4413'
       x-ratelimit-reset-requests:
-      - 1h33m36s
+      - 3h4m19.2s
       x-ratelimit-reset-tokens:
-      - 22.785s
+      - 26.902s
       x-request-id:
-      - req_01m64dz2nyecrvmxrje72pcms5
+      - req_01m64j22c5eb1a6ayzfmvx25gt
     status:
       code: 200
       message: OK
@@ -305,8 +321,8 @@ interactions:
       para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
       y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
       den las tools.\"},{\"role\":\"user\",\"content\":\"\xBFC\xF3mo vamos este mes?
-      \xBFAcabaremos gastando m\xE1s que en septiembre?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_ea26e553-aaaa-4340-9690-8d7e83298b62\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-10\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_ea26e553-aaaa-4340-9690-8d7e83298b62\",\"content\":\"{\\\"mes\\\":\\\"2026-10\\\",\\\"gastos\\\":\\\"505.14\\\",\\\"ingresos\\\":\\\"2100.00\\\",\\\"balance\\\":\\\"1594.86\\\",\\\"movimientos\\\":7,\\\"gastos_mes_anterior\\\":\\\"776.59\\\",\\\"variacion_gastos_pct\\\":-35.0,\\\"mes_en_curso\\\":\\\"hasta
-      el d\xEDa 29\\\"}\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_40f1e92e-f906-40df-acff-2cecb17c25ad\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-09\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_40f1e92e-f906-40df-acff-2cecb17c25ad\",\"content\":\"{\\\"mes\\\":\\\"2026-09\\\",\\\"gastos\\\":\\\"776.59\\\",\\\"ingresos\\\":\\\"2100.00\\\",\\\"balance\\\":\\\"1323.41\\\",\\\"movimientos\\\":10,\\\"gastos_mes_anterior\\\":\\\"671.35\\\",\\\"variacion_gastos_pct\\\":15.7}\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
+      \xBFAcabaremos gastando m\xE1s que en septiembre?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_7c85e418-68ef-4400-8f48-3440a4942e4c\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-10\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_7c85e418-68ef-4400-8f48-3440a4942e4c\",\"content\":\"{\\\"mes\\\":\\\"2026-10\\\",\\\"gastos\\\":\\\"505.14\\\",\\\"ingresos\\\":\\\"2100.00\\\",\\\"balance\\\":\\\"1594.86\\\",\\\"movimientos\\\":7,\\\"gastos_mes_anterior\\\":\\\"776.59\\\",\\\"variacion_gastos_pct\\\":-35.0,\\\"mes_en_curso\\\":\\\"hasta
+      el d\xEDa 29\\\"}\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_27a5cab8-1cfe-4658-8b9c-2296644c5b47\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-09\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_27a5cab8-1cfe-4658-8b9c-2296644c5b47\",\"content\":\"{\\\"mes\\\":\\\"2026-09\\\",\\\"gastos\\\":\\\"776.59\\\",\\\"ingresos\\\":\\\"2100.00\\\",\\\"balance\\\":\\\"1323.41\\\",\\\"movimientos\\\":10,\\\"gastos_mes_anterior\\\":\\\"671.35\\\",\\\"variacion_gastos_pct\\\":15.7}\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
       de un mes del hogar: gastos, ingresos, balance, n\xFAmero de movimientos y variaci\xF3n
       del gasto frente al mes anterior. Para '\xBFcu\xE1nto gastamos en septiembre?'
       o '\xBFc\xF3mo vamos este mes?'. El desglose por categor\xEDa est\xE1 en gasto_por_categoria.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
@@ -314,8 +330,13 @@ interactions:
       de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
       su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
       m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
-      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
-      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      dos meses, usa comparar_meses.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_meses\",\"description\":\"Compara
+      el gasto de dos meses por categor\xEDa principal: cu\xE1nto en cada uno y la
+      diferencia, de la que m\xE1s cambia a la que menos. 'con' es el mes de referencia
+      (sin \xE9l, el anterior a 'mes').\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"},\"con\":{\"description\":\"El
+      mes de referencia, AAAA-MM. Si no lo env\xEDas: el anterior a 'mes'.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
       movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
       la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
       para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
@@ -334,9 +355,9 @@ interactions:
       presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
       est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
       por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
-      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y
-      lo que llevabais el mismo d\xEDa del mes anterior. Es una estimaci\xF3n: dilo
-      as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y,
+      del mes anterior, lo que llevabais el mismo d\xEDa y su total (mes_anterior_total).
+      Es una estimaci\xF3n: dilo as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
       categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
       tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
       que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
@@ -355,7 +376,14 @@ interactions:
       Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
       nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
       cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
-      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}}]}"
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"description\":\"Los
+      festivos oficiales de un a\xF1o en Espa\xF1a: los nacionales y, con 'comunidad',
+      los de esa comunidad. Para explicar gastos de puentes y vacaciones o planear
+      los pr\xF3ximos.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"anio\":{\"description\":\"El
+      a\xF1o. Sin \xE9l: el a\xF1o en curso del hogar.\",\"type\":\"integer\"},\"comunidad\":{\"description\":\"C\xF3digo
+      ISO 3166-2 de la comunidad: ES-MD (Madrid), ES-CT (Catalu\xF1a)\u2026 Sin ella:
+      nacionales.\",\"type\":\"string\"},\"desde_hoy\":{\"default\":false,\"description\":\"true:
+      solo los que quedan desde hoy (\\\"\xBFqu\xE9 festivos nos quedan?\\\").\",\"type\":\"boolean\"}},\"type\":\"object\"}}}]}"
     headers:
       accept:
       - application/json
@@ -364,7 +392,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '7094'
+      - '8371'
       content-type:
       - application/json
       host:
@@ -393,16 +421,15 @@ interactions:
     uri: https://api.groq.com/openai/v1/chat/completions
   response:
     body:
-      string: "{\"id\":\"chatcmpl-e0041695-c5fe-44d8-9cf1-1d78eb2e4f44\",\"object\":\"chat.completion\",\"created\":1793297716,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"reasoning\":\"We
-        have data for October (current month up to day 29): gastos 505.14, ingresos
-        2100.00, balance 1594.86, movimientos 7, gastos mes anterior 776.59, variacion
-        -35.0% (meaning gasto decreased 35% compared to September). September: gastos
-        776.59.\\n\\nUser asks: \\\"\xBFC\xF3mo vamos este mes? \xBFAcabaremos gastando
-        m\xE1s que en septiembre?\\\" So need to summarize current month status and
-        compare to September, perhaps mention trend and forecast if needed. Could
-        also use prevision_fin_de_mes to forecast total for month. Not requested but
-        could be helpful to answer second part: will we exceed September's total?
-        We can compute forecast based on current pace. Let's call prevision_fin_de_mes.\",\"tool_calls\":[{\"id\":\"fc_fd30b68b-fa2d-4848-8777-5c606a244721\",\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"arguments\":\"{}\"}}]},\"logprobs\":null,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"queue_time\":0.201507811,\"prompt_tokens\":1495,\"prompt_time\":0.0904136,\"completion_tokens\":184,\"completion_time\":0.385875433,\"total_tokens\":1679,\"total_time\":0.476289033,\"completion_tokens_details\":{\"reasoning_tokens\":163}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_b9a23305b9\",\"x_groq\":{\"id\":\"req_01m64dz41serasft4f6hbx290r\",\"seed\":1341745129},\"service_tier\":\"on_demand\"}\n"
+      string: "{\"id\":\"chatcmpl-ab7f6a0a-38c5-4ee2-968c-3eb776cd255f\",\"object\":\"chat.completion\",\"created\":1793302007,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"reasoning\":\"We
+        have data for October (current month) and September. The user asks: \\\"\xBFC\xF3mo
+        vamos este mes? \xBFAcabaremos gastando m\xE1s que en septiembre?\\\" Need
+        to answer with current month status, and compare to September.\\n\\nFrom October:
+        gastos 505.14, ingresos 2100, balance 1594.86, movimientos 7, variation -35%
+        vs previous month (September). September: gastos 776.59.\\n\\nThus October
+        expenses are lower than September. Predict if will exceed September? We can
+        say based on current spending pace, it's unlikely, and can mention forecast
+        using prevision_fin_de_mes maybe. Could call prevision_fin_de_mes.\",\"tool_calls\":[{\"id\":\"fc_f42c610a-a8ea-4b17-8eb0-a1c57f78e9a5\",\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"arguments\":\"{}\"}}]},\"logprobs\":null,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"queue_time\":0.082789089,\"prompt_tokens\":1758,\"prompt_time\":0.088873303,\"completion_tokens\":155,\"completion_time\":0.330474784,\"total_tokens\":1913,\"total_time\":0.419348087,\"completion_tokens_details\":{\"reasoning_tokens\":137}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_bb691ea66b\",\"x_groq\":{\"id\":\"req_01m64j230nefmrz6k3tagtwsbb\",\"seed\":678097077},\"service_tier\":\"on_demand\"}\n"
     headers:
       alt-svc:
       - h3=":443"; ma=86400
@@ -411,15 +438,15 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a5242a203829a159-IAD
+      - a52492e659ad7044-IAD
       connection:
       - keep-alive
       content-length:
-      - '1458'
+      - '1375'
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 18:15:16 GMT
+      - Thu, 29 Oct 2026 19:26:47 GMT
       server:
       - cloudflare
       strict-transport-security:
@@ -435,15 +462,15 @@ interactions:
       x-ratelimit-limit-tokens:
       - '8000'
       x-ratelimit-remaining-requests:
-      - '934'
+      - '871'
       x-ratelimit-remaining-tokens:
-      - '3766'
+      - '2718'
       x-ratelimit-reset-requests:
-      - 1h35m2.4s
+      - 3h5m45.6s
       x-ratelimit-reset-tokens:
-      - 31.755s
+      - 39.615s
       x-request-id:
-      - req_01m64dz41serasft4f6hbx290r
+      - req_01m64j230nefmrz6k3tagtwsbb
     status:
       code: 200
       message: OK
@@ -454,8 +481,8 @@ interactions:
       para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
       y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
       den las tools.\"},{\"role\":\"user\",\"content\":\"\xBFC\xF3mo vamos este mes?
-      \xBFAcabaremos gastando m\xE1s que en septiembre?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_ea26e553-aaaa-4340-9690-8d7e83298b62\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-10\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_ea26e553-aaaa-4340-9690-8d7e83298b62\",\"content\":\"{\\\"mes\\\":\\\"2026-10\\\",\\\"gastos\\\":\\\"505.14\\\",\\\"ingresos\\\":\\\"2100.00\\\",\\\"balance\\\":\\\"1594.86\\\",\\\"movimientos\\\":7,\\\"gastos_mes_anterior\\\":\\\"776.59\\\",\\\"variacion_gastos_pct\\\":-35.0,\\\"mes_en_curso\\\":\\\"hasta
-      el d\xEDa 29\\\"}\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_40f1e92e-f906-40df-acff-2cecb17c25ad\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-09\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_40f1e92e-f906-40df-acff-2cecb17c25ad\",\"content\":\"{\\\"mes\\\":\\\"2026-09\\\",\\\"gastos\\\":\\\"776.59\\\",\\\"ingresos\\\":\\\"2100.00\\\",\\\"balance\\\":\\\"1323.41\\\",\\\"movimientos\\\":10,\\\"gastos_mes_anterior\\\":\\\"671.35\\\",\\\"variacion_gastos_pct\\\":15.7}\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_fd30b68b-fa2d-4848-8777-5c606a244721\",\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"arguments\":\"{}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_fd30b68b-fa2d-4848-8777-5c606a244721\",\"content\":\"{\\\"mes\\\":\\\"2026-10\\\",\\\"dia\\\":\\\"29
+      \xBFAcabaremos gastando m\xE1s que en septiembre?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_7c85e418-68ef-4400-8f48-3440a4942e4c\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-10\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_7c85e418-68ef-4400-8f48-3440a4942e4c\",\"content\":\"{\\\"mes\\\":\\\"2026-10\\\",\\\"gastos\\\":\\\"505.14\\\",\\\"ingresos\\\":\\\"2100.00\\\",\\\"balance\\\":\\\"1594.86\\\",\\\"movimientos\\\":7,\\\"gastos_mes_anterior\\\":\\\"776.59\\\",\\\"variacion_gastos_pct\\\":-35.0,\\\"mes_en_curso\\\":\\\"hasta
+      el d\xEDa 29\\\"}\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_27a5cab8-1cfe-4658-8b9c-2296644c5b47\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-09\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_27a5cab8-1cfe-4658-8b9c-2296644c5b47\",\"content\":\"{\\\"mes\\\":\\\"2026-09\\\",\\\"gastos\\\":\\\"776.59\\\",\\\"ingresos\\\":\\\"2100.00\\\",\\\"balance\\\":\\\"1323.41\\\",\\\"movimientos\\\":10,\\\"gastos_mes_anterior\\\":\\\"671.35\\\",\\\"variacion_gastos_pct\\\":15.7}\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_f42c610a-a8ea-4b17-8eb0-a1c57f78e9a5\",\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"arguments\":\"{}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_f42c610a-a8ea-4b17-8eb0-a1c57f78e9a5\",\"content\":\"{\\\"mes\\\":\\\"2026-10\\\",\\\"dia\\\":\\\"29
       de 31\\\",\\\"gastado_hasta_hoy\\\":\\\"505.14\\\",\\\"total_al_ritmo_actual\\\":\\\"539.98\\\",\\\"mes_anterior_a_estas_alturas\\\":\\\"776.59\\\",\\\"mes_anterior_total\\\":\\\"776.59\\\"}\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
       de un mes del hogar: gastos, ingresos, balance, n\xFAmero de movimientos y variaci\xF3n
       del gasto frente al mes anterior. Para '\xBFcu\xE1nto gastamos en septiembre?'
@@ -464,8 +491,13 @@ interactions:
       de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
       su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
       m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
-      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
-      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      dos meses, usa comparar_meses.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_meses\",\"description\":\"Compara
+      el gasto de dos meses por categor\xEDa principal: cu\xE1nto en cada uno y la
+      diferencia, de la que m\xE1s cambia a la que menos. 'con' es el mes de referencia
+      (sin \xE9l, el anterior a 'mes').\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"},\"con\":{\"description\":\"El
+      mes de referencia, AAAA-MM. Si no lo env\xEDas: el anterior a 'mes'.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
       movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
       la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
       para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
@@ -484,9 +516,9 @@ interactions:
       presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
       est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
       por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
-      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y
-      lo que llevabais el mismo d\xEDa del mes anterior. Es una estimaci\xF3n: dilo
-      as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y,
+      del mes anterior, lo que llevabais el mismo d\xEDa y su total (mes_anterior_total).
+      Es una estimaci\xF3n: dilo as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
       categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
       tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
       que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
@@ -505,7 +537,14 @@ interactions:
       Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
       nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
       cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
-      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}}]}"
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"description\":\"Los
+      festivos oficiales de un a\xF1o en Espa\xF1a: los nacionales y, con 'comunidad',
+      los de esa comunidad. Para explicar gastos de puentes y vacaciones o planear
+      los pr\xF3ximos.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"anio\":{\"description\":\"El
+      a\xF1o. Sin \xE9l: el a\xF1o en curso del hogar.\",\"type\":\"integer\"},\"comunidad\":{\"description\":\"C\xF3digo
+      ISO 3166-2 de la comunidad: ES-MD (Madrid), ES-CT (Catalu\xF1a)\u2026 Sin ella:
+      nacionales.\",\"type\":\"string\"},\"desde_hoy\":{\"default\":false,\"description\":\"true:
+      solo los que quedan desde hoy (\\\"\xBFqu\xE9 festivos nos quedan?\\\").\",\"type\":\"boolean\"}},\"type\":\"object\"}}}]}"
     headers:
       accept:
       - application/json
@@ -514,7 +553,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '7548'
+      - '8825'
       content-type:
       - application/json
       host:
@@ -543,19 +582,18 @@ interactions:
     uri: https://api.groq.com/openai/v1/chat/completions
   response:
     body:
-      string: "{\"id\":\"chatcmpl-d459f785-5cc1-4b22-985a-cab2b885e379\",\"object\":\"chat.completion\",\"created\":1793297717,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Este
-        mes (octubre) llevamos gastados **505,14\u202F\u20AC** (balance\u202F+\u202F1\u202F594,86\u202F\u20AC)
-        y, seg\xFAn la previsi\xF3n, terminaremos el mes con unos **540\u202F\u20AC**
-        de gasto.  \\n\\nEn septiembre el gasto total fue **776,59\u202F\u20AC**.
-        \ \\n\\nAs\xED que, con la tendencia actual, **no superaremos el gasto de
-        septiembre**; terminaremos gastando bastante menos.\",\"reasoning\":\"We have
-        the data:\\n\\nCurrent month (Oct 2026) up to day 29: gastos 505.14, ingresos
-        2100, balance 1594.86, variation -35% vs previous month (Sept). Forecast total
-        by end of month: 539.98. September total was 776.59. So question: \\\"\xBFC\xF3mo
-        vamos este mes? \xBFAcabaremos gastando m\xE1s que en septiembre?\\\" Answer:
-        This month we are spending less, forecast shows we will finish at ~540 EUR,
-        which is lower than September's 776.59, so no, we will not spend more.\\n\\nProvide
-        brief answer in Spanish, include figures.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.243767979,\"prompt_tokens\":1581,\"prompt_time\":0.062427142,\"completion_tokens\":238,\"completion_time\":0.549756042,\"total_tokens\":1819,\"total_time\":0.612183184,\"prompt_tokens_details\":{\"cached_tokens\":256},\"completion_tokens_details\":{\"reasoning_tokens\":137}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c3da0d4bb9\",\"x_groq\":{\"id\":\"req_01m64dz4zee21s6vk6cyk6fj23\",\"seed\":292335265},\"service_tier\":\"on_demand\"}\n"
+      string: "{\"id\":\"chatcmpl-426c2d73-d350-4869-8a5d-b561be124427\",\"object\":\"chat.completion\",\"created\":1793302008,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Este
+        mes (octubre) llevamos\u202F**505,14\u202F\u20AC** de gasto (hasta el d\xEDa\u202F29)
+        y, seg\xFAn la previsi\xF3n, terminar\xEDamos con unos **539,98\u202F\u20AC**
+        si mantenemos el ritmo actual.\\n\\nEn septiembre el gasto total fue de **776,59\u202F\u20AC**.
+        Por lo tanto, con la tendencia actual no superaremos el gasto de septiembre.\",\"reasoning\":\"We
+        need to answer: \\\"\xBFC\xF3mo vamos este mes? \xBFAcabaremos gastando m\xE1s
+        que en septiembre?\\\" Use data from October (current month) and September.\\n\\nWe
+        have current month data: gastos 505.14 hasta d\xEDa 29, ingresos 2100, balance
+        1594.86, movimientos 7, variation -35% vs previous month.\\n\\nSeptember:
+        gastos 776.59.\\n\\nPrevision: total at current pace = 539.98 for full month,
+        compared to September total 776.59.\\n\\nThus we will not exceed September,
+        predicted spend 540 vs 777.\\n\\nAnswer in Spanish, brief, include importes.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.083517428,\"prompt_tokens\":1844,\"prompt_time\":0.021322123,\"completion_tokens\":223,\"completion_time\":0.515825934,\"total_tokens\":2067,\"total_time\":0.537148057,\"prompt_tokens_details\":{\"cached_tokens\":1536},\"completion_tokens_details\":{\"reasoning_tokens\":133}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c868cf1eaa\",\"x_groq\":{\"id\":\"req_01m64j23k6eassngr362mkz40g\",\"seed\":884440479},\"service_tier\":\"on_demand\"}\n"
     headers:
       alt-svc:
       - h3=":443"; ma=86400
@@ -564,15 +602,15 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a5242a261b52a159-IAD
+      - a52492ea0f007044-IAD
       connection:
       - keep-alive
       content-length:
-      - '1539'
+      - '1521'
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 18:15:17 GMT
+      - Thu, 29 Oct 2026 19:26:48 GMT
       server:
       - cloudflare
       strict-transport-security:
@@ -588,15 +626,15 @@ interactions:
       x-ratelimit-limit-tokens:
       - '8000'
       x-ratelimit-remaining-requests:
-      - '933'
+      - '870'
       x-ratelimit-remaining-tokens:
-      - '2027'
+      - '802'
       x-ratelimit-reset-requests:
-      - 1h36m28.8s
+      - 3h7m12s
       x-ratelimit-reset-tokens:
-      - 44.797s
+      - 53.985s
       x-request-id:
-      - req_01m64dz4zee21s6vk6cyk6fj23
+      - req_01m64j23k6eassngr362mkz40g
     status:
       code: 200
       message: OK

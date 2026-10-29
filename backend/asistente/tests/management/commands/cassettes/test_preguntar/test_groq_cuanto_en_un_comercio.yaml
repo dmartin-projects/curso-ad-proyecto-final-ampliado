@@ -14,8 +14,13 @@ interactions:
       de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
       su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
       m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
-      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
-      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      dos meses, usa comparar_meses.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_meses\",\"description\":\"Compara
+      el gasto de dos meses por categor\xEDa principal: cu\xE1nto en cada uno y la
+      diferencia, de la que m\xE1s cambia a la que menos. 'con' es el mes de referencia
+      (sin \xE9l, el anterior a 'mes').\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"},\"con\":{\"description\":\"El
+      mes de referencia, AAAA-MM. Si no lo env\xEDas: el anterior a 'mes'.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
       movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
       la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
       para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
@@ -34,9 +39,9 @@ interactions:
       presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
       est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
       por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
-      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y
-      lo que llevabais el mismo d\xEDa del mes anterior. Es una estimaci\xF3n: dilo
-      as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y,
+      del mes anterior, lo que llevabais el mismo d\xEDa y su total (mes_anterior_total).
+      Es una estimaci\xF3n: dilo as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
       categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
       tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
       que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
@@ -55,7 +60,14 @@ interactions:
       Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
       nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
       cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
-      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}}]}"
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"description\":\"Los
+      festivos oficiales de un a\xF1o en Espa\xF1a: los nacionales y, con 'comunidad',
+      los de esa comunidad. Para explicar gastos de puentes y vacaciones o planear
+      los pr\xF3ximos.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"anio\":{\"description\":\"El
+      a\xF1o. Sin \xE9l: el a\xF1o en curso del hogar.\",\"type\":\"integer\"},\"comunidad\":{\"description\":\"C\xF3digo
+      ISO 3166-2 de la comunidad: ES-MD (Madrid), ES-CT (Catalu\xF1a)\u2026 Sin ella:
+      nacionales.\",\"type\":\"string\"},\"desde_hoy\":{\"default\":false,\"description\":\"true:
+      solo los que quedan desde hoy (\\\"\xBFqu\xE9 festivos nos quedan?\\\").\",\"type\":\"boolean\"}},\"type\":\"object\"}}}]}"
     headers:
       accept:
       - application/json
@@ -64,7 +76,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '6140'
+      - '7417'
       content-type:
       - application/json
       host:
@@ -93,17 +105,16 @@ interactions:
     uri: https://api.groq.com/openai/v1/chat/completions
   response:
     body:
-      string: "{\"id\":\"chatcmpl-808951d7-6cb5-4044-a5ba-d042842e2e93\",\"object\":\"chat.completion\",\"created\":1793297551,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"reasoning\":\"The
-        user asks: \\\"\xBFCu\xE1nto llevamos gastado en Mercadona desde agosto?\\\"
-        Need total spent on Mercadona from August (presumably August 2026) to now
-        (today 2026-10-29). So from 2026-08-01 to today (or end of month? They say
-        \\\"desde agosto\\\" meaning from August up to now). Use buscar_movimientos
-        with categoria? Actually they want by merchant name \\\"Mercadona\\\". In
-        buscar_movimientos, we can filter by texto (commerce) or category. Use texto
-        \\\"Mercadona\\\". Since date range from August 1 to today. So set desde:
-        \\\"2026-08-01\\\", hasta: today \\\"2026-10-29\\\". Type gasto. tipo: \\\"gasto\\\".
-        No limit needed for sum. The tool returns number and sum of all matching movements
-        and recent examples. So call buscar_movimientos.\",\"tool_calls\":[{\"id\":\"fc_cbf749b9-458c-4091-89f0-e7c08a9bf9de\",\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"arguments\":\"{\\\"desde\\\":\\\"2026-08-01\\\",\\\"hasta\\\":\\\"2026-10-29\\\",\\\"limite\\\":5,\\\"texto\\\":\\\"Mercadona\\\",\\\"tipo\\\":\\\"gasto\\\"}\"}}]},\"logprobs\":null,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"queue_time\":0.182733742,\"prompt_tokens\":1309,\"prompt_time\":0.07920225,\"completion_tokens\":253,\"completion_time\":0.708158757,\"total_tokens\":1562,\"total_time\":0.787361007,\"prompt_tokens_details\":{\"cached_tokens\":256},\"completion_tokens_details\":{\"reasoning_tokens\":184}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_87b3c396db\",\"x_groq\":{\"id\":\"req_01m64dt2y5ew0bcwp5zczhwzc3\",\"seed\":2115960277},\"service_tier\":\"on_demand\"}\n"
+      string: "{\"id\":\"chatcmpl-4387effc-e884-4ff0-8655-24adacad3227\",\"object\":\"chat.completion\",\"created\":1793302335,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"reasoning\":\"User
+        asks: \\\"\xBFCu\xE1nto llevamos gastado en Mercadona desde agosto?\\\" They
+        want sum of all expenses (gastos) with merchant \\\"Mercadona\\\" from August
+        (presumably start of August) up to now (today 2026-10-29). Need to use buscar_movimientos
+        with categoria? Actually merchant is a text search: we can use texto \\\"Mercadona\\\".
+        Also need date range from 2026-08-01 to today (or to present). So use buscar_movimientos
+        with texto: \\\"Mercadona\\\", desde: \\\"2026-08-01\\\", hasta: maybe \\\"2026-10-29\\\".
+        Also need tipo \\\"gasto\\\". The function returns number of movements and
+        sum of all that meet filter, and recent examples. We just need sum. Let's
+        call.\",\"tool_calls\":[{\"id\":\"fc_7bcfef57-894d-4a35-85a6-7ef719e591b9\",\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"arguments\":\"{\\\"desde\\\":\\\"2026-08-01\\\",\\\"hasta\\\":\\\"2026-10-29\\\",\\\"limite\\\":5,\\\"texto\\\":\\\"Mercadona\\\",\\\"tipo\\\":\\\"gasto\\\"}\"}}]},\"logprobs\":null,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"queue_time\":0.082970301,\"prompt_tokens\":1572,\"prompt_time\":0.004688467,\"completion_tokens\":234,\"completion_time\":0.498552991,\"total_tokens\":1806,\"total_time\":0.503241458,\"prompt_tokens_details\":{\"cached_tokens\":1536},\"completion_tokens_details\":{\"reasoning_tokens\":165}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c868cf1eaa\",\"x_groq\":{\"id\":\"req_01m64jc3wre3ysmxh0an98txtq\",\"seed\":738712679},\"service_tier\":\"on_demand\"}\n"
     headers:
       alt-svc:
       - h3=":443"; ma=86400
@@ -112,15 +123,15 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a52426191eed35b0-IAD
+      - a5249aebfe0fd96f-IAD
       connection:
       - keep-alive
       content-length:
-      - '1642'
+      - '1567'
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 18:12:31 GMT
+      - Thu, 29 Oct 2026 19:32:15 GMT
       server:
       - cloudflare
       strict-transport-security:
@@ -136,15 +147,15 @@ interactions:
       x-ratelimit-limit-tokens:
       - '8000'
       x-ratelimit-remaining-requests:
-      - '940'
+      - '863'
       x-ratelimit-remaining-tokens:
-      - '6512'
+      - '6373'
       x-ratelimit-reset-requests:
-      - 1h26m24s
+      - 3h17m16.8s
       x-ratelimit-reset-tokens:
-      - 11.16s
+      - 12.202s
       x-request-id:
-      - req_01m64dt2y5ew0bcwp5zczhwzc3
+      - req_01m64jc3wre3ysmxh0an98txtq
     status:
       code: 200
       message: OK
@@ -155,7 +166,7 @@ interactions:
       para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
       y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
       den las tools.\"},{\"role\":\"user\",\"content\":\"\xBFCu\xE1nto llevamos gastado
-      en Mercadona desde agosto?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_cbf749b9-458c-4091-89f0-e7c08a9bf9de\",\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"arguments\":\"{\\\"desde\\\":\\\"2026-08-01\\\",\\\"hasta\\\":\\\"2026-10-29\\\",\\\"limite\\\":5,\\\"texto\\\":\\\"Mercadona\\\",\\\"tipo\\\":\\\"gasto\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_cbf749b9-458c-4091-89f0-e7c08a9bf9de\",\"content\":\"{\\\"periodo\\\":\\\"2026-08-01
+      en Mercadona desde agosto?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_7bcfef57-894d-4a35-85a6-7ef719e591b9\",\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"arguments\":\"{\\\"desde\\\":\\\"2026-08-01\\\",\\\"hasta\\\":\\\"2026-10-29\\\",\\\"limite\\\":5,\\\"texto\\\":\\\"Mercadona\\\",\\\"tipo\\\":\\\"gasto\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_7bcfef57-894d-4a35-85a6-7ef719e591b9\",\"content\":\"{\\\"periodo\\\":\\\"2026-08-01
       a 2026-10-29\\\",\\\"total\\\":5,\\\"suma_gastos\\\":\\\"1121.05\\\",\\\"suma_ingresos\\\":\\\"0.00\\\",\\\"movimientos\\\":[{\\\"fecha\\\":\\\"2026-10-03\\\",\\\"importe\\\":\\\"-301.25\\\",\\\"concepto\\\":\\\"Compra
       semanal\\\",\\\"categoria\\\":\\\"Supermercado\\\",\\\"comercio\\\":\\\"Mercadona\\\"},{\\\"fecha\\\":\\\"2026-09-19\\\",\\\"importe\\\":\\\"-121.35\\\",\\\"concepto\\\":\\\"Compra\\\",\\\"categoria\\\":\\\"Supermercado\\\",\\\"comercio\\\":\\\"Mercadona\\\"},{\\\"fecha\\\":\\\"2026-09-05\\\",\\\"importe\\\":\\\"-287.90\\\",\\\"concepto\\\":\\\"Compra
       semanal\\\",\\\"categoria\\\":\\\"Supermercado\\\",\\\"comercio\\\":\\\"Mercadona\\\"},{\\\"fecha\\\":\\\"2026-08-17\\\",\\\"importe\\\":\\\"-98.15\\\",\\\"concepto\\\":\\\"Compra\\\",\\\"categoria\\\":\\\"Supermercado\\\",\\\"comercio\\\":\\\"Mercadona\\\"},{\\\"fecha\\\":\\\"2026-08-03\\\",\\\"importe\\\":\\\"-312.40\\\",\\\"concepto\\\":\\\"Compra
@@ -167,8 +178,13 @@ interactions:
       de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
       su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
       m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
-      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
-      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      dos meses, usa comparar_meses.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_meses\",\"description\":\"Compara
+      el gasto de dos meses por categor\xEDa principal: cu\xE1nto en cada uno y la
+      diferencia, de la que m\xE1s cambia a la que menos. 'con' es el mes de referencia
+      (sin \xE9l, el anterior a 'mes').\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"},\"con\":{\"description\":\"El
+      mes de referencia, AAAA-MM. Si no lo env\xEDas: el anterior a 'mes'.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
       movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
       la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
       para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
@@ -187,9 +203,9 @@ interactions:
       presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
       est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
       por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
-      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y
-      lo que llevabais el mismo d\xEDa del mes anterior. Es una estimaci\xF3n: dilo
-      as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y,
+      del mes anterior, lo que llevabais el mismo d\xEDa y su total (mes_anterior_total).
+      Es una estimaci\xF3n: dilo as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
       categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
       tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
       que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
@@ -208,7 +224,14 @@ interactions:
       Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
       nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
       cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
-      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}}]}"
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"description\":\"Los
+      festivos oficiales de un a\xF1o en Espa\xF1a: los nacionales y, con 'comunidad',
+      los de esa comunidad. Para explicar gastos de puentes y vacaciones o planear
+      los pr\xF3ximos.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"anio\":{\"description\":\"El
+      a\xF1o. Sin \xE9l: el a\xF1o en curso del hogar.\",\"type\":\"integer\"},\"comunidad\":{\"description\":\"C\xF3digo
+      ISO 3166-2 de la comunidad: ES-MD (Madrid), ES-CT (Catalu\xF1a)\u2026 Sin ella:
+      nacionales.\",\"type\":\"string\"},\"desde_hoy\":{\"default\":false,\"description\":\"true:
+      solo los que quedan desde hoy (\\\"\xBFqu\xE9 festivos nos quedan?\\\").\",\"type\":\"boolean\"}},\"type\":\"object\"}}}]}"
     headers:
       accept:
       - application/json
@@ -217,7 +240,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '7321'
+      - '8598'
       content-type:
       - application/json
       host:
@@ -246,11 +269,14 @@ interactions:
     uri: https://api.groq.com/openai/v1/chat/completions
   response:
     body:
-      string: "{\"id\":\"chatcmpl-eca4a6db-ad05-4adc-a5e3-cee2e2faea7a\",\"object\":\"chat.completion\",\"created\":1793297551,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Hasta
-        ahora, desde agosto hemos gastado **1\u202F121,05\u202F\u20AC** en Mercadona.\",\"reasoning\":\"The
+      string: "{\"id\":\"chatcmpl-481966cd-02bb-4e20-abf0-0e48730d436b\",\"object\":\"chat.completion\",\"created\":1793302336,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Hasta
+        hoy hemos gastado **1\u202F121,05\u202F\u20AC** en Mercadona desde agosto.\",\"reasoning\":\"The
         user asks: \\\"\xBFCu\xE1nto llevamos gastado en Mercadona desde agosto?\\\"
-        The tool returned total number of movements 5, sum_gastos \\\"1121.05\\\".
-        So answer: 1121.05 EUR spent. Provide brief answer in Spanish.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.150499755,\"prompt_tokens\":1586,\"prompt_time\":0.077968847,\"completion_tokens\":85,\"completion_time\":0.175902476,\"total_tokens\":1671,\"total_time\":0.253871323,\"completion_tokens_details\":{\"reasoning_tokens\":55}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_64b2f1c926\",\"x_groq\":{\"id\":\"req_01m64dt401e5pb5ba4k2ebsvws\",\"seed\":1575661039},\"service_tier\":\"on_demand\"}\n"
+        The tool returned total 5 movements, sum_gastos 1121.05 (as string). Need
+        to respond in Spanish, brief, with the amount. Also note the date range is
+        from August 1 to Oct 29 (today). So answer: Hemos gastado 1.121,05\u202F\u20AC
+        en Mercadona desde agosto. Possibly format with comma decimal. Provide brief
+        response.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.097537901,\"prompt_tokens\":1849,\"prompt_time\":0.099400884,\"completion_tokens\":127,\"completion_time\":0.265256162,\"total_tokens\":1976,\"total_time\":0.364657046,\"completion_tokens_details\":{\"reasoning_tokens\":98}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_f73454f048\",\"x_groq\":{\"id\":\"req_01m64jc4jmewqbtcjh3q5qn93g\",\"seed\":188937281},\"service_tier\":\"on_demand\"}\n"
     headers:
       alt-svc:
       - h3=":443"; ma=86400
@@ -259,15 +285,15 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a524261fdb5e35b0-IAD
+      - a5249af05f9fd96f-IAD
       connection:
       - keep-alive
       content-length:
-      - '921'
+      - '1093'
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 18:12:31 GMT
+      - Thu, 29 Oct 2026 19:32:16 GMT
       server:
       - cloudflare
       strict-transport-security:
@@ -283,15 +309,15 @@ interactions:
       x-ratelimit-limit-tokens:
       - '8000'
       x-ratelimit-remaining-requests:
-      - '939'
+      - '862'
       x-ratelimit-remaining-tokens:
-      - '5076'
+      - '5918'
       x-ratelimit-reset-requests:
-      - 1h27m50.4s
+      - 3h18m43.2s
       x-ratelimit-reset-tokens:
-      - 21.93s
+      - 15.614s
       x-request-id:
-      - req_01m64dt401e5pb5ba4k2ebsvws
+      - req_01m64jc4jmewqbtcjh3q5qn93g
     status:
       code: 200
       message: OK

@@ -14,8 +14,13 @@ interactions:
       de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
       su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
       m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
-      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
-      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      dos meses, usa comparar_meses.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_meses\",\"description\":\"Compara
+      el gasto de dos meses por categor\xEDa principal: cu\xE1nto en cada uno y la
+      diferencia, de la que m\xE1s cambia a la que menos. 'con' es el mes de referencia
+      (sin \xE9l, el anterior a 'mes').\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"},\"con\":{\"description\":\"El
+      mes de referencia, AAAA-MM. Si no lo env\xEDas: el anterior a 'mes'.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
       movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
       la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
       para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
@@ -34,9 +39,9 @@ interactions:
       presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
       est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
       por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
-      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y
-      lo que llevabais el mismo d\xEDa del mes anterior. Es una estimaci\xF3n: dilo
-      as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y,
+      del mes anterior, lo que llevabais el mismo d\xEDa y su total (mes_anterior_total).
+      Es una estimaci\xF3n: dilo as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
       categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
       tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
       que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
@@ -55,7 +60,14 @@ interactions:
       Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
       nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
       cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
-      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}}]}"
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"description\":\"Los
+      festivos oficiales de un a\xF1o en Espa\xF1a: los nacionales y, con 'comunidad',
+      los de esa comunidad. Para explicar gastos de puentes y vacaciones o planear
+      los pr\xF3ximos.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"anio\":{\"description\":\"El
+      a\xF1o. Sin \xE9l: el a\xF1o en curso del hogar.\",\"type\":\"integer\"},\"comunidad\":{\"description\":\"C\xF3digo
+      ISO 3166-2 de la comunidad: ES-MD (Madrid), ES-CT (Catalu\xF1a)\u2026 Sin ella:
+      nacionales.\",\"type\":\"string\"},\"desde_hoy\":{\"default\":false,\"description\":\"true:
+      solo los que quedan desde hoy (\\\"\xBFqu\xE9 festivos nos quedan?\\\").\",\"type\":\"boolean\"}},\"type\":\"object\"}}}]}"
     headers:
       accept:
       - application/json
@@ -64,7 +76,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '6126'
+      - '7403'
       content-type:
       - application/json
       host:
@@ -93,13 +105,12 @@ interactions:
     uri: https://api.groq.com/openai/v1/chat/completions
   response:
     body:
-      string: "{\"id\":\"chatcmpl-185218c1-50ac-45f7-b0f4-67e626af49e0\",\"object\":\"chat.completion\",\"created\":1793297977,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"reasoning\":\"We
-        need to answer: \\\"\xBFNos ha subido la luz m\xE1s que el IPC?\\\" The user
-        asks if the electricity cost has increased more than inflation. So we need
-        to compare electricity expense change vs IPC.\\n\\nWe need to use function
-        comparar_con_ipc with categoria \\\"luz\\\". Provide month? Likely last closed
-        month. Today is 2026-10-29, so last closed month is September 2026. So we
-        can call comparar_con_ipc with categoria \\\"luz\\\".\",\"tool_calls\":[{\"id\":\"fc_0800d32d-c8b2-4bd0-bece-92c94ae58f00\",\"type\":\"function\",\"function\":{\"name\":\"comparar_con_ipc\",\"arguments\":\"{\\\"categoria\\\":\\\"luz\\\"}\"}}]},\"logprobs\":null,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"queue_time\":0.14729539,\"prompt_tokens\":1309,\"prompt_time\":0.053212274,\"completion_tokens\":133,\"completion_time\":0.281336885,\"total_tokens\":1442,\"total_time\":0.334549159,\"prompt_tokens_details\":{\"cached_tokens\":256},\"completion_tokens_details\":{\"reasoning_tokens\":101}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_02b0d31eca\",\"x_groq\":{\"id\":\"req_01m64e73dpek59hqd295j24zxq\",\"seed\":1453040553},\"service_tier\":\"on_demand\"}\n"
+      string: "{\"id\":\"chatcmpl-d3b57841-ae6d-4856-91de-d984654ede1d\",\"object\":\"chat.completion\",\"created\":1793302488,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"reasoning\":\"We
+        need to answer: \\\"\xBFNos ha subido la luz m\xE1s que el IPC?\\\" i.e.,
+        compare increase in electricity (luz) cost vs IPC (inflation) for that category.
+        Use tool comparar_con_ipc. Need to pass categoria name. Likely \\\"luz\\\".
+        Also possibly month? It says \\\"Sin mes: el \xFAltimo cerrado.\\\" So we
+        can omit month. Call tool.\",\"tool_calls\":[{\"id\":\"fc_9d5a2c8c-f77b-4687-9b28-c9ee4a016d43\",\"type\":\"function\",\"function\":{\"name\":\"comparar_con_ipc\",\"arguments\":\"{\\\"categoria\\\":\\\"luz\\\"}\"}}]},\"logprobs\":null,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"queue_time\":0.147088711,\"prompt_tokens\":1572,\"prompt_time\":0.069859416,\"completion_tokens\":115,\"completion_time\":0.240168758,\"total_tokens\":1687,\"total_time\":0.310028174,\"completion_tokens_details\":{\"reasoning_tokens\":83}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_64b2f1c926\",\"x_groq\":{\"id\":\"req_01m64jgrfxe5cts4qn76nbb7y9\",\"seed\":477230678},\"service_tier\":\"on_demand\"}\n"
     headers:
       alt-svc:
       - h3=":443"; ma=86400
@@ -108,15 +119,15 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a52430829af57e51-IAD
+      - a5249ea2fa4935b0-IAD
       connection:
       - keep-alive
       content-length:
-      - '1258'
+      - '1109'
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 18:19:37 GMT
+      - Thu, 29 Oct 2026 19:34:48 GMT
       server:
       - cloudflare
       strict-transport-security:
@@ -132,15 +143,15 @@ interactions:
       x-ratelimit-limit-tokens:
       - '8000'
       x-ratelimit-remaining-requests:
-      - '928'
+      - '859'
       x-ratelimit-remaining-tokens:
-      - '6136'
+      - '6117'
       x-ratelimit-reset-requests:
-      - 1h43m40.799s
+      - 3h23m2.4s
       x-ratelimit-reset-tokens:
-      - 13.98s
+      - 14.122s
       x-request-id:
-      - req_01m64e73dpek59hqd295j24zxq
+      - req_01m64jgrfxe5cts4qn76nbb7y9
     status:
       code: 200
       message: OK
@@ -205,11 +216,7 @@ interactions:
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 18:19:37 GMT
-      x-oracle-dms-ecid:
-      - 19b2d50e-5e6e-4698-893a-3a3f3a599dfa-007aab02
-      x-oracle-dms-rid:
-      - '0'
+      - Thu, 29 Oct 2026 19:34:48 GMT
     status:
       code: 200
       message: OK
@@ -220,7 +227,7 @@ interactions:
       para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
       y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
       den las tools.\"},{\"role\":\"user\",\"content\":\"\xBFNos ha subido la luz
-      m\xE1s que el IPC?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_0800d32d-c8b2-4bd0-bece-92c94ae58f00\",\"type\":\"function\",\"function\":{\"name\":\"comparar_con_ipc\",\"arguments\":\"{\\\"categoria\\\":\\\"luz\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_0800d32d-c8b2-4bd0-bece-92c94ae58f00\",\"content\":\"{\\\"categoria\\\":\\\"Luz\\\",\\\"mes\\\":\\\"2026-09\\\",\\\"grupo_ipc\\\":\\\"Electricidad\\\",\\\"gasto_hogar\\\":\\\"92.75\\\",\\\"gasto_hogar_un_anio_antes\\\":\\\"79.80\\\",\\\"variacion_hogar_pct\\\":16.2,\\\"ipc_variacion_anual_pct\\\":11.4}\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
+      m\xE1s que el IPC?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_9d5a2c8c-f77b-4687-9b28-c9ee4a016d43\",\"type\":\"function\",\"function\":{\"name\":\"comparar_con_ipc\",\"arguments\":\"{\\\"categoria\\\":\\\"luz\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_9d5a2c8c-f77b-4687-9b28-c9ee4a016d43\",\"content\":\"{\\\"categoria\\\":\\\"Luz\\\",\\\"mes\\\":\\\"2026-09\\\",\\\"grupo_ipc\\\":\\\"Electricidad\\\",\\\"gasto_hogar\\\":\\\"92.75\\\",\\\"gasto_hogar_un_anio_antes\\\":\\\"79.80\\\",\\\"variacion_hogar_pct\\\":16.2,\\\"ipc_variacion_anual_pct\\\":11.4}\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
       de un mes del hogar: gastos, ingresos, balance, n\xFAmero de movimientos y variaci\xF3n
       del gasto frente al mes anterior. Para '\xBFcu\xE1nto gastamos en septiembre?'
       o '\xBFc\xF3mo vamos este mes?'. El desglose por categor\xEDa est\xE1 en gasto_por_categoria.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
@@ -228,8 +235,13 @@ interactions:
       de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
       su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
       m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
-      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
-      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      dos meses, usa comparar_meses.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_meses\",\"description\":\"Compara
+      el gasto de dos meses por categor\xEDa principal: cu\xE1nto en cada uno y la
+      diferencia, de la que m\xE1s cambia a la que menos. 'con' es el mes de referencia
+      (sin \xE9l, el anterior a 'mes').\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"},\"con\":{\"description\":\"El
+      mes de referencia, AAAA-MM. Si no lo env\xEDas: el anterior a 'mes'.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
       movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
       la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
       para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
@@ -248,9 +260,9 @@ interactions:
       presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
       est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
       por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
-      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y
-      lo que llevabais el mismo d\xEDa del mes anterior. Es una estimaci\xF3n: dilo
-      as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y,
+      del mes anterior, lo que llevabais el mismo d\xEDa y su total (mes_anterior_total).
+      Es una estimaci\xF3n: dilo as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
       categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
       tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
       que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
@@ -269,7 +281,14 @@ interactions:
       Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
       nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
       cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
-      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}}]}"
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"description\":\"Los
+      festivos oficiales de un a\xF1o en Espa\xF1a: los nacionales y, con 'comunidad',
+      los de esa comunidad. Para explicar gastos de puentes y vacaciones o planear
+      los pr\xF3ximos.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"anio\":{\"description\":\"El
+      a\xF1o. Sin \xE9l: el a\xF1o en curso del hogar.\",\"type\":\"integer\"},\"comunidad\":{\"description\":\"C\xF3digo
+      ISO 3166-2 de la comunidad: ES-MD (Madrid), ES-CT (Catalu\xF1a)\u2026 Sin ella:
+      nacionales.\",\"type\":\"string\"},\"desde_hoy\":{\"default\":false,\"description\":\"true:
+      solo los que quedan desde hoy (\\\"\xBFqu\xE9 festivos nos quedan?\\\").\",\"type\":\"boolean\"}},\"type\":\"object\"}}}]}"
     headers:
       accept:
       - application/json
@@ -278,7 +297,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '6609'
+      - '7886'
       content-type:
       - application/json
       host:
@@ -307,16 +326,15 @@ interactions:
     uri: https://api.groq.com/openai/v1/chat/completions
   response:
     body:
-      string: "{\"id\":\"chatcmpl-7f79dde0-0662-4b25-88dc-d0b2873d4f71\",\"object\":\"chat.completion\",\"created\":1793297978,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"S\xED,
-        la luz ha subido m\xE1s que el IPC: pas\xF3 de\u202F79,80\u202F\u20AC a\u202F92,75\u202F\u20AC
-        (un\u202F+16,2\u202F%), mientras que la variaci\xF3n del IPC para electricidad
-        fue de\u202F\u2248\u202F11,4\u202F%.\",\"reasoning\":\"We have data: category
-        \\\"Luz\\\" month 2026-09 (presumably last closed month). Household electricity
-        spending 92.75 EUR, last year 79.80, variation 16.2% vs IPC variation 11.4%.
-        The user asks: \\\"\xBFNos ha subido la luz m\xE1s que el IPC?\\\" Need to
-        answer in Spanish, brief, with importes from tool. So we can say: s\xED, la
-        luz subi\xF3 16.2% vs IPC 11.4%. Provide amounts maybe. So answer: S\xED,
-        la luz aument\xF3 16.2% (de 79.80 a 92.75) frente a IPC 11.4%.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.243910646,\"prompt_tokens\":1406,\"prompt_time\":0.006241303,\"completion_tokens\":209,\"completion_time\":0.466995401,\"total_tokens\":1615,\"total_time\":0.473236704,\"prompt_tokens_details\":{\"cached_tokens\":1280},\"completion_tokens_details\":{\"reasoning_tokens\":145}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_4727af4560\",\"x_groq\":{\"id\":\"req_01m64e74jwe55vfzwqkm7qgdwb\",\"seed\":993420818},\"service_tier\":\"on_demand\"}\n"
+      string: "{\"id\":\"chatcmpl-8bb4de13-d824-45c3-a764-21557f1dfc9e\",\"object\":\"chat.completion\",\"created\":1793302489,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"S\xED,
+        el gasto de la luz ha subido m\xE1s que la inflaci\xF3n del sector.  \\n\\n-
+        **Variaci\xF3n del gasto de la luz**:\u202F+16,2\u202F% (de 79,80\u202F\u20AC
+        a 92,75\u202F\u20AC).  \\n- **Variaci\xF3n del IPC de electricidad**:\u202F+11,4\u202F%.
+        \ \\n\\nAs\xED que el aumento de vuestro consumo supera al IPC correspondiente.\",\"reasoning\":\"We
+        need to answer: \\\"\xBFNos ha subido la luz m\xE1s que el IPC?\\\" Use the
+        data returned: gasto_hogar increased 16.2% vs IPC 11.4% for electricity. So
+        yes, the increase is higher than IPC. Provide brief answer in Spanish with
+        amounts.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.242931974,\"prompt_tokens\":1669,\"prompt_time\":0.090580961,\"completion_tokens\":153,\"completion_time\":0.322577342,\"total_tokens\":1822,\"total_time\":0.413158303,\"completion_tokens_details\":{\"reasoning_tokens\":61}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_5a93aea882\",\"x_groq\":{\"id\":\"req_01m64jgstpepgaarszc5nexvst\",\"seed\":65392430},\"service_tier\":\"on_demand\"}\n"
     headers:
       alt-svc:
       - h3=":443"; ma=86400
@@ -325,15 +343,15 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a524308a0b1e7e51-IAD
+      - a5249eab7ab935b0-IAD
       connection:
       - keep-alive
       content-length:
-      - '1309'
+      - '1158'
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 18:19:38 GMT
+      - Thu, 29 Oct 2026 19:34:49 GMT
       server:
       - cloudflare
       strict-transport-security:
@@ -349,15 +367,15 @@ interactions:
       x-ratelimit-limit-tokens:
       - '8000'
       x-ratelimit-remaining-requests:
-      - '927'
+      - '858'
       x-ratelimit-remaining-tokens:
-      - '5011'
+      - '4516'
       x-ratelimit-reset-requests:
-      - 1h45m7.2s
+      - 3h24m28.8s
       x-ratelimit-reset-tokens:
-      - 22.417s
+      - 26.13s
       x-request-id:
-      - req_01m64e74jwe55vfzwqkm7qgdwb
+      - req_01m64jgstpepgaarszc5nexvst
     status:
       code: 200
       message: OK

@@ -1,0 +1,418 @@
+interactions:
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eres
+      el asistente de Gastos, una app de gastos del hogar. Contestas sobre el hogar
+      \xABCasa de Ana y Luis\xBB (importes en EUR). Hoy es 2026-10-29.\\nUsa las tools
+      para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
+      y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
+      den las tools.\"},{\"role\":\"user\",\"content\":\"\xBFQu\xE9 festivos nos quedan
+      este a\xF1o? Vivimos en Madrid.\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
+      de un mes del hogar: gastos, ingresos, balance, n\xFAmero de movimientos y variaci\xF3n
+      del gasto frente al mes anterior. Para '\xBFcu\xE1nto gastamos en septiembre?'
+      o '\xBFc\xF3mo vamos este mes?'. El desglose por categor\xEDa est\xE1 en gasto_por_categoria.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"description\":\"Gasto
+      de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
+      su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
+      m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
+      dos meses, usa comparar_meses.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_meses\",\"description\":\"Compara
+      el gasto de dos meses por categor\xEDa principal: cu\xE1nto en cada uno y la
+      diferencia, de la que m\xE1s cambia a la que menos. 'con' es el mes de referencia
+      (sin \xE9l, el anterior a 'mes').\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"},\"con\":{\"description\":\"El
+      mes de referencia, AAAA-MM. Si no lo env\xEDas: el anterior a 'mes'.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
+      la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
+      para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
+      fechas: el mes en curso.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"texto\":{\"description\":\"En
+      el concepto, el comercio o las notas.\",\"maxLength\":60,\"type\":\"string\"},\"categoria\":{\"description\":\"Una
+      categor\xEDa, como la dice el usuario (incluye sus subcategor\xEDas).\",\"maxLength\":60,\"type\":\"string\"},\"desde\":{\"description\":\"AAAA-MM-DD.\",\"type\":\"string\"},\"hasta\":{\"description\":\"AAAA-MM-DD.\",\"type\":\"string\"},\"tipo\":{\"description\":\"Solo
+      gastos o solo ingresos.\",\"enum\":[\"gasto\",\"ingreso\"],\"type\":\"string\"},\"limite\":{\"default\":10,\"description\":\"Cu\xE1ntos
+      movimientos de ejemplo.\",\"maximum\":20,\"minimum\":1,\"type\":\"integer\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"tendencia\",\"description\":\"Gastos
+      e ingresos de cada uno de los \xFAltimos meses, en una sola llamada. Para '\xBFc\xF3mo
+      hemos ido este a\xF1o?' o '\xBFestamos gastando m\xE1s?': no llames a resumen_mes
+      mes a mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"meses\":{\"default\":6,\"description\":\"Cu\xE1ntos
+      meses, contando el actual (de 2 a 12).\",\"maximum\":12,\"minimum\":2,\"type\":\"integer\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"top_comercios\",\"description\":\"Los
+      5 comercios con m\xE1s gasto de un mes, con cu\xE1ntas veces se compr\xF3 en
+      cada uno.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"estado_presupuestos\",\"description\":\"Los
+      presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
+      est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y,
+      del mes anterior, lo que llevabais el mismo d\xEDa y su total (mes_anterior_total).
+      Es una estimaci\xF3n: dilo as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
+      tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
+      que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
+      estado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"ticket_id\":{\"description\":\"El
+      id del ticket.\",\"type\":\"integer\"}},\"required\":[\"ticket_id\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"tipo_de_cambio\",\"description\":\"Convierte
+      un importe a otra moneda con el tipo de referencia del Banco Central Europeo.
+      Para viajes o compras en otra moneda: si el usuario dice cu\xE1ndo pag\xF3,
+      manda esa fecha.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"importe\":{\"anyOf\":[{\"exclusiveMinimum\":0.0,\"maximum\":1000000.0,\"type\":\"number\"},{\"type\":\"string\"}],\"description\":\"El
+      importe a convertir, en positivo.\"},\"de\":{\"description\":\"Moneda de origen,
+      ISO 4217: GBP, USD\u2026\",\"maxLength\":3,\"minLength\":3,\"type\":\"string\"},\"a\":{\"description\":\"Moneda
+      de destino. Sin ella: la del hogar.\",\"maxLength\":3,\"minLength\":3,\"type\":\"string\"},\"fecha\":{\"description\":\"AAAA-MM-DD.
+      El d\xEDa del pago, si el usuario lo dice: el tipo cambia cada d\xEDa. Sin ella:
+      hoy.\",\"type\":\"string\"}},\"required\":[\"importe\",\"de\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_con_ipc\",\"description\":\"Compara
+      cu\xE1nto ha cambiado el gasto del hogar en una categor\xEDa frente al mismo
+      mes del a\xF1o anterior con la inflaci\xF3n oficial (IPC armonizado de Espa\xF1a,
+      Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
+      nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
+      cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"description\":\"Los
+      festivos oficiales de un a\xF1o en Espa\xF1a: los nacionales y, con 'comunidad',
+      los de esa comunidad. Para explicar gastos de puentes y vacaciones o planear
+      los pr\xF3ximos.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"anio\":{\"description\":\"El
+      a\xF1o. Sin \xE9l: el a\xF1o en curso del hogar.\",\"type\":\"integer\"},\"comunidad\":{\"description\":\"C\xF3digo
+      ISO 3166-2 de la comunidad: ES-MD (Madrid), ES-CT (Catalu\xF1a)\u2026 Sin ella:
+      nacionales.\",\"type\":\"string\"},\"desde_hoy\":{\"default\":false,\"description\":\"true:
+      solo los que quedan desde hoy (\\\"\xBFqu\xE9 festivos nos quedan?\\\").\",\"type\":\"boolean\"}},\"type\":\"object\"}}}]}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '7420'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-b7a6b676-1cf5-4910-8bff-e5449d36bee5\",\"object\":\"chat.completion\",\"created\":1793302719,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"reasoning\":\"We
+        need to call dias_festivos with a\xF1o default (current year 2026) and comunidad
+        ES-MD (Madrid), desde_hoy true to get upcoming festivos. Use function.\",\"tool_calls\":[{\"id\":\"fc_59cb0ba3-1957-4710-9ef6-8cdc1fc7ac90\",\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"arguments\":\"{\\\"anio\\\":2026,\\\"comunidad\\\":\\\"ES-MD\\\",\\\"desde_hoy\\\":true}\"}}]},\"logprobs\":null,\"finish_reason\":\"tool_calls\"}],\"usage\":{\"queue_time\":0.243794101,\"prompt_tokens\":1573,\"prompt_time\":0.012607136,\"completion_tokens\":89,\"completion_time\":0.185399377,\"total_tokens\":1662,\"total_time\":0.198006513,\"prompt_tokens_details\":{\"cached_tokens\":1536},\"completion_tokens_details\":{\"reasoning_tokens\":40}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_a655021f7d\",\"x_groq\":{\"id\":\"req_01m64jqt56ez4sj4mp20hkqnjn\",\"seed\":609724196},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a524a4474833d703-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '1023'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 19:38:39 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '852'
+      x-ratelimit-remaining-tokens:
+      - '6339'
+      x-ratelimit-reset-requests:
+      - 3h33m7.199s
+      x-ratelimit-reset-tokens:
+      - 12.457s
+      x-request-id:
+      - req_01m64jqt56ez4sj4mp20hkqnjn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      host:
+      - date.nager.at
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://date.nager.at/api/v3/PublicHolidays/2026/ES
+  response:
+    body:
+      string: "[{\"date\":\"2026-01-01\",\"localName\":\"A\xF1o Nuevo\",\"name\":\"New
+        Year's Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-01-06\",\"localName\":\"D\xEDa
+        de Reyes / Epifan\xEDa del Se\xF1or\",\"name\":\"Epiphany\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-02-28\",\"localName\":\"D\xEDa
+        de Andaluc\xEDa\",\"name\":\"Day of Andaluc\xEDa\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-AN\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-03-01\",\"localName\":\"Dia
+        de les Illes Balears\",\"name\":\"Day of the Balearic Islands\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-IB\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-04-02\",\"localName\":\"Jueves
+        Santo\",\"name\":\"Maundy Thursday\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-AN\",\"ES-AR\",\"ES-CL\",\"ES-CM\",\"ES-CN\",\"ES-EX\",\"ES-GA\",\"ES-IB\",\"ES-RI\",\"ES-MD\",\"ES-MC\",\"ES-NC\",\"ES-AS\",\"ES-PV\",\"ES-CB\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-04-03\",\"localName\":\"Viernes
+        Santo\",\"name\":\"Good Friday\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-04-06\",\"localName\":\"Lunes
+        de Pascua\",\"name\":\"Easter Monday\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CT\",\"ES-IB\",\"ES-RI\",\"ES-NC\",\"ES-PV\",\"ES-VC\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-04-23\",\"localName\":\"D\xEDa
+        de Castilla y Le\xF3n\",\"name\":\"Castile and Le\xF3n Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CL\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-04-23\",\"localName\":\"San
+        Jorge (D\xEDa de Arag\xF3n)\",\"name\":\"Day of Arag\xF3n\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-AR\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-05-01\",\"localName\":\"Fiesta
+        del trabajo\",\"name\":\"Labour Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-05-02\",\"localName\":\"Fiesta
+        de la Comunidad de Madrid\",\"name\":\"Day of Madrid\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-MD\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-05-17\",\"localName\":\"D\xEDa
+        das Letras Galegas\",\"name\":\"Galician Literature Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-GA\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-05-30\",\"localName\":\"D\xEDa
+        de Canarias\",\"name\":\"Day of the Canary Islands\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CN\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-05-31\",\"localName\":\"D\xEDa
+        de la Regi\xF3n Castilla-La Mancha\",\"name\":\"Day of Castilla-La Mancha\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CM\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-06-04\",\"localName\":\"Corpus
+        Christi\",\"name\":\"Corpus Christi\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CM\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-06-09\",\"localName\":\"D\xEDa
+        de La Rioja\",\"name\":\"Day of La Rioja\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-RI\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-06-09\",\"localName\":\"D\xEDa
+        de la Regi\xF3n de Murcia\",\"name\":\"Day of Murcia\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-MC\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-06-24\",\"localName\":\"Sant
+        Joan\",\"name\":\"St. John's Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CT\",\"ES-VC\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-07-25\",\"localName\":\"Santiago
+        Ap\xF3stol\",\"name\":\"Santiago Ap\xF3stol\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-GA\",\"ES-PV\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-07-28\",\"localName\":\"D\xEDa
+        de las Instituciones de Cantabria\",\"name\":\"Day of the Cantabrian Institutions\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CB\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-08-15\",\"localName\":\"Asunci\xF3n\",\"name\":\"Assumption\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-09-08\",\"localName\":\"D\xEDa
+        de Asturias\",\"name\":\"Day of Asturias\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-AS\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-09-08\",\"localName\":\"D\xEDa
+        de Extremadura\",\"name\":\"Day of Extremadura\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-EX\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-09-11\",\"localName\":\"Diada
+        Nacional de Catalunya\",\"name\":\"National Day of Catalonia\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CT\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-09-15\",\"localName\":\"Festividad
+        de la Bien Aparecida\",\"name\":\"Feast of Our Lady of Bien Aparecida\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CB\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-10-09\",\"localName\":\"Dia
+        de la Comunitat Valenciana\",\"name\":\"Day of the Valencian Community\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-VC\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-10-12\",\"localName\":\"Fiesta
+        Nacional de Espa\xF1a\",\"name\":\"National Day of Spain\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-11-01\",\"localName\":\"D\xEDa
+        de todos los Santos\",\"name\":\"All Saints Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-12-06\",\"localName\":\"D\xEDa
+        de la Constituci\xF3n\",\"name\":\"Constitution Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-12-08\",\"localName\":\"Inmaculada
+        Concepci\xF3n\",\"name\":\"Immaculate Conception\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-12-25\",\"localName\":\"Navidad\",\"name\":\"Christmas
+        Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-12-26\",\"localName\":\"Feast
+        of Saint Stephen\",\"name\":\"St. Stephen's Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CT\"],\"launchYear\":null,\"types\":[\"Public\"]}]"
+    headers:
+      age:
+      - '68702'
+      alt-svc:
+      - h3=":443"; ma=86400
+      api-supported-versions:
+      - '3.0'
+      cache-control:
+      - public,max-age=604800
+      cf-cache-status:
+      - HIT
+      cf-ray:
+      - a524a44d8cd85fe8-EWR
+      connection:
+      - keep-alive
+      content-length:
+      - '6267'
+      content-security-policy:
+      - 'default-src https: data: ''unsafe-inline'' ''unsafe-eval'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Oct 2026 19:38:39 GMT
+      last-modified:
+      - Thu, 29 Oct 2026 02:23:55 GMT
+      nel:
+      - '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}'
+      permissions-policy:
+      - camera=(), microphone=(), geolocation=(), payment=()
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      report-to:
+      - '{"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=N13F8N%2BqUdjowc1MFlENU37%2B4EM%2BhLLkvKPp%2BwLvt6yzmafPDhhKa1bSTeIXKP55pNDQ6Ryt677Y2F1pFeJWp5PaLMc4lzj%2FbCFpp4pNHSqIq4toDgR3O9Ic%2BVupWLgr"}]}'
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eres
+      el asistente de Gastos, una app de gastos del hogar. Contestas sobre el hogar
+      \xABCasa de Ana y Luis\xBB (importes en EUR). Hoy es 2026-10-29.\\nUsa las tools
+      para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
+      y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
+      den las tools.\"},{\"role\":\"user\",\"content\":\"\xBFQu\xE9 festivos nos quedan
+      este a\xF1o? Vivimos en Madrid.\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_59cb0ba3-1957-4710-9ef6-8cdc1fc7ac90\",\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"arguments\":\"{\\\"anio\\\":2026,\\\"comunidad\\\":\\\"ES-MD\\\",\\\"desde_hoy\\\":true}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_59cb0ba3-1957-4710-9ef6-8cdc1fc7ac90\",\"content\":\"{\\\"anio\\\":2026,\\\"hoy\\\":\\\"2026-10-29\\\",\\\"festivos\\\":[{\\\"fecha\\\":\\\"2026-11-01\\\",\\\"dia\\\":\\\"domingo\\\",\\\"nombre\\\":\\\"D\xEDa
+      de todos los Santos\\\",\\\"ambito\\\":\\\"nacional\\\"},{\\\"fecha\\\":\\\"2026-12-06\\\",\\\"dia\\\":\\\"domingo\\\",\\\"nombre\\\":\\\"D\xEDa
+      de la Constituci\xF3n\\\",\\\"ambito\\\":\\\"nacional\\\"},{\\\"fecha\\\":\\\"2026-12-08\\\",\\\"dia\\\":\\\"martes\\\",\\\"nombre\\\":\\\"Inmaculada
+      Concepci\xF3n\\\",\\\"ambito\\\":\\\"nacional\\\"},{\\\"fecha\\\":\\\"2026-12-25\\\",\\\"dia\\\":\\\"viernes\\\",\\\"nombre\\\":\\\"Navidad\\\",\\\"ambito\\\":\\\"nacional\\\"}],\\\"nota\\\":\\\"Nacionales
+      y auton\xF3micos. No incluye los locales de cada municipio (dos al a\xF1o):
+      si preguntan, dilo.\\\"}\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
+      de un mes del hogar: gastos, ingresos, balance, n\xFAmero de movimientos y variaci\xF3n
+      del gasto frente al mes anterior. Para '\xBFcu\xE1nto gastamos en septiembre?'
+      o '\xBFc\xF3mo vamos este mes?'. El desglose por categor\xEDa est\xE1 en gasto_por_categoria.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"description\":\"Gasto
+      de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
+      su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
+      m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
+      dos meses, usa comparar_meses.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_meses\",\"description\":\"Compara
+      el gasto de dos meses por categor\xEDa principal: cu\xE1nto en cada uno y la
+      diferencia, de la que m\xE1s cambia a la que menos. 'con' es el mes de referencia
+      (sin \xE9l, el anterior a 'mes').\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"},\"con\":{\"description\":\"El
+      mes de referencia, AAAA-MM. Si no lo env\xEDas: el anterior a 'mes'.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
+      la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
+      para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
+      fechas: el mes en curso.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"texto\":{\"description\":\"En
+      el concepto, el comercio o las notas.\",\"maxLength\":60,\"type\":\"string\"},\"categoria\":{\"description\":\"Una
+      categor\xEDa, como la dice el usuario (incluye sus subcategor\xEDas).\",\"maxLength\":60,\"type\":\"string\"},\"desde\":{\"description\":\"AAAA-MM-DD.\",\"type\":\"string\"},\"hasta\":{\"description\":\"AAAA-MM-DD.\",\"type\":\"string\"},\"tipo\":{\"description\":\"Solo
+      gastos o solo ingresos.\",\"enum\":[\"gasto\",\"ingreso\"],\"type\":\"string\"},\"limite\":{\"default\":10,\"description\":\"Cu\xE1ntos
+      movimientos de ejemplo.\",\"maximum\":20,\"minimum\":1,\"type\":\"integer\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"tendencia\",\"description\":\"Gastos
+      e ingresos de cada uno de los \xFAltimos meses, en una sola llamada. Para '\xBFc\xF3mo
+      hemos ido este a\xF1o?' o '\xBFestamos gastando m\xE1s?': no llames a resumen_mes
+      mes a mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"meses\":{\"default\":6,\"description\":\"Cu\xE1ntos
+      meses, contando el actual (de 2 a 12).\",\"maximum\":12,\"minimum\":2,\"type\":\"integer\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"top_comercios\",\"description\":\"Los
+      5 comercios con m\xE1s gasto de un mes, con cu\xE1ntas veces se compr\xF3 en
+      cada uno.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"estado_presupuestos\",\"description\":\"Los
+      presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
+      est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y,
+      del mes anterior, lo que llevabais el mismo d\xEDa y su total (mes_anterior_total).
+      Es una estimaci\xF3n: dilo as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
+      tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
+      que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
+      estado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"ticket_id\":{\"description\":\"El
+      id del ticket.\",\"type\":\"integer\"}},\"required\":[\"ticket_id\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"tipo_de_cambio\",\"description\":\"Convierte
+      un importe a otra moneda con el tipo de referencia del Banco Central Europeo.
+      Para viajes o compras en otra moneda: si el usuario dice cu\xE1ndo pag\xF3,
+      manda esa fecha.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"importe\":{\"anyOf\":[{\"exclusiveMinimum\":0.0,\"maximum\":1000000.0,\"type\":\"number\"},{\"type\":\"string\"}],\"description\":\"El
+      importe a convertir, en positivo.\"},\"de\":{\"description\":\"Moneda de origen,
+      ISO 4217: GBP, USD\u2026\",\"maxLength\":3,\"minLength\":3,\"type\":\"string\"},\"a\":{\"description\":\"Moneda
+      de destino. Sin ella: la del hogar.\",\"maxLength\":3,\"minLength\":3,\"type\":\"string\"},\"fecha\":{\"description\":\"AAAA-MM-DD.
+      El d\xEDa del pago, si el usuario lo dice: el tipo cambia cada d\xEDa. Sin ella:
+      hoy.\",\"type\":\"string\"}},\"required\":[\"importe\",\"de\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_con_ipc\",\"description\":\"Compara
+      cu\xE1nto ha cambiado el gasto del hogar en una categor\xEDa frente al mismo
+      mes del a\xF1o anterior con la inflaci\xF3n oficial (IPC armonizado de Espa\xF1a,
+      Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
+      nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
+      cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"description\":\"Los
+      festivos oficiales de un a\xF1o en Espa\xF1a: los nacionales y, con 'comunidad',
+      los de esa comunidad. Para explicar gastos de puentes y vacaciones o planear
+      los pr\xF3ximos.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"anio\":{\"description\":\"El
+      a\xF1o. Sin \xE9l: el a\xF1o en curso del hogar.\",\"type\":\"integer\"},\"comunidad\":{\"description\":\"C\xF3digo
+      ISO 3166-2 de la comunidad: ES-MD (Madrid), ES-CT (Catalu\xF1a)\u2026 Sin ella:
+      nacionales.\",\"type\":\"string\"},\"desde_hoy\":{\"default\":false,\"description\":\"true:
+      solo los que quedan desde hoy (\\\"\xBFqu\xE9 festivos nos quedan?\\\").\",\"type\":\"boolean\"}},\"type\":\"object\"}}}]}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '8326'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-d01d1279-6769-46b6-b6c3-dff7a3231948\",\"object\":\"chat.completion\",\"created\":1793302720,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Los
+        festivos que quedan en 2026 para Madrid son:\\n\\n- **1 de noviembre (domingo)**
+        \u2013 D\xEDa de Todos los Santos  \\n- **6 de diciembre (domingo)** \u2013
+        D\xEDa de la Constituci\xF3n  \\n- **8 de diciembre (martes)** \u2013 Inmaculada
+        Concepci\xF3n  \\n- **25 de diciembre (viernes)** \u2013 Navidad  \\n\\nEstos
+        son los festivos nacionales y auton\xF3micos; no incluye los dos festivos
+        locales que cada municipio celebra. \xA1Que los disfrutes!\",\"reasoning\":\"User
+        asks: \\\"\xBFQu\xE9 festivos nos quedan este a\xF1o? Vivimos en Madrid.\\\"
+        We have the list. Need respond in Spanish, brief. Provide upcoming holidays.
+        Should include dates and names. Also note that includes national and autonomous
+        community; no local. Provide answer.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.083014459,\"prompt_tokens\":1772,\"prompt_time\":0.013118326,\"completion_tokens\":162,\"completion_time\":0.334966586,\"total_tokens\":1934,\"total_time\":0.348084912,\"prompt_tokens_details\":{\"cached_tokens\":1536},\"completion_tokens_details\":{\"reasoning_tokens\":56}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_bb691ea66b\",\"x_groq\":{\"id\":\"req_01m64jqv6bex7vz5j4c8n17gqj\",\"seed\":1049489766},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a524a44def9fd703-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '1375'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 19:38:40 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '851'
+      x-ratelimit-remaining-tokens:
+      - '6140'
+      x-ratelimit-reset-requests:
+      - 3h34m33.599s
+      x-ratelimit-reset-tokens:
+      - 13.95s
+      x-request-id:
+      - req_01m64jqv6bex7vz5j4c8n17gqj
+    status:
+      code: 200
+      message: OK
+version: 1

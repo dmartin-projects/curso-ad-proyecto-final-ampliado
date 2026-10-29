@@ -8,9 +8,9 @@ from asistente.tests.fakes.mundo import Mundo
 CATALOGO = Mundo().catalogo()
 
 
-def test_once_tools_sin_nombres_repetidos():
+def test_trece_tools_sin_nombres_repetidos():  # las 11 del módulo y las 2 de los ejercicios
     nombres = [t.nombre for t in CATALOGO]
-    assert len(nombres) == len(set(nombres)) == 11
+    assert len(nombres) == len(set(nombres)) == 13
 
 
 @pytest.mark.parametrize("tool", CATALOGO, ids=lambda t: t.nombre)

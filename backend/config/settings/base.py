@@ -422,6 +422,7 @@ ASISTENTE_FRANKFURTER_URL = env("ASISTENTE_FRANKFURTER_URL", default="https://ap
 ASISTENTE_EUROSTAT_URL = env(
     "ASISTENTE_EUROSTAT_URL", default="https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/"
 )
+ASISTENTE_NAGER_URL = env("ASISTENTE_NAGER_URL", default="https://date.nager.at/api/v3/")  # ejercicio 1 del 95
 # Dólares por millón de tokens: entrada, salida (con el razonamiento) y entrada desde la caché. Los publicados en
 # console.groq.com/docs/models en octubre de 2026. Un modelo que no esté aquí sale con "coste desconocido".
 ASISTENTE_PRECIOS = {

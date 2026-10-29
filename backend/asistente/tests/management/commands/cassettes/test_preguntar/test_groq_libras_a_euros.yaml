@@ -14,8 +14,13 @@ interactions:
       de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
       su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
       m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
-      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
-      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      dos meses, usa comparar_meses.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_meses\",\"description\":\"Compara
+      el gasto de dos meses por categor\xEDa principal: cu\xE1nto en cada uno y la
+      diferencia, de la que m\xE1s cambia a la que menos. 'con' es el mes de referencia
+      (sin \xE9l, el anterior a 'mes').\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"},\"con\":{\"description\":\"El
+      mes de referencia, AAAA-MM. Si no lo env\xEDas: el anterior a 'mes'.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
       movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
       la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
       para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
@@ -34,9 +39,9 @@ interactions:
       presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
       est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
       por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
-      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y
-      lo que llevabais el mismo d\xEDa del mes anterior. Es una estimaci\xF3n: dilo
-      as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y,
+      del mes anterior, lo que llevabais el mismo d\xEDa y su total (mes_anterior_total).
+      Es una estimaci\xF3n: dilo as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
       categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
       tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
       que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
@@ -55,7 +60,14 @@ interactions:
       Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
       nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
       cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
-      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}}]}"
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"description\":\"Los
+      festivos oficiales de un a\xF1o en Espa\xF1a: los nacionales y, con 'comunidad',
+      los de esa comunidad. Para explicar gastos de puentes y vacaciones o planear
+      los pr\xF3ximos.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"anio\":{\"description\":\"El
+      a\xF1o. Sin \xE9l: el a\xF1o en curso del hogar.\",\"type\":\"integer\"},\"comunidad\":{\"description\":\"C\xF3digo
+      ISO 3166-2 de la comunidad: ES-MD (Madrid), ES-CT (Catalu\xF1a)\u2026 Sin ella:
+      nacionales.\",\"type\":\"string\"},\"desde_hoy\":{\"default\":false,\"description\":\"true:
+      solo los que quedan desde hoy (\\\"\xBFqu\xE9 festivos nos quedan?\\\").\",\"type\":\"boolean\"}},\"type\":\"object\"}}}]}"
     headers:
       accept:
       - application/json
@@ -64,7 +76,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '6160'
+      - '7437'
       content-type:
       - application/json
       host:
@@ -93,9 +105,10 @@ interactions:
     uri: https://api.groq.com/openai/v1/chat/completions
   response:
     body:
-      string: '{"id":"chatcmpl-5ac8b6c2-ee27-4ea2-931b-8b9969f22a5c","object":"chat.completion","created":1793297632,"model":"openai/gpt-oss-120b","choices":[{"index":0,"message":{"role":"assistant","reasoning":"User
-        wants conversion: 120 GBP on 2026-09-12 to EUR. Use tipo_de_cambio with de:
-        \"GBP\", a: \"EUR\", importe:120, fecha:\"2026-09-12\".","tool_calls":[{"id":"fc_e2b1862d-c2a7-4076-a4b6-5d0ea57af636","type":"function","function":{"name":"tipo_de_cambio","arguments":"{\"a\":\"EUR\",\"de\":\"GBP\",\"fecha\":\"2026-09-12\",\"importe\":120}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.084373469,"prompt_tokens":1318,"prompt_time":0.087784737,"completion_tokens":103,"completion_time":0.23101959,"total_tokens":1421,"total_time":0.318804327,"completion_tokens_details":{"reasoning_tokens":48}},"usage_breakdown":null,"system_fingerprint":"fp_e1a78f200e","x_groq":{"id":"req_01m64dwjseee88t6dptd2gbfjv","seed":263321203},"service_tier":"on_demand"}
+      string: '{"id":"chatcmpl-9dd6689e-7c5e-4ac4-aa16-50d291e1cd41","object":"chat.completion","created":1793302411,"model":"openai/gpt-oss-120b","choices":[{"index":0,"message":{"role":"assistant","reasoning":"User
+        wants conversion from GBP to EUR. They paid 120 GBP on 12 Sep. Need to use
+        tipo_de_cambio with de: \"GBP\", a: \"EUR\", importe: 120, fecha: \"2026-09-12\".
+        Return conversion.","tool_calls":[{"id":"fc_898c333d-4a00-4cc4-a826-235e4c44ebe9","type":"function","function":{"name":"tipo_de_cambio","arguments":"{\"a\":\"EUR\",\"de\":\"GBP\",\"fecha\":\"2026-09-12\",\"importe\":120}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.294161729,"prompt_tokens":1581,"prompt_time":0.077527309,"completion_tokens":110,"completion_time":0.231225061,"total_tokens":1691,"total_time":0.30875237,"completion_tokens_details":{"reasoning_tokens":55}},"usage_breakdown":null,"system_fingerprint":"fp_fe269835c7","x_groq":{"id":"req_01m64jedpaec7sn0p7q616avcp","seed":718947954},"service_tier":"on_demand"}
 
         '
     headers:
@@ -106,15 +119,15 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a5242818295c2be6-IAD
+      - a5249cc44ef6d703-IAD
       connection:
       - keep-alive
       content-length:
-      - '974'
+      - '1018'
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 18:13:52 GMT
+      - Thu, 29 Oct 2026 19:33:31 GMT
       server:
       - cloudflare
       strict-transport-security:
@@ -130,15 +143,15 @@ interactions:
       x-ratelimit-limit-tokens:
       - '8000'
       x-ratelimit-remaining-requests:
-      - '938'
+      - '861'
       x-ratelimit-remaining-tokens:
-      - '6511'
+      - '6239'
       x-ratelimit-reset-requests:
-      - 1h29m16.8s
+      - 3h20m9.6s
       x-ratelimit-reset-tokens:
-      - 11.167s
+      - 13.207s
       x-request-id:
-      - req_01m64dwjseee88t6dptd2gbfjv
+      - req_01m64jedpaec7sn0p7q616avcp
     status:
       code: 200
       message: OK
@@ -166,7 +179,7 @@ interactions:
       cf-cache-status:
       - MISS
       cf-ray:
-      - a524281cd80f067e-EWR
+      - a5249cc84996a9d2-IAD
       connection:
       - keep-alive
       content-length:
@@ -174,7 +187,7 @@ interactions:
       content-type:
       - application/json; charset=utf-8
       date:
-      - Thu, 29 Oct 2026 18:13:53 GMT
+      - Thu, 29 Oct 2026 19:33:31 GMT
       deprecation:
       - '@1779103800'
       etag:
@@ -184,7 +197,7 @@ interactions:
       nel:
       - '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}'
       report-to:
-      - '{"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=9X6qsp%2FHKkcoqhyaZhrwRLAFeAsgMTD0JixdQ15MS7u0kjs5pHsxrobXWyil%2FV9I36qHd%2BBLu5z8cSXqD%2BF5lrTeggrKWD1Nn9n%2F0aZEAcXZoqQI1ohj93dZkFaNAh4oNUuBYXA%3D"}]}'
+      - '{"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=4sBuVqcyEu2hvmN3LOsmRW2c4Hhbv3L5C4XmRt%2Fjjn6hYOQvm9VClWrkS85efI%2BgPP9sYPW%2B%2BkYYBrXDZhmcFPSnaM2YNdT4TxrIBKAtS%2BYJSty4YgjmplVu9kwPgd2hFxcd5xs%3D"}]}'
       server:
       - cloudflare
       transfer-encoding:
@@ -203,7 +216,7 @@ interactions:
       para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
       y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
       den las tools.\"},{\"role\":\"user\",\"content\":\"En Londres pagu\xE9 120 libras
-      el 12 de septiembre. \xBFCu\xE1nto fue en euros?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_e2b1862d-c2a7-4076-a4b6-5d0ea57af636\",\"type\":\"function\",\"function\":{\"name\":\"tipo_de_cambio\",\"arguments\":\"{\\\"a\\\":\\\"EUR\\\",\\\"de\\\":\\\"GBP\\\",\\\"fecha\\\":\\\"2026-09-12\\\",\\\"importe\\\":120}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_e2b1862d-c2a7-4076-a4b6-5d0ea57af636\",\"content\":\"{\\\"importe\\\":\\\"120.00
+      el 12 de septiembre. \xBFCu\xE1nto fue en euros?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_898c333d-4a00-4cc4-a826-235e4c44ebe9\",\"type\":\"function\",\"function\":{\"name\":\"tipo_de_cambio\",\"arguments\":\"{\\\"a\\\":\\\"EUR\\\",\\\"de\\\":\\\"GBP\\\",\\\"fecha\\\":\\\"2026-09-12\\\",\\\"importe\\\":120}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_898c333d-4a00-4cc4-a826-235e4c44ebe9\",\"content\":\"{\\\"importe\\\":\\\"120.00
       GBP\\\",\\\"resultado\\\":\\\"139.84 EUR\\\",\\\"tipo\\\":\\\"1 GBP = 1.1653
       EUR\\\",\\\"fecha_del_tipo\\\":\\\"2026-09-11\\\",\\\"nota\\\":\\\"El BCE no
       publica en fines de semana ni festivos: es el del d\xEDa h\xE1bil anterior.\\\"}\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
@@ -214,8 +227,13 @@ interactions:
       de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
       su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
       m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
-      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
-      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      dos meses, usa comparar_meses.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_meses\",\"description\":\"Compara
+      el gasto de dos meses por categor\xEDa principal: cu\xE1nto en cada uno y la
+      diferencia, de la que m\xE1s cambia a la que menos. 'con' es el mes de referencia
+      (sin \xE9l, el anterior a 'mes').\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"},\"con\":{\"description\":\"El
+      mes de referencia, AAAA-MM. Si no lo env\xEDas: el anterior a 'mes'.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
       movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
       la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
       para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
@@ -234,9 +252,9 @@ interactions:
       presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
       est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
       por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
-      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y
-      lo que llevabais el mismo d\xEDa del mes anterior. Es una estimaci\xF3n: dilo
-      as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y,
+      del mes anterior, lo que llevabais el mismo d\xEDa y su total (mes_anterior_total).
+      Es una estimaci\xF3n: dilo as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
       categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
       tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
       que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
@@ -255,7 +273,14 @@ interactions:
       Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
       nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
       cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
-      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}}]}"
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"dias_festivos\",\"description\":\"Los
+      festivos oficiales de un a\xF1o en Espa\xF1a: los nacionales y, con 'comunidad',
+      los de esa comunidad. Para explicar gastos de puentes y vacaciones o planear
+      los pr\xF3ximos.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"anio\":{\"description\":\"El
+      a\xF1o. Sin \xE9l: el a\xF1o en curso del hogar.\",\"type\":\"integer\"},\"comunidad\":{\"description\":\"C\xF3digo
+      ISO 3166-2 de la comunidad: ES-MD (Madrid), ES-CT (Catalu\xF1a)\u2026 Sin ella:
+      nacionales.\",\"type\":\"string\"},\"desde_hoy\":{\"default\":false,\"description\":\"true:
+      solo los que quedan desde hoy (\\\"\xBFqu\xE9 festivos nos quedan?\\\").\",\"type\":\"boolean\"}},\"type\":\"object\"}}}]}"
     headers:
       accept:
       - application/json
@@ -264,7 +289,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '6705'
+      - '7982'
       content-type:
       - application/json
       host:
@@ -293,11 +318,11 @@ interactions:
     uri: https://api.groq.com/openai/v1/chat/completions
   response:
     body:
-      string: "{\"id\":\"chatcmpl-b429b399-a0dd-422b-bc30-51b8a9cd9e24\",\"object\":\"chat.completion\",\"created\":1793297633,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"El
-        importe de\u202F120\u202F\xA3 el 12\u202Fde\u202Fseptiembre equivale a\u202F\u2248\u202F139,84\u202F\u20AC
-        (tipo\u202F1\u202FGBP\u202F=\u202F1,1653\u202FEUR).\",\"reasoning\":\"We need
-        to answer in Spanish, brief, with the amount in euros. The tool returned result:
-        139.84 EUR. Provide answer.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.084803772,\"prompt_tokens\":1425,\"prompt_time\":0.008635119,\"completion_tokens\":81,\"completion_time\":0.210465951,\"total_tokens\":1506,\"total_time\":0.21910107,\"prompt_tokens_details\":{\"cached_tokens\":1280},\"completion_tokens_details\":{\"reasoning_tokens\":30}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_e1a78f200e\",\"x_groq\":{\"id\":\"req_01m64dwksqectvaxb0f6hcz6bt\",\"seed\":871436867},\"service_tier\":\"on_demand\"}\n"
+      string: "{\"id\":\"chatcmpl-cf810e9f-3609-4776-a8b9-7e39647463c4\",\"object\":\"chat.completion\",\"created\":1793302412,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"120\u202F\xA3
+        equivalen a\u202F\u2248\u202F139,84\u202F\u20AC (tipo de cambio 1\u202FGBP\u202F=\u202F1,1653\u202FEUR).\",\"reasoning\":\"The
+        user asked: \\\"En Londres pagu\xE9 120 libras el 12 de septiembre. \xBFCu\xE1nto
+        fue en euros?\\\" The tool gave conversion result: 139.84 EUR. Need to respond
+        in Spanish, brief, with the amount.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.120067472,\"prompt_tokens\":1688,\"prompt_time\":0.007884278,\"completion_tokens\":92,\"completion_time\":0.666072259,\"total_tokens\":1780,\"total_time\":0.673956537,\"prompt_tokens_details\":{\"cached_tokens\":1536},\"completion_tokens_details\":{\"reasoning_tokens\":51}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_f73454f048\",\"x_groq\":{\"id\":\"req_01m64jeembeftb9t9xkhcqbd16\",\"seed\":1242699544},\"service_tier\":\"on_demand\"}\n"
     headers:
       alt-svc:
       - h3=":443"; ma=86400
@@ -306,15 +331,15 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a524281e98742be6-IAD
+      - a5249cca4877d703-IAD
       connection:
       - keep-alive
       content-length:
-      - '919'
+      - '964'
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 18:13:53 GMT
+      - Thu, 29 Oct 2026 19:33:32 GMT
       server:
       - cloudflare
       strict-transport-security:
@@ -330,15 +355,15 @@ interactions:
       x-ratelimit-limit-tokens:
       - '8000'
       x-ratelimit-remaining-requests:
-      - '937'
+      - '860'
       x-ratelimit-remaining-tokens:
-      - '5185'
+      - '4512'
       x-ratelimit-reset-requests:
-      - 1h30m43.2s
+      - 3h21m36s
       x-ratelimit-reset-tokens:
-      - 21.112s
+      - 26.16s
       x-request-id:
-      - req_01m64dwksqectvaxb0f6hcz6bt
+      - req_01m64jeembeftb9t9xkhcqbd16
     status:
       code: 200
       message: OK

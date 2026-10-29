@@ -48,6 +48,7 @@ def test_el_agente_con_sus_tools_y_el_tiempo_de_los_ajustes(settings):
     assert list(agente.tools) == [
         "resumen_mes",
         "gasto_por_categoria",
+        "comparar_meses",
         "buscar_movimientos",
         "tendencia",
         "top_comercios",
@@ -57,5 +58,6 @@ def test_el_agente_con_sus_tools_y_el_tiempo_de_los_ajustes(settings):
         "detalle_ticket",
         "tipo_de_cambio",
         "comparar_con_ipc",
+        "dias_festivos",
     ]
     assert (agente.limites.segundos, agente.limites.max_tokens) == (45, 10000)

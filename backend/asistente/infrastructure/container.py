@@ -15,7 +15,9 @@ from asistente.application.ports.i_llm import ILLM
 from asistente.application.ports.i_observador_agente import IObservadorAgente
 from asistente.application.tools.buscar_movimientos_tool import BuscarMovimientosTool
 from asistente.application.tools.comparar_con_ipc_tool import CompararConIpcTool
+from asistente.application.tools.comparar_meses_tool import CompararMesesTool
 from asistente.application.tools.detalle_ticket_tool import DetalleTicketTool
+from asistente.application.tools.dias_festivos_tool import DiasFestivosTool
 from asistente.application.tools.estado_presupuestos_tool import EstadoPresupuestosTool
 from asistente.application.tools.gasto_por_categoria_tool import GastoPorCategoriaTool
 from asistente.application.tools.listar_categorias_tool import ListarCategoriasTool
@@ -28,6 +30,7 @@ from asistente.application.tools.top_comercios_tool import TopComerciosTool
 from asistente.domain.vo.precio import Precio
 from asistente.infrastructure.externos.eurostat_indice_de_precios import IndiceDePreciosEurostat
 from asistente.infrastructure.externos.frankfurter_tipo_de_cambio import TipoDeCambioFrankfurter
+from asistente.infrastructure.externos.nager_festivos import FestivosNager
 from asistente.infrastructure.finanzas.consultas_en_finanzas import ConsultasEnFinanzas
 from asistente.infrastructure.hogares.membresias_en_hogares import MembresiasEnHogares
 from asistente.infrastructure.llm.cliente_openai import cliente_del_proceso
@@ -67,6 +70,7 @@ def tools() -> list[Tool]:
     return [
         ResumenMesTool(finanzas=finanzas),
         GastoPorCategoriaTool(finanzas=finanzas),
+        CompararMesesTool(finanzas=finanzas),  # ejercicio 2 del 95
         BuscarMovimientosTool(finanzas=finanzas),
         TendenciaTool(finanzas=finanzas),
         TopComerciosTool(finanzas=finanzas),
@@ -76,6 +80,7 @@ def tools() -> list[Tool]:
         DetalleTicketTool(tickets=TicketsEnTickets()),
         TipoDeCambioTool(divisas=_tipo_de_cambio(settings.ASISTENTE_FRANKFURTER_URL)),
         CompararConIpcTool(finanzas=finanzas, precios=_indice_de_precios(settings.ASISTENTE_EUROSTAT_URL)),
+        DiasFestivosTool(festivos=_festivos(settings.ASISTENTE_NAGER_URL)),  # ejercicio 1 del 95
     ]
 
 
@@ -88,6 +93,11 @@ def _tipo_de_cambio(base_url: str) -> TipoDeCambioFrankfurter:
 @functools.lru_cache(maxsize=2)
 def _indice_de_precios(base_url: str) -> IndiceDePreciosEurostat:
     return IndiceDePreciosEurostat(base_url=base_url)
+
+
+@functools.lru_cache(maxsize=2)
+def _festivos(base_url: str) -> FestivosNager:
+    return FestivosNager(base_url=base_url)
 
 
 def agente(observador: IObservadorAgente | None = None, modelo: str | None = None) -> Agente:

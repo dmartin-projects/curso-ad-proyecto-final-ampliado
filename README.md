@@ -233,3 +233,5 @@ uv run python manage.py preguntar "¿Nos ha subido la luz más que el IPC?" --em
 ```
 
 Las URL, en `.env`: `ASISTENTE_FRANKFURTER_URL` y `ASISTENTE_EUROSTAT_URL`.
+
+Ejercicios: `dias_festivos` con Nager.Date (otro servicio externo detrás de su *port*, `ASISTENTE_NAGER_URL`), `comparar_meses` (dos meses por categoría en una sola llamada: una vuelta menos) y un test con el presupuesto de tamaño de todo el catálogo, que viaja en cada llamada.

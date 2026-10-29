@@ -1,4 +1,4 @@
-# asistente/application/tools/prevision_fin_de_mes_tool.py — ¿cuánto llevaremos a fin de mes? (módulo 95)
+# asistente/application/tools/prevision_fin_de_mes_tool.py — ¿cuánto llevaremos a fin de mes? (módulo 95; ejercicio 2)
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.ports.i_consultas_de_finanzas import IConsultasDeFinanzas
 from asistente.application.tools.formato import euros
@@ -11,8 +11,8 @@ from core.domain.vo.mes import Mes
 class PrevisionFinDeMesTool(Tool):
     nombre = "prevision_fin_de_mes"
     descripcion = (
-        "Previsión del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y lo que llevabais el "
-        "mismo día del mes anterior. Es una estimación: dilo así."
+        "Previsión del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y, del mes anterior, lo "
+        "que llevabais el mismo día y su total (mes_anterior_total). Es una estimación: dilo así."
     )
 
     def __init__(self, *, finanzas: IConsultasDeFinanzas):

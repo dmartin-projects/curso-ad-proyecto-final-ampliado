@@ -1,0 +1,99 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      host:
+      - date.nager.at
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://date.nager.at/api/v3/PublicHolidays/2026/ES
+  response:
+    body:
+      string: "[{\"date\":\"2026-01-01\",\"localName\":\"A\xF1o Nuevo\",\"name\":\"New
+        Year's Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-01-06\",\"localName\":\"D\xEDa
+        de Reyes / Epifan\xEDa del Se\xF1or\",\"name\":\"Epiphany\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-02-28\",\"localName\":\"D\xEDa
+        de Andaluc\xEDa\",\"name\":\"Day of Andaluc\xEDa\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-AN\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-03-01\",\"localName\":\"Dia
+        de les Illes Balears\",\"name\":\"Day of the Balearic Islands\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-IB\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-04-02\",\"localName\":\"Jueves
+        Santo\",\"name\":\"Maundy Thursday\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-AN\",\"ES-AR\",\"ES-CL\",\"ES-CM\",\"ES-CN\",\"ES-EX\",\"ES-GA\",\"ES-IB\",\"ES-RI\",\"ES-MD\",\"ES-MC\",\"ES-NC\",\"ES-AS\",\"ES-PV\",\"ES-CB\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-04-03\",\"localName\":\"Viernes
+        Santo\",\"name\":\"Good Friday\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-04-06\",\"localName\":\"Lunes
+        de Pascua\",\"name\":\"Easter Monday\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CT\",\"ES-IB\",\"ES-RI\",\"ES-NC\",\"ES-PV\",\"ES-VC\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-04-23\",\"localName\":\"D\xEDa
+        de Castilla y Le\xF3n\",\"name\":\"Castile and Le\xF3n Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CL\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-04-23\",\"localName\":\"San
+        Jorge (D\xEDa de Arag\xF3n)\",\"name\":\"Day of Arag\xF3n\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-AR\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-05-01\",\"localName\":\"Fiesta
+        del trabajo\",\"name\":\"Labour Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-05-02\",\"localName\":\"Fiesta
+        de la Comunidad de Madrid\",\"name\":\"Day of Madrid\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-MD\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-05-17\",\"localName\":\"D\xEDa
+        das Letras Galegas\",\"name\":\"Galician Literature Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-GA\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-05-30\",\"localName\":\"D\xEDa
+        de Canarias\",\"name\":\"Day of the Canary Islands\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CN\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-05-31\",\"localName\":\"D\xEDa
+        de la Regi\xF3n Castilla-La Mancha\",\"name\":\"Day of Castilla-La Mancha\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CM\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-06-04\",\"localName\":\"Corpus
+        Christi\",\"name\":\"Corpus Christi\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CM\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-06-09\",\"localName\":\"D\xEDa
+        de La Rioja\",\"name\":\"Day of La Rioja\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-RI\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-06-09\",\"localName\":\"D\xEDa
+        de la Regi\xF3n de Murcia\",\"name\":\"Day of Murcia\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-MC\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-06-24\",\"localName\":\"Sant
+        Joan\",\"name\":\"St. John's Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CT\",\"ES-VC\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-07-25\",\"localName\":\"Santiago
+        Ap\xF3stol\",\"name\":\"Santiago Ap\xF3stol\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-GA\",\"ES-PV\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-07-28\",\"localName\":\"D\xEDa
+        de las Instituciones de Cantabria\",\"name\":\"Day of the Cantabrian Institutions\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CB\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-08-15\",\"localName\":\"Asunci\xF3n\",\"name\":\"Assumption\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-09-08\",\"localName\":\"D\xEDa
+        de Asturias\",\"name\":\"Day of Asturias\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-AS\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-09-08\",\"localName\":\"D\xEDa
+        de Extremadura\",\"name\":\"Day of Extremadura\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-EX\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-09-11\",\"localName\":\"Diada
+        Nacional de Catalunya\",\"name\":\"National Day of Catalonia\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CT\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-09-15\",\"localName\":\"Festividad
+        de la Bien Aparecida\",\"name\":\"Feast of Our Lady of Bien Aparecida\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CB\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-10-09\",\"localName\":\"Dia
+        de la Comunitat Valenciana\",\"name\":\"Day of the Valencian Community\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-VC\"],\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-10-12\",\"localName\":\"Fiesta
+        Nacional de Espa\xF1a\",\"name\":\"National Day of Spain\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-11-01\",\"localName\":\"D\xEDa
+        de todos los Santos\",\"name\":\"All Saints Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-12-06\",\"localName\":\"D\xEDa
+        de la Constituci\xF3n\",\"name\":\"Constitution Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-12-08\",\"localName\":\"Inmaculada
+        Concepci\xF3n\",\"name\":\"Immaculate Conception\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-12-25\",\"localName\":\"Navidad\",\"name\":\"Christmas
+        Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":true,\"counties\":null,\"launchYear\":null,\"types\":[\"Public\"]},{\"date\":\"2026-12-26\",\"localName\":\"Feast
+        of Saint Stephen\",\"name\":\"St. Stephen's Day\",\"countryCode\":\"ES\",\"fixed\":false,\"global\":false,\"counties\":[\"ES-CT\"],\"launchYear\":null,\"types\":[\"Public\"]}]"
+    headers:
+      age:
+      - '64184'
+      alt-svc:
+      - h3=":443"; ma=86400
+      api-supported-versions:
+      - '3.0'
+      cache-control:
+      - public,max-age=604800
+      cf-cache-status:
+      - HIT
+      cf-ray:
+      - a5243604bfd742a9-EWR
+      connection:
+      - keep-alive
+      content-length:
+      - '6267'
+      content-security-policy:
+      - 'default-src https: data: ''unsafe-inline'' ''unsafe-eval'''
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Oct 2026 18:23:22 GMT
+      last-modified:
+      - Thu, 29 Oct 2026 02:23:55 GMT
+      nel:
+      - '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}'
+      permissions-policy:
+      - camera=(), microphone=(), geolocation=(), payment=()
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      report-to:
+      - '{"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=ZY7zMLKpKcvVOB7ZZ4o5sPpNuBOVZhbZMK37bdqypFM%2Bw2GjTjshblatKrtCTDx5UlL9UUzb39R%2BJ8XNv6X%2BKRR7dsfVop%2FgEcbSvsdSKcnHKObIH8X2V%2FS7gIRl16pi"}]}'
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -71,7 +71,7 @@ class Agente:
         ya_llamadas: set[tuple[str, str]] = set()
 
         def terminar(texto: str, motivo: MotivoParada) -> ResultadoAgente:
-            return ResultadoAgente(
+            resultado = ResultadoAgente(
                 texto=texto,
                 nuevos=tuple(nuevos),
                 motivo=motivo,
@@ -81,12 +81,17 @@ class Agente:
                 modelos=tuple(modelos),
                 duracion_ms=int((self.cronometro() - inicio) * 1000),
             )
+            _registrar(resultado, contexto)
+            return resultado
 
         for iteracion in range(1, self.limites.max_iteraciones + 1):
             sin_tiempo = self.cronometro() - inicio >= self.limites.segundos
-            ultima = iteracion == self.limites.max_iteraciones or sin_tiempo
+            sin_tokens = self.limites.max_tokens is not None and uso.total >= self.limites.max_tokens  # ejercicio 1
+            ultima = iteracion == self.limites.max_iteraciones or sin_tiempo or sin_tokens
             if sin_tiempo:
                 logger.warning("Agente: %.0f s y sin terminar; última vuelta, sin tools", self.limites.segundos)
+            if sin_tokens:
+                logger.warning("Agente: %s tokens y sin terminar; última vuelta, sin tools", uso.total)
             r = self.llm.generar(
                 PeticionLLM(
                     sistema=instrucciones(contexto),
@@ -189,6 +194,32 @@ class Agente:
         while (sobra := len(json.dumps(inicio, ensure_ascii=False)) - 2 - maximo) > 0:
             inicio = inicio[:-sobra]
         return json.dumps({"recortado": True, "aviso": aviso, "inicio": inicio}, ensure_ascii=False)
+
+
+def _registrar(r: ResultadoAgente, contexto: ContextoPregunta) -> None:
+    """Ejercicio 3: UNA línea de log por pregunta, con todo lo que hace falta para buscarla y para sumar (coste, cuotas,
+    tools más usadas). Sin la pregunta ni la respuesta: son datos del hogar (privacidad, módulo 107)."""
+    logger.info(
+        "Pregunta respondida: %s en %s vueltas y %s ms",
+        r.motivo,
+        r.iteraciones,
+        r.duracion_ms,
+        extra={
+            "asistente": {
+                "usuario_id": contexto.usuario_id,
+                "hogar_id": contexto.hogar.id,
+                "motivo": str(r.motivo),
+                "iteraciones": r.iteraciones,
+                "tools": [ll.nombre for ll in r.llamadas],
+                "modelos": list(dict.fromkeys(r.modelos)),
+                "tokens_entrada": r.uso.entrada,
+                "tokens_salida": r.uso.salida,
+                "tokens_razonamiento": r.uso.razonamiento,
+                "tokens_cache": r.uso.cache,
+                "duracion_ms": r.duracion_ms,
+            }
+        },
+    )
 
 
 def _normalizado(argumentos: str) -> str:

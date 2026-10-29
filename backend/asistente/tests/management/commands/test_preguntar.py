@@ -44,6 +44,11 @@ def test_groq_un_mes_que_no_ha_empezado(casa):
     assert salida == SALIDAS["futuro"]
 
 
+def test_groq_tools_en_paralelo_con_qwen(casa):  # ejercicio 2: un modelo que pide varias tools en el mismo turno
+    salida = preguntar(casa, "¿En qué categoría gastamos más en septiembre que en agosto?", modelo="qwen/qwen3.8-27b")
+    assert salida == SALIDAS["paralelo"]
+
+
 def test_quien_no_es_miembro_no_pregunta(casa, db):
     from conftest import UsuarioFactory
 
@@ -93,5 +98,24 @@ SALIDAS = {
         "vuelta 2 · openai/gpt-oss-120b · N ms · fin · entrada 485, salida 125\n"
         "Lo siento, todavía no hay datos para diciembre de 2026 (aún no ha empezado el mes). ¿Te gustaría el resumen de octubre de 2026 o de algún mes anterior?\n"
         "  [fin · 2 vueltas · 1 tool calls · N ms · tokens: entrada 901, salida 190 (razonamiento 110) · 0.000249 $]\n"
+    ),
+    "paralelo": (
+        "vuelta 1 · qwen/qwen3.8-27b · N ms · tools · entrada 613, salida 68\n"
+        '  → gasto_por_categoria {"mes":"2026-09"}\n'
+        "  ← gasto_por_categoria (N ms): 348 caracteres\n"
+        '  → gasto_por_categoria {"mes":"2026-08"}\n'
+        "  ← gasto_por_categoria (N ms): 345 caracteres\n"
+        "vuelta 2 · qwen/qwen3.8-27b · N ms · fin · entrada 960, salida 165\n"
+        "En septiembre gastaste más que en agosto sobre todo en:\n"
+        "\n"
+        "- **Ocio**: 82,99 € vs 24,00 € (+58,99 €)\n"
+        "- **Restaurantes**: 102,00 € vs 46,80 € (+55,20 €)\n"
+        "- **Casa**: 92,75 € vs 88,30 € (+4,45 €)\n"
+        "- **Transporte**: igual (37,50 €)\n"
+        "\n"
+        "Y menos en **Supermercado**: 461,35 € vs 474,75 € (−13,40 €).\n"
+        "\n"
+        "¿Quieres el desglose por subcategorías de alguna de ellas?\n"
+        "  [fin · 2 vueltas · 2 tool calls · N ms · tokens: entrada 1573, salida 233 (razonamiento 0) · 0.002190 $]\n"
     ),
 }

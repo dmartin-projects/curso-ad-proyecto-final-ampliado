@@ -46,4 +46,4 @@ def test_el_agente_con_sus_tools_y_el_tiempo_de_los_ajustes(settings):
     settings.ASISTENTE_API_KEY, settings.ASISTENTE_SEGUNDOS_POR_PREGUNTA = "clave", 45
     agente = container.agente()
     assert list(agente.tools) == ["resumen_mes", "gasto_por_categoria"]
-    assert agente.limites.segundos == 45
+    assert (agente.limites.segundos, agente.limites.max_tokens) == (45, 10000)

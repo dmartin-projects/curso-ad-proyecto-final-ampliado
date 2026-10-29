@@ -219,3 +219,5 @@ uv run python manage.py preguntar "¿En qué categoría gastamos más en septiem
 ```
 
 Cada vuelta del agente sale en la terminal (el modelo, las *tools* que pide, lo que devuelven) y al final las vueltas, los *tokens* y el coste. La reserva y los límites, en `.env`: `ASISTENTE_MODELOS_RESERVA` (por defecto `openai/gpt-oss-20b`) y `ASISTENTE_SEGUNDOS_POR_PREGUNTA` (60).
+
+Ejercicios: un presupuesto de *tokens* por pregunta (`ASISTENTE_TOKENS_POR_PREGUNTA`, 10.000: pasado, la siguiente vuelta es la última), *tool calls* en paralelo con un modelo que las pide (`--modelo qwen/qwen3.8-27b`) y por qué se ejecutan en serie, y una línea de *log* por pregunta (`asistente.application.agent.agente`: vueltas, *tools*, modelos y *tokens*, sin la pregunta ni la respuesta).

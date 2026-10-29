@@ -1,0 +1,208 @@
+interactions:
+- request:
+    body: "{\"model\":\"qwen/qwen3.8-27b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eres
+      el asistente de Gastos, una app de gastos del hogar. Contestas sobre el hogar
+      \xABCasa de Ana y Luis\xBB (importes en EUR). Hoy es 2026-10-29.\\nUsa las tools
+      para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
+      y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
+      den las tools.\"},{\"role\":\"user\",\"content\":\"\xBFEn qu\xE9 categor\xEDa
+      gastamos m\xE1s en septiembre que en agosto?\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
+      de un mes del hogar: gastos, ingresos, balance, n\xFAmero de movimientos y variaci\xF3n
+      del gasto frente al mes anterior. Para '\xBFcu\xE1nto gastamos en septiembre?'
+      o '\xBFc\xF3mo vamos este mes?'. El desglose por categor\xEDa est\xE1 en gasto_por_categoria.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"description\":\"Gasto
+      de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
+      su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
+      m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
+      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}}]}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1571'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-dc903a46-04b8-4ed5-878b-79a3a895b09f","object":"chat.completion","created":1793293890,"model":"qwen/qwen3.8-27b","choices":[{"index":0,"message":{"role":"assistant","tool_calls":[{"id":"r8rcdawm7","type":"function","function":{"name":"gasto_por_categoria","arguments":"{\"mes\":\"2026-09\"}"}},{"id":"nfygbpat9","type":"function","function":{"name":"gasto_por_categoria","arguments":"{\"mes\":\"2026-08\"}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.101845463,"prompt_tokens":613,"prompt_time":0.053585165,"completion_tokens":68,"completion_time":0.205222579,"total_tokens":681,"total_time":0.258807744},"usage_breakdown":null,"system_fingerprint":"fp_57c7e760a9","x_groq":{"id":"req_01m64aac7tecx8cx52kq78wekc","seed":596350714},"service_tier":"on_demand"}
+
+        '
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a523ccbb0f2cad87-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '806'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 17:11:30 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - msp
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '985'
+      x-ratelimit-remaining-tokens:
+      - '7331'
+      x-ratelimit-reset-requests:
+      - 21m36s
+      x-ratelimit-reset-tokens:
+      - 5.017s
+      x-request-id:
+      - req_01m64aac7tecx8cx52kq78wekc
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"qwen/qwen3.8-27b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eres
+      el asistente de Gastos, una app de gastos del hogar. Contestas sobre el hogar
+      \xABCasa de Ana y Luis\xBB (importes en EUR). Hoy es 2026-10-29.\\nUsa las tools
+      para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
+      y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
+      den las tools.\"},{\"role\":\"user\",\"content\":\"\xBFEn qu\xE9 categor\xEDa
+      gastamos m\xE1s en septiembre que en agosto?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"r8rcdawm7\",\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"arguments\":\"{\\\"mes\\\":\\\"2026-09\\\"}\"}},{\"id\":\"nfygbpat9\",\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"arguments\":\"{\\\"mes\\\":\\\"2026-08\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"r8rcdawm7\",\"content\":\"{\\\"mes\\\":\\\"2026-09\\\",\\\"gastos\\\":\\\"776.59\\\",\\\"categorias\\\":[{\\\"categoria\\\":\\\"Supermercado\\\",\\\"total\\\":\\\"461.35\\\",\\\"porcentaje\\\":59.4},{\\\"categoria\\\":\\\"Restaurantes\\\",\\\"total\\\":\\\"102.00\\\",\\\"porcentaje\\\":13.1},{\\\"categoria\\\":\\\"Casa\\\",\\\"total\\\":\\\"92.75\\\",\\\"porcentaje\\\":11.9},{\\\"categoria\\\":\\\"Ocio\\\",\\\"total\\\":\\\"82.99\\\",\\\"porcentaje\\\":10.7},{\\\"categoria\\\":\\\"Transporte\\\",\\\"total\\\":\\\"37.50\\\",\\\"porcentaje\\\":4.8}]}\"},{\"role\":\"tool\",\"tool_call_id\":\"nfygbpat9\",\"content\":\"{\\\"mes\\\":\\\"2026-08\\\",\\\"gastos\\\":\\\"671.35\\\",\\\"categorias\\\":[{\\\"categoria\\\":\\\"Supermercado\\\",\\\"total\\\":\\\"474.75\\\",\\\"porcentaje\\\":70.7},{\\\"categoria\\\":\\\"Casa\\\",\\\"total\\\":\\\"88.30\\\",\\\"porcentaje\\\":13.2},{\\\"categoria\\\":\\\"Restaurantes\\\",\\\"total\\\":\\\"46.80\\\",\\\"porcentaje\\\":7.0},{\\\"categoria\\\":\\\"Transporte\\\",\\\"total\\\":\\\"37.50\\\",\\\"porcentaje\\\":5.6},{\\\"categoria\\\":\\\"Ocio\\\",\\\"total\\\":\\\"24.00\\\",\\\"porcentaje\\\":3.6}]}\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
+      de un mes del hogar: gastos, ingresos, balance, n\xFAmero de movimientos y variaci\xF3n
+      del gasto frente al mes anterior. Para '\xBFcu\xE1nto gastamos en septiembre?'
+      o '\xBFc\xF3mo vamos este mes?'. El desglose por categor\xEDa est\xE1 en gasto_por_categoria.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"description\":\"Gasto
+      de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
+      su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
+      m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
+      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}}]}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '2777'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-f1971540-8347-447a-8544-d3f00c298a9e\",\"object\":\"chat.completion\",\"created\":1793293890,\"model\":\"qwen/qwen3.8-27b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"En
+        septiembre gastaste m\xE1s que en agosto sobre todo en:\\n\\n- **Ocio**: 82,99
+        \u20AC vs 24,00 \u20AC (+58,99 \u20AC)\\n- **Restaurantes**: 102,00 \u20AC
+        vs 46,80 \u20AC (+55,20 \u20AC)\\n- **Casa**: 92,75 \u20AC vs 88,30 \u20AC
+        (+4,45 \u20AC)\\n- **Transporte**: igual (37,50 \u20AC)\\n\\nY menos en **Supermercado**:
+        461,35 \u20AC vs 474,75 \u20AC (\u221213,40 \u20AC).\\n\\n\xBFQuieres el desglose
+        por subcategor\xEDas de alguna de ellas?\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.099994093,\"prompt_tokens\":960,\"prompt_time\":0.076914607,\"completion_tokens\":165,\"completion_time\":0.345629277,\"total_tokens\":1125,\"total_time\":0.422543884},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_5e14805ce3\",\"x_groq\":{\"id\":\"req_01m64aacr9e96b3dkqb8b54w1r\",\"seed\":482719114},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a523ccbe5ab1ad87-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '957'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 17:11:30 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - msp
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '984'
+      x-ratelimit-remaining-tokens:
+      - '6353'
+      x-ratelimit-reset-requests:
+      - 23m2.4s
+      x-ratelimit-reset-tokens:
+      - 12.96s
+      x-request-id:
+      - req_01m64aacr9e96b3dkqb8b54w1r
+    status:
+      code: 200
+      message: OK
+version: 1

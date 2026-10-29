@@ -54,7 +54,9 @@ def tools() -> list[Tool]:
 
 
 def agente(observador: IObservadorAgente | None = None, modelo: str | None = None) -> Agente:
-    limites = Limites(segundos=settings.ASISTENTE_SEGUNDOS_POR_PREGUNTA)
+    limites = Limites(
+        segundos=settings.ASISTENTE_SEGUNDOS_POR_PREGUNTA, max_tokens=settings.ASISTENTE_TOKENS_POR_PREGUNTA
+    )
     return Agente(llm=llm(modelo), tools=tools(), limites=limites, observador=observador)
 
 

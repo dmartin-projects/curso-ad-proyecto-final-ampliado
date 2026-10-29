@@ -12,6 +12,8 @@ class Limites:
         60.0  # pasado este tiempo, la siguiente vuelta es la última (sin tools): contesta con lo que tiene
     )
     max_caracteres_resultado: int = 6000  # ~1.500 tokens por resultado de tool: una red de seguridad
+    # Ejercicio 1: pasados estos tokens (entrada + salida, sumando todas las vueltas), la siguiente vuelta es la última
+    max_tokens: int | None = None
 
     def __post_init__(self):
         if self.max_iteraciones < 2:  # una para pedir tools y otra para contestar con sus resultados

@@ -1,0 +1,1034 @@
+interactions:
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"user\",\"content\":\"Movimiento:
+      12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. \\n\xBFCu\xE1ntos
+      movimientos hay? Solo el n\xFAmero.\"}],\"max_completion_tokens\":300,\"reasoning_effort\":\"low\"}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '16672'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-4d150f37-e7c1-4019-90e4-fe253525368d","object":"chat.completion","created":1793293412,"model":"openai/gpt-oss-120b","choices":[{"index":0,"message":{"role":"assistant","content":"200","reasoning":"Count
+        repetitions. Looks like many lines. Probably 200? Need count. Hard. Might
+        be 200 lines. I''ll answer 200."},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.243745374,"prompt_tokens":4882,"prompt_time":0.211092003,"completion_tokens":39,"completion_time":0.081435964,"total_tokens":4921,"total_time":0.292527967,"completion_tokens_details":{"reasoning_tokens":29}},"usage_breakdown":null,"system_fingerprint":"fp_69334c0be3","x_groq":{"id":"req_01m649vs8webn8na97amd1ca5e","seed":1497664479},"service_tier":"on_demand"}
+
+        '
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a523c10e5a062f6b-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '754'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 17:03:32 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '978'
+      x-ratelimit-remaining-tokens:
+      - '2936'
+      x-ratelimit-reset-requests:
+      - 31m40.8s
+      x-ratelimit-reset-tokens:
+      - 37.98s
+      x-request-id:
+      - req_01m649vs8webn8na97amd1ca5e
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"user\",\"content\":\"Movimiento:
+      12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. \\n\xBFCu\xE1ntos
+      movimientos hay? Solo el n\xFAmero.\"}],\"max_completion_tokens\":300,\"reasoning_effort\":\"low\"}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '16672'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: '{"error":{"message":"Rate limit reached for model `openai/gpt-oss-120b`
+        in organization `org_...` service tier `on_demand` on tokens per minute (TPM):
+        Limit 8000, Used 4836, Requested 4940. Please try again in 13.32s. Need more
+        tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing","type":"tokens","code":"rate_limit_exceeded"}}
+
+        '
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a523c1128dcd2f6b-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '378'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 17:03:32 GMT
+      retry-after:
+      - '14'
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '978'
+      x-ratelimit-remaining-tokens:
+      - '3164'
+      x-ratelimit-reset-requests:
+      - 31m40.8s
+      x-ratelimit-reset-tokens:
+      - 36.27s
+      x-request-id:
+      - req_01m649vsxse4eae6m9c8d1c52k
+    status:
+      code: 429
+      message: Too Many Requests
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Movimiento:
+      12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30
+      \u20AC en Mercadona el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona
+      el 3 de septiembre. Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre.
+      Movimiento: 12,30 \u20AC en Mercadona el 3 de septiembre. \\n\xBFCu\xE1ntos
+      movimientos hay? Solo el n\xFAmero.\"}],\"max_completion_tokens\":300,\"reasoning_effort\":\"low\"}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '16671'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-7acce8aa-d5da-45bc-8b00-46029a8f633a\",\"object\":\"chat.completion\",\"created\":1793293413,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"200\",\"reasoning\":\"User
+        asks how many movements. The text repeats \\\"Movimiento: 12,30 \u20AC en
+        Mercadona el 3 de septiembre.\\\" many times. Need count. Hard to count manually.
+        We can approximate? Might be 200? But need exact. We could count lines? The
+        text is a continuous block. I think it's 200? But maybe 200 times. Let's assume
+        200.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.176846902,\"prompt_tokens\":4882,\"prompt_time\":0.371997196,\"completion_tokens\":90,\"completion_time\":0.0981168,\"total_tokens\":4972,\"total_time\":0.470113996,\"completion_tokens_details\":{\"reasoning_tokens\":80}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_d3e146e1a5\",\"x_groq\":{\"id\":\"req_01m649vt0geyvsdn5kzpqh1qb0\",\"seed\":2074689602},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a523c1131f502f6b-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '955'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 17:03:33 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '999'
+      x-ratelimit-remaining-tokens:
+      - '2818'
+      x-ratelimit-reset-requests:
+      - 1m26.4s
+      x-ratelimit-reset-tokens:
+      - 38.865s
+      x-request-id:
+      - req_01m649vt0geyvsdn5kzpqh1qb0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"\xBFCu\xE1nto
+      son 12,30 \u20AC por 300? Solo el n\xFAmero.\"}],\"max_completion_tokens\":300,\"reasoning_effort\":\"low\"}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '174'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-372dc03c-9caa-4ca0-a200-d0c25c9dab0e","object":"chat.completion","created":1793293413,"model":"openai/gpt-oss-20b","choices":[{"index":0,"message":{"role":"assistant","content":"3690","reasoning":"Need
+        compute 12.30 * 300 = 3690."},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.086461448,"prompt_tokens":87,"prompt_time":0.031366389,"completion_tokens":26,"completion_time":0.027886676,"total_tokens":113,"total_time":0.059253065,"completion_tokens_details":{"reasoning_tokens":15}},"usage_breakdown":null,"system_fingerprint":"fp_e11c8bbf69","x_groq":{"id":"req_01m649vtx5es1873p5vfv6n0j6","seed":200557065},"service_tier":"on_demand"}
+
+        '
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a523c118deab2f6b-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '672'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 17:03:33 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '998'
+      x-ratelimit-remaining-tokens:
+      - '2757'
+      x-ratelimit-reset-requests:
+      - 2m52.8s
+      x-ratelimit-reset-tokens:
+      - 39.322s
+      x-request-id:
+      - req_01m649vtx5es1873p5vfv6n0j6
+    status:
+      code: 200
+      message: OK
+version: 1

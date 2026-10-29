@@ -410,6 +410,10 @@ ASISTENTE_BASE_URL = env("ASISTENTE_BASE_URL", default="https://api.groq.com/ope
 ASISTENTE_API_KEY = env("ASISTENTE_API_KEY", default="")
 ASISTENTE_MODELO = env("ASISTENTE_MODELO", default="openai/gpt-oss-120b")
 ASISTENTE_TIMEOUT = env.float("ASISTENTE_TIMEOUT", default=30.0)  # segundos por intento
+# Módulo 94: si el principal no está disponible (o se ha quedado sin cuota), estos, en orden. En Groq, cada modelo
+# tiene su propia cuota: el de reserva suele estar libre cuando el principal devuelve 429.
+ASISTENTE_MODELOS_RESERVA = env.list("ASISTENTE_MODELOS_RESERVA", default=["openai/gpt-oss-20b"])
+ASISTENTE_SEGUNDOS_POR_PREGUNTA = env.float("ASISTENTE_SEGUNDOS_POR_PREGUNTA", default=60.0)
 # Dólares por millón de tokens: entrada, salida (con el razonamiento) y entrada desde la caché. Los publicados en
 # console.groq.com/docs/models en octubre de 2026. Un modelo que no esté aquí sale con "coste desconocido".
 ASISTENTE_PRECIOS = {

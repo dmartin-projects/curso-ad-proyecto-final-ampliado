@@ -1,0 +1,19 @@
+# asistente/application/agent/resultado_agente.py — lo que devuelve el agente al contestar una pregunta (módulo 94)
+from dataclasses import dataclass
+
+from asistente.domain.enums.motivo_parada import MotivoParada
+from asistente.domain.vo.llamada_tool import LlamadaTool
+from asistente.domain.vo.mensaje import Mensaje
+from asistente.domain.vo.uso import Uso
+
+
+@dataclass(frozen=True, slots=True)
+class ResultadoAgente:
+    texto: str  # lo que se enseña al usuario
+    nuevos: tuple[Mensaje, ...]  # lo que se AÑADE a la conversación: turnos del modelo y resultados de tools
+    motivo: MotivoParada
+    uso: Uso  # la suma de todas las vueltas
+    iteraciones: int  # llamadas al LLM
+    llamadas: tuple[LlamadaTool, ...]  # todas las tool calls que pidió (ejecutadas o rechazadas)
+    modelos: tuple[str, ...]  # el que respondió en cada vuelta (con reserva, puede cambiar a mitad)
+    duracion_ms: int

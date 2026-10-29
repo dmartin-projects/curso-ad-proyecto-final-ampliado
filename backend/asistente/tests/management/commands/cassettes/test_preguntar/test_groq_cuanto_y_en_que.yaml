@@ -1,0 +1,313 @@
+interactions:
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eres
+      el asistente de Gastos, una app de gastos del hogar. Contestas sobre el hogar
+      \xABCasa de Ana y Luis\xBB (importes en EUR). Hoy es 2026-10-29.\\nUsa las tools
+      para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
+      y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
+      den las tools.\"},{\"role\":\"user\",\"content\":\"\xBFCu\xE1nto gastamos en
+      septiembre y en qu\xE9 categor\xEDa se fue m\xE1s dinero?\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
+      de un mes del hogar: gastos, ingresos, balance, n\xFAmero de movimientos y variaci\xF3n
+      del gasto frente al mes anterior. Para '\xBFcu\xE1nto gastamos en septiembre?'
+      o '\xBFc\xF3mo vamos este mes?'. El desglose por categor\xEDa est\xE1 en gasto_por_categoria.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"description\":\"Gasto
+      de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
+      su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
+      m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
+      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}}]}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1584'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-45bb749a-f558-4a5b-ac70-c6c378be87b6","object":"chat.completion","created":1793293822,"model":"openai/gpt-oss-120b","choices":[{"index":0,"message":{"role":"assistant","reasoning":"We
+        need to answer two parts: total spent in September, and which category had
+        the most money. Use functions: resumen_mes for total, and gasto_por_categoria
+        for breakdown. Need to call with month=2026-09. Let''s do that.","tool_calls":[{"id":"fc_e2f35154-e7b2-43d0-94c1-c79a9e724d30","type":"function","function":{"name":"resumen_mes","arguments":"{\"mes\":\"2026-09\"}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.207946691,"prompt_tokens":421,"prompt_time":0.024621284,"completion_tokens":82,"completion_time":0.176461329,"total_tokens":503,"total_time":0.201082613,"completion_tokens_details":{"reasoning_tokens":51}},"usage_breakdown":null,"system_fingerprint":"fp_02b0d31eca","x_groq":{"id":"req_01m64a8ad1ewm9wa871hvqk670","seed":780139104},"service_tier":"on_demand"}
+
+        '
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a523cb159c52e87f-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '1001'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 17:10:23 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '981'
+      x-ratelimit-remaining-tokens:
+      - '7314'
+      x-ratelimit-reset-requests:
+      - 27m21.6s
+      x-ratelimit-reset-tokens:
+      - 5.145s
+      x-request-id:
+      - req_01m64a8ad1ewm9wa871hvqk670
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eres
+      el asistente de Gastos, una app de gastos del hogar. Contestas sobre el hogar
+      \xABCasa de Ana y Luis\xBB (importes en EUR). Hoy es 2026-10-29.\\nUsa las tools
+      para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
+      y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
+      den las tools.\"},{\"role\":\"user\",\"content\":\"\xBFCu\xE1nto gastamos en
+      septiembre y en qu\xE9 categor\xEDa se fue m\xE1s dinero?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_e2f35154-e7b2-43d0-94c1-c79a9e724d30\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-09\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_e2f35154-e7b2-43d0-94c1-c79a9e724d30\",\"content\":\"{\\\"mes\\\":\\\"2026-09\\\",\\\"gastos\\\":\\\"776.59\\\",\\\"ingresos\\\":\\\"2100.00\\\",\\\"balance\\\":\\\"1323.41\\\",\\\"movimientos\\\":10,\\\"gastos_mes_anterior\\\":\\\"671.35\\\",\\\"variacion_gastos_pct\\\":15.7}\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
+      de un mes del hogar: gastos, ingresos, balance, n\xFAmero de movimientos y variaci\xF3n
+      del gasto frente al mes anterior. Para '\xBFcu\xE1nto gastamos en septiembre?'
+      o '\xBFc\xF3mo vamos este mes?'. El desglose por categor\xEDa est\xE1 en gasto_por_categoria.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"description\":\"Gasto
+      de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
+      su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
+      m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
+      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}}]}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '2034'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-929ff8ad-0d2b-4e7e-a7dd-b7ddfcfc9160","object":"chat.completion","created":1793293823,"model":"openai/gpt-oss-120b","choices":[{"index":0,"message":{"role":"assistant","reasoning":"We
+        need also category breakdown for September. Use gasto_por_categoria.","tool_calls":[{"id":"fc_a3735c60-067c-4348-accc-a1ec651a89c7","type":"function","function":{"name":"gasto_por_categoria","arguments":"{\"mes\":\"2026-09\"}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.243770666,"prompt_tokens":506,"prompt_time":0.023978765,"completion_tokens":40,"completion_time":0.083876774,"total_tokens":546,"total_time":0.107855539,"completion_tokens_details":{"reasoning_tokens":14}},"usage_breakdown":null,"system_fingerprint":"fp_c3da0d4bb9","x_groq":{"id":"req_01m64a8b4mezgvmmrh0f06599v","seed":164075929},"service_tier":"on_demand"}
+
+        '
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a523cb1a5d05e87f-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '862'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 17:10:23 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '980'
+      x-ratelimit-remaining-tokens:
+      - '6835'
+      x-ratelimit-reset-requests:
+      - 28m48s
+      x-ratelimit-reset-tokens:
+      - 8.737s
+      x-request-id:
+      - req_01m64a8b4mezgvmmrh0f06599v
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eres
+      el asistente de Gastos, una app de gastos del hogar. Contestas sobre el hogar
+      \xABCasa de Ana y Luis\xBB (importes en EUR). Hoy es 2026-10-29.\\nUsa las tools
+      para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
+      y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
+      den las tools.\"},{\"role\":\"user\",\"content\":\"\xBFCu\xE1nto gastamos en
+      septiembre y en qu\xE9 categor\xEDa se fue m\xE1s dinero?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_e2f35154-e7b2-43d0-94c1-c79a9e724d30\",\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"arguments\":\"{\\\"mes\\\":\\\"2026-09\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_e2f35154-e7b2-43d0-94c1-c79a9e724d30\",\"content\":\"{\\\"mes\\\":\\\"2026-09\\\",\\\"gastos\\\":\\\"776.59\\\",\\\"ingresos\\\":\\\"2100.00\\\",\\\"balance\\\":\\\"1323.41\\\",\\\"movimientos\\\":10,\\\"gastos_mes_anterior\\\":\\\"671.35\\\",\\\"variacion_gastos_pct\\\":15.7}\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"fc_a3735c60-067c-4348-accc-a1ec651a89c7\",\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"arguments\":\"{\\\"mes\\\":\\\"2026-09\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"fc_a3735c60-067c-4348-accc-a1ec651a89c7\",\"content\":\"{\\\"mes\\\":\\\"2026-09\\\",\\\"gastos\\\":\\\"776.59\\\",\\\"categorias\\\":[{\\\"categoria\\\":\\\"Supermercado\\\",\\\"total\\\":\\\"461.35\\\",\\\"porcentaje\\\":59.4},{\\\"categoria\\\":\\\"Restaurantes\\\",\\\"total\\\":\\\"102.00\\\",\\\"porcentaje\\\":13.1},{\\\"categoria\\\":\\\"Casa\\\",\\\"total\\\":\\\"92.75\\\",\\\"porcentaje\\\":11.9},{\\\"categoria\\\":\\\"Ocio\\\",\\\"total\\\":\\\"82.99\\\",\\\"porcentaje\\\":10.7},{\\\"categoria\\\":\\\"Transporte\\\",\\\"total\\\":\\\"37.50\\\",\\\"porcentaje\\\":4.8}]}\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
+      de un mes del hogar: gastos, ingresos, balance, n\xFAmero de movimientos y variaci\xF3n
+      del gasto frente al mes anterior. Para '\xBFcu\xE1nto gastamos en septiembre?'
+      o '\xBFc\xF3mo vamos este mes?'. El desglose por categor\xEDa est\xE1 en gasto_por_categoria.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"description\":\"Gasto
+      de un mes del hogar por categor\xEDa principal (las subcategor\xEDas suman en
+      su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
+      m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
+      dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}}]}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '2724'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-24d2983a-cceb-4175-8554-ec4ea69b4b06\",\"object\":\"chat.completion\",\"created\":1793293823,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"En
+        septiembre gastamos **776,59\u202F\u20AC**. La categor\xEDa con mayor gasto
+        fue **Supermercado**, con **461,35\u202F\u20AC** (\u2248\u202F59\u202F% del
+        total).\",\"reasoning\":\"We need to answer: \\\"\xBFCu\xE1nto gastamos en
+        septiembre y en qu\xE9 categor\xEDa se fue m\xE1s dinero?\\\" Provide total
+        spent and top category with amount. Use data from tools. Provide brief answer
+        in Spanish.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.03225789,\"prompt_tokens\":648,\"prompt_time\":0.029253794,\"completion_tokens\":92,\"completion_time\":0.193826107,\"total_tokens\":740,\"total_time\":0.223079901,\"completion_tokens_details\":{\"reasoning_tokens\":43}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_6b677c2caf\",\"x_groq\":{\"id\":\"req_01m64a8bnjexn9dt36zqwat7sr\",\"seed\":678636294},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a523cb1db883e87f-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '976'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 17:10:23 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '979'
+      x-ratelimit-remaining-tokens:
+      - '6222'
+      x-ratelimit-reset-requests:
+      - 30m14.4s
+      x-ratelimit-reset-tokens:
+      - 13.335s
+      x-request-id:
+      - req_01m64a8bnjexn9dt36zqwat7sr
+    status:
+      code: 200
+      message: OK
+version: 1

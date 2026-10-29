@@ -16,8 +16,9 @@ Es Gastos (módulos 70-83) con las ampliaciones de las Partes 6 y 7 encima. **Ca
 | **91 · Social login (Google, GitHub, Apple)** | Gastos como **cliente** OIDC (*Relying Party*) con Authlib y el patrón BFF: Django hace la ida y la vuelta (`state`, `nonce`, PKCE), canjea el *code* con su secreto y valida el ID token; los *tokens* del proveedor no llegan al navegador y la SPA recibe los mismos *tokens* que con la contraseña. Google (OIDC), GitHub (OAuth 2.0 + su API, solo emails verificados) y Apple (`form_post` y *client secret* JWT ES256). Identidades por (proveedor, `sub`), sin vincular nunca por email; «Métodos de acceso» para vincular, desvincular (nunca el último) y establecer contraseña | `backend/usuarios/infrastructure/providers/`, `backend/usuarios/application/empezar_login_social_use_case/` y `completar_login_social_use_case/`, `frontend/src/app/features/cuenta/pages/acceso/acceso.ts` |
 | **92 · MFA y login moderno** | Verificación en dos pasos con TOTP (secreto cifrado con Fernet, un código una vez, ±30 s) y códigos de recuperación con hash; *passkeys* (WebAuthn con py_webauthn y la API nativa del navegador) como segundo factor y para entrar sin contraseña (también en el autorrelleno); un único `IniciarSesionUseCase` para las cuatro puertas (contraseña y proveedor, en la SPA y en el *authorization server*), con `amr`/`acr` en el ID token; *step-up* (RFC 9470) para las acciones sensibles; sesiones con nombre (dispositivo, red, último uso), «cerrar las demás», caducidad y detección de reutilización del *refresh token* (RFC 9700, sin guardar ningún *token* en la base de datos); aviso por email de un dispositivo nuevo y de los fallos del segundo factor; bloqueo progresivo del segundo factor con techo (NIST SP 800-63B-4) | `backend/usuarios/application/iniciar_sesion_use_case/` (y los demás *use cases* de sesiones, MFA y *passkeys*), `backend/usuarios/infrastructure/mfa/`, `frontend/src/app/features/cuenta/pages/seguridad/seguridad.ts`, `frontend/src/app/core/auth/reautenticacion.ts` |
 | **93 · LLMs para developers** | La app `asistente` (Parte 7) con su núcleo hexagonal: el *port* `ILLM` (una petición con instrucciones, historial, *tools*, *structured output* y razonamiento; un turno del modelo con sus *tokens* y su coste) y su *adapter* `OpenAICompatibleLLM` con el SDK `openai` sobre la API Chat Completions de **Groq** (`openai/gpt-oss-120b`; cualquier proveedor compatible cambiando la URL, la clave y el modelo), reintentos con tenacity solo de lo transitorio (el 429 dice cuánto esperar), `LLMFake` con guion para los tests y **cassettes** (pytest-recording) de llamadas reales: los tests no necesitan red ni clave. `manage.py probar_llm` para ver *tokens*, latencia, coste, *temperature*, razonamiento y *structured output* | `backend/asistente/`, `backend/asistente/tests/management/commands/cassettes/` |
+| **94 · El *agent loop*** | El bucle del agente escrito a mano (`application/agent/agente.py`), sin *frameworks*: el modelo pide *tools*, se ejecutan y sus resultados (o sus errores, para que se corrija) vuelven al historial hasta que contesta. Guardas: `MAX_ITERATIONS` con la última vuelta sin *tools*, tiempo por pregunta, cuota por *tool*, llamadas repetidas y resultados recortados. `LLMConReserva`: `gpt-oss-20b` si `gpt-oss-120b` no está disponible, con un *circuit breaker* por modelo (un 429 lo abre lo que diga `retry-after`). Las dos primeras *tools* (`resumen_mes`, `gasto_por_categoria`) sobre los *use cases* de consulta de finanzas con un `Actor` limitado a LECTOR, y `manage.py preguntar` | `backend/asistente/application/agent/`, `backend/asistente/application/tools/`, `backend/asistente/infrastructure/llm/llm_con_reserva.py` |
 
-Estado comprobado al terminar el módulo 93: 889 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (sin cambios desde el 89), 48 de *frontend* (Vitest) y 21 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones (30 contratos).
+Estado comprobado al terminar el módulo 94: 967 tests de *backend* (1 se salta sin Kafka; con Kafka, los 24 de eventos pasan), 75 del servicio de estadísticas (sin cambios desde el 89), 48 de *frontend* (Vitest) y 21 de punta a punta (Playwright), todos en verde; `uv run lint-imports` sin violaciones (30 contratos).
 
 ## Estructura
 
@@ -84,7 +85,7 @@ Personal de soporte (el *backoffice* está dentro de la app, no hay Django admin
 ## Tests
 
 ```bash
-cd backend && uv run pytest -n 4 --cov                 # 887 tests (+1 que se salta sin Kafka)
+cd backend && uv run pytest -n 4 --cov                 # 965 tests (+1 que se salta sin Kafka)
 cd frontend && npx ng test --watch=false                # 38 tests
 # punta a punta (módulo 82): una vez, crea la BD de E2E
 docker compose exec db createdb -U gastos gastos_e2e
@@ -208,3 +209,13 @@ uv run python manage.py probar_llm "¿Qué variación hay entre 1.240 € y 1.11
 Otro proveedor compatible con Chat Completions: `ASISTENTE_BASE_URL`, `ASISTENTE_API_KEY` y `ASISTENTE_MODELO` (por ejemplo, Ollama en local: `http://localhost:11434/v1`, clave `ollama`).
 
 Ejercicios: el *structured output* validado con un modelo de pydantic que además genera el JSON Schema que se pide (`--estructurado`: un importe de 0 €, una fecha del futuro o una cuenta que no existe se rechazan), la misma extracción con tres modelos (`--modelo openai/gpt-oss-20b`, `--modelo qwen/qwen3.8-27b`) y el coste mensual del asistente.
+
+**94 · El agente.** Con la clave de Groq en `.env` y los datos de ejemplo (`manage.py seed`):
+
+```bash
+cd backend
+uv run python manage.py preguntar "¿Cuánto gastamos en septiembre y en qué categoría se fue más dinero?" --email demo@example.com --hogar 1
+uv run python manage.py preguntar "¿En qué categoría gastamos más en septiembre que en agosto?" --email demo@example.com --hogar 1 --resultados
+```
+
+Cada vuelta del agente sale en la terminal (el modelo, las *tools* que pide, lo que devuelven) y al final las vueltas, los *tokens* y el coste. La reserva y los límites, en `.env`: `ASISTENTE_MODELOS_RESERVA` (por defecto `openai/gpt-oss-20b`) y `ASISTENTE_SEGUNDOS_POR_PREGUNTA` (60).

@@ -1,4 +1,4 @@
-"""Módulo 93: el composition root del asistente."""
+"""Módulos 93 y 94: el composition root del asistente."""
 
 from decimal import Decimal
 
@@ -6,6 +6,7 @@ import pytest
 from django.core.exceptions import ImproperlyConfigured
 
 from asistente.infrastructure import container
+from asistente.infrastructure.llm.llm_con_reserva import LLMConReserva
 from asistente.infrastructure.llm.openai_compatible_llm import OpenAICompatibleLLM
 
 
@@ -15,17 +16,23 @@ def test_sin_clave_no_arranca(settings):
         container.llm()
 
 
-def test_monta_el_adapter_con_el_modelo_de_los_ajustes_o_el_pedido(settings):
+def test_el_principal_con_su_reserva_o_solo_el_modelo_pedido(settings):
     settings.ASISTENTE_API_KEY, settings.ASISTENTE_MODELO = "clave", "openai/gpt-oss-120b"
+    settings.ASISTENTE_MODELOS_RESERVA = ["openai/gpt-oss-20b"]
 
-    assert isinstance(container.llm(), OpenAICompatibleLLM)
-    assert container.llm().modelo == "openai/gpt-oss-120b"
-    assert container.llm("openai/gpt-oss-20b").modelo == "openai/gpt-oss-20b"
+    llm = container.llm()
+    assert isinstance(llm, LLMConReserva)
+    assert [(m.modelo, c.clave_abierto) for m, c in llm.modelos] == [
+        ("openai/gpt-oss-120b", "cb:llm:openai/gpt-oss-120b:abierto"),
+        ("openai/gpt-oss-20b", "cb:llm:openai/gpt-oss-20b:abierto"),
+    ]
+    solo = container.llm("qwen/qwen3.8-27b")
+    assert isinstance(solo, OpenAICompatibleLLM) and solo.modelo == "qwen/qwen3.8-27b"
 
 
 def test_el_cliente_http_es_uno_por_configuracion(settings):
     settings.ASISTENTE_API_KEY = "clave"
-    assert container.llm()._cliente is container.llm("openai/gpt-oss-20b")._cliente  # la conexión se reutiliza
+    assert container.llm("a")._cliente is container.llm("b")._cliente  # la conexión se reutiliza
 
 
 def test_precio_de_un_modelo_y_coste_desconocido(settings):
@@ -33,3 +40,10 @@ def test_precio_de_un_modelo_y_coste_desconocido(settings):
 
     assert container.precio("openai/gpt-oss-120b").salida == Decimal("0.60")
     assert container.precio("modelo-nuevo") is None
+
+
+def test_el_agente_con_sus_tools_y_el_tiempo_de_los_ajustes(settings):
+    settings.ASISTENTE_API_KEY, settings.ASISTENTE_SEGUNDOS_POR_PREGUNTA = "clave", 45
+    agente = container.agente()
+    assert list(agente.tools) == ["resumen_mes", "gasto_por_categoria"]
+    assert agente.limites.segundos == 45

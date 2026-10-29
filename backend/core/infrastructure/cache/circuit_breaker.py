@@ -1,4 +1,4 @@
-# core/infrastructure/cache/circuit_breaker.py — circuit breaker compartido entre procesos, con el estado en la caché (Redis) (módulos 27 y 88)
+# core/infrastructure/cache/circuit_breaker.py — circuit breaker compartido entre procesos, con el estado en la caché (Redis) (módulos 27, 88 y 94)
 from django.core.cache import cache
 
 from core.infrastructure.cache.circuito_abierto_exception import CircuitoAbiertoException
@@ -27,3 +27,9 @@ class CircuitBreaker:
             raise
         cache.delete(self.clave_fallos)
         return resultado
+
+    def abrir(self, segundos: float) -> None:
+        """Abre el circuito YA, sin esperar al umbral: cuando el otro lado dice "vuelve dentro de N s" (un 429 con
+        retry-after, módulo 94). Se cierra solo cuando pasan."""
+        cache.set(self.clave_abierto, True, timeout=max(1, round(segundos)))
+        cache.delete(self.clave_fallos)

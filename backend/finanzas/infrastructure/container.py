@@ -1,4 +1,4 @@
-# finanzas/infrastructure/container.py — composition root de finanzas (módulos 87 y 88)
+# finanzas/infrastructure/container.py — composition root de finanzas (módulos 87, 88 y 95)
 #
 # El ÚNICO sitio que sabe qué implementación va detrás de cada interfaz. Las views, las tareas, los receivers y los
 # comandos piden aquí su use case ya montado; nadie más escribe `RegistrarMovimientoUseCase(MovimientoCommand…)`.
@@ -102,6 +102,12 @@ from finanzas.application.obtener_movimiento_use_case.i_obtener_movimiento_use_c
 from finanzas.application.obtener_movimiento_use_case.obtener_movimiento_use_case import ObtenerMovimientoUseCase
 from finanzas.application.obtener_presupuesto_use_case.i_obtener_presupuesto_use_case import IObtenerPresupuestoUseCase
 from finanzas.application.obtener_presupuesto_use_case.obtener_presupuesto_use_case import ObtenerPresupuestoUseCase
+from finanzas.application.obtener_totales_movimientos_use_case.i_obtener_totales_movimientos_use_case import (
+    IObtenerTotalesMovimientosUseCase,
+)
+from finanzas.application.obtener_totales_movimientos_use_case.obtener_totales_movimientos_use_case import (
+    ObtenerTotalesMovimientosUseCase,
+)
 from finanzas.application.recategorizar_movimientos_use_case.i_recategorizar_movimientos_use_case import (
     IRecategorizarMovimientosUseCase,
 )
@@ -272,6 +278,10 @@ def obtener_movimiento() -> IObtenerMovimientoUseCase:
 
 def exportar_movimientos() -> IExportarMovimientosUseCase:
     return ExportarMovimientosUseCase(movimientos=MovimientoQueryServiceORM())
+
+
+def obtener_totales_movimientos() -> IObtenerTotalesMovimientosUseCase:  # módulo 95: lo pide el asistente
+    return ObtenerTotalesMovimientosUseCase(movimientos=MovimientoQueryServiceORM())
 
 
 def listar_categorias() -> IListarCategoriasUseCase:

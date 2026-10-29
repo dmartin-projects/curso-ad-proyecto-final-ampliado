@@ -417,6 +417,11 @@ ASISTENTE_SEGUNDOS_POR_PREGUNTA = env.float("ASISTENTE_SEGUNDOS_POR_PREGUNTA", d
 # Ejercicio 1 del 94: tokens (entrada + salida) por pregunta; pasados, la siguiente vuelta es la última. Con la capa
 # gratuita de Groq (8.000 por minuto), una pregunta que pasa de aquí deja sin cuota a las demás de ese minuto.
 ASISTENTE_TOKENS_POR_PREGUNTA = env.int("ASISTENTE_TOKENS_POR_PREGUNTA", default=10000)
+# Módulo 95: los servicios externos de las tools (sin clave). Configurables para los tests y por si cambian de sitio
+ASISTENTE_FRANKFURTER_URL = env("ASISTENTE_FRANKFURTER_URL", default="https://api.frankfurter.dev/v1/")
+ASISTENTE_EUROSTAT_URL = env(
+    "ASISTENTE_EUROSTAT_URL", default="https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data/"
+)
 # Dólares por millón de tokens: entrada, salida (con el razonamiento) y entrada desde la caché. Los publicados en
 # console.groq.com/docs/models en octubre de 2026. Un modelo que no esté aquí sale con "coste desconocido".
 ASISTENTE_PRECIOS = {

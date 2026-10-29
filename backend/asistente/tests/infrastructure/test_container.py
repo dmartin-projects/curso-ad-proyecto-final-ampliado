@@ -45,5 +45,17 @@ def test_precio_de_un_modelo_y_coste_desconocido(settings):
 def test_el_agente_con_sus_tools_y_el_tiempo_de_los_ajustes(settings):
     settings.ASISTENTE_API_KEY, settings.ASISTENTE_SEGUNDOS_POR_PREGUNTA = "clave", 45
     agente = container.agente()
-    assert list(agente.tools) == ["resumen_mes", "gasto_por_categoria"]
+    assert list(agente.tools) == [
+        "resumen_mes",
+        "gasto_por_categoria",
+        "buscar_movimientos",
+        "tendencia",
+        "top_comercios",
+        "estado_presupuestos",
+        "prevision_fin_de_mes",
+        "listar_categorias",
+        "detalle_ticket",
+        "tipo_de_cambio",
+        "comparar_con_ipc",
+    ]
     assert (agente.limites.segundos, agente.limites.max_tokens) == (45, 10000)

@@ -125,7 +125,7 @@ layers = [
     "(infrastructure.tasks)", # adapter de entrada (Celery, django.tasks); los receivers encolan tareas
     "(infrastructure.relay)", # adapter de entrada del relay (eventos): el comando y la tarea lo llaman
     "(infrastructure.container)", # composition root: monta los use cases con los adapters de salida
-    "(infrastructure.messaging) | (infrastructure.finanzas) | (infrastructure.hogares) | (infrastructure.server) | (infrastructure.providers)", # adapters de salida: el publicador de eventos, el ACL hacia finanzas, lo que se enchufa en django-oauth-toolkit…
+    "(infrastructure.messaging) | (infrastructure.finanzas) | (infrastructure.hogares) | (infrastructure.tickets) | (infrastructure.externos) | (infrastructure.server) | (infrastructure.providers)", # adapters de salida: el publicador de eventos, el ACL hacia finanzas, lo que se enchufa en django-oauth-toolkit…
     "(infrastructure.cache) | (infrastructure.realtime)", # …la caché del dashboard, el aviso por WebSocket…
     "(infrastructure.database) | (infrastructure.auth) | (infrastructure.crypto) | (infrastructure.mfa) | (infrastructure.ocr) | (infrastructure.ia) | (infrastructure.lectores) | (infrastructure.pdf) | (infrastructure.i18n) | (infrastructure.llm) | (infrastructure.signals.finanzas_signals) | (infrastructure.signals.hogares_signals) | (infrastructure.signals.tickets_signals) | (infrastructure.signals.importaciones_signals) | (infrastructure.signals.informes_signals)", # …la base de datos, los servicios externos y las signals que la app ofrece
     "(application)", # use cases, sus DTOs y los ports de la aplicación
@@ -222,10 +222,10 @@ forbidden_modules = ["pydantic", "openai", "httpx2", "tenacity"]
 
 [[tool.importlinter.contracts]]
 id = "asistente-proveedores"
-name = "Solo infrastructure/llm habla con el proveedor del LLM"
+name = "Solo infrastructure/llm habla con el proveedor del LLM (y, desde el módulo 95, infrastructure/externos con los servicios de las tools)"
 type = "forbidden"
-source_modules = ["asistente.infrastructure.container", "asistente.management"]
-forbidden_modules = ["openai", "httpx2", "tenacity"]
+source_modules = ["asistente.infrastructure.container", "asistente.infrastructure.finanzas", "asistente.infrastructure.hogares", "asistente.infrastructure.tickets", "asistente.management"]
+forbidden_modules = ["openai", "httpx2", "httpx", "tenacity"]
 allow_indirect_imports = true
 
 # ── Módulo 91: el social login. Con los proveedores (Authlib, joserfc, HTTP) solo hablan sus adapters ──
@@ -438,8 +438,10 @@ id = "asistente-adapters"
 name = "Los adapters del asistente son suyos"
 type = "protected"
 protected_modules = [
+    "asistente.infrastructure.externos",
     "asistente.infrastructure.finanzas",
     "asistente.infrastructure.hogares",
     "asistente.infrastructure.llm",
+    "asistente.infrastructure.tickets",
 ]
 allowed_importers = ["asistente", "config"]

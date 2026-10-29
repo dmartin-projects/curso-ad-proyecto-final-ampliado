@@ -9,6 +9,7 @@ from finanzas.domain.read_models.movimiento_del_mes import MovimientoDelMes
 from finanzas.domain.read_models.movimiento_exportado import MovimientoExportado
 from finanzas.domain.read_models.movimiento_listado import MovimientoListado
 from finanzas.domain.read_models.movimiento_sin_conciliar import MovimientoSinConciliar
+from finanzas.domain.read_models.totales_de_movimientos import TotalesDeMovimientos
 from finanzas.domain.repositories.queries.movimientos_query import MovimientosQuery
 
 
@@ -27,6 +28,11 @@ class IMovimientoQueryService(ABC):
     @abstractmethod
     def exportar(self, query: MovimientosQuery) -> Iterator[MovimientoExportado]:
         """Todos los que cumplen los filtros, en el orden pedido, sin cargarlos de golpe en memoria."""
+
+    @abstractmethod
+    def totales(self, query: MovimientosQuery) -> TotalesDeMovimientos:
+        """Cuántos cumplen los filtros y cuánto suman sus gastos y sus ingresos, en una consulta (módulo 95: lo que
+        necesita el agente para contestar "¿cuánto en Mercadona este año?" sin leer los movimientos uno a uno)."""
 
     # ── Lo que leen otras apps (módulo 88) ──
     @abstractmethod

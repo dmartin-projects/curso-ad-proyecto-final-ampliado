@@ -1,13 +1,15 @@
 # finanzas/infrastructure/database/repositories/movimiento_query_service_orm.py — IMovimientoQueryService con el ORM
-# (módulos 34, 37, 73, 87 y 88)
+# (módulos 34, 37, 73, 87, 88 y 95)
 #
 # Todo el ORM dentro: select_related para los nombres (una consulta, no N), Count de los adjuntos, values_list e
 # iterator para el CSV, keyset para el cursor. Fuera solo salen read models.
 from collections.abc import Iterator
+from decimal import Decimal
 from functools import reduce
 from operator import and_
 
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
+from django.db.models.functions import Coalesce
 
 from core.domain.read_models.pagina import Pagina
 from core.domain.repositories.queries.paginacion_cursor import PaginacionCursor
@@ -16,6 +18,7 @@ from finanzas.domain.read_models.movimiento_del_mes import MovimientoDelMes
 from finanzas.domain.read_models.movimiento_exportado import MovimientoExportado
 from finanzas.domain.read_models.movimiento_listado import MovimientoListado
 from finanzas.domain.read_models.movimiento_sin_conciliar import MovimientoSinConciliar
+from finanzas.domain.read_models.totales_de_movimientos import TotalesDeMovimientos
 from finanzas.domain.repositories.i_movimiento_query_service import IMovimientoQueryService
 from finanzas.domain.repositories.queries.filtros_movimientos_query import FiltrosMovimientosQuery
 from finanzas.domain.repositories.queries.movimientos_query import MovimientosQuery
@@ -107,6 +110,16 @@ class MovimientoQueryServiceORM(IMovimientoQueryService):
         )
         for fecha, concepto, importe, cuenta, categoria, etiquetas in filas.iterator(chunk_size=2000):
             yield MovimientoExportado(fecha, concepto, importe, cuenta, categoria, tuple(etiquetas))
+
+    def totales(self, query: MovimientosQuery) -> TotalesDeMovimientos:
+        # Los mismos filtros que el listado (_filtrar) y una sola consulta: agregación condicional (módulo 07)
+        cero = Decimal("0")
+        t = _filtrar(MovimientoModel.objects.filter(hogar_id=query.hogar_id), query.filtros).aggregate(
+            num=Count("id"),
+            gastos=Coalesce(Sum("importe", filter=Q(importe__lt=0)), cero),
+            ingresos=Coalesce(Sum("importe", filter=Q(importe__gt=0)), cero),
+        )
+        return TotalesDeMovimientos(num=t["num"], gastos=-t["gastos"], ingresos=t["ingresos"])
 
     # ── Lo que leen otras apps (módulo 88) ──
     def del_mes(self, hogar_id, mes):

@@ -15,7 +15,47 @@ interactions:
       su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
       m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
       dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
-      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}}]}"
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
+      la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
+      para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
+      fechas: el mes en curso.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"texto\":{\"description\":\"En
+      el concepto, el comercio o las notas.\",\"maxLength\":60,\"type\":\"string\"},\"categoria\":{\"description\":\"Una
+      categor\xEDa, como la dice el usuario (incluye sus subcategor\xEDas).\",\"maxLength\":60,\"type\":\"string\"},\"desde\":{\"description\":\"AAAA-MM-DD.\",\"type\":\"string\"},\"hasta\":{\"description\":\"AAAA-MM-DD.\",\"type\":\"string\"},\"tipo\":{\"description\":\"Solo
+      gastos o solo ingresos.\",\"enum\":[\"gasto\",\"ingreso\"],\"type\":\"string\"},\"limite\":{\"default\":10,\"description\":\"Cu\xE1ntos
+      movimientos de ejemplo.\",\"maximum\":20,\"minimum\":1,\"type\":\"integer\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"tendencia\",\"description\":\"Gastos
+      e ingresos de cada uno de los \xFAltimos meses, en una sola llamada. Para '\xBFc\xF3mo
+      hemos ido este a\xF1o?' o '\xBFestamos gastando m\xE1s?': no llames a resumen_mes
+      mes a mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"meses\":{\"default\":6,\"description\":\"Cu\xE1ntos
+      meses, contando el actual (de 2 a 12).\",\"maximum\":12,\"minimum\":2,\"type\":\"integer\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"top_comercios\",\"description\":\"Los
+      5 comercios con m\xE1s gasto de un mes, con cu\xE1ntas veces se compr\xF3 en
+      cada uno.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"estado_presupuestos\",\"description\":\"Los
+      presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
+      est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y
+      lo que llevabais el mismo d\xEDa del mes anterior. Es una estimaci\xF3n: dilo
+      as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
+      tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
+      que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
+      estado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"ticket_id\":{\"description\":\"El
+      id del ticket.\",\"type\":\"integer\"}},\"required\":[\"ticket_id\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"tipo_de_cambio\",\"description\":\"Convierte
+      un importe a otra moneda con el tipo de referencia del Banco Central Europeo.
+      Para viajes o compras en otra moneda: si el usuario dice cu\xE1ndo pag\xF3,
+      manda esa fecha.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"importe\":{\"anyOf\":[{\"exclusiveMinimum\":0.0,\"maximum\":1000000.0,\"type\":\"number\"},{\"type\":\"string\"}],\"description\":\"El
+      importe a convertir, en positivo.\"},\"de\":{\"description\":\"Moneda de origen,
+      ISO 4217: GBP, USD\u2026\",\"maxLength\":3,\"minLength\":3,\"type\":\"string\"},\"a\":{\"description\":\"Moneda
+      de destino. Sin ella: la del hogar.\",\"maxLength\":3,\"minLength\":3,\"type\":\"string\"},\"fecha\":{\"description\":\"AAAA-MM-DD.
+      El d\xEDa del pago, si el usuario lo dice: el tipo cambia cada d\xEDa. Sin ella:
+      hoy.\",\"type\":\"string\"}},\"required\":[\"importe\",\"de\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_con_ipc\",\"description\":\"Compara
+      cu\xE1nto ha cambiado el gasto del hogar en una categor\xEDa frente al mismo
+      mes del a\xF1o anterior con la inflaci\xF3n oficial (IPC armonizado de Espa\xF1a,
+      Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
+      nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
+      cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}}]}"
     headers:
       accept:
       - application/json
@@ -24,7 +64,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '1571'
+      - '6147'
       content-type:
       - application/json
       host:
@@ -53,7 +93,7 @@ interactions:
     uri: https://api.groq.com/openai/v1/chat/completions
   response:
     body:
-      string: '{"id":"chatcmpl-dc903a46-04b8-4ed5-878b-79a3a895b09f","object":"chat.completion","created":1793293890,"model":"qwen/qwen3.8-27b","choices":[{"index":0,"message":{"role":"assistant","tool_calls":[{"id":"r8rcdawm7","type":"function","function":{"name":"gasto_por_categoria","arguments":"{\"mes\":\"2026-09\"}"}},{"id":"nfygbpat9","type":"function","function":{"name":"gasto_por_categoria","arguments":"{\"mes\":\"2026-08\"}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.101845463,"prompt_tokens":613,"prompt_time":0.053585165,"completion_tokens":68,"completion_time":0.205222579,"total_tokens":681,"total_time":0.258807744},"usage_breakdown":null,"system_fingerprint":"fp_57c7e760a9","x_groq":{"id":"req_01m64aac7tecx8cx52kq78wekc","seed":596350714},"service_tier":"on_demand"}
+      string: '{"id":"chatcmpl-b82b09bc-c52c-4682-9d1f-f1452853c5ea","object":"chat.completion","created":1793297961,"model":"qwen/qwen3.8-27b","choices":[{"index":0,"message":{"role":"assistant","tool_calls":[{"id":"3q7y1w6ky","type":"function","function":{"name":"gasto_por_categoria","arguments":"{\"mes\":\"2026-09\"}"}},{"id":"4wt8hwews","type":"function","function":{"name":"gasto_por_categoria","arguments":"{\"mes\":\"2026-08\"}"}}]},"logprobs":null,"finish_reason":"tool_calls"}],"usage":{"queue_time":0.120430392,"prompt_tokens":1955,"prompt_time":0.153405905,"completion_tokens":68,"completion_time":0.207963818,"total_tokens":2023,"total_time":0.361369723},"usage_breakdown":null,"system_fingerprint":"fp_fea14bdc83","x_groq":{"id":"req_01m64e6mare18tcn04nkqhhvg5","seed":900909842},"service_tier":"on_demand"}
 
         '
     headers:
@@ -64,15 +104,15 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a523ccbb0f2cad87-IAD
+      - a5243021fc6cc922-IAD
       connection:
       - keep-alive
       content-length:
-      - '806'
+      - '808'
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 17:11:30 GMT
+      - Thu, 29 Oct 2026 18:19:21 GMT
       server:
       - cloudflare
       strict-transport-security:
@@ -82,21 +122,21 @@ interactions:
       vary:
       - Origin
       x-groq-region:
-      - msp
+      - yul
       x-ratelimit-limit-requests:
       - '1000'
       x-ratelimit-limit-tokens:
       - '8000'
       x-ratelimit-remaining-requests:
-      - '985'
+      - '999'
       x-ratelimit-remaining-tokens:
-      - '7331'
+      - '5555'
       x-ratelimit-reset-requests:
-      - 21m36s
+      - 1m26.4s
       x-ratelimit-reset-tokens:
-      - 5.017s
+      - 18.337s
       x-request-id:
-      - req_01m64aac7tecx8cx52kq78wekc
+      - req_01m64e6mare18tcn04nkqhhvg5
     status:
       code: 200
       message: OK
@@ -107,7 +147,7 @@ interactions:
       para obtener los datos: no inventes cifras. Si una tool devuelve un error, l\xE9elo
       y corrige la llamada. Responde en espa\xF1ol, breve y con los importes que te
       den las tools.\"},{\"role\":\"user\",\"content\":\"\xBFEn qu\xE9 categor\xEDa
-      gastamos m\xE1s en septiembre que en agosto?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"r8rcdawm7\",\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"arguments\":\"{\\\"mes\\\":\\\"2026-09\\\"}\"}},{\"id\":\"nfygbpat9\",\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"arguments\":\"{\\\"mes\\\":\\\"2026-08\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"r8rcdawm7\",\"content\":\"{\\\"mes\\\":\\\"2026-09\\\",\\\"gastos\\\":\\\"776.59\\\",\\\"categorias\\\":[{\\\"categoria\\\":\\\"Supermercado\\\",\\\"total\\\":\\\"461.35\\\",\\\"porcentaje\\\":59.4},{\\\"categoria\\\":\\\"Restaurantes\\\",\\\"total\\\":\\\"102.00\\\",\\\"porcentaje\\\":13.1},{\\\"categoria\\\":\\\"Casa\\\",\\\"total\\\":\\\"92.75\\\",\\\"porcentaje\\\":11.9},{\\\"categoria\\\":\\\"Ocio\\\",\\\"total\\\":\\\"82.99\\\",\\\"porcentaje\\\":10.7},{\\\"categoria\\\":\\\"Transporte\\\",\\\"total\\\":\\\"37.50\\\",\\\"porcentaje\\\":4.8}]}\"},{\"role\":\"tool\",\"tool_call_id\":\"nfygbpat9\",\"content\":\"{\\\"mes\\\":\\\"2026-08\\\",\\\"gastos\\\":\\\"671.35\\\",\\\"categorias\\\":[{\\\"categoria\\\":\\\"Supermercado\\\",\\\"total\\\":\\\"474.75\\\",\\\"porcentaje\\\":70.7},{\\\"categoria\\\":\\\"Casa\\\",\\\"total\\\":\\\"88.30\\\",\\\"porcentaje\\\":13.2},{\\\"categoria\\\":\\\"Restaurantes\\\",\\\"total\\\":\\\"46.80\\\",\\\"porcentaje\\\":7.0},{\\\"categoria\\\":\\\"Transporte\\\",\\\"total\\\":\\\"37.50\\\",\\\"porcentaje\\\":5.6},{\\\"categoria\\\":\\\"Ocio\\\",\\\"total\\\":\\\"24.00\\\",\\\"porcentaje\\\":3.6}]}\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
+      gastamos m\xE1s en septiembre que en agosto?\"},{\"role\":\"assistant\",\"content\":null,\"tool_calls\":[{\"id\":\"3q7y1w6ky\",\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"arguments\":\"{\\\"mes\\\":\\\"2026-09\\\"}\"}},{\"id\":\"4wt8hwews\",\"type\":\"function\",\"function\":{\"name\":\"gasto_por_categoria\",\"arguments\":\"{\\\"mes\\\":\\\"2026-08\\\"}\"}}]},{\"role\":\"tool\",\"tool_call_id\":\"3q7y1w6ky\",\"content\":\"{\\\"mes\\\":\\\"2026-09\\\",\\\"gastos\\\":\\\"776.59\\\",\\\"categorias\\\":[{\\\"categoria\\\":\\\"Supermercado\\\",\\\"total\\\":\\\"461.35\\\",\\\"porcentaje\\\":59.4},{\\\"categoria\\\":\\\"Restaurantes\\\",\\\"total\\\":\\\"102.00\\\",\\\"porcentaje\\\":13.1},{\\\"categoria\\\":\\\"Casa\\\",\\\"total\\\":\\\"92.75\\\",\\\"porcentaje\\\":11.9},{\\\"categoria\\\":\\\"Ocio\\\",\\\"total\\\":\\\"82.99\\\",\\\"porcentaje\\\":10.7},{\\\"categoria\\\":\\\"Transporte\\\",\\\"total\\\":\\\"37.50\\\",\\\"porcentaje\\\":4.8}]}\"},{\"role\":\"tool\",\"tool_call_id\":\"4wt8hwews\",\"content\":\"{\\\"mes\\\":\\\"2026-08\\\",\\\"gastos\\\":\\\"671.35\\\",\\\"categorias\\\":[{\\\"categoria\\\":\\\"Supermercado\\\",\\\"total\\\":\\\"474.75\\\",\\\"porcentaje\\\":70.7},{\\\"categoria\\\":\\\"Casa\\\",\\\"total\\\":\\\"88.30\\\",\\\"porcentaje\\\":13.2},{\\\"categoria\\\":\\\"Restaurantes\\\",\\\"total\\\":\\\"46.80\\\",\\\"porcentaje\\\":7.0},{\\\"categoria\\\":\\\"Transporte\\\",\\\"total\\\":\\\"37.50\\\",\\\"porcentaje\\\":5.6},{\\\"categoria\\\":\\\"Ocio\\\",\\\"total\\\":\\\"24.00\\\",\\\"porcentaje\\\":3.6}]}\"}],\"tool_choice\":\"auto\",\"tools\":[{\"type\":\"function\",\"function\":{\"name\":\"resumen_mes\",\"description\":\"Totales
       de un mes del hogar: gastos, ingresos, balance, n\xFAmero de movimientos y variaci\xF3n
       del gasto frente al mes anterior. Para '\xBFcu\xE1nto gastamos en septiembre?'
       o '\xBFc\xF3mo vamos este mes?'. El desglose por categor\xEDa est\xE1 en gasto_por_categoria.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
@@ -116,7 +156,47 @@ interactions:
       su principal), de mayor a menor, con su porcentaje. Para '\xBFen qu\xE9 gastamos
       m\xE1s en agosto?' o '\xBFcu\xE1nto se fue en supermercado?'. Para comparar
       dos meses, ll\xE1mala una vez por mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
-      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}}]}"
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"buscar_movimientos\",\"description\":\"Busca
+      movimientos por texto, categor\xEDa, fechas o tipo. Devuelve el n\xFAmero y
+      la suma de TODOS los que cumplen el filtro y los m\xE1s recientes como ejemplo:
+      para '\xBFcu\xE1nto en Mercadona este a\xF1o?' usa la suma, sin paginar. Sin
+      fechas: el mes en curso.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"texto\":{\"description\":\"En
+      el concepto, el comercio o las notas.\",\"maxLength\":60,\"type\":\"string\"},\"categoria\":{\"description\":\"Una
+      categor\xEDa, como la dice el usuario (incluye sus subcategor\xEDas).\",\"maxLength\":60,\"type\":\"string\"},\"desde\":{\"description\":\"AAAA-MM-DD.\",\"type\":\"string\"},\"hasta\":{\"description\":\"AAAA-MM-DD.\",\"type\":\"string\"},\"tipo\":{\"description\":\"Solo
+      gastos o solo ingresos.\",\"enum\":[\"gasto\",\"ingreso\"],\"type\":\"string\"},\"limite\":{\"default\":10,\"description\":\"Cu\xE1ntos
+      movimientos de ejemplo.\",\"maximum\":20,\"minimum\":1,\"type\":\"integer\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"tendencia\",\"description\":\"Gastos
+      e ingresos de cada uno de los \xFAltimos meses, en una sola llamada. Para '\xBFc\xF3mo
+      hemos ido este a\xF1o?' o '\xBFestamos gastando m\xE1s?': no llames a resumen_mes
+      mes a mes.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"meses\":{\"default\":6,\"description\":\"Cu\xE1ntos
+      meses, contando el actual (de 2 a 12).\",\"maximum\":12,\"minimum\":2,\"type\":\"integer\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"top_comercios\",\"description\":\"Los
+      5 comercios con m\xE1s gasto de un mes, con cu\xE1ntas veces se compr\xF3 en
+      cada uno.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"estado_presupuestos\",\"description\":\"Los
+      presupuestos de un mes por categor\xEDa: l\xEDmite, gastado, porcentaje y si
+      est\xE1 superado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"mes\":{\"description\":\"AAAA-MM,
+      por ejemplo 2026-09. Si no lo env\xEDas: el mes en curso del hogar.\",\"type\":\"string\"}},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"prevision_fin_de_mes\",\"description\":\"Previsi\xF3n
+      del gasto del mes en curso: lo gastado hasta hoy, el total al ritmo actual y
+      lo que llevabais el mismo d\xEDa del mes anterior. Es una estimaci\xF3n: dilo
+      as\xED.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"listar_categorias\",\"description\":\"Las
+      categor\xEDas del hogar, con su categor\xEDa principal. Para '\xBFqu\xE9 categor\xEDas
+      tenemos?' o para saber qu\xE9 nombre usar si el que dice el usuario no est\xE1.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{},\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"detalle_ticket\",\"description\":\"Lo
+      que se ley\xF3 de un ticket subido (comercio, fecha, total y l\xEDneas) y su
+      estado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"ticket_id\":{\"description\":\"El
+      id del ticket.\",\"type\":\"integer\"}},\"required\":[\"ticket_id\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"tipo_de_cambio\",\"description\":\"Convierte
+      un importe a otra moneda con el tipo de referencia del Banco Central Europeo.
+      Para viajes o compras en otra moneda: si el usuario dice cu\xE1ndo pag\xF3,
+      manda esa fecha.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"importe\":{\"anyOf\":[{\"exclusiveMinimum\":0.0,\"maximum\":1000000.0,\"type\":\"number\"},{\"type\":\"string\"}],\"description\":\"El
+      importe a convertir, en positivo.\"},\"de\":{\"description\":\"Moneda de origen,
+      ISO 4217: GBP, USD\u2026\",\"maxLength\":3,\"minLength\":3,\"type\":\"string\"},\"a\":{\"description\":\"Moneda
+      de destino. Sin ella: la del hogar.\",\"maxLength\":3,\"minLength\":3,\"type\":\"string\"},\"fecha\":{\"description\":\"AAAA-MM-DD.
+      El d\xEDa del pago, si el usuario lo dice: el tipo cambia cada d\xEDa. Sin ella:
+      hoy.\",\"type\":\"string\"}},\"required\":[\"importe\",\"de\"],\"type\":\"object\"}}},{\"type\":\"function\",\"function\":{\"name\":\"comparar_con_ipc\",\"description\":\"Compara
+      cu\xE1nto ha cambiado el gasto del hogar en una categor\xEDa frente al mismo
+      mes del a\xF1o anterior con la inflaci\xF3n oficial (IPC armonizado de Espa\xF1a,
+      Eurostat) de ese tipo de gasto. Sin mes: el \xFAltimo cerrado.\",\"parameters\":{\"additionalProperties\":false,\"properties\":{\"categoria\":{\"description\":\"El
+      nombre como lo dice el usuario ('luz', 's\xFAper'): si no existe, el error dice
+      cu\xE1les hay.\",\"maxLength\":60,\"type\":\"string\"},\"mes\":{\"description\":\"AAAA-MM,
+      un mes ya terminado. Si no lo env\xEDas: el \xFAltimo cerrado.\",\"type\":\"string\"}},\"required\":[\"categoria\"],\"type\":\"object\"}}}]}"
     headers:
       accept:
       - application/json
@@ -125,7 +205,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '2777'
+      - '7353'
       content-type:
       - application/json
       host:
@@ -154,13 +234,12 @@ interactions:
     uri: https://api.groq.com/openai/v1/chat/completions
   response:
     body:
-      string: "{\"id\":\"chatcmpl-f1971540-8347-447a-8544-d3f00c298a9e\",\"object\":\"chat.completion\",\"created\":1793293890,\"model\":\"qwen/qwen3.8-27b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"En
-        septiembre gastaste m\xE1s que en agosto sobre todo en:\\n\\n- **Ocio**: 82,99
-        \u20AC vs 24,00 \u20AC (+58,99 \u20AC)\\n- **Restaurantes**: 102,00 \u20AC
-        vs 46,80 \u20AC (+55,20 \u20AC)\\n- **Casa**: 92,75 \u20AC vs 88,30 \u20AC
-        (+4,45 \u20AC)\\n- **Transporte**: igual (37,50 \u20AC)\\n\\nY menos en **Supermercado**:
-        461,35 \u20AC vs 474,75 \u20AC (\u221213,40 \u20AC).\\n\\n\xBFQuieres el desglose
-        por subcategor\xEDas de alguna de ellas?\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.099994093,\"prompt_tokens\":960,\"prompt_time\":0.076914607,\"completion_tokens\":165,\"completion_time\":0.345629277,\"total_tokens\":1125,\"total_time\":0.422543884},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_5e14805ce3\",\"x_groq\":{\"id\":\"req_01m64aacr9e96b3dkqb8b54w1r\",\"seed\":482719114},\"service_tier\":\"on_demand\"}\n"
+      string: "{\"id\":\"chatcmpl-37ce9b1b-92a4-40a6-b9f1-9e84f9d03ccb\",\"object\":\"chat.completion\",\"created\":1793297962,\"model\":\"qwen/qwen3.8-27b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"El
+        mayor aumento de agosto a septiembre va en **Ocio**: de 24,00 \u20AC a **82,99
+        \u20AC** (sube 58,99 \u20AC).\\n\\nLe sigue **Restaurantes**, que casi se
+        duplica: de 46,80 \u20AC a **102,00 \u20AC** (+55,20 \u20AC).\\n\\nPor cierto,
+        Supermercado es la categor\xEDa donde m\xE1s gast\xE1is en ambos meses, pero
+        en septiembre baj\xF3 algo: de 474,75 \u20AC a 461,35 \u20AC.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.136942243,\"prompt_tokens\":2302,\"prompt_time\":0.188978297,\"completion_tokens\":122,\"completion_time\":0.285405635,\"total_tokens\":2424,\"total_time\":0.474383932},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c7e30c203c\",\"x_groq\":{\"id\":\"req_01m64e6mxyefhr9nrmdz58n657\",\"seed\":2096281812},\"service_tier\":\"on_demand\"}\n"
     headers:
       alt-svc:
       - h3=":443"; ma=86400
@@ -169,15 +248,15 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a523ccbe5ab1ad87-IAD
+      - a5243025d9f6c922-IAD
       connection:
       - keep-alive
       content-length:
-      - '957'
+      - '909'
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 17:11:30 GMT
+      - Thu, 29 Oct 2026 18:19:22 GMT
       server:
       - cloudflare
       strict-transport-security:
@@ -187,21 +266,21 @@ interactions:
       vary:
       - Origin
       x-groq-region:
-      - msp
+      - yul
       x-ratelimit-limit-requests:
       - '1000'
       x-ratelimit-limit-tokens:
       - '8000'
       x-ratelimit-remaining-requests:
-      - '984'
+      - '998'
       x-ratelimit-remaining-tokens:
-      - '6353'
+      - '3444'
       x-ratelimit-reset-requests:
-      - 23m2.4s
+      - 2m52.8s
       x-ratelimit-reset-tokens:
-      - 12.96s
+      - 35.854s
       x-request-id:
-      - req_01m64aacr9e96b3dkqb8b54w1r
+      - req_01m64e6mxyefhr9nrmdz58n657
     status:
       code: 200
       message: OK

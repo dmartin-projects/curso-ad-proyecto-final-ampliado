@@ -79,7 +79,8 @@ Las demás apps tienen el mismo árbol; las carpetas de `infrastructure/` que fi
 | `infrastructure/server/`, `crypto/` | Lo que se enchufa en los ajustes de django-oauth-toolkit (`ValidadorGastos`, `ScopesPorCliente`, los generadores de tokens) y la clave que firma los ID tokens | oauth |
 | `infrastructure/api/{authentication,permissions,views}/` | La API como *resource server*: `AutenticacionOAuth`, `ScopeRequerido`, `EsServicio` y el *mixin* `AceptaOAuth`, que usan las views de las demás apps | oauth |
 | `infrastructure/llm/` | El LLM del asistente (módulos 93 y 94): `OpenAICompatibleLLM(ILLM)` sobre la API Chat Completions con el SDK `openai` (Groq por defecto; cualquier proveedor compatible cambiando la URL, la clave y el modelo), los reintentos con tenacity, el cliente HTTP del proceso (`cliente_openai.py`) y `LLMConReserva(ILLM)`, que prueba los modelos en orden con un *circuit breaker* por modelo (un 429 lo abre el tiempo que pide el proveedor). En los tests, `LLMFake` (`tests/fakes/llm_fake.py`) y cassettes de llamadas reales | asistente |
-| `infrastructure/finanzas/`, `hogares/` (en asistente) | El *anti-corruption layer* del agente (módulo 94): `ConsultasEnFinanzas(IConsultasDeFinanzas)` llama a los *use cases* de **consulta** de finanzas con el `Actor` de quien pregunta y traduce sus OutputDTOs a los *read models* del asistente; `MembresiasEnHogares(IMembresias)` lee el hogar y el rol con el *query service* de hogares | asistente |
+| `infrastructure/finanzas/`, `hogares/` (en asistente) | El *anti-corruption layer* del agente (módulo 94): `ConsultasEnFinanzas(IConsultasDeFinanzas)` llama a los *use cases* de **consulta** de finanzas con el `Actor` de quien pregunta y traduce sus OutputDTOs a los *read models* del asistente; `MembresiasEnHogares(IMembresias)` lee el hogar y el rol con el *query service* de hogares; `TicketsEnTickets(ITickets)` (módulo 95) da lo que leyó la IA de un ticket del hogar, que las *tools* marcan como no fiable | asistente |
+| `infrastructure/externos/` (en asistente) | Los servicios públicos de las *tools* (módulo 95): `TipoDeCambioFrankfurter(ITipoDeCambio)`, los tipos de referencia del BCE, e `IndiceDePreciosEurostat(IIndiceDePrecios)`, el IPC armonizado de España por grupo ECOICOP (`prc_hicp_minr`, el mismo índice que publica el INE). Lo común en `ServicioHttp`: httpx con *timeout* corto, reintentos con tenacity solo de lo transitorio y un *circuit breaker* por servicio; en cada *adapter*, la caché de Django según cómo cambia su dato y los errores traducidos (un fallo, `ServicioExternoNoDisponibleException`, que el agente le explica al modelo) | asistente |
 
 `core` es el **shared kernel**, con las mismas carpetas: `core/domain/{vo,enums,exceptions,services,bo,read_models,
 repositories/queries}` (`Dinero`, `Mes`, `Actor`, `Rol`, `Accion`, `DominioException` y sus subclases, `diferencias`,
@@ -164,9 +165,11 @@ Lo comprueba `uv run lint-imports` (contratos en `backend/pyproject.toml`, *job*
 7. (Módulo 92) En `usuarios`, solo `infrastructure/mfa` importa pyotp, webauthn (py_webauthn) o segno: las firmas de
    las passkeys y los códigos TOTP se comprueban detrás de sus ports (`IWebAuthn`, `ITotp`), en un solo sitio. Esas
    librerías y `cryptography`, además, prohibidas en todos los núcleos (regla 1).
-8. (Módulo 93) En `asistente`, solo `infrastructure/llm` importa el SDK `openai`, su cliente HTTP (`httpx2`) o
+8. (Módulos 93 y 95) En `asistente`, solo `infrastructure/llm` importa el SDK `openai`, su cliente HTTP (`httpx2`) o
    tenacity: el resto del asistente habla con el modelo a través del port `ILLM`, con los tipos de su dominio
-   (`PeticionLLM`, `Mensaje`, `RespuestaLLM`). Su dominio es Python puro: ni siquiera pydantic.
+   (`PeticionLLM`, `Mensaje`, `RespuestaLLM`). Su dominio es Python puro: ni siquiera pydantic. Con los servicios
+   públicos de las *tools* (Frankfurter, Eurostat) habla `infrastructure/externos`, con httpx y tenacity, detrás de
+   sus ports (`ITipoDeCambio`, `IIndiceDePrecios`): ni el contenedor ni los demás *adapters* los importan.
 
 Una app nueva se añade a `root_packages`, a `containers` del contrato de capas y con sus contratos 4 y 5.
 
@@ -317,7 +320,7 @@ apps) sin PostgreSQL.
 | eventos | el outbox | — | `IOutbox` (lo usan los publicadores de finanzas y hogares) |
 | backoffice | nada propio | los use cases de tickets, importaciones y finanzas, con `Actor.soporte` | — |
 | oauth | clientes registrados (el *authorization server* del módulo 90, sobre django-oauth-toolkit) | — | la autenticación OAuth de la API y `AceptaOAuth` (las views de finanzas y hogares la usan) |
-| asistente | — (Parte 7: el agente de IA). Solo lee: sus *tools* llaman a *use cases* de consulta con un `Actor` limitado a LECTOR | `IConsultasDeFinanzas` → finanzas, `IMembresias` → hogares | — |
+| asistente | — (Parte 7: el agente de IA). Solo lee: sus *tools* llaman a *use cases* de consulta con un `Actor` limitado a LECTOR | `IConsultasDeFinanzas` → finanzas, `IMembresias` → hogares, `ITickets` → tickets | — |
 
 - Los procesos crean y borran movimientos con los use cases de finanzas, así que cada cambio tiene sus eventos
   (outbox de Kafka, avisos, comprobación de presupuestos) y, si lo pide una persona, su auditoría.

@@ -1,0 +1,58 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      host:
+      - api.frankfurter.dev
+      user-agent:
+      - python-httpx/0.28.1
+    method: GET
+    uri: https://api.frankfurter.dev/v1/2026-09-12?base=GBP&symbols=EUR
+  response:
+    body:
+      string: '{"amount":1.0,"base":"GBP","date":"2026-09-11","rates":{"EUR":1.1653}}'
+    headers:
+      age:
+      - '889'
+      cache-control:
+      - public, max-age=86400
+      cf-cache-status:
+      - HIT
+      cf-ray:
+      - a523f126dc848c2d-EWR
+      connection:
+      - keep-alive
+      content-length:
+      - '70'
+      content-type:
+      - application/json; charset=utf-8
+      date:
+      - Thu, 29 Oct 2026 17:36:21 GMT
+      deprecation:
+      - '@1779103800'
+      etag:
+      - W/"a5f78aedefc93c72e18880849bb06461"
+      link:
+      - <https://api.frankfurter.dev/v2/rates>; rel="successor-version"
+      nel:
+      - '{"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}'
+      report-to:
+      - '{"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=DBfmDZQilVg4LeyHa%2FCnzi542foTYBxwbhOXx56FSnA1unFqecFVtTKCYioc6FVQNXXccjLHG6mSlMT7DHUXklApXX7SCOkwxFm6bmDVuvPomZm4PwhERpiofkgaswbnFWD43e8%3D"}]}'
+      server:
+      - cloudflare
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-robots-tag:
+      - noindex
+    status:
+      code: 200
+      message: OK
+version: 1

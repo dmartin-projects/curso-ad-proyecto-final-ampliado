@@ -1,4 +1,4 @@
-# asistente/application/tools/formato.py — cómo escriben las tools los números que lee el modelo (módulo 94)
+# asistente/application/tools/formato.py — cómo escriben las tools los números que lee el modelo (módulos 94 y 95)
 from decimal import Decimal
 
 
@@ -10,3 +10,8 @@ def euros(valor: Decimal | int | None) -> str | None:
 def pct(valor: Decimal | None) -> float | None:
     """Porcentajes con un decimal (63.6): un número, que el modelo compara y redondea mejor que un texto."""
     return None if valor is None else round(float(valor), 1)
+
+
+def corto(texto: str, maximo: int = 60) -> str:
+    """Un concepto bancario puede tener 255 caracteres; 60 bastan para reconocerlo (y se pagan en cada vuelta)."""
+    return texto if len(texto) <= maximo else texto[: maximo - 1] + "…"

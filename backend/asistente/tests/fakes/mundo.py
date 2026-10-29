@@ -1,15 +1,27 @@
-# asistente/tests/fakes/mundo.py — un hogar, quien pregunta y el agente con fakes (módulo 94)
+# asistente/tests/fakes/mundo.py — un hogar, quien pregunta y el agente con fakes (módulos 94 y 95)
 from datetime import UTC, date, datetime
 
 from asistente.application.agent.agente import Agente
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.agent.limites import Limites
+from asistente.application.tools.buscar_movimientos_tool import BuscarMovimientosTool
+from asistente.application.tools.comparar_con_ipc_tool import CompararConIpcTool
+from asistente.application.tools.detalle_ticket_tool import DetalleTicketTool
+from asistente.application.tools.estado_presupuestos_tool import EstadoPresupuestosTool
 from asistente.application.tools.gasto_por_categoria_tool import GastoPorCategoriaTool
+from asistente.application.tools.listar_categorias_tool import ListarCategoriasTool
+from asistente.application.tools.prevision_fin_de_mes_tool import PrevisionFinDeMesTool
 from asistente.application.tools.resumen_mes_tool import ResumenMesTool
+from asistente.application.tools.tendencia_tool import TendenciaTool
+from asistente.application.tools.tipo_de_cambio_tool import TipoDeCambioTool
+from asistente.application.tools.top_comercios_tool import TopComerciosTool
 from asistente.domain.read_models.hogar_del_usuario import HogarDelUsuario
 from asistente.tests.fakes.consultas_de_finanzas_fake import ConsultasDeFinanzasFake
+from asistente.tests.fakes.indice_de_precios_fake import IndiceDePreciosFake
 from asistente.tests.fakes.llm_fake import LLMFake
 from asistente.tests.fakes.membresias_fake import MembresiasFake
+from asistente.tests.fakes.tickets_fake import TicketsFake
+from asistente.tests.fakes.tipo_de_cambio_fake import TipoDeCambioFake
 from core.domain.vo.mes import Mes
 from core.tests.fakes.reloj_fake import RelojFake
 
@@ -39,11 +51,31 @@ def contexto(hogar: HogarDelUsuario = CASA, ahora: datetime | None = None) -> Co
 
 class Mundo:
     def __init__(self):
-        self.finanzas = ConsultasDeFinanzasFake()
+        self.finanzas = ConsultasDeFinanzasFake.de_casa(HOGAR)
+        self.tickets = TicketsFake()
+        self.divisas = TipoDeCambioFake()
+        self.precios = IndiceDePreciosFake()
         self.cronometro = Cronometro()
 
     def tools(self):
+        """Las dos del módulo 94."""
         return [ResumenMesTool(finanzas=self.finanzas), GastoPorCategoriaTool(finanzas=self.finanzas)]
+
+    def catalogo(self):
+        """Todas (módulo 95), sobre los fakes: lo mismo que monta container.tools() con los adapters."""
+        f = self.finanzas
+        return [
+            *self.tools(),
+            BuscarMovimientosTool(finanzas=f),
+            TendenciaTool(finanzas=f),
+            TopComerciosTool(finanzas=f),
+            EstadoPresupuestosTool(finanzas=f),
+            PrevisionFinDeMesTool(finanzas=f),
+            ListarCategoriasTool(finanzas=f),
+            DetalleTicketTool(tickets=self.tickets),
+            TipoDeCambioTool(divisas=self.divisas),
+            CompararConIpcTool(finanzas=f, precios=self.precios),
+        ]
 
     def agente(self, guion: list, limites: Limites | None = None, tools=None) -> tuple[Agente, LLMFake]:
         llm = LLMFake(guion)

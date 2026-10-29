@@ -1,0 +1,113 @@
+interactions:
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Extrae
+      el movimiento bancario que describe el usuario. Hoy es 2026-10-29.\"},{\"role\":\"user\",\"content\":\"anteayer
+      cen\xE9 con Marta en el Bar Manolo, 46,80 \u20AC en efectivo, a medias\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"movimiento\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"concepto\":{\"description\":\"Comercio
+      o descripci\xF3n corta\",\"maxLength\":255,\"minLength\":1,\"title\":\"Concepto\",\"type\":\"string\"},\"importe\":{\"description\":\"Negativo
+      si es un gasto; positivo si es un ingreso\",\"title\":\"Importe\",\"type\":\"number\"},\"fecha\":{\"anyOf\":[{\"format\":\"date\",\"type\":\"string\"},{\"type\":\"null\"}],\"description\":\"AAAA-MM-DD,
+      o null si no se sabe\",\"title\":\"Fecha\"},\"cuenta\":{\"anyOf\":[{\"enum\":[\"Cuenta
+      com\xFAn\",\"Tarjeta\",\"Efectivo\"],\"type\":\"string\"},{\"type\":\"null\"}],\"description\":\"null
+      si no se dice\",\"title\":\"Cuenta\"}},\"required\":[\"concepto\",\"importe\",\"fecha\",\"cuenta\"],\"title\":\"MovimientoExtraido\",\"type\":\"object\"},\"strict\":true}}}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1018'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-8e5d5d30-f592-4718-bc7d-7d1c8c8fe0af\",\"object\":\"chat.completion\",\"created\":1793291841,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"concepto\\\":\\\"Bar
+        Manolo\\\",\\\"cuenta\\\":\\\"Efectivo\\\",\\\"fecha\\\":\\\"2026-10-27\\\",\\\"importe\\\":-23.4}\",\"reasoning\":\"We
+        need to extract a bank movement. The user says: \\\"anteayer cen\xE9 con Marta
+        en el Bar Manolo, 46,80 \u20AC en efectivo, a medias\\\". So transaction:
+        date is anteayer relative to today 2026-10-29. Anteayer is two days ago: 2026-10-27.
+        Concept: \\\"cena con Marta en el Bar Manolo\\\" maybe \\\"Bar Manolo\\\".
+        Need to be concise. \\\"cena con Marta\\\" maybe concept: \\\"Bar Manolo\\\".
+        Let's set concept: \\\"Bar Manolo\\\". Account: \\\"Efectivo\\\". Importe:
+        Since they paid in cash, it's an expense, negative. 46.80 \u20AC split \\\"a
+        medias\\\" meaning maybe each paid half? But the transaction is the user's
+        portion? The user says \\\"a medias\\\" meaning split cost, but they paid
+        in cash, maybe they each paid half, i.e., 23.40 each. However unclear. Probably
+        the movement for the user's part: 46.80 total but they paid half? The phrase
+        \\\"en efectivo, a medias\\\" suggests they paid in cash, split, so the user
+        paid half in cash? Actually if they paid together, each contributed half,
+        maybe the user paid 23.40. Could be ambiguous. I think we interpret as the
+        user's expense is half, 23.40. Use negative -23.40. Provide JSON.\\n\\nCheck
+        schema: concepto string 1-255, cuenta one of \\\"Cuenta com\xFAn\\\",\\\"Tarjeta\\\",\\\"Efectivo\\\"
+        or null, fecha string date or null, importe number.\\n\\nThus:\\n\\n{\\n \\\"concepto\\\":\\\"Bar
+        Manolo\\\",\\n \\\"cuenta\\\":\\\"Efectivo\\\",\\n \\\"fecha\\\":\\\"2026-10-27\\\",\\n
+        \\\"importe\\\":-23.40\\n}\\n\\nMake sure formatting compact JSON.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.151446469,\"prompt_tokens\":348,\"prompt_time\":0.017340368,\"completion_tokens\":414,\"completion_time\":0.870304372,\"total_tokens\":762,\"total_time\":0.88764474,\"completion_tokens_details\":{\"reasoning_tokens\":370}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_fe269835c7\",\"x_groq\":{\"id\":\"req_01m648btcceb6rxfczr4x326p3\",\"seed\":1634600000},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5239aaf1ed028bb-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '2142'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 16:37:21 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '996'
+      x-ratelimit-remaining-tokens:
+      - '6908'
+      x-ratelimit-reset-requests:
+      - 5m45.6s
+      x-ratelimit-reset-tokens:
+      - 8.19s
+      x-request-id:
+      - req_01m648btcceb6rxfczr4x326p3
+    status:
+      code: 200
+      message: OK
+version: 1

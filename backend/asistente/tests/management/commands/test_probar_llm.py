@@ -44,6 +44,13 @@ def test_groq_structured_output():
     assert probar("ayer pagué 23,40 en el Mercadona con la tarjeta", estructurado=True) == SALIDAS["estructurado"]
 
 
+@time_machine.travel(date(2026, 10, 29))
+@pytest.mark.parametrize("modelo", ["openai/gpt-oss-120b", "openai/gpt-oss-20b", "qwen/qwen3.8-27b"])
+def test_groq_tres_modelos_la_misma_extraccion(modelo):  # ejercicio 2
+    frase = "anteayer cené con Marta en el Bar Manolo, 46,80 € en efectivo, a medias"
+    assert probar(frase, estructurado=True, modelo=modelo) == SALIDAS[modelo]
+
+
 SALIDAS = {
     "una": (
         "{\n"
@@ -81,7 +88,19 @@ SALIDAS = {
         "  [openai/gpt-oss-120b · N ms · fin · tokens: entrada 113, salida 380 (razonamiento 369) · 0.000245 $]\n"
     ),
     "estructurado": (
-        '{"concepto": "Mercadona", "importe": -23.4, "fecha": "2026-10-28", "cuenta": "Tarjeta"}\n'
-        "  [openai/gpt-oss-120b · N ms · fin · tokens: entrada 277, salida 226 (razonamiento 184) · 0.000177 $]\n"
+        '{"concepto": "Mercadona", "importe": "-23.40", "fecha": "2026-10-28", "cuenta": "Tarjeta"}\n'
+        "  [openai/gpt-oss-120b · N ms · fin · tokens: entrada 340, salida 251 (razonamiento 209) · 0.000202 $]\n"
+    ),
+    "openai/gpt-oss-120b": (
+        '{"concepto": "Bar Manolo", "importe": "-23.40", "fecha": "2026-10-27", "cuenta": "Efectivo"}\n'
+        "  [openai/gpt-oss-120b · N ms · fin · tokens: entrada 348, salida 414 (razonamiento 370) · 0.000301 $]\n"
+    ),
+    "openai/gpt-oss-20b": (
+        '{"concepto": "Bar Manolo", "importe": "-46.80", "fecha": "2026-10-27", "cuenta": "Efectivo"}\n'
+        "  [openai/gpt-oss-20b · N ms · fin · tokens: entrada 348, salida 466 (razonamiento 422) · 0.000166 $]\n"
+    ),
+    "qwen/qwen3.8-27b": (
+        '{"concepto": "Cena Bar Manolo con Marta", "importe": "23.40", "fecha": "2026-10-27", "cuenta": "Efectivo"}\n'
+        "  [qwen/qwen3.8-27b · N ms · fin · tokens: entrada 65, salida 49 (razonamiento 0) · 0.000248 $]\n"
     ),
 }

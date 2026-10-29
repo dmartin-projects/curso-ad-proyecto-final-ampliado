@@ -1,0 +1,97 @@
+interactions:
+- request:
+    body: "{\"model\":\"qwen/qwen3.8-27b\",\"messages\":[{\"role\":\"system\",\"content\":\"Extrae
+      el movimiento bancario que describe el usuario. Hoy es 2026-10-29.\"},{\"role\":\"user\",\"content\":\"anteayer
+      cen\xE9 con Marta en el Bar Manolo, 46,80 \u20AC en efectivo, a medias\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"movimiento\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"concepto\":{\"description\":\"Comercio
+      o descripci\xF3n corta\",\"maxLength\":255,\"minLength\":1,\"title\":\"Concepto\",\"type\":\"string\"},\"importe\":{\"description\":\"Negativo
+      si es un gasto; positivo si es un ingreso\",\"title\":\"Importe\",\"type\":\"number\"},\"fecha\":{\"anyOf\":[{\"format\":\"date\",\"type\":\"string\"},{\"type\":\"null\"}],\"description\":\"AAAA-MM-DD,
+      o null si no se sabe\",\"title\":\"Fecha\"},\"cuenta\":{\"anyOf\":[{\"enum\":[\"Cuenta
+      com\xFAn\",\"Tarjeta\",\"Efectivo\"],\"type\":\"string\"},{\"type\":\"null\"}],\"description\":\"null
+      si no se dice\",\"title\":\"Cuenta\"}},\"required\":[\"concepto\",\"importe\",\"fecha\",\"cuenta\"],\"title\":\"MovimientoExtraido\",\"type\":\"object\"},\"strict\":true}}}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1015'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-0763bbb7-c580-410f-ba60-a0d509ceb925","object":"chat.completion","created":1793291842,"model":"qwen/qwen3.8-27b","choices":[{"index":0,"message":{"role":"assistant","content":"{\"concepto\":
+        \"Cena Bar Manolo con Marta\", \"cuenta\": \"Efectivo\", \"fecha\": \"2026-10-27\",
+        \"importe\": 23.40}"},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.12109232,"prompt_tokens":65,"prompt_time":0.004495815,"completion_tokens":49,"completion_time":0.103129022,"total_tokens":114,"total_time":0.107624837},"usage_breakdown":null,"system_fingerprint":"fp_fea14bdc83","x_groq":{"id":"req_01m648bwkfeg6b86d9tbgy8vp3","seed":36905042},"service_tier":"on_demand"}
+
+        '
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5239abd589128bb-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '683'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 16:37:22 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '999'
+      x-ratelimit-remaining-tokens:
+      - '7873'
+      x-ratelimit-reset-requests:
+      - 1m26.4s
+      x-ratelimit-reset-tokens:
+      - 952ms
+      x-request-id:
+      - req_01m648bwkfeg6b86d9tbgy8vp3
+    status:
+      code: 200
+      message: OK
+version: 1

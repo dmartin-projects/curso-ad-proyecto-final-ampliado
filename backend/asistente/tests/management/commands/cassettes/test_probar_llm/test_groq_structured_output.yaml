@@ -2,11 +2,12 @@ interactions:
 - request:
     body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Extrae
       el movimiento bancario que describe el usuario. Hoy es 2026-10-29.\"},{\"role\":\"user\",\"content\":\"ayer
-      pagu\xE9 23,40 en el Mercadona con la tarjeta\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"movimiento\",\"schema\":{\"type\":\"object\",\"properties\":{\"concepto\":{\"type\":\"string\",\"description\":\"Comercio
-      o descripci\xF3n corta\"},\"importe\":{\"type\":\"number\",\"description\":\"Negativo
-      si es un gasto; positivo si es un ingreso\"},\"fecha\":{\"type\":\"string\",\"description\":\"AAAA-MM-DD,
-      o vac\xEDo si no se sabe\"},\"cuenta\":{\"type\":\"string\",\"enum\":[\"Cuenta
-      com\xFAn\",\"Tarjeta\",\"Efectivo\",\"\"]}},\"required\":[\"concepto\",\"importe\",\"fecha\",\"cuenta\"],\"additionalProperties\":false},\"strict\":true}}}"
+      pagu\xE9 23,40 en el Mercadona con la tarjeta\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"movimiento\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"concepto\":{\"description\":\"Comercio
+      o descripci\xF3n corta\",\"maxLength\":255,\"minLength\":1,\"title\":\"Concepto\",\"type\":\"string\"},\"importe\":{\"description\":\"Negativo
+      si es un gasto; positivo si es un ingreso\",\"title\":\"Importe\",\"type\":\"number\"},\"fecha\":{\"anyOf\":[{\"format\":\"date\",\"type\":\"string\"},{\"type\":\"null\"}],\"description\":\"AAAA-MM-DD,
+      o null si no se sabe\",\"title\":\"Fecha\"},\"cuenta\":{\"anyOf\":[{\"enum\":[\"Cuenta
+      com\xFAn\",\"Tarjeta\",\"Efectivo\"],\"type\":\"string\"},{\"type\":\"null\"}],\"description\":\"null
+      si no se dice\",\"title\":\"Cuenta\"}},\"required\":[\"concepto\",\"importe\",\"fecha\",\"cuenta\"],\"title\":\"MovimientoExtraido\",\"type\":\"object\"},\"strict\":true}}}"
     headers:
       accept:
       - application/json
@@ -15,7 +16,7 @@ interactions:
       connection:
       - keep-alive
       content-length:
-      - '761'
+      - '992'
       content-type:
       - application/json
       host:
@@ -44,16 +45,17 @@ interactions:
     uri: https://api.groq.com/openai/v1/chat/completions
   response:
     body:
-      string: "{\"id\":\"chatcmpl-5648feca-6b2f-4a49-8213-f7f9438bc482\",\"object\":\"chat.completion\",\"created\":1793291266,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"concepto\\\":\\\"Mercadona\\\",\\\"importe\\\":-23.40,\\\"fecha\\\":\\\"2026-10-28\\\",\\\"cuenta\\\":\\\"Tarjeta\\\"}\",\"reasoning\":\"We
-        need to output JSON object adhering to movement schema. Need to extract movement:
-        yesterday (2026-10-28) paid 23.40 at Mercadona with card. Concept: \\\"Mercadona\\\".
-        Account: \\\"Tarjeta\\\". Importe negative: -23.40. Fecha: 2026-10-28. Must
-        be compact JSON, no extra spaces? Probably fine.\\n\\nCheck schema: required
-        fields concept, importe, fecha, cuenta. \\\"concepto\\\": string. \\\"importe\\\":
-        number. \\\"fecha\\\": string. \\\"cuenta\\\": must be one of enum: \\\"Cuenta
-        com\xFAn\\\",\\\"Tarjeta\\\",\\\"Efectivo\\\",\\\"\\\". So \\\"Tarjeta\\\".
-        Provide.\\n\\nThus output: {\\\"concepto\\\":\\\"Mercadona\\\",\\\"importe\\\":-23.40,\\\"fecha\\\":\\\"2026-10-28\\\",\\\"cuenta\\\":\\\"Tarjeta\\\"}\\n\\nMake
-        sure JSON is valid. Use compact formatting (no extra whitespace).\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.149558949,\"prompt_tokens\":277,\"prompt_time\":0.107119671,\"completion_tokens\":226,\"completion_time\":0.474000639,\"total_tokens\":503,\"total_time\":0.58112031,\"completion_tokens_details\":{\"reasoning_tokens\":184}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_f640395b96\",\"x_groq\":{\"id\":\"req_01m647ta3eeha97w0nk70z7yme\",\"seed\":372216809},\"service_tier\":\"on_demand\"}\n"
+      string: "{\"id\":\"chatcmpl-296c53cf-ab1c-4ea7-9b30-188fd09f1739\",\"object\":\"chat.completion\",\"created\":1793291839,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"concepto\\\":\\\"Mercadona\\\",\\\"importe\\\":-23.4,\\\"fecha\\\":\\\"2026-10-28\\\",\\\"cuenta\\\":\\\"Tarjeta\\\"}\",\"reasoning\":\"We
+        need to extract bank transaction. The user says: \\\"ayer pagu\xE9 23,40 en
+        el Mercadona con la tarjeta\\\". Today is 2026-10-29, so \\\"ayer\\\" is 2026-10-28.
+        Concept: Mercadona (shopping). Concept: \\\"Mercadona\\\". Importe: negative
+        because it's a payment: -23.40. Cuenta: \\\"Tarjeta\\\". Fecha: 2026-10-28.
+        Must follow schema: concepto string length 1-255, importe number, cuenta either
+        \\\"Cuenta com\xFAn\\\",\\\"Tarjeta\\\",\\\"Efectivo\\\" or null, fecha string
+        date or null. Provide JSON object.\\n\\nMake sure format uses dot as decimal?
+        In JSON number  -23.40 is okay. Use -23.4 perhaps? Use -23.40. Provide compact
+        JSON.\\n\\nThus output:\\n\\n{\\\"concepto\\\":\\\"Mercadona\\\",\\\"importe\\\":-23.40,\\\"fecha\\\":\\\"2026-10-28\\\",\\\"cuenta\\\":\\\"Tarjeta\\\"}\\n\\nCheck
+        JSON validity: yes.\\n\\n\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.247986845,\"prompt_tokens\":340,\"prompt_time\":0.067198291,\"completion_tokens\":251,\"completion_time\":0.52483891,\"total_tokens\":591,\"total_time\":0.592037201,\"completion_tokens_details\":{\"reasoning_tokens\":209}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_5a93aea882\",\"x_groq\":{\"id\":\"req_01m648bsb2eyj91nb1f6txqc16\",\"seed\":580141981},\"service_tier\":\"on_demand\"}\n"
     headers:
       alt-svc:
       - h3=":443"; ma=86400
@@ -62,15 +64,15 @@ interactions:
       cf-cache-status:
       - DYNAMIC
       cf-ray:
-      - a5238cad59da9698-IAD
+      - a5239aa87b9e28bb-IAD
       connection:
       - keep-alive
       content-length:
-      - '1442'
+      - '1485'
       content-type:
       - application/json
       date:
-      - Thu, 29 Oct 2026 16:27:46 GMT
+      - Thu, 29 Oct 2026 16:37:19 GMT
       server:
       - cloudflare
       strict-transport-security:
@@ -80,21 +82,21 @@ interactions:
       vary:
       - Origin
       x-groq-region:
-      - msp
+      - yul
       x-ratelimit-limit-requests:
       - '1000'
       x-ratelimit-limit-tokens:
       - '8000'
       x-ratelimit-remaining-requests:
-      - '993'
+      - '997'
       x-ratelimit-remaining-tokens:
-      - '6656'
+      - '7343'
       x-ratelimit-reset-requests:
-      - 10m4.8s
+      - 4m19.2s
       x-ratelimit-reset-tokens:
-      - 10.08s
+      - 4.927s
       x-request-id:
-      - req_01m647ta3eeha97w0nk70z7yme
+      - req_01m648bsb2eyj91nb1f6txqc16
     status:
       code: 200
       message: OK

@@ -1,0 +1,113 @@
+interactions:
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"system\",\"content\":\"Extrae
+      el movimiento bancario que describe el usuario. Hoy es 2026-10-29.\"},{\"role\":\"user\",\"content\":\"anteayer
+      cen\xE9 con Marta en el Bar Manolo, 46,80 \u20AC en efectivo, a medias\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"movimiento\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"concepto\":{\"description\":\"Comercio
+      o descripci\xF3n corta\",\"maxLength\":255,\"minLength\":1,\"title\":\"Concepto\",\"type\":\"string\"},\"importe\":{\"description\":\"Negativo
+      si es un gasto; positivo si es un ingreso\",\"title\":\"Importe\",\"type\":\"number\"},\"fecha\":{\"anyOf\":[{\"format\":\"date\",\"type\":\"string\"},{\"type\":\"null\"}],\"description\":\"AAAA-MM-DD,
+      o null si no se sabe\",\"title\":\"Fecha\"},\"cuenta\":{\"anyOf\":[{\"enum\":[\"Cuenta
+      com\xFAn\",\"Tarjeta\",\"Efectivo\"],\"type\":\"string\"},{\"type\":\"null\"}],\"description\":\"null
+      si no se dice\",\"title\":\"Cuenta\"}},\"required\":[\"concepto\",\"importe\",\"fecha\",\"cuenta\"],\"title\":\"MovimientoExtraido\",\"type\":\"object\"},\"strict\":true}}}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1017'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-6923db80-67e7-4d27-aba7-db7c169d2f0e\",\"object\":\"chat.completion\",\"created\":1793291842,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"concepto\\\":\\\"Bar
+        Manolo\\\",\\\"importe\\\":-46.80,\\\"fecha\\\":\\\"2026-10-27\\\",\\\"cuenta\\\":\\\"Efectivo\\\"}\",\"reasoning\":\"We
+        need to extract movement: concept, importe, fecha, cuenta. The user: \\\"anteayer
+        cen\xE9 con Marta en el Bar Manolo, 46,80 \u20AC en efectivo, a medias\\\".
+        So they ate with Marta at Bar Manolo, cost 46.80 \u20AC in cash, \\\"a medias\\\"
+        meaning split. So it's a transaction: concept likely \\\"Bar Manolo\\\" or
+        \\\"cenar con Marta en Bar Manolo\\\" but short. Let's choose \\\"Bar Manolo\\\".
+        The importe: negative because expense. It's 46.80. But if split, each pays
+        half: 23.40. However the user says 46.80 \u20AC en efectivo, a medias. So
+        maybe they paid 46.80 in cash for the whole dinner, but then they split? The
+        movement could be 46.80 negative? If they pay 46.80 in cash for the dinner.
+        But maybe the user is describing the whole dinner, not just their share. We
+        need to output a single movement. Let's assume the user is describing the
+        whole dinner cost of 46.80. So negative 46.80. Account: \\\"Efectivo\\\".
+        Fecha: \\\"anteayer\\\" which relative to today (2026-10-29). Anteayer = day
+        before yesterday. So two days before. Today is 2026-10-29. Anteayer is 2026-10-27.
+        So fecha: 2026-10-27. AdditionalProperties false. All required fields: concepto,
+        importe, fecha, cuenta. Good. JSON: {\\\"concepto\\\":\\\"Bar Manolo\\\",\\\"importe\\\":-46.80,\\\"fecha\\\":\\\"2026-10-27\\\",\\\"cuenta\\\":\\\"Efectivo\\\"}
+        Need to ensure numeric with decimal. In JSON, 46.80 is valid. Use -46.8 or
+        -46.80. Let's use -46.8? But original is 46,80 with comma; it's 46.80. So
+        -46.80. Ensure no trailing spaces. JSON must be compact. Provide only JSON.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.201712857,\"prompt_tokens\":348,\"prompt_time\":0.019757464,\"completion_tokens\":466,\"completion_time\":0.514149144,\"total_tokens\":814,\"total_time\":0.533906608,\"completion_tokens_details\":{\"reasoning_tokens\":422}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c5a89987dc\",\"x_groq\":{\"id\":\"req_01m648bvspenq8twxrcvajvg2p\",\"seed\":181798952},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5239ab82bab28bb-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '2222'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 16:37:22 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '999'
+      x-ratelimit-remaining-tokens:
+      - '7239'
+      x-ratelimit-reset-requests:
+      - 1m26.4s
+      x-ratelimit-reset-tokens:
+      - 5.707s
+      x-request-id:
+      - req_01m648bvspenq8twxrcvajvg2p
+    status:
+      code: 200
+      message: OK
+version: 1

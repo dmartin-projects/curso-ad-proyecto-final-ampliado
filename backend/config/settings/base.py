@@ -415,6 +415,7 @@ ASISTENTE_TIMEOUT = env.float("ASISTENTE_TIMEOUT", default=30.0)  # segundos por
 ASISTENTE_PRECIOS = {
     "openai/gpt-oss-120b": ("0.15", "0.60", "0.075"),
     "openai/gpt-oss-20b": ("0.075", "0.30", "0.037"),
+    "qwen/qwen3.8-27b": ("0.80", "4.00", "0.80"),  # ejercicio 2 (sin precio de caché publicado: el de entrada)
 }
 
 # ── Importación de extractos (módulo 75) ──

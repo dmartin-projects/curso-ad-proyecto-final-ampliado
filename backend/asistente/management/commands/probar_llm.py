@@ -10,8 +10,12 @@ datos ni tools.
 """
 
 import json
+from datetime import date
+from decimal import Decimal
+from typing import Annotated, Literal
 
 from django.core.management.base import BaseCommand, CommandError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, WithJsonSchema, field_validator
 
 from asistente.domain.enums.esfuerzo_de_razonamiento import EsfuerzoDeRazonamiento
 from asistente.domain.exceptions.llm_exception import LLMException
@@ -23,22 +27,41 @@ from asistente.infrastructure import container
 from asistente.infrastructure.llm.openai_compatible_llm import a_json
 from core.infrastructure.clock.reloj_django import RelojDjango
 
+
+# Ejercicio 1: UNA definición para las dos cosas. Su JSON Schema es lo que se pide al modelo (structured output) y su
+# validación, lo que se le exige a la respuesta: el schema garantiza la forma; las reglas, el sentido. (Sin docstring:
+# pydantic lo pondría en el schema como "description", y el modelo lo leería en cada llamada.)
+class MovimientoExtraido(BaseModel):
+    model_config = ConfigDict(extra="forbid")  # additionalProperties: false, lo que exige el modo estricto
+
+    concepto: str = Field(min_length=1, max_length=255, description="Comercio o descripción corta")
+    # Decimal (dinero), pero en el schema un number: es lo que escribe el modelo
+    importe: Annotated[Decimal, WithJsonSchema({"type": "number"})] = Field(
+        description="Negativo si es un gasto; positivo si es un ingreso"
+    )
+    fecha: date | None = Field(description="AAAA-MM-DD, o null si no se sabe")
+    cuenta: Literal["Cuenta común", "Tarjeta", "Efectivo"] | None = Field(description="null si no se dice")
+
+    @field_validator("importe")
+    @classmethod
+    def no_cero(cls, valor: Decimal) -> Decimal:
+        valor = valor.quantize(Decimal("0.01"))  # el modelo puede escribir -23.399999
+        if valor == 0:
+            raise ValueError("un movimiento no puede ser de 0 €")
+        return valor
+
+    @field_validator("fecha")
+    @classmethod
+    def no_futura(cls, valor: date | None) -> date | None:
+        if valor and valor > RelojDjango().hoy():
+            raise ValueError("la fecha está en el futuro")
+        return valor
+
+
 # Structured output: el modelo DEBE devolver un JSON con esta forma (no "por favor, contesta en JSON"). En modo
-# estricto, todos los campos van en required y los objetos con additionalProperties: false.
-MOVIMIENTO = EsquemaRespuesta(
-    nombre="movimiento",
-    esquema={
-        "type": "object",
-        "properties": {
-            "concepto": {"type": "string", "description": "Comercio o descripción corta"},
-            "importe": {"type": "number", "description": "Negativo si es un gasto; positivo si es un ingreso"},
-            "fecha": {"type": "string", "description": "AAAA-MM-DD, o vacío si no se sabe"},
-            "cuenta": {"type": "string", "enum": ["Cuenta común", "Tarjeta", "Efectivo", ""]},
-        },
-        "required": ["concepto", "importe", "fecha", "cuenta"],
-        "additionalProperties": False,
-    },
-)
+# estricto, todos los campos van en required y los objetos con additionalProperties: false; pydantic ya lo escribe así
+# (sin valores por defecto, todos son obligatorios; los opcionales son "X o null").
+MOVIMIENTO = EsquemaRespuesta(nombre="movimiento", esquema=MovimientoExtraido.model_json_schema())
 
 
 class Command(BaseCommand):
@@ -79,17 +102,20 @@ class Command(BaseCommand):
             if o["ver_razonamiento"] and r.razonamiento:
                 self.stdout.write(self.style.WARNING(f"(razonamiento) {r.razonamiento.strip()}"))
             texto = r.texto.strip()
-            if o["estructurado"]:  # la salida de un LLM es una entrada externa: como mínimo, se parsea
+            if o["estructurado"]:
                 texto = _json(r)
             self.stdout.write(texto)
             self.stdout.write(self.style.HTTP_INFO(_resumen(r)))
 
 
 def _json(r: RespuestaLLM) -> str:
+    """Ejercicio 1: la salida de un LLM es una entrada externa y se valida, como el body de una request."""
     try:
-        return json.dumps(json.loads(r.texto), ensure_ascii=False)
-    except json.JSONDecodeError as e:  # p. ej. cortado por max_tokens (motivo=limite_tokens)
-        raise CommandError(f"El modelo no ha devuelto JSON válido ({r.motivo}): {e}") from e
+        movimiento = MovimientoExtraido.model_validate_json(r.texto)
+    except ValidationError as e:  # también un JSON roto: p. ej. cortado por max_tokens (motivo=limite_tokens)
+        errores = "; ".join(f"{'.'.join(map(str, x['loc'])) or 'json'}: {x['msg']}" for x in e.errors())
+        raise CommandError(f"El modelo no ha devuelto un movimiento válido ({r.motivo}): {errores}") from e
+    return json.dumps(movimiento.model_dump(mode="json"), ensure_ascii=False)
 
 
 def _resumen(r: RespuestaLLM) -> str:

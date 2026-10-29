@@ -206,3 +206,5 @@ uv run python manage.py probar_llm "¿Qué variación hay entre 1.240 € y 1.11
 ```
 
 Otro proveedor compatible con Chat Completions: `ASISTENTE_BASE_URL`, `ASISTENTE_API_KEY` y `ASISTENTE_MODELO` (por ejemplo, Ollama en local: `http://localhost:11434/v1`, clave `ollama`).
+
+Ejercicios: el *structured output* validado con un modelo de pydantic que además genera el JSON Schema que se pide (`--estructurado`: un importe de 0 €, una fecha del futuro o una cuenta que no existe se rechazan), la misma extracción con tres modelos (`--modelo openai/gpt-oss-20b`, `--modelo qwen/qwen3.8-27b`) y el coste mensual del asistente.

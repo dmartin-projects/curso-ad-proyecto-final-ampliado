@@ -1,0 +1,274 @@
+interactions:
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Responde
+      en espa\xF1ol, breve.\"},{\"role\":\"user\",\"content\":\"Inventa un nombre
+      para una app de gastos del hogar. Solo el nombre.\"}],\"temperature\":1.5}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '217'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-a6623221-5148-47c0-91f4-b164e5182bfd","object":"chat.completion","created":1793291263,"model":"openai/gpt-oss-120b","choices":[{"index":0,"message":{"role":"assistant","content":"**CasaBalance**","reasoning":"User
+        asks: \"Invent a name for a household expenses app. Just the name.\" Need
+        to respond in Spanish, brief. Provide just a name, maybe a single line. Ensure
+        not disallowed. It''s allowed. Provide Spanish.\n\nWe''ll output just the
+        name, maybe \"GastoHogar\". Or something creative. Provide brief."},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.073948159,"prompt_tokens":97,"prompt_time":0.003768481,"completion_tokens":80,"completion_time":0.174183232,"total_tokens":177,"total_time":0.177951713,"completion_tokens_details":{"reasoning_tokens":67}},"usage_breakdown":null,"system_fingerprint":"fp_90620edd96","x_groq":{"id":"req_01m647t7dgextv6skqxns2gyed","seed":992582015},"service_tier":"on_demand"}
+
+        '
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5238c9c1eee9698-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '947'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 16:27:43 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - msp
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '998'
+      x-ratelimit-remaining-tokens:
+      - '7662'
+      x-ratelimit-reset-requests:
+      - 2m52.8s
+      x-ratelimit-reset-tokens:
+      - 2.535s
+      x-request-id:
+      - req_01m647t7dgextv6skqxns2gyed
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Responde
+      en espa\xF1ol, breve.\"},{\"role\":\"user\",\"content\":\"Inventa un nombre
+      para una app de gastos del hogar. Solo el nombre.\"}],\"temperature\":1.5}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '217'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-9b60310c-6f59-476f-94dc-a3a982b388d2\",\"object\":\"chat.completion\",\"created\":1793291263,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"\xA1HogarBudget!\",\"reasoning\":\"The
+        user wants in Spanish, brief. Provide a name only, no explanation. So respond
+        with a name. e.g., \\\"CasaCash\\\". Must be Spanish. Provide only the name.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.090108697,\"prompt_tokens\":97,\"prompt_time\":0.003918315,\"completion_tokens\":53,\"completion_time\":0.112174195,\"total_tokens\":150,\"total_time\":0.11609251,\"completion_tokens_details\":{\"reasoning_tokens\":39}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_47082602e2\",\"x_groq\":{\"id\":\"req_01m647t7rgeh3vt9m6550p22h4\",\"seed\":1728560751},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5238c9e5f129698-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '805'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 16:27:43 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - msp
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '997'
+      x-ratelimit-remaining-tokens:
+      - '7528'
+      x-ratelimit-reset-requests:
+      - 4m19.2s
+      x-ratelimit-reset-tokens:
+      - 3.54s
+      x-request-id:
+      - req_01m647t7rgeh3vt9m6550p22h4
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Responde
+      en espa\xF1ol, breve.\"},{\"role\":\"user\",\"content\":\"Inventa un nombre
+      para una app de gastos del hogar. Solo el nombre.\"}],\"temperature\":1.5}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '217'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-248f133d-ad9e-4e96-b07d-a2aa9f64bc78","object":"chat.completion","created":1793291264,"model":"openai/gpt-oss-120b","choices":[{"index":0,"message":{"role":"assistant","content":"GastoHogar.","reasoning":"The
+        user asks: \"Inventa un nombre para una app de gastos del hogar. Solo el nombre.\"
+        They want in Spanish, short. Provide a name.\n\nWe need to respond in Spanish,
+        brief, only the name.\n\nThus answer just a name, like \"CasaControl\". Provide
+        one name. Ensure no extra text."},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.138264392,"prompt_tokens":97,"prompt_time":0.004158691,"completion_tokens":80,"completion_time":0.167513814,"total_tokens":177,"total_time":0.171672505,"completion_tokens_details":{"reasoning_tokens":66}},"usage_breakdown":null,"system_fingerprint":"fp_8ea50c0161","x_groq":{"id":"req_01m647t81ke43bjpqh52kg0y07","seed":1319016476},"service_tier":"on_demand"}
+
+        '
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5238ca02e0c9698-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '926'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 16:27:44 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - msp
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '996'
+      x-ratelimit-remaining-tokens:
+      - '7419'
+      x-ratelimit-reset-requests:
+      - 5m45.6s
+      x-ratelimit-reset-tokens:
+      - 4.357s
+      x-request-id:
+      - req_01m647t81ke43bjpqh52kg0y07
+    status:
+      code: 200
+      message: OK
+version: 1

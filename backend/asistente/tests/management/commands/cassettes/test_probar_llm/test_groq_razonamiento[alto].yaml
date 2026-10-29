@@ -1,0 +1,109 @@
+interactions:
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Responde
+      en espa\xF1ol, breve.\"},{\"role\":\"user\",\"content\":\"Un hogar gasta 1.240
+      \u20AC en agosto y 1.116 \u20AC en septiembre. \xBFQu\xE9 variaci\xF3n porcentual
+      hay? Solo el n\xFAmero.\"}],\"reasoning_effort\":\"high\"}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '270'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-9e683f48-cc01-4875-a2e6-6bedfa813943\",\"object\":\"chat.completion\",\"created\":1793291266,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"-10\",\"reasoning\":\"The
+        user asks: \\\"Un hogar gasta 1.240 \u20AC en agosto y 1.116 \u20AC en septiembre.
+        \xBFQu\xE9 variaci\xF3n porcentual hay? Solo el n\xFAmero.\\\" They want the
+        percentage variation between the two amounts, presumably the change from August
+        to September, expressed as a percent. They say \\\"Solo el n\xFAmero.\\\"
+        So we should give just the numeric result (maybe with sign? maybe just the
+        absolute? Probably they want percent change: (new - old) / old * 100. So (1,116
+        - 1,240) / 1,240 * 100 = (-124) / 1240 * 100 = -10%. Actually compute: 1240
+        - 1116 = 124. So difference is -124 (decrease). Divided by 1240 = -0.1 =\\u003e
+        -10%. So the variation is -10%. If they want just the number, perhaps \\\"-10\\\".
+        They might want \\\"10%\\\"? The phrasing \\\"\xBFQu\xE9 variaci\xF3n porcentual
+        hay? Solo el n\xFAmero.\\\" Usually they might want the percentage change
+        magnitude: -10% (decrease). Since they ask \\\"variaci\xF3n porcentual\\\",
+        it's typical to include sign. They say \\\"Solo el n\xFAmero.\\\" Possibly
+        just \\\"-10\\\". But might need to include the percent sign? They said \\\"solo
+        el n\xFAmero\\\". So I think we should output \\\"-10%\\\"? However that includes
+        the percent sign, not just number. But the percent sign might be considered
+        part of the answer. Usually they'd want the number value. I'd respond with
+        \\\"-10\\\". Could also say \\\"-10%\\\". But they explicitly say \\\"Solo
+        el n\xFAmero.\\\" So I'd give \\\"-10\\\". In Spanish: I'd say \\\"-10\\\".
+        The answer: -10. Also could be \\\"\u201310\\\". Let's give -10.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.229752483,\"prompt_tokens\":113,\"prompt_time\":0.006389048,\"completion_tokens\":380,\"completion_time\":0.811133671,\"total_tokens\":493,\"total_time\":0.817522719,\"completion_tokens_details\":{\"reasoning_tokens\":369}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_5a93aea882\",\"x_groq\":{\"id\":\"req_01m647t8yyenaark23gbr8p836\",\"seed\":172644424},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5238ca60c959698-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '2090'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 16:27:46 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - msp
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '994'
+      x-ratelimit-remaining-tokens:
+      - '7155'
+      x-ratelimit-reset-requests:
+      - 8m38.4s
+      x-ratelimit-reset-tokens:
+      - 6.337s
+      x-request-id:
+      - req_01m647t8yyenaark23gbr8p836
+    status:
+      code: 200
+      message: OK
+version: 1

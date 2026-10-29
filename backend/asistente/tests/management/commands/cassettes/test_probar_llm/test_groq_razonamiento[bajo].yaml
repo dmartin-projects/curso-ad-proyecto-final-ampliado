@@ -1,0 +1,94 @@
+interactions:
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Responde
+      en espa\xF1ol, breve.\"},{\"role\":\"user\",\"content\":\"Un hogar gasta 1.240
+      \u20AC en agosto y 1.116 \u20AC en septiembre. \xBFQu\xE9 variaci\xF3n porcentual
+      hay? Solo el n\xFAmero.\"}],\"reasoning_effort\":\"low\"}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '269'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-b5a3220d-155a-46da-8e8c-22284a5d728d","object":"chat.completion","created":1793291264,"model":"openai/gpt-oss-120b","choices":[{"index":0,"message":{"role":"assistant","content":"-10%","reasoning":"Need
+        compute ((1126? wait) September 1116 vs August 1240. Variation = (1116-1240)/1240*100
+        = -124/1240*100 = -10%. Actually 124/1240=0.1 so -10%. Output only number.
+        Probably -10."},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.146664026,"prompt_tokens":113,"prompt_time":0.029243436,"completion_tokens":78,"completion_time":0.163404043,"total_tokens":191,"total_time":0.192647479,"completion_tokens_details":{"reasoning_tokens":66}},"usage_breakdown":null,"system_fingerprint":"fp_f640395b96","x_groq":{"id":"req_01m647t8h1edzb1zvp9j0q6npf","seed":625895251},"service_tier":"on_demand"}
+
+        '
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5238ca34a0f9698-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '821'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 16:27:44 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - msp
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '995'
+      x-ratelimit-remaining-tokens:
+      - '7288'
+      x-ratelimit-reset-requests:
+      - 7m12s
+      x-ratelimit-reset-tokens:
+      - 5.34s
+      x-request-id:
+      - req_01m647t8h1edzb1zvp9j0q6npf
+    status:
+      code: 200
+      message: OK
+version: 1

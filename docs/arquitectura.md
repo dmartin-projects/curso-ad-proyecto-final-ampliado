@@ -78,6 +78,7 @@ Las demás apps tienen el mismo árbol; las carpetas de `infrastructure/` que fi
 | `infrastructure/web/` | Adapter de entrada con páginas de Django: el login, el segundo factor (módulo 92) y el consentimiento del *authorization server* (`views/`, `urls.py`, `templates/`, y `middleware/`: su sesión sigue a la de Gastos) y los *endpoints* de django-oauth-toolkit (módulo 90) | oauth |
 | `infrastructure/server/`, `crypto/` | Lo que se enchufa en los ajustes de django-oauth-toolkit (`ValidadorGastos`, `ScopesPorCliente`, los generadores de tokens) y la clave que firma los ID tokens | oauth |
 | `infrastructure/api/{authentication,permissions,views}/` | La API como *resource server*: `AutenticacionOAuth`, `ScopeRequerido`, `EsServicio` y el *mixin* `AceptaOAuth`, que usan las views de las demás apps | oauth |
+| `infrastructure/llm/` | El LLM del asistente (módulo 93): `OpenAICompatibleLLM(ILLM)` sobre la API Chat Completions con el SDK `openai` (Groq por defecto; cualquier proveedor compatible cambiando la URL, la clave y el modelo), los reintentos con tenacity y el cliente HTTP del proceso (`cliente_openai.py`). En los tests, `LLMFake` (`tests/fakes/llm_fake.py`) y cassettes de llamadas reales | asistente |
 
 `core` es el **shared kernel**, con las mismas carpetas: `core/domain/{vo,enums,exceptions,services,bo,read_models,
 repositories/queries}` (`Dinero`, `Mes`, `Actor`, `Rol`, `Accion`, `DominioException` y sus subclases, `diferencias`,
@@ -136,7 +137,7 @@ Lo comprueba `uv run lint-imports` (contratos en `backend/pyproject.toml`, *job*
 
 1. `*.domain` y `*.application` (de todas las apps y de core) no importan django, rest_framework,
    drf_spectacular, django_filters, celery, channels, psycopg, opentelemetry, confluent_kafka, weasyprint,
-   pytesseract ni httpx (ni directa ni indirectamente).
+   pytesseract, httpx ni el SDK de un LLM (`openai`, `httpx2`) (ni directa ni indirectamente).
 2. Dentro de cada app, de arriba abajo (un solo contrato `layers` con todas las apps como `containers`; las capas
    que una app no tiene van entre paréntesis, opcionales): `infrastructure.api | infrastructure.signals.receivers |
    infrastructure.metrics | infrastructure.web` → `infrastructure.websocket` → `infrastructure.tasks` →
@@ -162,6 +163,9 @@ Lo comprueba `uv run lint-imports` (contratos en `backend/pyproject.toml`, *job*
 7. (Módulo 92) En `usuarios`, solo `infrastructure/mfa` importa pyotp, webauthn (py_webauthn) o segno: las firmas de
    las passkeys y los códigos TOTP se comprueban detrás de sus ports (`IWebAuthn`, `ITotp`), en un solo sitio. Esas
    librerías y `cryptography`, además, prohibidas en todos los núcleos (regla 1).
+8. (Módulo 93) En `asistente`, solo `infrastructure/llm` importa el SDK `openai`, su cliente HTTP (`httpx2`) o
+   tenacity: el resto del asistente habla con el modelo a través del port `ILLM`, con los tipos de su dominio
+   (`PeticionLLM`, `Mensaje`, `RespuestaLLM`). Su dominio es Python puro: ni siquiera pydantic.
 
 Una app nueva se añade a `root_packages`, a `containers` del contrato de capas y con sus contratos 4 y 5.
 
@@ -311,6 +315,7 @@ apps) sin PostgreSQL.
 | eventos | el outbox | — | `IOutbox` (lo usan los publicadores de finanzas y hogares) |
 | backoffice | nada propio | los use cases de tickets, importaciones y finanzas, con `Actor.soporte` | — |
 | oauth | clientes registrados (el *authorization server* del módulo 90, sobre django-oauth-toolkit) | — | la autenticación OAuth de la API y `AceptaOAuth` (las views de finanzas y hogares la usan) |
+| asistente | — (Parte 7: el agente de IA; módulo 93, el port `ILLM` y su adapter) | — | — |
 
 - Los procesos crean y borran movimientos con los use cases de finanzas, así que cada cambio tiene sus eventos
   (outbox de Kafka, avisos, comprobación de presupuestos) y, si lo pide una persona, su auditoría.

@@ -22,6 +22,7 @@ dependencies = [
     "drf-spectacular>=0.30.0",
     "gunicorn>=26.2.0",
     "httpx>=0.28.1",
+    "openai>=3.41",
     "opentelemetry-exporter-otlp-proto-http>=1.45.1",
     "opentelemetry-instrumentation-asgi>=0.66b1",
     "opentelemetry-instrumentation-botocore>=0.66b1",
@@ -58,10 +59,12 @@ dev = [
     "pytest-cov>=7.1.0",
     "pytest-django>=4.14.0",
     "pytest-mock>=3.17.0",
+    "pytest-recording>=0.14",
     "pytest-xdist>=3.8.0",
     "respx>=0.23.1",
     "ruff>=0.17.1",
     "time-machine>=3.5.1",
+    "vcrpy>=9.2",
 ]
 
 [tool.ruff]
@@ -92,7 +95,7 @@ skip_covered = true
 
 # ── Arquitectura (módulos 87, 88 y 90): las capas se comprueban en el CI con `uv run lint-imports` ──
 [tool.importlinter]
-root_packages = ["config", "core", "finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
+root_packages = ["config", "core", "finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth", "asistente"]
 include_external_packages = true # para poder prohibir django, rest_framework, celery…
 
 # ── 1. El núcleo (domain + application) de TODAS las apps, sin frameworks ──
@@ -101,21 +104,21 @@ id = "nucleo-sin-frameworks"
 name = "El dominio y la aplicación no conocen Django, DRF, Celery ni la base de datos"
 type = "forbidden"
 source_modules = ["*.domain", "*.application"]
-forbidden_modules = ["django", "rest_framework", "drf_spectacular", "django_filters", "celery", "channels", "psycopg", "opentelemetry", "confluent_kafka", "weasyprint", "pytesseract", "httpx", "authlib", "joserfc", "pyotp", "webauthn", "segno", "cryptography"]
+forbidden_modules = ["django", "rest_framework", "drf_spectacular", "django_filters", "celery", "channels", "psycopg", "opentelemetry", "confluent_kafka", "weasyprint", "pytesseract", "httpx", "authlib", "joserfc", "pyotp", "webauthn", "segno", "cryptography", "openai", "httpx2"]
 
 [[tool.importlinter.contracts]]
 id = "nucleo-compartido"
 name = "El shared kernel no depende de ninguna app"
 type = "forbidden"
 source_modules = ["core.domain", "core.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth", "asistente"]
 
 # ── 2. Las capas, iguales en todas las apps (las que una app no tiene, entre paréntesis: opcionales) ──
 [[tool.importlinter.contracts]]
 id = "capas"
 name = "Cada capa solo importa las de debajo (en todas las apps)"
 type = "layers"
-containers = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
+containers = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth", "asistente"]
 layers = [
     "(infrastructure.api) | (infrastructure.signals.receivers) | (infrastructure.metrics) | (infrastructure.web)", # adapters de entrada (HTTP, signals, métricas, páginas)
     "(infrastructure.websocket)", # adapter de entrada (Channels); la API reparte sus tickets de conexión
@@ -124,7 +127,7 @@ layers = [
     "(infrastructure.container)", # composition root: monta los use cases con los adapters de salida
     "(infrastructure.messaging) | (infrastructure.finanzas) | (infrastructure.server) | (infrastructure.providers)", # adapters de salida: el publicador de eventos, el ACL hacia finanzas, lo que se enchufa en django-oauth-toolkit…
     "(infrastructure.cache) | (infrastructure.realtime)", # …la caché del dashboard, el aviso por WebSocket…
-    "(infrastructure.database) | (infrastructure.auth) | (infrastructure.crypto) | (infrastructure.mfa) | (infrastructure.ocr) | (infrastructure.ia) | (infrastructure.lectores) | (infrastructure.pdf) | (infrastructure.i18n) | (infrastructure.signals.finanzas_signals) | (infrastructure.signals.hogares_signals) | (infrastructure.signals.tickets_signals) | (infrastructure.signals.importaciones_signals) | (infrastructure.signals.informes_signals)", # …la base de datos, los servicios externos y las signals que la app ofrece
+    "(infrastructure.database) | (infrastructure.auth) | (infrastructure.crypto) | (infrastructure.mfa) | (infrastructure.ocr) | (infrastructure.ia) | (infrastructure.lectores) | (infrastructure.pdf) | (infrastructure.i18n) | (infrastructure.llm) | (infrastructure.signals.finanzas_signals) | (infrastructure.signals.hogares_signals) | (infrastructure.signals.tickets_signals) | (infrastructure.signals.importaciones_signals) | (infrastructure.signals.informes_signals)", # …la base de datos, los servicios externos y las signals que la app ofrece
     "(application)", # use cases, sus DTOs y los ports de la aplicación
     "(domain)", # BOs, value objects, eventos, excepciones, read models e interfaces de los repositorios
 ]
@@ -135,70 +138,95 @@ id = "finanzas-nucleo"
 name = "El núcleo de finanzas no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["finanzas.domain", "finanzas.application"]
-forbidden_modules = ["hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
+forbidden_modules = ["hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth", "asistente"]
 
 [[tool.importlinter.contracts]]
 id = "hogares-nucleo"
 name = "El núcleo de hogares no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["hogares.domain", "hogares.application"]
-forbidden_modules = ["finanzas", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
+forbidden_modules = ["finanzas", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth", "asistente"]
 
 [[tool.importlinter.contracts]]
 id = "eventos-nucleo"
 name = "El núcleo de eventos no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["eventos.domain", "eventos.application"]
-forbidden_modules = ["finanzas", "hogares", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
+forbidden_modules = ["finanzas", "hogares", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth", "asistente"]
 
 [[tool.importlinter.contracts]]
 id = "tickets-nucleo"
 name = "El núcleo de tickets no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["tickets.domain", "tickets.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth", "asistente"]
 
 [[tool.importlinter.contracts]]
 id = "importaciones-nucleo"
 name = "El núcleo de importaciones no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["importaciones.domain", "importaciones.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "informes", "notificaciones", "usuarios", "backoffice", "oauth", "asistente"]
 
 [[tool.importlinter.contracts]]
 id = "informes-nucleo"
 name = "El núcleo de informes no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["informes.domain", "informes.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "notificaciones", "usuarios", "backoffice", "oauth"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "notificaciones", "usuarios", "backoffice", "oauth", "asistente"]
 
 [[tool.importlinter.contracts]]
 id = "notificaciones-nucleo"
 name = "El núcleo de notificaciones no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["notificaciones.domain", "notificaciones.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "usuarios", "backoffice", "oauth"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "usuarios", "backoffice", "oauth", "asistente"]
 
 [[tool.importlinter.contracts]]
 id = "usuarios-nucleo"
 name = "El núcleo de usuarios no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["usuarios.domain", "usuarios.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "backoffice", "oauth"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "backoffice", "oauth", "asistente"]
 
 [[tool.importlinter.contracts]]
 id = "backoffice-nucleo"
 name = "El núcleo de backoffice no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["backoffice.domain", "backoffice.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "oauth"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "oauth", "asistente"]
 
 [[tool.importlinter.contracts]]
 id = "oauth-nucleo"
 name = "El núcleo de oauth no importa otras apps (solo el shared kernel)"
 type = "forbidden"
 source_modules = ["oauth.domain", "oauth.application"]
-forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "asistente"]
+
+[[tool.importlinter.contracts]]
+id = "asistente-nucleo"
+name = "El núcleo del asistente no importa otras apps (solo el shared kernel)"
+type = "forbidden"
+source_modules = ["asistente.domain", "asistente.application"]
+forbidden_modules = ["finanzas", "hogares", "eventos", "tickets", "importaciones", "informes", "notificaciones", "usuarios", "backoffice", "oauth"]
+
+# ── Parte 7: el asistente. El dominio es Python puro (sus value objects son dataclasses, ni siquiera pydantic) y solo
+# infrastructure/llm habla con el proveedor: el SDK de OpenAI (y su cliente HTTP) no aparece en nada más. Cambiar de
+# proveedor es escribir otro adapter en esa carpeta.
+[[tool.importlinter.contracts]]
+id = "asistente-dominio-puro"
+name = "El dominio del asistente es Python puro"
+type = "forbidden"
+source_modules = ["asistente.domain"]
+forbidden_modules = ["pydantic", "openai", "httpx2", "tenacity"]
+
+[[tool.importlinter.contracts]]
+id = "asistente-proveedores"
+name = "Solo infrastructure/llm habla con el proveedor del LLM"
+type = "forbidden"
+source_modules = ["asistente.infrastructure.container", "asistente.management"]
+forbidden_modules = ["openai", "httpx2", "tenacity"]
+allow_indirect_imports = true
 
 # ── Módulo 91: el social login. Con los proveedores (Authlib, joserfc, HTTP) solo hablan sus adapters ──
 # Los tokens de Google, GitHub o Apple no pueden aparecer en una view, un serializer o un repositorio si ninguno de ellos
@@ -404,3 +432,12 @@ protected_modules = [
     "oauth.infrastructure.web",
 ]
 allowed_importers = ["oauth", "config"]
+
+[[tool.importlinter.contracts]]
+id = "asistente-adapters"
+name = "Los adapters del asistente son suyos"
+type = "protected"
+protected_modules = [
+    "asistente.infrastructure.llm",
+]
+allowed_importers = ["asistente", "config"]

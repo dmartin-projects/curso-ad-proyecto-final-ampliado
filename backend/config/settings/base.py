@@ -47,6 +47,7 @@ PROPIAS = [
     "backoffice",
     "eventos",  # módulo 85: outbox → Kafka
     "oauth",  # módulo 90: clientes, scopes, login y consentimiento del authorization server
+    "asistente",  # Parte 7: el agente de IA
 ]
 INSTALLED_APPS = DJANGO_APPS + TERCEROS + PROPIAS
 
@@ -384,6 +385,7 @@ LOGGING = {
     "loggers": {
         "django.db.backends": {"level": "WARNING"},
         "httpx": {"level": "WARNING"},
+        "httpx2": {"level": "WARNING"},  # el fork de httpx que usa el SDK de OpenAI (Parte 7): una línea por petición
         "weasyprint": {"level": "WARNING"},  # registra cada paso de cada PDF en INFO
         "fontTools": {"level": "WARNING"},
     },
@@ -400,6 +402,20 @@ IA_MODELO = env("IA_MODELO", default="gemini-3.8-flash")
 IA_TIMEOUT = env.float("IA_TIMEOUT", default=30.0)
 TICKETS_UMBRAL_CONFIANZA = env.float("TICKETS_UMBRAL_CONFIANZA", default=0.8)
 TICKETS_TAMANO_MAXIMO = 10 * 1024 * 1024  # 10 MB
+
+# ── Asistente: el agente de IA (Parte 7) ──
+# Cualquier API compatible con Chat Completions. Por defecto, Groq (capa gratuita; la clave: console.groq.com/keys).
+# En local, sin clave ni límites: ASISTENTE_BASE_URL=http://localhost:11434/v1 (Ollama) y un modelo con tools.
+ASISTENTE_BASE_URL = env("ASISTENTE_BASE_URL", default="https://api.groq.com/openai/v1")
+ASISTENTE_API_KEY = env("ASISTENTE_API_KEY", default="")
+ASISTENTE_MODELO = env("ASISTENTE_MODELO", default="openai/gpt-oss-120b")
+ASISTENTE_TIMEOUT = env.float("ASISTENTE_TIMEOUT", default=30.0)  # segundos por intento
+# Dólares por millón de tokens: entrada, salida (con el razonamiento) y entrada desde la caché. Los publicados en
+# console.groq.com/docs/models en octubre de 2026. Un modelo que no esté aquí sale con "coste desconocido".
+ASISTENTE_PRECIOS = {
+    "openai/gpt-oss-120b": ("0.15", "0.60", "0.075"),
+    "openai/gpt-oss-20b": ("0.075", "0.30", "0.037"),
+}
 
 # ── Importación de extractos (módulo 75) ──
 IMPORTACION_TAMANO_MAXIMO = 5 * 1024 * 1024  # 5 MB

@@ -1,0 +1,101 @@
+interactions:
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Extrae
+      el movimiento bancario que describe el usuario. Hoy es 2026-10-29.\"},{\"role\":\"user\",\"content\":\"ayer
+      pagu\xE9 23,40 en el Mercadona con la tarjeta\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"movimiento\",\"schema\":{\"type\":\"object\",\"properties\":{\"concepto\":{\"type\":\"string\",\"description\":\"Comercio
+      o descripci\xF3n corta\"},\"importe\":{\"type\":\"number\",\"description\":\"Negativo
+      si es un gasto; positivo si es un ingreso\"},\"fecha\":{\"type\":\"string\",\"description\":\"AAAA-MM-DD,
+      o vac\xEDo si no se sabe\"},\"cuenta\":{\"type\":\"string\",\"enum\":[\"Cuenta
+      com\xFAn\",\"Tarjeta\",\"Efectivo\",\"\"]}},\"required\":[\"concepto\",\"importe\",\"fecha\",\"cuenta\"],\"additionalProperties\":false},\"strict\":true}}}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '761'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-5648feca-6b2f-4a49-8213-f7f9438bc482\",\"object\":\"chat.completion\",\"created\":1793291266,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"concepto\\\":\\\"Mercadona\\\",\\\"importe\\\":-23.40,\\\"fecha\\\":\\\"2026-10-28\\\",\\\"cuenta\\\":\\\"Tarjeta\\\"}\",\"reasoning\":\"We
+        need to output JSON object adhering to movement schema. Need to extract movement:
+        yesterday (2026-10-28) paid 23.40 at Mercadona with card. Concept: \\\"Mercadona\\\".
+        Account: \\\"Tarjeta\\\". Importe negative: -23.40. Fecha: 2026-10-28. Must
+        be compact JSON, no extra spaces? Probably fine.\\n\\nCheck schema: required
+        fields concept, importe, fecha, cuenta. \\\"concepto\\\": string. \\\"importe\\\":
+        number. \\\"fecha\\\": string. \\\"cuenta\\\": must be one of enum: \\\"Cuenta
+        com\xFAn\\\",\\\"Tarjeta\\\",\\\"Efectivo\\\",\\\"\\\". So \\\"Tarjeta\\\".
+        Provide.\\n\\nThus output: {\\\"concepto\\\":\\\"Mercadona\\\",\\\"importe\\\":-23.40,\\\"fecha\\\":\\\"2026-10-28\\\",\\\"cuenta\\\":\\\"Tarjeta\\\"}\\n\\nMake
+        sure JSON is valid. Use compact formatting (no extra whitespace).\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.149558949,\"prompt_tokens\":277,\"prompt_time\":0.107119671,\"completion_tokens\":226,\"completion_time\":0.474000639,\"total_tokens\":503,\"total_time\":0.58112031,\"completion_tokens_details\":{\"reasoning_tokens\":184}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_f640395b96\",\"x_groq\":{\"id\":\"req_01m647ta3eeha97w0nk70z7yme\",\"seed\":372216809},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5238cad59da9698-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '1442'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 16:27:46 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - msp
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '993'
+      x-ratelimit-remaining-tokens:
+      - '6656'
+      x-ratelimit-reset-requests:
+      - 10m4.8s
+      x-ratelimit-reset-tokens:
+      - 10.08s
+      x-request-id:
+      - req_01m647ta3eeha97w0nk70z7yme
+    status:
+      code: 200
+      message: OK
+version: 1

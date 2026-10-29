@@ -1,0 +1,92 @@
+interactions:
+- request:
+    body: "{\"model\":\"openai/gpt-oss-120b\",\"messages\":[{\"role\":\"system\",\"content\":\"Responde
+      en espa\xF1ol, breve.\"},{\"role\":\"user\",\"content\":\"Explica qu\xE9 es
+      un presupuesto dom\xE9stico en una frase\"}]}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '186'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-1d2a65a7-5f72-461c-80b5-0733ab17eeae\",\"object\":\"chat.completion\",\"created\":1793291262,\"model\":\"openai/gpt-oss-120b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Un
+        presupuesto dom\xE9stico es un plan que registra y controla los ingresos y
+        gastos de un hogar para gestionar sus finanzas de manera equilibrada.\",\"reasoning\":\"The
+        user asks: \\\"Explica qu\xE9 es un presupuesto dom\xE9stico en una frase\\\".
+        They want a brief explanation, in Spanish, in one sentence. Provide that.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.097332401,\"prompt_tokens\":92,\"prompt_time\":0.003972843,\"completion_tokens\":71,\"completion_time\":0.147766427,\"total_tokens\":163,\"total_time\":0.15173927,\"completion_tokens_details\":{\"reasoning_tokens\":34}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_df9620fe21\",\"x_groq\":{\"id\":\"req_01m647t6e3ec2tt8t4f9hf8gq3\",\"seed\":1300412988},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5238c95dff79698-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '930'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 16:27:42 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - msp
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '999'
+      x-ratelimit-remaining-tokens:
+      - '7697'
+      x-ratelimit-reset-requests:
+      - 1m26.4s
+      x-ratelimit-reset-tokens:
+      - 2.272s
+      x-request-id:
+      - req_01m647t6e3ec2tt8t4f9hf8gq3
+    status:
+      code: 200
+      message: OK
+version: 1

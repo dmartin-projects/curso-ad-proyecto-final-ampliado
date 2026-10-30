@@ -216,3 +216,22 @@ test('el análisis del mes: Celery, el progreso por el WebSocket y el informe co
   await expect(page.getByRole('button', { name: 'Analizar el mes' })).toBeEnabled();
   sinErrores();
 });
+
+test('apagado: el chat lo dice y no deja escribir; el resto de la app, igual', async ({
+  page,
+  request,
+}) => {
+  await request.post('http://localhost:8000/e2e/asistente/apagar');
+  try {
+    await abrirAsistente(page);
+    await expect(page.getByRole('alert')).toContainText(
+      'El asistente está desactivado por mantenimiento',
+    );
+    await expect(page.getByRole('textbox', { name: 'Pregunta' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Analizar el mes' })).toHaveCount(0);
+    await page.getByRole('link', { name: 'Movimientos' }).click();
+    await expect(page.getByRole('searchbox', { name: 'Buscar' })).toBeVisible();
+  } finally {
+    await request.delete('http://localhost:8000/e2e/asistente/apagar');
+  }
+});

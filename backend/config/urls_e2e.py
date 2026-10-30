@@ -163,6 +163,14 @@ def envejecer_sesiones(request):
 
 
 @csrf_exempt
+def apagar_asistente(request):
+    """Módulo 107: POST apaga el asistente (el interruptor, ASISTENTE_ACTIVO) en este proceso; DELETE lo enciende. En
+    producción es una variable de entorno y un reinicio; aquí, un proceso de runserver."""
+    settings.ASISTENTE_ACTIVO = request.method != "POST"
+    return JsonResponse({"activo": settings.ASISTENTE_ACTIVO})
+
+
+@csrf_exempt
 def gastar_cuota(request):
     """Módulo 98: POST gasta la cuota del día de todos los miembros (una fila del libro de cuentas con los tokens del
     plan); DELETE la devuelve. Gastarla de verdad serían decenas de preguntas."""
@@ -228,6 +236,7 @@ urlpatterns = [
     path("e2e/correos", correos),
     path("e2e/sesiones/envejecer", envejecer_sesiones),
     path("e2e/asistente/cuota", gastar_cuota),  # módulo 98
+    path("e2e/asistente/apagar", apagar_asistente),  # módulo 107
     path("e2e/asistente/transferencia", transferencia_con_instrucciones),  # módulo 102
     *urls_normales,
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),

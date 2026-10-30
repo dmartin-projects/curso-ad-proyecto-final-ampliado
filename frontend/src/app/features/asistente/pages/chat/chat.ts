@@ -96,6 +96,13 @@ export default class Chat {
     queryKey: clavesAsistente.cuota(this.hogarId()),
     queryFn: () => lastValueFrom(this.api.cuota(this.hogarId())),
   }));
+  // Módulo 107: si no está, se dice y no se ofrece escribir (una pregunta que va a fallar). Se vuelve a mirar cada minuto
+  protected readonly estado = injectQuery(() => ({
+    queryKey: clavesAsistente.estado(this.hogarId()),
+    queryFn: () => lastValueFrom(this.api.estado(this.hogarId())),
+    refetchInterval: 60_000,
+  }));
+  protected readonly disponible = computed(() => this.estado.data()?.activo ?? true);
   protected readonly recuerdos = injectQuery(() => ({
     queryKey: clavesAsistente.recuerdos(this.hogarId()),
     queryFn: () => lastValueFrom(this.api.recuerdos(this.hogarId())),

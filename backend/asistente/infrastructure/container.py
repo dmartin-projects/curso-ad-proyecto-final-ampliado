@@ -92,14 +92,20 @@ from asistente.application.obtener_conversacion_use_case.i_obtener_conversacion_
 from asistente.application.obtener_conversacion_use_case.obtener_conversacion_use_case import (
     ObtenerConversacionUseCase,
 )
+from asistente.application.obtener_estado_use_case.i_obtener_estado_use_case import IObtenerEstadoUseCase
+from asistente.application.obtener_estado_use_case.obtener_estado_use_case import ObtenerEstadoUseCase
 from asistente.application.olvidar_recuerdo_use_case.i_olvidar_recuerdo_use_case import IOlvidarRecuerdoUseCase
 from asistente.application.olvidar_recuerdo_use_case.olvidar_recuerdo_use_case import OlvidarRecuerdoUseCase
 from asistente.application.pedir_analisis_use_case.i_pedir_analisis_use_case import IPedirAnalisisUseCase
 from asistente.application.pedir_analisis_use_case.pedir_analisis_use_case import PedirAnalisisUseCase
 from asistente.application.ports.i_embeddings import IEmbeddings
+from asistente.application.ports.i_estado_del_asistente import IEstadoDelAsistente
 from asistente.application.ports.i_llm import ILLM
 from asistente.application.ports.i_observador_agente import IObservadorAgente
 from asistente.application.prompts.subagentes import ORQUESTADOR
+from asistente.application.purgar_conversaciones_use_case.purgar_conversaciones_use_case import (
+    PurgarConversacionesUseCase,
+)
 from asistente.application.quitar_grafico_use_case.i_quitar_grafico_use_case import IQuitarGraficoUseCase
 from asistente.application.quitar_grafico_use_case.quitar_grafico_use_case import QuitarGraficoUseCase
 from asistente.application.responder_pregunta_use_case.i_responder_pregunta_use_case import (
@@ -163,6 +169,7 @@ from asistente.infrastructure.database.repositories.propuesta_command_repository
 from asistente.infrastructure.database.repositories.recuerdo_command_repository_orm import RecuerdoCommandRepositoryORM
 from asistente.infrastructure.database.repositories.recuerdo_query_service_orm import RecuerdoQueryServiceORM
 from asistente.infrastructure.embeddings.embeddings_fastembed import EmbeddingsFastembed
+from asistente.infrastructure.estado.estado_desde_ajustes_y_circuitos import EstadoDesdeAjustesYCircuitos
 from asistente.infrastructure.externos.eurostat_indice_de_precios import IndiceDePreciosEurostat
 from asistente.infrastructure.externos.frankfurter_tipo_de_cambio import TipoDeCambioFrankfurter
 from asistente.infrastructure.externos.nager_festivos import FestivosNager
@@ -666,6 +673,7 @@ def pedir_analisis() -> IPedirAnalisisUseCase:
         consumos=ConsumoQueryServiceORM(),
         reloj=RelojDjango(),
         control=ControlDeAnalisisEnCache(),  # ejercicio 3
+        estado=estado_del_asistente(),  # módulo 107
     )
 
 
@@ -685,4 +693,23 @@ def analizar_mes() -> IAnalizarMesUseCase:
         uow=UnidadDeTrabajoDjango(),
         control=ControlDeAnalisisEnCache(),  # ejercicios 1 y 3
         max_tokens=settings.ASISTENTE_ANALISIS_MAX_TOKENS,  # ejercicio 2
+    )
+
+
+# ── Módulo 107: producción ──
+def estado_del_asistente() -> IEstadoDelAsistente:
+    return EstadoDesdeAjustesYCircuitos(circuito=_circuito)
+
+
+def obtener_estado() -> IObtenerEstadoUseCase:
+    return ObtenerEstadoUseCase(estado=estado_del_asistente())
+
+
+def purgar_conversaciones() -> PurgarConversacionesUseCase:
+    return PurgarConversacionesUseCase(
+        conversaciones=ConversacionCommandRepositoryORM(),
+        almacen=AlmacenDjango(),
+        reloj=RelojDjango(),
+        uow=UnidadDeTrabajoDjango(),
+        dias=settings.ASISTENTE_RETENCION_DIAS,
     )

@@ -22,10 +22,12 @@ from asistente.application.consultar_cuota_use_case.dtos.consultar_cuota_input_d
 from asistente.application.obtener_conversacion_use_case.dtos.obtener_conversacion_input_dto import (
     ObtenerConversacionInputDTO,
 )
+from asistente.application.obtener_estado_use_case.dtos.obtener_estado_input_dto import ObtenerEstadoInputDTO
 from asistente.application.responder_pregunta_use_case.dtos.responder_pregunta_input_dto import (
     ResponderPreguntaInputDTO,
 )
 from asistente.domain.exceptions.adjunto_no_valido_exception import AdjuntoNoValidoException
+from asistente.domain.exceptions.asistente_no_disponible_exception import AsistenteNoDisponibleException
 from asistente.domain.exceptions.cuota_agotada_exception import CuotaAgotadaException
 from asistente.infrastructure import container
 from asistente.infrastructure.api.v1.serializers.pregunta_serializer import PreguntaSerializer
@@ -64,6 +66,9 @@ class PreguntarView(HogarDesdeUrlMixin, APIView):
         datos = PreguntaSerializer(data=request.data)
         datos.is_valid(raise_exception=True)
         hogar_id, actor = self.hogar.pk, self.actor
+        # Módulo 107: apagado, o sin ningún modelo disponible: un 503 ahora, no una pregunta que falla a los 30 s
+        if not (estado := container.obtener_estado().ejecutar(ObtenerEstadoInputDTO(hogar_id, actor))).activo:
+            raise AsistenteNoDisponibleException(estado.motivo)
         # La conversación, de quien pregunta: el 404, ahora (después del 200 ya no se puede)
         if container.obtener_conversacion().ejecutar(ObtenerConversacionInputDTO(hogar_id, actor, pk)) is None:
             raise consultas.no_encontrado(ConversacionModel)

@@ -10,6 +10,7 @@ import {
   Conversacion,
   ConversacionDetalle,
   Cuota,
+  EstadoDelAsistente,
   EventoChat,
   GraficoDelChat,
   Pregunta,
@@ -69,6 +70,11 @@ export class AsistenteApi {
   /** Módulo 105: encargar el análisis del mes (202: lo hace Celery; el progreso llega por el WebSocket). */
   analizar(hogarId: number, tarea: string, mes?: string) {
     return this.http.post<AnalisisPedido>(`${this.base(hogarId)}/analisis/`, { tarea, mes });
+  }
+
+  /** Módulo 107: si el asistente está disponible (apagado, o sin ningún modelo que responda). */
+  estado(hogarId: number) {
+    return this.http.get<EstadoDelAsistente>(`${this.base(hogarId)}/estado/`);
   }
 
   /** Ejercicio 1 del 105: pedir que pare (lo verá el worker entre especialista y especialista). */

@@ -2026,6 +2026,32 @@ paths:
               schema:
                 $ref: '#/components/schemas/Cuota'
           description: ''
+  /api/v1/hogares/{hogar_pk}/asistente/estado/:
+    get:
+      operationId: hogares_asistente_estado_retrieve
+      description: |-
+        Vistas anidadas en /hogares/<hogar_pk>/…
+
+        Resuelve el hogar de la URL y la membresía del usuario. Si el usuario no pertenece
+        al hogar, responde 404 (ni siquiera revela que el hogar existe).
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EstadoDelAsistente'
+          description: ''
   /api/v1/hogares/{hogar_pk}/asistente/graficos-fijados/:
     get:
       operationId: hogares_asistente_graficos_fijados_list
@@ -4975,6 +5001,23 @@ components:
           minLength: 1
       required:
       - nueva
+    EstadoDelAsistente:
+      type: object
+      properties:
+        activo:
+          type: boolean
+        motivo:
+          oneOf:
+          - $ref: '#/components/schemas/MotivoEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        mensaje:
+          type: string
+          readOnly: true
+          description: Para enseñarlo tal cual si no está activo
+      required:
+      - activo
+      - mensaje
+      - motivo
     EstadoImportacionEnum:
       enum:
       - pendiente
@@ -5646,6 +5689,12 @@ components:
       - email
       - rol
       - usuario
+    MotivoEnum:
+      enum:
+      - apagado
+      - sin_modelos
+      type: string
+      description: "* `` - \n* `apagado` - apagado\n* `sin_modelos` - sin_modelos"
     Movimiento:
       type: object
       description: 'Limita los campos relacionados al hogar de la URL: no se puede

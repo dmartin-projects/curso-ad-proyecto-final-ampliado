@@ -102,6 +102,18 @@ services:
       resources:
         limits: { memory: 2g }
 
+  worker-asistente: # módulo 107: el análisis del mes y los resúmenes (cola "asistente"), aparte de los demás
+    <<: *backend
+    environment: { OTEL_SERVICE_NAME: gastos-worker-asistente }
+    depends_on: *tras-migrar
+    command: ["celery", "-A", "config", "worker", "-l", "info", "-Q", "asistente", "-c", "2", "-n", "asistente@%h"]
+    healthcheck:
+      <<: *celery-ping
+      test: ["CMD-SHELL", "celery -A config inspect ping -d asistente@$$HOSTNAME --timeout 10 || exit 1"]
+    deploy:
+      resources:
+        limits: { memory: 1g } # el modelo de embeddings no se carga aquí: solo el bucle y las llamadas al LLM
+
   beat: # UNO solo: informes del día 1 y limpieza nocturna (módulo 78)
     <<: *backend
     environment: { OTEL_SERVICE_NAME: gastos-beat }

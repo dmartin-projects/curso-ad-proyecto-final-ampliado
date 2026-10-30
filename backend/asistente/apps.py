@@ -11,6 +11,7 @@ class AsistenteConfig(AppConfig):
         from .infrastructure.tasks import (
             analizar_mes_task,  # noqa: F401 (módulo 105)
             compactar_conversacion_task,  # noqa: F401 (módulo 99)
+            purgar_conversaciones_task,  # noqa: F401 (módulo 107)
         )
 
         metricas_asistente.registrar()  # sin OpenTelemetry activo, el SDK nunca llama a la función

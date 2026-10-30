@@ -12,6 +12,7 @@ class ConversacionCommandRepositoryFake(AlmacenEnMemoria, IConversacionCommandRe
             dict
         ] = []  # {"id", "conversacion_id", "mdc" (MensajeDeConversacion), "incompleto", "motivo"}
         self.guardadas = 0
+        self.actualizadas: dict = {}  # módulo 107: id → cuándo se tocó por última vez (para antiguas)
 
     def obtener(self, usuario_id, hogar_id, conversacion_id):
         c = self._datos.get(conversacion_id)
@@ -23,6 +24,10 @@ class ConversacionCommandRepositoryFake(AlmacenEnMemoria, IConversacionCommandRe
         self._asignar_id(conversacion)
         self._datos[conversacion.id] = copia(conversacion)
         self.guardadas += 1
+
+    def antiguas(self, antes_de, limite):  # módulo 107: `actualizadas` lo rellena el test
+        viejas = sorted((t, i) for i, t in self.actualizadas.items() if t < antes_de and i in self._datos)
+        return tuple(copia(self._datos[i]) for _, i in viejas[:limite])
 
     def archivos(self, conversacion_id):
         rutas = []

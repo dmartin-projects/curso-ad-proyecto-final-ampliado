@@ -39,6 +39,10 @@ class ConversacionCommandRepositoryORM(IConversacionCommandRepository):
     def eliminar(self, conversacion):
         ConversacionModel.objects.filter(pk=conversacion.id).delete()
 
+    def antiguas(self, antes_de, limite):  # módulo 107: el índice (usuario, hogar, -actualizado) no sirve aquí
+        filas = ConversacionModel.objects.filter(actualizado__lt=antes_de).order_by("actualizado")[:limite]
+        return tuple(conversacion_a_bo(f) for f in filas)
+
     def archivos(self, conversacion_id):
         rutas = []
         for adjunto, datos in MensajeModel.objects.filter(conversacion_id=conversacion_id).values_list(

@@ -17,6 +17,7 @@ from hogares.infrastructure import container as hogares
 CELERY = {
     "asistente.tasks.analizar_mes",  # módulo 105
     "asistente.tasks.compactar_conversacion",  # módulo 99
+    "asistente.tasks.purgar_conversaciones",  # módulo 107
     "core.tasks.limpiar_resultados_de_tareas",
     "eventos.tasks.limpiar_eventos_publicados",
     "finanzas.tasks.comprobar_presupuestos_tarea",

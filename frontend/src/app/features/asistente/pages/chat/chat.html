@@ -18,13 +18,15 @@
       (borrar)="borrar($event)"
     />
     <app-recuerdos [recuerdos]="recuerdos.data() ?? []" (olvidar)="olvidar($event)" />
-    <app-analisis-del-mes
-      [pasos]="analisis.pasos()"
-      [enCurso]="analisis.enCurso()"
-      [error]="analisis.error()"
-      (analizar)="analizar()"
-      (cancelar)="analisis.cancelar()"
-    />
+    @if (disponible()) {
+      <app-analisis-del-mes
+        [pasos]="analisis.pasos()"
+        [enCurso]="analisis.enCurso()"
+        [error]="analisis.error()"
+        (analizar)="analizar()"
+        (cancelar)="analisis.cancelar()"
+      />
+    }
   </div>
 
   <section class="flex min-h-[70vh] flex-col gap-4" aria-labelledby="titulo-chat">
@@ -71,6 +73,11 @@
               Pregunta por los gastos del hogar. Contesta con vuestros datos, y lo que apunte, lo
               confirmas tú.
             </p>
+            <!-- Módulo 107: que se sepa que es una máquina, y que puede fallar -->
+            <p class="text-sm text-texto-suave">
+              Es un asistente automático y puede equivocarse: las cifras importantes, compruébalas
+              en Movimientos.
+            </p>
             <mat-chip-set aria-label="Preguntas de ejemplo">
               @for (s of sugerencias; track s) {
                 <mat-chip (click)="enviar({ texto: s })">{{ s }}</mat-chip>
@@ -116,11 +123,15 @@
     @if (cuota.data(); as c) {
       <app-cuota [cuota]="c" />
     }
-    <app-entrada
-      class="sticky bottom-0 bg-superficie pt-2"
-      [ocupado]="chat.enCurso()"
-      (enviar)="enviar($event)"
-      (detener)="chat.detener()"
-    />
+    @if (disponible()) {
+      <app-entrada
+        class="sticky bottom-0 bg-superficie pt-2"
+        [ocupado]="chat.enCurso()"
+        (enviar)="enviar($event)"
+        (detener)="chat.detener()"
+      />
+    } @else {
+      <p class="m-0 rounded bg-superficie-alta p-3" role="alert">{{ estado.data()?.mensaje }}</p>
+    }
   </section>
 </div>

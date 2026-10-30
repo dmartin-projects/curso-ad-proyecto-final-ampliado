@@ -1114,6 +1114,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hogares/{hogar_pk}/asistente/estado/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Vistas anidadas en /hogares/<hogar_pk>/…
+         *
+         *     Resuelve el hogar de la URL y la membresía del usuario. Si el usuario no pertenece
+         *     al hogar, responde 404 (ni siquiera revela que el hogar existe).
+         */
+        get: operations["hogares_asistente_estado_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/hogares/{hogar_pk}/asistente/graficos-fijados/": {
         parameters: {
             query?: never;
@@ -2142,6 +2164,12 @@ export interface components {
         EstablecerPasswordRequest: {
             nueva: string;
         };
+        EstadoDelAsistente: {
+            activo: boolean;
+            motivo: components["schemas"]["MotivoEnum"] | components["schemas"]["BlankEnum"];
+            /** @description Para enseñarlo tal cual si no está activo */
+            readonly mensaje: string;
+        };
         /**
          * @description * `pendiente` - Pendiente
          *     * `analizando` - Analizando
@@ -2402,6 +2430,13 @@ export interface components {
             email: string;
             rol: string;
         };
+        /**
+         * @description * `` -
+         *     * `apagado` - apagado
+         *     * `sin_modelos` - sin_modelos
+         * @enum {string}
+         */
+        MotivoEnum: "apagado" | "sin_modelos";
         /** @description Limita los campos relacionados al hogar de la URL: no se puede apuntar a datos de otro hogar (módulo 33). */
         Movimiento: {
             readonly id: number;
@@ -4901,6 +4936,27 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Cuota"];
+                };
+            };
+        };
+    };
+    hogares_asistente_estado_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EstadoDelAsistente"];
                 };
             };
         };

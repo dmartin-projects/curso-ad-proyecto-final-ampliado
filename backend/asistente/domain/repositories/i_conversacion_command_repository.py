@@ -1,5 +1,6 @@
 # asistente/domain/repositories/i_conversacion_command_repository.py — escribir conversaciones (módulo 97)
 from abc import ABC, abstractmethod
+from datetime import datetime
 
 from asistente.domain.bo.conversacion import Conversacion
 from asistente.domain.vo.intercambio import Intercambio
@@ -25,6 +26,10 @@ class IConversacionCommandRepository(ABC):
 
     @abstractmethod
     def eliminar(self, conversacion: Conversacion) -> None: ...
+
+    @abstractmethod
+    def antiguas(self, antes_de: datetime, limite: int) -> tuple[Conversacion, ...]:
+        """Módulo 107: las que nadie ha tocado desde `antes_de`, las más viejas primero (la retención)."""
 
     @abstractmethod
     def archivos(self, conversacion_id: int) -> tuple[str, ...]:

@@ -9,10 +9,12 @@ from asistente.application.cuotas.calcular_cuota import calcular_cuota
 from asistente.application.pedir_analisis_use_case.dtos.pedir_analisis_input_dto import PedirAnalisisInputDTO
 from asistente.application.pedir_analisis_use_case.i_pedir_analisis_use_case import IPedirAnalisisUseCase
 from asistente.application.ports.i_control_de_analisis import IControlDeAnalisis
+from asistente.application.ports.i_estado_del_asistente import IEstadoDelAsistente
 from asistente.application.ports.i_membresias import IMembresias
 from asistente.application.ports.i_programador_de_analisis import IProgramadorDeAnalisis
 from asistente.application.ports.i_tarifas import ITarifas
 from asistente.domain.exceptions.analisis_en_curso_exception import AnalisisEnCursoException
+from asistente.domain.exceptions.asistente_no_disponible_exception import AsistenteNoDisponibleException
 from asistente.domain.repositories.i_consumo_query_service import IConsumoQueryService
 from asistente.domain.repositories.i_plan_del_hogar_repository import IPlanDelHogarRepository
 from core.application.ports.i_reloj import IReloj
@@ -36,13 +38,16 @@ class PedirAnalisisUseCase(IPedirAnalisisUseCase):
         consumos: IConsumoQueryService,
         reloj: IReloj,
         control: IControlDeAnalisis | None = None,  # ejercicio 3: uno a la vez
+        estado: IEstadoDelAsistente | None = None,  # módulo 107: apagado o sin modelos, ni se encola
     ):
         self.membresias, self.programador = membresias, programador
         self.planes, self.tarifas, self.consumos, self.reloj = planes, tarifas, consumos, reloj
-        self.control = control
+        self.control, self.estado = control, estado
 
     def ejecutar(self, entrada: PedirAnalisisInputDTO) -> str:
         entrada.actor.exigir(self.rol_minimo)
+        if self.estado is not None and not (estado := self.estado.estado()).activo:
+            raise AsistenteNoDisponibleException(estado.motivo)
         if not TAREA.match(entrada.tarea):
             raise ValidacionException("La tarea es un UUID en minúsculas.", campo="tarea")
         contexto = ContextoPregunta.abrir(

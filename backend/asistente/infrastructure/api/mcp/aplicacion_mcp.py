@@ -23,6 +23,9 @@ Y las cabeceras WWW-Authenticate del SDK, ajustadas a RFC 6750 §3.1 y a MCP: si
 de error (no ha habido un token que esté mal); y el 401 y el 403 dicen qué scope hace falta.
 """
 
+import json
+from collections.abc import Callable
+
 from asgiref.sync import ThreadSensitiveContext, sync_to_async
 from django.db import close_old_connections
 from mcp.server.auth.settings import AuthSettings
@@ -37,10 +40,20 @@ METADATA = "/.well-known/oauth-protected-resource/api/mcp"
 
 
 class AplicacionMCP:
-    def __init__(self, servidor: ServidorMCP, *, recurso: str, emisor: str, hosts: list[str], origenes: list[str]):
+    def __init__(
+        self,
+        servidor: ServidorMCP,
+        *,
+        recurso: str,
+        emisor: str,
+        hosts: list[str],
+        origenes: list[str],
+        apagado: Callable[[], str | None] = lambda: None,
+    ):
         """`recurso`: la URI canónica del servidor (https://gastos.…/api/mcp), la que los clientes piden con `resource` y la
-        que tiene que llevar el token; `emisor`: el authorization server (OAUTH_ISSUER, módulo 90)."""
-        self.servidor = servidor
+        que tiene que llevar el token; `emisor`: el authorization server (OAUTH_ISSUER, módulo 90). Módulo 107:
+        `apagado()` → el mensaje si quien opera la app ha apagado el asistente (None si no)."""
+        self.servidor, self.apagado = servidor, apagado
         self.auth = AuthSettings(
             issuer_url=emisor,
             resource_server_url=recurso,
@@ -56,6 +69,9 @@ class AplicacionMCP:
         return ruta in (RUTA, f"{RUTA}/", METADATA)
 
     async def __call__(self, scope, receive, send):
+        # Módulo 107: el interruptor apaga también lo que el asistente ofrece a otros clientes (las mismas tools)
+        if scope["path"] != METADATA and (mensaje := await sync_to_async(self.apagado)()):
+            return await _no_disponible(send, mensaje)
         app = self.servidor.servidor.streamable_http_app(
             streamable_http_path=RUTA,
             stateless_http=True,
@@ -71,6 +87,13 @@ class AplicacionMCP:
                     await app(scope, receive, _con_desafio(scope, send))
             finally:
                 await sync_to_async(close_old_connections)()
+
+
+async def _no_disponible(send, mensaje: str) -> None:
+    cuerpo = json.dumps({"detail": mensaje}, ensure_ascii=False).encode()
+    cabeceras = [(b"content-type", b"application/json"), (b"retry-after", b"300")]
+    await send({"type": "http.response.start", "status": 503, "headers": cabeceras})
+    await send({"type": "http.response.body", "body": cuerpo})
 
 
 def _con_desafio(scope, send):
@@ -124,4 +147,17 @@ def crear_aplicacion_mcp() -> AplicacionMCP:
         emisor=settings.OAUTH_ISSUER,
         hosts=hosts,
         origenes=[settings.FRONTEND_URL],
+        apagado=_apagado,
     )
+
+
+def _apagado() -> str | None:
+    """Módulo 107: solo el interruptor (ASISTENTE_ACTIVO). Sin modelos (Groq caído), las tools siguen sirviendo: no
+    llaman a ningún modelo."""
+    from asistente.domain.exceptions.asistente_no_disponible_exception import AsistenteNoDisponibleException
+    from asistente.domain.vo.estado_del_asistente import APAGADO
+    from asistente.infrastructure import container
+
+    if container.estado_del_asistente().estado().motivo == APAGADO:
+        return AsistenteNoDisponibleException(APAGADO).mensaje
+    return None

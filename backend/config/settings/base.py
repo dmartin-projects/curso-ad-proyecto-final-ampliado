@@ -160,7 +160,9 @@ CELERY_WORKER_HIJACK_ROOT_LOGGER = False  # el worker usa nuestro LOGGING (con r
 CELERY_TASK_TIME_LIMIT = 300
 CELERY_TASK_SOFT_TIME_LIMIT = 270
 CELERY_TASK_DEFAULT_QUEUE = "default"
-CELERY_TASK_ROUTES = {"tickets.tasks.*": {"queue": "ocr"}}  # el resto (importaciones…) va a "default"
+# Módulo 107: el asistente, en su cola: un análisis de un minuto no espera detrás de una importación (ni al revés)
+CELERY_TASK_ROUTES = {"tickets.tasks.*": {"queue": "ocr"}, "asistente.tasks.*": {"queue": "asistente"}}
+# el resto (importaciones…) va a "default"
 # Tareas periódicas (módulo 78). Con el DatabaseScheduler de django-celery-beat se copian a la BD al
 # arrancar Beat y se pueden pausar desde el backoffice (módulo 79). Horas en CELERY_TIMEZONE (Europe/Madrid).
 CELERY_BEAT_SCHEDULE = {
@@ -175,6 +177,10 @@ CELERY_BEAT_SCHEDULE = {
     "limpiar-eventos-publicados": {  # módulo 85
         "task": "eventos.tasks.limpiar_eventos_publicados",
         "schedule": crontab(minute=45, hour=3),
+    },
+    "purgar-conversaciones": {  # módulo 107: la retención del asistente
+        "task": "asistente.tasks.purgar_conversaciones",
+        "schedule": crontab(minute=15, hour=4),
     },
 }
 
@@ -477,6 +483,12 @@ ASISTENTE_MCP_URL = env("ASISTENTE_MCP_URL", default="http://localhost:8000/api/
 ASISTENTE_MCP_SERVIDORES = env.json("ASISTENTE_MCP_SERVIDORES", default=[])
 # Ejercicio 1 del 104: llamadas por minuto al servidor MCP, por persona y cliente
 ASISTENTE_MCP_LLAMADAS_POR_MINUTO = env.int("ASISTENTE_MCP_LLAMADAS_POR_MINUTO", default=60)
+# Módulo 107: el interruptor. false: el chat y el análisis contestan 503 y la interfaz lo dice (el resto de la app,
+# igual). Para un incidente de seguridad, un gasto que se dispara o un proveedor que cambia sus condiciones
+ASISTENTE_ACTIVO = env.bool("ASISTENTE_ACTIVO", default=True)
+# Módulo 107: la retención (RGPD). Las conversaciones que nadie toca en estos días se borran, con sus archivos. El
+# aviso de privacidad lo dice; quien quiera guardarlas más, las descarga en Markdown (ejercicio 3 del 97)
+ASISTENTE_RETENCION_DIAS = env.int("ASISTENTE_RETENCION_DIAS", default=365)
 # Ejercicio 2 del 105: los tokens de todo un análisis del mes (orquestador y especialistas); se para al pasarlo
 ASISTENTE_ANALISIS_MAX_TOKENS = env.int("ASISTENTE_ANALISIS_MAX_TOKENS", default=60_000)
 # Módulo 98: el proveedor, como lo nombran las convenciones GenAI de OpenTelemetry (gen_ai.provider.name)

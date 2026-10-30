@@ -1605,6 +1605,39 @@ paths:
               schema:
                 $ref: '#/components/schemas/Hogar'
           description: ''
+  /api/v1/hogares/{hogar_pk}/asistente/analisis/:
+    post:
+      operationId: hogares_asistente_analisis_create
+      description: |-
+        202 Accepted: el análisis se hace en segundo plano; el progreso y el final llegan por el WebSocket de la app
+        (evento "asistente.analisis" con la `tarea`), y el informe queda como una conversación nueva.
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - hogares
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PedirAnalisisRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PedirAnalisisRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AnalisisPedido'
+          description: ''
   /api/v1/hogares/{hogar_pk}/asistente/carpetas/:
     get:
       operationId: hogares_asistente_carpetas_list
@@ -4314,6 +4347,17 @@ components:
       - qr
       - secreto
       - uri
+    AnalisisPedido:
+      type: object
+      properties:
+        tarea:
+          type: string
+          format: uuid
+        mes:
+          type: string
+      required:
+      - mes
+      - tarea
     AplicacionConectada:
       type: object
       properties:
@@ -6356,6 +6400,21 @@ components:
       properties:
         is_active:
           type: boolean
+    PedirAnalisisRequest:
+      type: object
+      properties:
+        tarea:
+          type: string
+          format: uuid
+          description: 'Un UUID que genera el cliente: con él llegan los avisos de
+            progreso.'
+        mes:
+          type: string
+          minLength: 1
+          description: AAAA-MM; sin él, el mes en curso.
+          pattern: ^\d{4}-\d{2}$
+      required:
+      - tarea
     PorEstado:
       type: object
       properties:

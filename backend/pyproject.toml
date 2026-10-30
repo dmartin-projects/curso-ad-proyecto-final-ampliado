@@ -130,7 +130,7 @@ layers = [
     "(infrastructure.tasks)", # adapter de entrada (Celery, django.tasks); los receivers encolan tareas
     "(infrastructure.relay)", # adapter de entrada del relay (eventos): el comando y la tarea lo llaman
     "(infrastructure.container)", # composition root: monta los use cases con los adapters de salida
-    "(infrastructure.messaging) | (infrastructure.finanzas) | (infrastructure.hogares) | (infrastructure.tickets) | (infrastructure.externos) | (infrastructure.mcp) | (infrastructure.server) | (infrastructure.providers)", # adapters de salida: el publicador de eventos, el ACL hacia finanzas, lo que se enchufa en django-oauth-toolkit…
+    "(infrastructure.messaging) | (infrastructure.finanzas) | (infrastructure.hogares) | (infrastructure.tickets) | (infrastructure.notificaciones) | (infrastructure.externos) | (infrastructure.mcp) | (infrastructure.server) | (infrastructure.providers)", # adapters de salida: el publicador de eventos, el ACL hacia finanzas, lo que se enchufa en django-oauth-toolkit…
     "(infrastructure.cache) | (infrastructure.realtime)", # …la caché del dashboard, el aviso por WebSocket…
     "(infrastructure.database) | (infrastructure.storage) | (infrastructure.auth) | (infrastructure.crypto) | (infrastructure.mfa) | (infrastructure.ocr) | (infrastructure.ia) | (infrastructure.lectores) | (infrastructure.pdf) | (infrastructure.i18n) | (infrastructure.llm) | (infrastructure.telemetria) | (infrastructure.tarifas) | (infrastructure.embeddings) | (infrastructure.ayuda) | (infrastructure.sql) | (infrastructure.signals.finanzas_signals) | (infrastructure.signals.hogares_signals) | (infrastructure.signals.tickets_signals) | (infrastructure.signals.importaciones_signals) | (infrastructure.signals.informes_signals)", # …la base de datos, los servicios externos y las signals que la app ofrece
     "(application)", # use cases, sus DTOs y los ports de la aplicación
@@ -463,6 +463,7 @@ protected_modules = [
     "asistente.infrastructure.mcp",
     "asistente.infrastructure.messaging",
     "asistente.infrastructure.metrics",
+    "asistente.infrastructure.notificaciones",
     "asistente.infrastructure.sql",
     "asistente.infrastructure.storage",
     "asistente.infrastructure.tarifas",

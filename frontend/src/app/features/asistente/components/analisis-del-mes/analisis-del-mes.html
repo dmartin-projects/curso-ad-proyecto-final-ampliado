@@ -1,0 +1,17 @@
+<section class="flex flex-col gap-2" aria-labelledby="titulo-analisis">
+  <h2 id="titulo-analisis" class="m-0 text-sm font-medium">Análisis del mes</h2>
+  <button mat-stroked-button [disabled]="enCurso()" (click)="analizar.emit()">
+    <mat-icon>insights</mat-icon> Analizar el mes
+  </button>
+  @if (enCurso()) {
+    <div role="status" class="flex flex-col gap-1">
+      <mat-progress-bar mode="indeterminate" aria-label="Preparando el análisis" />
+      @for (p of pasos(); track $index) {
+        <p class="m-0 text-sm text-texto-suave">{{ p }}</p>
+      }
+    </div>
+  }
+  @if (error(); as e) {
+    <p class="m-0 text-sm text-error" role="alert">{{ e }}</p>
+  }
+</section>

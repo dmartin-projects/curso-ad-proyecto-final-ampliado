@@ -12,6 +12,8 @@ from django.core.exceptions import ImproperlyConfigured
 from asistente.application.agent.agente import Agente
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.agent.limites import Limites
+from asistente.application.analizar_mes_use_case.analizar_mes_use_case import AnalizarMesUseCase
+from asistente.application.analizar_mes_use_case.i_analizar_mes_use_case import IAnalizarMesUseCase
 from asistente.application.asignar_plan_use_case.asignar_plan_use_case import AsignarPlanUseCase
 from asistente.application.asignar_plan_use_case.i_asignar_plan_use_case import IAsignarPlanUseCase
 from asistente.application.ayuda.buscador_de_ayuda import BuscadorDeAyuda
@@ -90,9 +92,12 @@ from asistente.application.obtener_conversacion_use_case.obtener_conversacion_us
 )
 from asistente.application.olvidar_recuerdo_use_case.i_olvidar_recuerdo_use_case import IOlvidarRecuerdoUseCase
 from asistente.application.olvidar_recuerdo_use_case.olvidar_recuerdo_use_case import OlvidarRecuerdoUseCase
+from asistente.application.pedir_analisis_use_case.i_pedir_analisis_use_case import IPedirAnalisisUseCase
+from asistente.application.pedir_analisis_use_case.pedir_analisis_use_case import PedirAnalisisUseCase
 from asistente.application.ports.i_embeddings import IEmbeddings
 from asistente.application.ports.i_llm import ILLM
 from asistente.application.ports.i_observador_agente import IObservadorAgente
+from asistente.application.prompts.subagentes import ORQUESTADOR
 from asistente.application.quitar_grafico_use_case.i_quitar_grafico_use_case import IQuitarGraficoUseCase
 from asistente.application.quitar_grafico_use_case.quitar_grafico_use_case import QuitarGraficoUseCase
 from asistente.application.responder_pregunta_use_case.i_responder_pregunta_use_case import (
@@ -100,7 +105,11 @@ from asistente.application.responder_pregunta_use_case.i_responder_pregunta_use_
 )
 from asistente.application.responder_pregunta_use_case.responder_pregunta_use_case import ResponderPreguntaUseCase
 from asistente.application.seguridad.vigilante import Vigilante
+from asistente.application.subagentes.especialistas import ESPECIALISTAS
+from asistente.application.subagentes.instrucciones_de import instrucciones_de
+from asistente.application.subagentes.subagente import Subagente
 from asistente.application.tools.buscar_ayuda_tool import BuscarAyudaTool
+from asistente.application.tools.buscar_en_conversaciones_tool import BuscarEnConversacionesTool
 from asistente.application.tools.buscar_movimientos_tool import BuscarMovimientosTool
 from asistente.application.tools.comparar_con_ipc_tool import CompararConIpcTool
 from asistente.application.tools.comparar_meses_tool import CompararMesesTool
@@ -119,6 +128,7 @@ from asistente.application.tools.prevision_fin_de_mes_tool import PrevisionFinDe
 from asistente.application.tools.proponer_movimiento_tool import ProponerMovimientoTool
 from asistente.application.tools.recordar_tool import RecordarTool
 from asistente.application.tools.resumen_mes_tool import ResumenMesTool
+from asistente.application.tools.subagente_tool import SubagenteTool
 from asistente.application.tools.tendencia_tool import TendenciaTool
 from asistente.application.tools.tipo_de_cambio_tool import TipoDeCambioTool
 from asistente.application.tools.tool import Tool
@@ -164,7 +174,9 @@ from asistente.infrastructure.llm.llm_con_reserva import LLMConReserva
 from asistente.infrastructure.llm.openai_compatible_llm import OpenAICompatibleLLM
 from asistente.infrastructure.mcp.pool import PoolMCP
 from asistente.infrastructure.mcp.servidor_mcp_remoto import ServidorMCPRemoto
+from asistente.infrastructure.messaging.programador_de_analisis_celery import ProgramadorDeAnalisisCelery
 from asistente.infrastructure.messaging.programador_de_compactacion_celery import ProgramadorDeCompactacionCelery
+from asistente.infrastructure.notificaciones.avisos_de_progreso_ws import AvisosDeProgresoWS
 from asistente.infrastructure.sql.consultas_sql_postgres import ConsultasSQLPostgres
 from asistente.infrastructure.storage.almacen_django import AlmacenDjango
 from asistente.infrastructure.tarifas.tarifas_desde_ajustes import TarifasDesdeAjustes
@@ -237,6 +249,7 @@ def tools(chat: bool = False) -> list[Tool]:
         RecordarTool(recuerdos=RecuerdoCommandRepositoryORM(), reloj=RelojDjango()),  # módulo 99
         OlvidarTool(recuerdos=RecuerdoCommandRepositoryORM(), consultas=RecuerdoQueryServiceORM()),  # su ejercicio 1
         BuscarAyudaTool(buscador=buscador_de_ayuda()),  # módulo 100
+        BuscarEnConversacionesTool(consultas=ConversacionQueryServiceORM()),  # módulo 105: la memoria
         *_text_to_sql(),  # módulo 101: solo si se enciende (ASISTENTE_TEXT_TO_SQL) y el rol tiene contraseña
         *_remotas(),  # módulo 104: las tools aprobadas de otros servidores MCP
     ]
@@ -579,3 +592,62 @@ def _remotas() -> list[Tool]:
         except ServicioExternoNoDisponibleException:
             logger.warning("Servidor MCP %s no disponible: el chat, sin sus tools", servidor.nombre)
     return remotas
+
+
+# ── Módulo 105: el orquestador, sus especialistas y el análisis del mes ──
+def _especialista(subagente: Subagente, observador: IObservadorAgente | None) -> Agente:
+    """Un Agente completo con SU prompt y SOLO sus tools (del catálogo de consulta)."""
+    catalogo = {t.nombre: t for t in tools()}
+    return Agente(
+        llm=llm(),
+        tools=[catalogo[n] for n in subagente.tools],
+        limites=Limites(max_iteraciones=subagente.max_iteraciones, segundos=60),
+        observador=observador,
+        telemetria=TelemetriaOTel(),
+        vigilante=vigilante(),
+        sistema=instrucciones_de(subagente.instrucciones),
+    )
+
+
+def orquestador(observador: IObservadorAgente | None = None) -> Agente:
+    """Sin tools de datos: solo sus especialistas (SubagenteTool). El observador lo comparten todos: el contador de
+    uso suma lo que gastan, y el progreso ve qué especialista empieza y termina."""
+    especialistas = [
+        SubagenteTool(subagente=s, crear_agente=lambda s: _especialista(s, observador)) for s in ESPECIALISTAS
+    ]
+    return Agente(
+        llm=llm(),
+        tools=especialistas,
+        limites=Limites(max_iteraciones=4, segundos=180),
+        observador=observador,
+        telemetria=TelemetriaOTel(),
+        sistema=instrucciones_de(ORQUESTADOR),
+    )
+
+
+def avisos_de_progreso() -> AvisosDeProgresoWS:
+    return AvisosDeProgresoWS()
+
+
+def pedir_analisis() -> IPedirAnalisisUseCase:
+    return PedirAnalisisUseCase(
+        membresias=MembresiasEnHogares(),
+        programador=ProgramadorDeAnalisisCelery(),
+        planes=PlanDelHogarRepositoryORM(),
+        tarifas=TarifasDesdeAjustes(),
+        consumos=ConsumoQueryServiceORM(),
+        reloj=RelojDjango(),
+    )
+
+
+def analizar_mes() -> IAnalizarMesUseCase:
+    return AnalizarMesUseCase(
+        crear_orquestador=orquestador,
+        conversaciones=ConversacionCommandRepositoryORM(),
+        membresias=MembresiasEnHogares(),
+        avisos=avisos_de_progreso(),
+        consumos=ConsumoRepositoryORM(),
+        tarifas=TarifasDesdeAjustes(),
+        reloj=RelojDjango(),
+        uow=UnidadDeTrabajoDjango(),
+    )

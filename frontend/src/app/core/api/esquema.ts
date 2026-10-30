@@ -950,6 +950,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hogares/{hogar_pk}/asistente/analisis/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description 202 Accepted: el análisis se hace en segundo plano; el progreso y el final llegan por el WebSocket de la app
+         *     (evento "asistente.analisis" con la `tarea`), y el informe queda como una conversación nueva.
+         */
+        post: operations["hogares_asistente_analisis_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/hogares/{hogar_pk}/asistente/carpetas/": {
         parameters: {
             query?: never;
@@ -1859,6 +1879,11 @@ export interface components {
             uri: string;
             qr: string;
         };
+        AnalisisPedido: {
+            /** Format: uuid */
+            tarea: string;
+            mes: string;
+        };
         AplicacionConectada: {
             client_id: string;
             nombre: string;
@@ -2743,6 +2768,15 @@ export interface components {
         };
         PatchedUsuarioSoporteRequest: {
             is_active?: boolean;
+        };
+        PedirAnalisisRequest: {
+            /**
+             * Format: uuid
+             * @description Un UUID que genera el cliente: con él llegan los avisos de progreso.
+             */
+            tarea: string;
+            /** @description AAAA-MM; sin él, el mes en curso. */
+            mes?: string;
         };
         PorEstado: {
             clave: string;
@@ -4517,6 +4551,32 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Hogar"];
+                };
+            };
+        };
+    };
+    hogares_asistente_analisis_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PedirAnalisisRequest"];
+                "multipart/form-data": components["schemas"]["PedirAnalisisRequest"];
+            };
+        };
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AnalisisPedido"];
                 };
             };
         };

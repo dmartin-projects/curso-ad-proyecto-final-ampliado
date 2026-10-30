@@ -15,6 +15,7 @@ from hogares.infrastructure import container as hogares
 
 # Los nombres que viajan en los mensajes de Celery (y que usan CELERY_TASK_ROUTES y CELERY_BEAT_SCHEDULE).
 CELERY = {
+    "asistente.tasks.analizar_mes",  # módulo 105
     "asistente.tasks.compactar_conversacion",  # módulo 99
     "core.tasks.limpiar_resultados_de_tareas",
     "eventos.tasks.limpiar_eventos_publicados",

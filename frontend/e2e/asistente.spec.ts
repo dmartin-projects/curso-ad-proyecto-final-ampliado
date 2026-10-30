@@ -196,3 +196,23 @@ test('seguridad: un concepto con instrucciones se descarta y la respuesta sale s
     await request.delete('http://localhost:8000/e2e/asistente/transferencia');
   }
 });
+
+test('el análisis del mes: Celery, el progreso por el WebSocket y el informe como conversación', async ({
+  page,
+}) => {
+  const sinErrores = vigilarConsola(page);
+  await abrirAsistente(page);
+  await page.getByRole('button', { name: 'Analizar el mes' }).click();
+
+  // El orquestador reparte, el especialista mira el resumen del mes y el informe queda como una conversación
+  await expect(page).toHaveURL(/\/asistente\?conversacion=\d+$/);
+  await expect(page.getByRole('heading', { name: /^Análisis de \w+ de \d{4}$/ })).toBeVisible();
+  await expect(page.getByRole('article', { name: 'Respuesta del asistente' })).toContainText(
+    /Análisis del mes\..*gastasteis [\d.,]+ €/,
+  );
+  await expect(page.getByRole('navigation', { name: 'Conversaciones' })).toContainText(
+    'Análisis de',
+  );
+  await expect(page.getByRole('button', { name: 'Analizar el mes' })).toBeEnabled();
+  sinErrores();
+});

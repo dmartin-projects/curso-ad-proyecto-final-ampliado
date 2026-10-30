@@ -18,6 +18,12 @@
       (borrar)="borrar($event)"
     />
     <app-recuerdos [recuerdos]="recuerdos.data() ?? []" (olvidar)="olvidar($event)" />
+    <app-analisis-del-mes
+      [pasos]="analisis.pasos()"
+      [enCurso]="analisis.enCurso()"
+      [error]="analisis.error()"
+      (analizar)="analizar()"
+    />
   </div>
 
   <section class="flex min-h-[70vh] flex-col gap-4" aria-labelledby="titulo-chat">

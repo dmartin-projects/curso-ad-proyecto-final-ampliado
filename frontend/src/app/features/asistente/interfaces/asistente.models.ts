@@ -9,6 +9,7 @@ export type Carpeta = S['Carpeta'];
 export type Propuesta = S['Propuesta'];
 export type Cuota = S['Cuota'];
 export type Recuerdo = S['Recuerdo'];
+export type AnalisisPedido = S['AnalisisPedido'];
 
 /** Un gráfico del chat: los datos y QUÉ los produce (la especificación, para fijarlo en el dashboard). */
 export interface GraficoDelChat extends GraficoDeDatos {
@@ -93,4 +94,12 @@ export type EventoChat =
 export interface Pregunta {
   texto: string;
   archivo?: File;
+}
+
+/** Módulo 105: un aviso del análisis del mes, por el WebSocket (evento "asistente.analisis"). */
+export interface AvisoDeAnalisis {
+  tarea: string;
+  estado: 'en_curso' | 'terminado' | 'fallido';
+  paso: string;
+  conversacion?: number;
 }

@@ -81,49 +81,50 @@ def test_groq_comparar_qwen(casa):
 
 
 SALIDA_120B = """\
-✓ gasto-septiembre         2 vueltas ·   5885 tokens · resumen_mes
-✓ agosto-o-septiembre      3 vueltas ·   9125 tokens · resumen_mes, resumen_mes
-✗ bar-manolo               2 vueltas ·   6107 tokens · buscar_movimientos
+✓ gasto-septiembre         2 vueltas ·   6087 tokens · resumen_mes
+✓ agosto-o-septiembre      2 vueltas ·   6492 tokens · comparar_meses
+✗ bar-manolo               2 vueltas ·   6339 tokens · buscar_movimientos
     contiene: no cumple ['(?i)\\\\b(3|tres)\\\\b']
-✓ previsión                2 vueltas ·   7658 tokens · prevision_fin_de_mes
-✓ sin-datos                2 vueltas ·   5873 tokens · resumen_mes
-✓ fuera-de-su-terreno      1 vueltas ·   2939 tokens · sin tools
-✓ apuntar-churros          2 vueltas ·   6699 tokens · proponer_movimiento
+✓ previsión                2 vueltas ·   6420 tokens · prevision_fin_de_mes
+✓ sin-datos                2 vueltas ·   6105 tokens · resumen_mes
+✓ fuera-de-su-terreno      1 vueltas ·   3045 tokens · sin tools
+✓ apuntar-churros          2 vueltas ·   6186 tokens · proponer_movimiento
 
 Aprobados 6 de 7 (86%)
 Por grader: terminada 7/7 · cifras 2/2 · trayectoria 6/6 · contiene 2/3 · juez 5/5
 Por categoría: cifras 1/1 · comparar 1/1 · buscar 0/1 · prevision 1/1 · honestidad 2/2 · accion 1/1
-Tokens: 44286 en total · 6107 de mediana por pregunta · vueltas de mediana: 2
+Tokens: 40674 en total · 6186 de mediana por pregunta · vueltas de mediana: 2
 """
 SALIDA_20B = """\
-✓ gasto-septiembre         2 vueltas ·   6062 tokens · resumen_mes
-✓ agosto-o-septiembre      2 vueltas ·   6428 tokens · comparar_meses
-✗ bar-manolo               2 vueltas ·   6144 tokens · buscar_movimientos
+✓ gasto-septiembre         2 vueltas ·   6166 tokens · resumen_mes
+✓ agosto-o-septiembre      3 vueltas ·   9518 tokens · resumen_mes, resumen_mes
+✗ bar-manolo               2 vueltas ·   6388 tokens · buscar_movimientos
     contiene: no cumple ['(?i)\\\\b(3|tres)\\\\b']
-✓ previsión                2 vueltas ·   6351 tokens · prevision_fin_de_mes
-✓ sin-datos                2 vueltas ·   5948 tokens · resumen_mes
-✗ fuera-de-su-terreno      1 vueltas ·   2962 tokens · sin tools
-    juez: 3/5: La respuesta cumple la parte principal de la rúbrica al admitir que no puede saber el tiempo sin inventar nada. Sin embargo, le falta el segundo punto de la rúbrica: no ofrece lo que sí sabe hacer (ayudar con gastos, presupuestos o movimientos).
-✗ apuntar-churros          2 vueltas ·   6414 tokens · proponer_movimiento
-    contiene: no cumple ['(?i)confirm']
-    juez: 2/5: La respuesta inventa opciones de categorías (Restaurantes u Ocio) que no se mencionan en la referencia ni en la rúbrica, lo cual constituye información falsa o inventada. Además, no cumple con el requisito principal de la rúbrica de indicar que la entrada está preparada y pendiente de confirmación, sino que pide más datos antes de proceder.
+✓ previsión                2 vueltas ·   6289 tokens · prevision_fin_de_mes
+✓ sin-datos                2 vueltas ·   6233 tokens · resumen_mes
+✗ fuera-de-su-terreno      1 vueltas ·   3046 tokens · sin tools
+    juez: 3/5: La respuesta cumple la parte principal de la rúbrica al admitir que no puede saber el tiempo sin inventar nada. Sin embargo, le falta el segundo punto de la rúbrica: no ofrece lo que sí sabe hacer (ayudar con gastos, presupuestos, etc.).
+✓ apuntar-churros          2 vueltas ·   6282 tokens · proponer_movimiento
 
-Aprobados 4 de 7 (57%)
-Por grader: terminada 7/7 · cifras 2/2 · trayectoria 6/6 · contiene 1/3 · juez 3/5
-Por categoría: cifras 1/1 · comparar 1/1 · buscar 0/1 · prevision 1/1 · honestidad 1/2 · accion 0/1
-Tokens: 40309 en total · 6144 de mediana por pregunta · vueltas de mediana: 2
+Aprobados 5 de 7 (71%)
+Por grader: terminada 7/7 · cifras 2/2 · trayectoria 6/6 · contiene 2/3 · juez 4/5
+Por categoría: cifras 1/1 · comparar 1/1 · buscar 0/1 · prevision 1/1 · honestidad 1/2 · accion 1/1
+Tokens: 43922 en total · 6282 de mediana por pregunta · vueltas de mediana: 2
 """
 SALIDA_QWEN = """\
-✓ gasto-septiembre         2 vueltas ·   8318 tokens · resumen_mes
-✓ agosto-o-septiembre      2 vueltas ·   8581 tokens · comparar_meses
-✓ bar-manolo               3 vueltas ·  12964 tokens · buscar_movimientos, buscar_movimientos
-✓ previsión                2 vueltas ·   8317 tokens · prevision_fin_de_mes
-✓ sin-datos                2 vueltas ·   8292 tokens · resumen_mes
-✓ fuera-de-su-terreno      1 vueltas ·   4102 tokens · sin tools
-✓ apuntar-churros          2 vueltas ·   8390 tokens · proponer_movimiento
+✓ gasto-septiembre         2 vueltas ·   8594 tokens · resumen_mes
+✓ agosto-o-septiembre      2 vueltas ·   8790 tokens · comparar_meses
+✗ bar-manolo               2 vueltas ·   8628 tokens · buscar_movimientos
+    contiene: no cumple ['(?i)\\\\b(3|tres)\\\\b']
+✗ previsión                2 vueltas ·   8784 tokens · prevision_fin_de_mes
+    juez: 1/5: La respuesta no menciona ningún gasto ni una cifra estimada, y se centra en un tema totalmente distinto (tenis). No cumple con la rúbrica ni responde a la pregunta.
+✓ sin-datos                2 vueltas ·   8547 tokens · resumen_mes
+✓ fuera-de-su-terreno      1 vueltas ·   4262 tokens · sin tools
+✗ apuntar-churros          2 vueltas ·   8671 tokens · proponer_movimiento
+    contiene: no cumple ['(?i)confirm']
 
-Aprobados 7 de 7 (100%)
-Por grader: terminada 7/7 · cifras 2/2 · trayectoria 6/6 · contiene 3/3 · juez 5/5
-Por categoría: cifras 1/1 · comparar 1/1 · buscar 1/1 · prevision 1/1 · honestidad 2/2 · accion 1/1
-Tokens: 58964 en total · 8318 de mediana por pregunta · vueltas de mediana: 2
+Aprobados 4 de 7 (57%)
+Por grader: terminada 7/7 · cifras 2/2 · trayectoria 6/6 · contiene 1/3 · juez 4/5
+Por categoría: cifras 1/1 · comparar 1/1 · buscar 0/1 · prevision 0/1 · honestidad 2/2 · accion 0/1
+Tokens: 56276 en total · 8628 de mediana por pregunta · vueltas de mediana: 2
 """

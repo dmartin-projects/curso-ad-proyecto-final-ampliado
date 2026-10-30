@@ -5,6 +5,7 @@ import { map, mergeMap, Observable } from 'rxjs';
 import { archivoDe } from '../../../core/http/archivos';
 
 import {
+  AnalisisPedido,
   Carpeta,
   Conversacion,
   ConversacionDetalle,
@@ -63,6 +64,11 @@ export class AsistenteApi {
   /** Módulo 98: lo gastado hoy (por quien pide) y este mes (por el hogar), con los límites de su plan. */
   cuota(hogarId: number) {
     return this.http.get<Cuota>(`${this.base(hogarId)}/cuota/`);
+  }
+
+  /** Módulo 105: encargar el análisis del mes (202: lo hace Celery; el progreso llega por el WebSocket). */
+  analizar(hogarId: number, tarea: string, mes?: string) {
+    return this.http.post<AnalisisPedido>(`${this.base(hogarId)}/analisis/`, { tarea, mes });
   }
 
   /** Módulo 99: lo que el asistente recuerda de quien pide (lo guarda la tool `recordar`). */

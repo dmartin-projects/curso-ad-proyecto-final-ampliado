@@ -98,6 +98,7 @@ class Agente:
         telemetria: ITelemetriaDelAgente | None = None,  # módulo 98: trazas y métricas (por defecto, ninguna)
         cronometro: Callable[[], float] = time.monotonic,  # segundos; en los tests, uno que avanza a mano
         vigilante: Vigilante | None = None,  # módulo 102: el clasificador de inyecciones (None: sin clasificador)
+        sistema: Callable[[ContextoPregunta], str] | None = None,  # módulo 105: otro system prompt (un especialista)
     ):
         self.llm = llm
         self.tools = {t.nombre: t for t in tools}
@@ -107,6 +108,7 @@ class Agente:
         self.telemetria = telemetria or TelemetriaMuda()
         self.cronometro = cronometro
         self.vigilante = vigilante
+        self.sistema = sistema or instrucciones
 
     def responder(
         self,
@@ -127,7 +129,7 @@ class Agente:
 
     def _responder(self, historial, contexto, estructurada, al_texto, memoria) -> ResultadoAgente:
         inicio = self.cronometro()
-        sistema = instrucciones(contexto)  # el mismo en todas las vueltas: el prefijo que el proveedor cachea
+        sistema = self.sistema(contexto)  # el mismo en todas las vueltas: el prefijo que el proveedor cachea
         # Módulo 99: la memoria (recuerdos y resumen), fija al principio; el historial, en lo que quede del presupuesto
         presupuesto = max(0, self.limites.max_tokens_historial - sum(estimar_tokens(m.texto) for m in memoria))
         mensajes = [*memoria, *ventana(historial, presupuesto)]

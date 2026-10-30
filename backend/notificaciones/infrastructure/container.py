@@ -31,6 +31,7 @@ from notificaciones.infrastructure.database.repositories.notificacion_query_serv
 )
 from notificaciones.infrastructure.i18n.traductor_django import TraductorDjango
 from notificaciones.infrastructure.messaging.publicador_eventos_django import PublicadorEventosDjango
+from notificaciones.infrastructure.realtime import tiempo_real
 
 
 def notificar() -> INotificarUseCase:
@@ -58,3 +59,8 @@ def contar_no_leidas() -> IContarNoLeidasUseCase:
 
 def obtener_estado_inicial() -> IObtenerEstadoInicialUseCase:
     return ObtenerEstadoInicialUseCase(destinatarios=DestinatariosORM(), notificaciones=NotificacionQueryServiceORM())
+
+
+def emitir_evento_a_usuario(usuario_id: int, hogar_id: int, evento: str, datos: dict) -> None:
+    """Módulo 105: para otras apps (el progreso del análisis del asistente), sin tocar los adapters de notificaciones."""
+    tiempo_real.emitir_evento_a_usuario(usuario_id, hogar_id, evento, datos)

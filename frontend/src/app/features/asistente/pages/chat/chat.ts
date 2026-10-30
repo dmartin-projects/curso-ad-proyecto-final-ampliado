@@ -23,6 +23,7 @@ import { ErrorApi } from '../../../../core/http/errores';
 import { Confirmaciones } from '../../../../shared/components/confirmar/confirmaciones';
 import { MarkdownLigero } from '../../../../shared/pipes/markdown-ligero';
 import { guardarArchivo } from '../../../../shared/utils/descargar';
+import { AnalisisDelMes } from '../../components/analisis-del-mes/analisis-del-mes';
 import { CuotaDelAsistente } from '../../components/cuota/cuota';
 import { Entrada } from '../../components/entrada/entrada';
 import { GraficoDelChatCard } from '../../components/grafico-del-chat/grafico-del-chat';
@@ -38,6 +39,7 @@ import {
   PropuestaDelChat,
   Recuerdo,
 } from '../../interfaces/asistente.models';
+import { AnalisisDelMesStore } from '../../services/analisis-del-mes';
 import { AsistenteApi } from '../../services/asistente-api';
 import { ChatStore } from '../../services/chat-store';
 import { clavesAsistente } from '../../services/consultas';
@@ -56,6 +58,7 @@ const SUGERENCIAS = [
     MatIconModule,
     MatProgressBarModule,
     MarkdownLigero,
+    AnalisisDelMes,
     CuotaDelAsistente,
     Entrada,
     GraficoDelChatCard,
@@ -64,13 +67,14 @@ const SUGERENCIAS = [
     PropuestaCard,
     Recuerdos,
   ],
-  providers: [ChatStore],
+  providers: [ChatStore, AnalisisDelMesStore],
   templateUrl: './chat.html',
 })
 export default class Chat {
   readonly conversacion = input<string>(); // ?conversacion=12
   protected readonly chat = inject(ChatStore);
   protected readonly hogar = inject(HogarStore);
+  protected readonly analisis = inject(AnalisisDelMesStore);
   private readonly api = inject(AsistenteApi);
   private readonly avisos = inject(Avisos);
   private readonly confirmaciones = inject(Confirmaciones);
@@ -126,6 +130,14 @@ export default class Chat {
       void this.router.navigate([], { queryParams: { conversacion: id } });
     }
     this.chat.preguntar(pregunta);
+  }
+
+  /** Módulo 105: el informe del análisis es una conversación más; se abre, y la lista y la cuota se refrescan. */
+  protected async analizar() {
+    const conversacion = await this.analisis.analizar(this.hogarId());
+    if (conversacion === null) return;
+    await this.router.navigate([], { queryParams: { conversacion } });
+    await this.invalidar();
   }
 
   protected async nueva() {

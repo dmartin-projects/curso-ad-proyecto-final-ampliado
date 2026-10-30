@@ -39,6 +39,14 @@ def emitir_a_hogar(hogar_id: int, evento: str, datos: dict | None = None) -> Non
     )
 
 
+def emitir_evento_a_usuario(usuario_id: int, hogar_id: int, evento: str, datos: dict) -> None:
+    """Módulo 105: un evento solo para una persona (el progreso de algo que ha pedido ella), con la misma forma que los
+    del hogar: la SPA ya los sabe leer."""
+    _enviar(
+        grupos.de_usuario(usuario_id), {"type": "hogar.evento", "evento": evento, "hogar": hogar_id, "datos": datos}
+    )
+
+
 def emitir_a_usuario(usuario_id: int, tipo: str, datos: dict) -> None:
     _enviar(grupos.de_usuario(usuario_id), {"type": tipo, "datos": datos})
 

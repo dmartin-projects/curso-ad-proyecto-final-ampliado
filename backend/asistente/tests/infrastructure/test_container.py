@@ -81,7 +81,8 @@ def test_el_chat_ademas_con_las_de_su_canal(settings):
         "recordar",
         "olvidar",
         "buscar_ayuda",
-    ]  # 99 y 100
+        "buscar_en_conversaciones",
+    ]  # 99, 100 y 105
 
 
 def test_el_modelo_auxiliar_con_el_principal_de_reserva(settings):

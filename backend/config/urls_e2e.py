@@ -68,8 +68,12 @@ def _respuesta_del_llm(cuerpo: dict) -> tuple[str, dict | None]:
             return f"No he podido: {resultado['error']}", None
         if "retirado" in resultado:  # módulo 102: el clasificador lo ha quitado
             return "He descartado un movimiento por seguridad: el resto, normal.", None
+        if "informe" in resultado:  # módulo 105: el orquestador, con el informe de su especialista
+            return f"**Análisis del mes.** {resultado['informe']}", None
         return f"En {resultado['mes']} gastasteis {resultado['gastos'].replace('.', ',')} €.", None
     pregunta = ultimo["content"].lower()
+    if pregunta.startswith("prepara el análisis de"):  # módulo 105: el orquestador reparte (un especialista basta)
+        return "", {"name": "especialista_gastos", "arguments": json.dumps({"encargo": "El gasto del mes"})}
     if "dibuja" in pregunta:
         argumentos = {
             "tipo": "lineas",

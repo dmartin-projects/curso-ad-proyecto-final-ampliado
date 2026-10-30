@@ -7,6 +7,7 @@ La forma la garantiza el proveedor (strict); el contenido se valida aquí, como 
 """
 
 import logging
+import re
 from typing import Annotated
 
 from pydantic import AfterValidator, BaseModel, ConfigDict, ValidationError
@@ -59,6 +60,21 @@ class _RespuestaJSON(BaseModel):
 ESQUEMA = EsquemaRespuesta("respuesta_gastos", esquema_json(_RespuestaJSON))
 
 
+def _numeros(texto: str) -> set[str]:
+    """Los números de un texto, sin separadores: «776,59 €» y «776.59 €» son el mismo, 77659."""
+    return {re.sub(r"[.,]", "", n) for n in re.findall(r"\d[\d.,]*\d|\d", texto)}
+
+
+def _cifras_del_texto(cifras: list[_CifraJSON], texto: str) -> tuple[Cifra, ...]:
+    """Ejercicio 3: una cifra cuyo número no está en la respuesta no es una cifra de la respuesta (el modelo la ha
+    calculado o inventado al estructurar). Se descarta: la interfaz no puede resaltar lo que el usuario no ha leído."""
+    en_el_texto = _numeros(texto)
+    buenas = tuple(Cifra(c.concepto, c.importe) for c in cifras if _numeros(c.importe) <= en_el_texto)
+    if len(buenas) < len(cifras):
+        logger.warning("Respuesta estructurada: %s cifras que no están en el texto", len(cifras) - len(buenas))
+    return buenas
+
+
 def estructurar(llm: ILLM, mensajes: tuple[Mensaje, ...]) -> tuple[RespuestaEstructurada | None, RespuestaLLM | None]:
     """`mensajes` acaba con la respuesta del modelo. Si algo falla, (None, …): el texto sigue siendo la respuesta."""
     peticion = PeticionLLM(
@@ -77,7 +93,7 @@ def estructurar(llm: ILLM, mensajes: tuple[Mensaje, ...]) -> tuple[RespuestaEstr
     return (
         RespuestaEstructurada(
             texto=datos.texto,
-            cifras=tuple(Cifra(c.concepto, c.importe) for c in datos.cifras),
+            cifras=_cifras_del_texto(datos.cifras, mensajes[-1].texto),  # contra la respuesta ORIGINAL
             seguimiento=tuple(datos.seguimiento[:MAX_SEGUIMIENTO]),
         ),
         r,

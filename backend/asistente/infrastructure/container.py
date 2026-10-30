@@ -37,6 +37,7 @@ from asistente.infrastructure.llm.cliente_openai import cliente_del_proceso
 from asistente.infrastructure.llm.llm_con_reserva import LLMConReserva
 from asistente.infrastructure.llm.openai_compatible_llm import OpenAICompatibleLLM
 from asistente.infrastructure.tickets.tickets_en_tickets import TicketsEnTickets
+from core.application.ports.i_reloj import IReloj
 from core.infrastructure.cache.circuit_breaker import CircuitBreaker
 from core.infrastructure.clock.reloj_django import RelojDjango
 
@@ -107,7 +108,8 @@ def agente(observador: IObservadorAgente | None = None, modelo: str | None = Non
     return Agente(llm=llm(modelo), tools=tools(), limites=limites, observador=observador)
 
 
-def contexto(usuario_id: int, hogar_id: int) -> ContextoPregunta:
+def contexto(usuario_id: int, hogar_id: int, reloj: IReloj | None = None) -> ContextoPregunta:
+    """`reloj`: otro momento (ejercicio 2 del 96: ver el prompt de otro día). Por defecto, el de Django."""
     return ContextoPregunta.abrir(
-        usuario_id=usuario_id, hogar_id=hogar_id, membresias=MembresiasEnHogares(), reloj=RelojDjango()
+        usuario_id=usuario_id, hogar_id=hogar_id, membresias=MembresiasEnHogares(), reloj=reloj or RelojDjango()
     )

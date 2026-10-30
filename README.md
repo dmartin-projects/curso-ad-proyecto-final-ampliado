@@ -243,3 +243,5 @@ Ejercicios: `dias_festivos` con Nager.Date (otro servicio externo detrás de su 
 cd backend
 uv run python manage.py preguntar "¿Cuánto gastamos en septiembre y en qué se fue más?" --email demo@example.com --hogar 1 --estructurada
 ```
+
+Ejercicios: calibrar la estimación de *tokens* con lo que contó Groq en los *cassettes* (nunca por debajo), `manage.py ver_prompt --email … --hogar … [--ahora 2027-01-15T12:00+00:00]` para ver el *prompt* de cualquier día sin llamar al modelo, y descartar de la respuesta estructurada las cifras que no están en el texto.

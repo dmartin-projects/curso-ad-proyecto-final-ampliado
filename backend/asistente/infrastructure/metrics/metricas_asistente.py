@@ -23,10 +23,26 @@ def _observar(_opciones):
             connection.close()
 
 
+def _disponible(_opciones):
+    """Ejercicio 3 del 107: 1 si se puede preguntar; 0 si no, con el motivo (apagado o sin_modelos). Solo Redis y los
+    ajustes: barato de leer cada vez que se exporta."""
+    try:
+        estado = container.estado_del_asistente().estado()
+    except Exception:  # sin Redis no se sabe: un hueco
+        return
+    yield Observation(1 if estado.activo else 0, {"motivo": estado.motivo or "activo"})
+
+
 def registrar() -> None:
     metrics.get_meter("gastos.asistente").create_observable_gauge(
         "gastos.asistente.hogares_sin_cuota",
         callbacks=[_observar],
         unit="{hogar}",
         description="Hogares que ya han gastado la cuota del mes de su plan",
+    )
+    metrics.get_meter("gastos.asistente").create_observable_gauge(
+        "gastos.asistente.disponible",
+        callbacks=[_disponible],
+        unit="1",
+        description="1 si el asistente contesta; 0 si está apagado o sin ningún modelo disponible (ejercicio 3 del 107)",
     )

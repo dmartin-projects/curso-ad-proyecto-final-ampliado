@@ -141,6 +141,26 @@ groups:
           - refId: C
             datasourceUid: __expr__
             model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0.5] } }] }
+      - uid: asistente-no-disponible # ejercicio 3 del 107
+        title: El asistente no está disponible
+        condition: C
+        for: 5m
+        annotations:
+          summary: "El asistente no contesta desde hace 5 minutos (motivo en el panel: apagado o sin_modelos)"
+          description: "apagado: alguien lo ha apagado (ASISTENTE_ACTIVO o manage.py interruptor_asistente). sin_modelos: todos los circuitos abiertos; mira el panel 'Llamadas al modelo que fallan'"
+        labels: { severidad: critica }
+        noDataState: OK
+        execErrState: Error
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: max(gastos_asistente_disponible)
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model: { type: threshold, expression: A, conditions: [{ evaluator: { type: lt, params: [1] } }] }
       - uid: asistente-reserva
         title: El modelo principal falla (contesta la reserva)
         condition: C

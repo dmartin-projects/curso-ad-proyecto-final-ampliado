@@ -9,10 +9,13 @@
 from collections.abc import Callable
 
 from django.conf import settings
+from django.core.cache import cache
 
 from asistente.application.ports.i_estado_del_asistente import IEstadoDelAsistente
 from asistente.domain.vo.estado_del_asistente import APAGADO, SIN_MODELOS, EstadoDelAsistente
 from core.infrastructure.cache.circuit_breaker import CircuitBreaker
+
+APAGADO_HASTA = "asistente:apagado_hasta"  # ejercicio 1: manage.py interruptor_asistente apagar --minutos 30
 
 
 class EstadoDesdeAjustesYCircuitos(IEstadoDelAsistente):
@@ -20,7 +23,7 @@ class EstadoDesdeAjustesYCircuitos(IEstadoDelAsistente):
         self.circuito = circuito  # el del container, para que el nombre del circuito sea el mismo
 
     def estado(self):
-        if not settings.ASISTENTE_ACTIVO:
+        if not settings.ASISTENTE_ACTIVO or cache.get(APAGADO_HASTA):
             return EstadoDelAsistente(False, APAGADO)
         modelos = [settings.ASISTENTE_MODELO, *settings.ASISTENTE_MODELOS_RESERVA]
         if all(self.circuito(m).abierto for m in modelos):

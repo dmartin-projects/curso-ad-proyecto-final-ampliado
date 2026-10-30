@@ -1171,6 +1171,28 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hogares/{hogar_pk}/asistente/mis-datos/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Vistas anidadas en /hogares/<hogar_pk>/…
+         *
+         *     Resuelve el hogar de la URL y la membresía del usuario. Si el usuario no pertenece
+         *     al hogar, responde 404 (ni siquiera revela que el hogar existe).
+         */
+        get: operations["hogares_asistente_mis_datos_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/hogares/{hogar_pk}/asistente/propuestas/{id}/confirmar/": {
         parameters: {
             query?: never;
@@ -5022,6 +5044,26 @@ export interface operations {
         responses: {
             /** @description No response body */
             204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    hogares_asistente_mis_datos_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Conversaciones y recuerdos de quien pide, en JSON */
+            200: {
                 headers: {
                     [name: string]: unknown;
                 };

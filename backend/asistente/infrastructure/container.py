@@ -56,6 +56,7 @@ from asistente.application.eliminar_conversacion_use_case.eliminar_conversacion_
 from asistente.application.eliminar_conversacion_use_case.i_eliminar_conversacion_use_case import (
     IEliminarConversacionUseCase,
 )
+from asistente.application.exportar_mis_datos_use_case.exportar_mis_datos_use_case import ExportarMisDatosUseCase
 from asistente.application.fijar_grafico_use_case.fijar_grafico_use_case import FijarGraficoUseCase
 from asistente.application.fijar_grafico_use_case.i_fijar_grafico_use_case import IFijarGraficoUseCase
 from asistente.application.indexar_ayuda_use_case.i_indexar_ayuda_use_case import IIndexarAyudaUseCase
@@ -713,3 +714,7 @@ def purgar_conversaciones() -> PurgarConversacionesUseCase:
         uow=UnidadDeTrabajoDjango(),
         dias=settings.ASISTENTE_RETENCION_DIAS,
     )
+
+
+def exportar_mis_datos() -> ExportarMisDatosUseCase:  # ejercicio 2
+    return ExportarMisDatosUseCase(conversaciones=ConversacionQueryServiceORM(), recuerdos=RecuerdoQueryServiceORM())

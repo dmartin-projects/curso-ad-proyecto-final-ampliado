@@ -2136,6 +2136,28 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/hogares/{hogar_pk}/asistente/mis-datos/:
+    get:
+      operationId: hogares_asistente_mis_datos_retrieve
+      description: |-
+        Vistas anidadas en /hogares/<hogar_pk>/…
+
+        Resuelve el hogar de la URL y la membresía del usuario. Si el usuario no pertenece
+        al hogar, responde 404 (ni siquiera revela que el hogar existe).
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: Conversaciones y recuerdos de quien pide, en JSON
   /api/v1/hogares/{hogar_pk}/asistente/propuestas/{id}/confirmar/:
     post:
       operationId: hogares_asistente_propuestas_confirmar_create

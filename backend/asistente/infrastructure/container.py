@@ -154,6 +154,7 @@ from asistente.infrastructure.finanzas.ejecutor_de_propuestas_en_finanzas import
 from asistente.infrastructure.finanzas.exportador_en_finanzas import ExportadorEnFinanzas
 from asistente.infrastructure.hogares.membresias_en_hogares import MembresiasEnHogares
 from asistente.infrastructure.llm.cliente_openai import cliente_del_proceso
+from asistente.infrastructure.llm.detector_con_politica import DetectorConPolitica
 from asistente.infrastructure.llm.detector_prompt_guard import DetectorPromptGuard
 from asistente.infrastructure.llm.llm_con_reserva import LLMConReserva
 from asistente.infrastructure.llm.openai_compatible_llm import OpenAICompatibleLLM
@@ -161,6 +162,7 @@ from asistente.infrastructure.messaging.programador_de_compactacion_celery impor
 from asistente.infrastructure.sql.consultas_sql_postgres import ConsultasSQLPostgres
 from asistente.infrastructure.storage.almacen_django import AlmacenDjango
 from asistente.infrastructure.tarifas.tarifas_desde_ajustes import TarifasDesdeAjustes
+from asistente.infrastructure.telemetria import instrumentos
 from asistente.infrastructure.telemetria.llm_medido import LLMMedido
 from asistente.infrastructure.telemetria.telemetria_otel import TelemetriaOTel
 from asistente.infrastructure.tickets.lector_de_adjuntos_en_tickets import LectorDeAdjuntosEnTickets
@@ -474,6 +476,7 @@ def indexar_ayuda() -> IIndexarAyudaUseCase:
         indice=IndiceDeAyudaPG(),
         embeddings=embeddings(descargar=True),  # el comando del despliegue: puede (y debe) traer el modelo
         uow=UnidadDeTrabajoDjango(),
+        vigilante=vigilante(),  # ejercicio 2 del 102
     )
 
 
@@ -505,4 +508,15 @@ def vigilante() -> Vigilante | None:
         return None
     cliente = cliente_del_proceso(settings.ASISTENTE_BASE_URL, settings.ASISTENTE_API_KEY, settings.ASISTENTE_TIMEOUT)
     detector = DetectorPromptGuard(cliente=cliente, modelo=settings.ASISTENTE_DETECTOR_INYECCION)
-    return Vigilante(detector, umbral=settings.ASISTENTE_UMBRAL_INYECCION)
+    return Vigilante(detector, umbral=settings.ASISTENTE_UMBRAL_INYECCION, al_detectar=_contar_inyeccion)
+
+
+def _contar_inyeccion(origen: str, puntuacion: float) -> None:
+    """Ejercicio 1 del 102: la métrica. Por origen (pocos valores: las tools, "adjunto", "pregunta"), sin hogares."""
+    instrumentos.inyecciones.add(1, {"origen": origen})
+
+
+def detector_con_politica() -> DetectorConPolitica:
+    """Ejercicio 3 del 102: gpt-oss-safeguard-20b con nuestra política (manage.py probar_detector --con-politica)."""
+    cliente = cliente_del_proceso(settings.ASISTENTE_BASE_URL, settings.ASISTENTE_API_KEY, settings.ASISTENTE_TIMEOUT)
+    return DetectorConPolitica(cliente=cliente)

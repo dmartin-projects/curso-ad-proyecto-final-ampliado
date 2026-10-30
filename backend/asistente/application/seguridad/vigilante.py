@@ -1,5 +1,6 @@
 # asistente/application/seguridad/vigilante.py — el clasificador, con su política (módulo 102)
 import logging
+from collections.abc import Callable
 
 from asistente.application.ports.i_detector_de_inyeccion import IDetectorDeInyeccion
 from asistente.domain.exceptions.llm_exception import LLMException
@@ -21,10 +22,15 @@ class Vigilante:
       conteste 400 pasaría sin revisar. Ahí, fail closed: se trata como sospechoso.
     """
 
-    def __init__(self, detector: IDetectorDeInyeccion, umbral: float = 0.5):
+    def __init__(
+        self,
+        detector: IDetectorDeInyeccion,
+        umbral: float = 0.5,
+        al_detectar: Callable[[str, float], None] | None = None,  # ejercicio 1: la métrica (origen, puntuación)
+    ):
         if not 0 < umbral < 1:
             raise ValueError("El umbral va entre 0 y 1.")
-        self.detector, self.umbral = detector, umbral
+        self.detector, self.umbral, self.al_detectar = detector, umbral, al_detectar
 
     def sospechoso(self, texto: str, origen: str) -> float | None:
         """La puntuación si el texto parece una inyección; None si no (o si no se ha podido saber)."""
@@ -49,4 +55,6 @@ class Vigilante:
             puntuacion,
             extra={"asistente": {"inyeccion": origen, "puntuacion": round(puntuacion, 3)}},
         )
+        if self.al_detectar is not None:
+            self.al_detectar(origen, puntuacion)
         return puntuacion

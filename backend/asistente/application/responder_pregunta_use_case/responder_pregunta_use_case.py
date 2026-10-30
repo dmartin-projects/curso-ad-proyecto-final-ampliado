@@ -130,6 +130,10 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
         ).exigir(self.reloj.ahora())
         historial = self.conversaciones.historial(conversacion.id, conversacion.resumido_hasta)
         recuerdos = [r.texto for r in self.recuerdos.listar(usuario_id, entrada.hogar_id)]
+        if (
+            self.vigilante is not None
+        ):  # ejercicio 1 del 102: la pregunta también, pero solo para saberlo (no se retira)
+            self.vigilante.sospechoso(entrada.texto, "pregunta")
         pregunta, retirado = self._pregunta(entrada)
         # Módulo 102: lo que se lea del adjunto es de terceros desde el principio, y lo que ya leyó la conversación sigue
         # en el historial

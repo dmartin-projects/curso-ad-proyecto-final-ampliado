@@ -20,3 +20,5 @@ class Command(BaseCommand):
         self.stdout.write(
             f"{r.trozos} trozos: {r.nuevos_o_cambiados} nuevos o cambiados, {r.borrados} borrados; {modelo}."
         )
+        for clave in r.rechazados:  # ejercicio 2 del 102
+            self.stderr.write(f"Fuera del índice (parece una prompt injection): {clave}")

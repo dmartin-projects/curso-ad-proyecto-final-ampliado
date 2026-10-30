@@ -71,6 +71,11 @@ coste = _medidor.create_counter(
 preguntas = _medidor.create_counter(
     "gastos.asistente.preguntas", unit="{pregunta}", description="Preguntas terminadas, por cómo terminaron"
 )
+inyecciones = _medidor.create_counter(  # ejercicio 1 del 102
+    "gastos.asistente.inyecciones",
+    unit="{texto}",
+    description="Textos que el clasificador ha tomado por prompt injection, por origen (una tool, adjunto o pregunta)",
+)
 cuota_agotada = _medidor.create_counter(
     "gastos.asistente.cuota_agotada",
     unit="{pregunta}",

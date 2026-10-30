@@ -27,7 +27,7 @@ def test_un_adjunto_con_instrucciones_no_llega_al_modelo_y_la_persona_lo_sabe():
 
     pregunta = chat.llm.peticiones[0].mensajes[-1].texto
     assert ADJUNTO_RETIRADO in pregunta and "900" not in pregunta
-    assert detector.revisados == [MALICIOSO]
+    assert detector.revisados[-1] == MALICIOSO  # (ejercicio 1: antes, la pregunta)
     aviso = "He descartado el documento adjunto: contenía texto que parecía instrucciones para mí, no datos."
     assert ("aviso", {"texto": aviso}) in chat.emisor.eventos
     fin = dict(chat.emisor.eventos)["fin"]

@@ -56,4 +56,22 @@ describe('Mensaje (módulo 97)', () => {
     ).nativeElement;
     expect(el.querySelector('mat-chip')).toBeNull();
   });
+
+  it('las secciones de la ayuda que ha usado (ejercicio 2 del 100)', () => {
+    const el: HTMLElement = montar({
+      rol: 'modelo',
+      texto: 'Pulsa Generar.',
+      datos: {
+        fuentes: [
+          { fuente: 'informes#Pedir uno a mano', titulo: 'Informes mensuales en PDF' },
+          { fuente: 'informes#Quién puede', titulo: 'Informes mensuales en PDF' },
+        ],
+      },
+    }).nativeElement;
+    expect(
+      el.querySelector('[aria-label="Fuentes"]')?.textContent?.replace(/\s+/g, ' ').trim(),
+    ).toBe(
+      'menu_book Según la ayuda: Informes mensuales en PDF › Pedir uno a mano;Informes mensuales en PDF › Quién puede',
+    );
+  });
 });

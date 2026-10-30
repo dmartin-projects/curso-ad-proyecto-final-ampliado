@@ -5,6 +5,7 @@ from datetime import datetime
 from asistente.application.ports.i_observador_agente import IObservadorAgente
 from asistente.application.ports.i_tarifas import ITarifas
 from asistente.domain.enums.canal_de_consumo import CanalDeConsumo
+from asistente.domain.vo.ayuda_consultada import AyudaConsultada
 from asistente.domain.vo.consumo import Consumo
 from asistente.domain.vo.respuesta_llm import RespuestaLLM
 from asistente.domain.vo.uso import Uso
@@ -17,9 +18,11 @@ class ContadorDeUso(IObservadorAgente):
 
     Por modelo, porque con la reserva una pregunta puede pasar por dos y no cuestan lo mismo."""
 
-    def __init__(self, dentro: IObservadorAgente):
+    def __init__(self, dentro: IObservadorAgente, con_ayuda: bool = True):
         self.dentro = dentro
         self.usos: dict[str, Uso] = defaultdict(Uso)
+        # Ejercicio 1 del 100: lo que gasta buscar_ayuda con el modelo auxiliar, aparte (otro canal)
+        self.ayuda = ContadorDeUso(dentro, con_ayuda=False) if con_ayuda else None
 
     def sumar(self, respuesta: RespuestaLLM | None) -> None:
         """También para lo que no pasa por el agente (el título)."""
@@ -37,6 +40,9 @@ class ContadorDeUso(IObservadorAgente):
         self.dentro.resultado(resultado, duracion_ms)
 
     def artefacto(self, artefacto):
+        if isinstance(artefacto, AyudaConsultada) and self.ayuda is not None:
+            for r in artefacto.llamadas:
+                self.ayuda.sumar(r)
         self.dentro.artefacto(artefacto)
 
     def consumos(

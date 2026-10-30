@@ -3,7 +3,9 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.ayuda.buscador_de_ayuda import BuscadorDeAyuda
+from asistente.application.tools.con_artefacto import ConArtefacto
 from asistente.application.tools.tool import Tool
+from asistente.domain.vo.ayuda_consultada import AyudaConsultada
 
 
 class BuscarAyudaArgumentos(BaseModel):
@@ -29,11 +31,18 @@ class BuscarAyudaTool(Tool):
     def __init__(self, *, buscador: BuscadorDeAyuda):
         self.buscador = buscador
 
-    def ejecutar(self, contexto: ContextoPregunta, args: BuscarAyudaArgumentos) -> dict:
+    def ejecutar(self, contexto: ContextoPregunta, args: BuscarAyudaArgumentos) -> ConArtefacto:
         r = self.buscador.buscar(args.pregunta)
+        # Ejercicios 1 y 2: las secciones, para que la interfaz las enseñe; las llamadas al modelo, para apuntarlas
+        artefacto = AyudaConsultada(tuple(dict.fromkeys((p.fuente, p.titulo) for p in r.pasajes)), r.llamadas)
         if not r.pasajes:
-            return {"pasajes": [], "nota": "La ayuda no dice nada de esto: dilo así, no lo inventes."}
-        return {
-            "pasajes": [{"fuente": p.fuente, "titulo": p.titulo, "texto": p.texto} for p in r.pasajes],
-            "nota": "Contesta solo con lo que dicen estos pasajes y cita la sección (p. ej. «según la ayuda, Tickets»).",
-        }
+            return ConArtefacto(
+                {"pasajes": [], "nota": "La ayuda no dice nada de esto: dilo así, no lo inventes."}, artefacto
+            )
+        return ConArtefacto(
+            {
+                "pasajes": [{"fuente": p.fuente, "titulo": p.titulo, "texto": p.texto} for p in r.pasajes],
+                "nota": "Contesta solo con lo que dicen estos pasajes y cita la sección (p. ej. «según la ayuda, Tickets»).",
+            },
+            artefacto,
+        )

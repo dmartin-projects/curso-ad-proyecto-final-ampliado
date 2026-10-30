@@ -31,4 +31,9 @@ export class Mensaje {
   readonly descartar = output<PropuestaDelChat>();
   readonly fijar = output<GraficoDelChat>();
   readonly seguir = output<string>();
+
+  /** «tickets#Subir un ticket» → «Subir un ticket» (ejercicio 2 del 100). */
+  protected seccion(fuente: string): string {
+    return fuente.split('#')[1] ?? fuente;
+  }
 }

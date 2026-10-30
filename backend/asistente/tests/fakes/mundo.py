@@ -84,6 +84,7 @@ class Mundo:
         self.exportador = ExportadorDeMovimientosFake()
         self.cronometro = Cronometro()
         self.recuerdos = RecuerdoRepositorioFake()
+        self.indice_de_ayuda, self.llm_de_ayuda = IndiceDeAyudaFake(), None
 
     def tools(self):
         """Las dos del módulo 94."""
@@ -117,7 +118,9 @@ class Mundo:
             ProponerMovimientoTool(finanzas=f),
             RecordarTool(recuerdos=self.recuerdos, reloj=reloj()),  # módulo 99
             OlvidarTool(recuerdos=self.recuerdos, consultas=self.recuerdos),  # su ejercicio 1
-            BuscarAyudaTool(buscador=BuscadorDeAyuda(indice=IndiceDeAyudaFake(), embeddings=None, llm=None)),  # 100
+            BuscarAyudaTool(  # módulo 100: el índice vacío y sin modelo, salvo que el test los prepare
+                buscador=BuscadorDeAyuda(indice=self.indice_de_ayuda, embeddings=None, llm=self.llm_de_ayuda)
+            ),
         ]
 
     def agente(self, guion: list, limites: Limites | None = None, tools=None) -> tuple[Agente, LLMFake]:

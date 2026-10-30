@@ -8,3 +8,4 @@ class CanalDeConsumo(StrEnum):
     CHAT = "chat"  # la respuesta: el agent loop y la llamada que la estructura
     TITULO = "titulo"  # el título de una conversación nueva, con el modelo auxiliar
     RESUMEN = "resumen"  # módulo 99: resumir lo antiguo de una conversación larga, con el modelo auxiliar
+    AYUDA = "ayuda"  # ejercicio 1 del 100: reescribir y reordenar la búsqueda en la ayuda, con el modelo auxiliar

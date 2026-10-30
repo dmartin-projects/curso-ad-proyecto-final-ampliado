@@ -1,0 +1,1123 @@
+interactions:
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Convierte
+      la pregunta de una persona sobre la app de gastos dom\xE9sticos Gastos en una
+      b\xFAsqueda para su ayuda.\\n- Usa las palabras con que la ayuda habla de la
+      app: movimiento, gasto, ingreso, cuenta, categor\xEDa, ticket, extracto, importar,
+      presupuesto, informe, hogar, miembro, rol, invitaci\xF3n, verificaci\xF3n en
+      dos pasos, passkey, sesi\xF3n, asistente.\\n- Entre 3 y 10 palabras, sin signos
+      ni explicaciones. Solo la b\xFAsqueda, en una l\xEDnea.\\nPregunta: \xBFhay
+      una app de Gastos para el Apple Watch?\"}],\"max_completion_tokens\":300,\"reasoning_effort\":\"low\"}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '623'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-04c736c5-42a6-46e1-b0ca-dd828ffbcd3e\",\"object\":\"chat.completion\",\"created\":1793312622,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"aplicaci\xF3n
+        gastos Apple Watch movimiento ingreso cuenta  \",\"reasoning\":\"Need to create
+        a search query using the words list. 3-10 words, no punctuation. Answer: \\\"aplicaci\xF3n
+        gastos Apple Watch movimiento ingreso cuenta\\\". That's 6 words. No punctuation.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.241802742,\"prompt_tokens\":188,\"prompt_time\":0.010738146,\"completion_tokens\":61,\"completion_time\":0.080899638,\"total_tokens\":249,\"total_time\":0.091637784,\"completion_tokens_details\":{\"reasoning_tokens\":42}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_75c733514d\",\"x_groq\":{\"id\":\"req_01m64w621cef3b8ss2ab066pg2\",\"seed\":1035461123},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5259613481a200f-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '877'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 22:23:42 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '940'
+      x-ratelimit-remaining-tokens:
+      - '7550'
+      x-ratelimit-reset-requests:
+      - 1h26m24s
+      x-ratelimit-reset-tokens:
+      - 3.375s
+      x-request-id:
+      - req_01m64w621cef3b8ss2ab066pg2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Pregunta
+      de una persona sobre la app Gastos: \xBFhay una app de Gastos para el Apple
+      Watch?\\n\\nPasajes de la ayuda de la app:\\n[1] Empezar con Gastos \xB7 Las
+      secciones de la app\\nDentro de un hogar, el men\xFA tiene: **Resumen** (el
+      dashboard del mes), **Movimientos**, **Tickets**, **Importar\\nextracto**, **Presupuestos**,
+      **Categor\xEDas**, **Informes** y **Asistente**. Tu cuenta (contrase\xF1a, m\xE9todos
+      de\\nacceso, verificaci\xF3n en dos pasos, sesiones y aplicaciones conectadas)
+      est\xE1 en el men\xFA de tu usuario, arriba a la\\nderecha.\\n\\n[2] Categor\xEDas
+      \xB7 Gastos e ingresos\\nCada categor\xEDa es de gastos o de ingresos (**Es
+      de ingresos**). As\xED el formulario de movimientos sabe el signo del\\nimporte
+      y los res\xFAmenes separan lo que entra de lo que sale.\\n\\n[3] Presupuestos
+      y avisos \xB7 El aviso al superarlo\\nCuando el gasto de la categor\xEDa llega
+      al l\xEDmite, todos los miembros reciben un aviso en la app (la campana de\\nnotificaciones),
+      al momento. Si despu\xE9s baja (por ejemplo, porque se borra un gasto), el aviso
+      se rearma: si se vuelve\\na superar, se vuelve a avisar.\\n\\n[4] Movimientos
+      y cuentas \xB7 Apuntar un gasto o un ingreso\\nEn **Movimientos**, pulsa **Nuevo**:
+      importe, concepto, fecha, cuenta y categor\xEDa. Un gasto es un importe negativo\\ny
+      un ingreso, positivo; el formulario lo pone por ti seg\xFAn la categor\xEDa
+      (las de ingresos est\xE1n marcadas as\xED en\\n**Categor\xEDas**). Tambi\xE9n
+      puedes ped\xEDrselo al asistente (\\\"apunta 3,50 \u20AC de churros\\\"): te
+      prepara el movimiento y no se\\nguarda hasta que lo confirmas.\\n\\n[5] El asistente
+      \xB7 Qu\xE9 puedes preguntarle\\nEl asistente contesta con los datos de tu hogar:
+      cu\xE1nto hab\xE9is gastado y en qu\xE9, comparaciones entre meses, c\xF3mo
+      vais\\nde presupuesto, c\xF3mo acabar\xE9is el mes, en qu\xE9 comercios gast\xE1is
+      m\xE1s, lo que dice un ticket, el tipo de cambio de una\\nmoneda o c\xF3mo han
+      subido los precios (IPC). Tambi\xE9n dibuja gr\xE1ficos y exporta movimientos
+      a CSV. Y contesta dudas\\nsobre c\xF3mo se usa la app, con esta ayuda.\\n\\n[6]
+      Empezar con Gastos \xB7 Qu\xE9 es un hogar\\nEn Gastos todo pertenece a un **hogar**:
+      las cuentas, los movimientos, las categor\xEDas, los presupuestos y los\\ninformes.
+      Un hogar puede ser tu casa, un piso compartido o la econom\xEDa de una pareja.
+      Puedes pertenecer a varios\\nhogares y cambiar de uno a otro desde **Mis hogares**.\\n\\n[7]
+      La seguridad de tu cuenta \xB7 Verificaci\xF3n en dos pasos\\nEn **Seguridad**,
+      activa la **Verificaci\xF3n en dos pasos** con una app de c\xF3digos (Google
+      Authenticator, 1Password\u2026):\\nescanea el c\xF3digo QR y escribe el **C\xF3digo
+      de 6 cifras**. Guarda los **c\xF3digos de recuperaci\xF3n** que te ense\xF1a:
+      cada\\nuno sirve una vez si pierdes el m\xF3vil. Si los gastas, **Generar c\xF3digos
+      nuevos**.\\n\\n[8] Movimientos y cuentas \xB7 Exportar a CSV\\nEl asistente
+      puede exportar tus movimientos a un CSV (para Excel u otra hoja de c\xE1lculo):
+      p\xEDdeselo con las fechas\\nque quieras (\\\"p\xE1same a Excel los gastos de
+      septiembre\\\"). El archivo usa punto y coma como separador y se abre\\ndirectamente
+      en Excel en espa\xF1ol.\\n\\n\xBFQu\xE9 pasajes ayudan a contestar la pregunta?
+      Devuelve sus n\xFAmeros, del que mejor la contesta al que menos, como mucho
+      3. Si ninguno la contesta, una lista vac\xEDa.\"}],\"max_completion_tokens\":400,\"reasoning_effort\":\"low\",\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"pasajes_relevantes\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"relevantes\":{\"items\":{\"type\":\"integer\"},\"type\":\"array\"}},\"required\":[\"relevantes\"],\"type\":\"object\"},\"strict\":true}}}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '3562'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-0990cd92-1363-48aa-8415-d4d2052e8cb5\",\"object\":\"chat.completion\",\"created\":1793312633,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"relevantes\\\":[]
+        }\",\"reasoning\":\"We need relevant passages for question: \\\"\xBFhay una
+        app de Gastos para el Apple Watch?\\\" The help doesn't mention Apple Watch.
+        None. So empty list.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.030535351,\"prompt_tokens\":904,\"prompt_time\":0.048856484,\"completion_tokens\":56,\"completion_time\":0.057345129,\"total_tokens\":960,\"total_time\":0.106201613,\"completion_tokens_details\":{\"reasoning_tokens\":34}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_e2cb7a84ec\",\"x_groq\":{\"id\":\"req_01m64w6cffeprrbv3d4jsqxqkj\",\"seed\":1845087910},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a52596562b738b1a-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '805'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 22:23:53 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '939'
+      x-ratelimit-remaining-tokens:
+      - '6778'
+      x-ratelimit-reset-requests:
+      - 1h27m50.4s
+      x-ratelimit-reset-tokens:
+      - 9.165s
+      x-request-id:
+      - req_01m64w6cffeprrbv3d4jsqxqkj
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Convierte
+      la pregunta de una persona sobre la app de gastos dom\xE9sticos Gastos en una
+      b\xFAsqueda para su ayuda.\\n- Usa las palabras con que la ayuda habla de la
+      app: movimiento, gasto, ingreso, cuenta, categor\xEDa, ticket, extracto, importar,
+      presupuesto, informe, hogar, miembro, rol, invitaci\xF3n, verificaci\xF3n en
+      dos pasos, passkey, sesi\xF3n, asistente.\\n- Entre 3 y 10 palabras, sin signos
+      ni explicaciones. Solo la b\xFAsqueda, en una l\xEDnea.\\nPregunta: \xBFcu\xE1nto
+      cuesta el plan plus al mes?\"}],\"max_completion_tokens\":300,\"reasoning_effort\":\"low\"}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '616'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-6fd94ac3-257a-45df-a49c-18b0c341cba6\",\"object\":\"chat.completion\",\"created\":1793312644,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"plan
+        plus mensual costo\",\"reasoning\":\"Need to convert question to search using
+        specified words. Words: movimiento, gasto, ingreso, cuenta, categor\xEDa,
+        ticket, extracto, importar, presupuesto, informe, hogar, miembro, rol, invitaci\xF3n,
+        verificaci\xF3n en dos pasos, passkey, sesi\xF3n, asistente. Need 3-10 words,
+        no punctuation. The question: \\\"\xBFcu\xE1nto cuesta el plan plus al mes?\\\"
+        Should use words: \\\"plan plus\\\" not in list. We must use words from list.
+        Probably \\\"precio plan plus mensual\\\". But cannot use \\\"precio\\\"?
+        Not in list. Need to use list words. We can phrase search: \\\"plan plus mensual
+        costo\\\". But \\\"costo\\\" not allowed. Maybe use \\\"plan plus mensual\\\"
+        but that only 3 words. Use list words: none relevant. Could just use \\\"plan
+        plus mensual\\\". That's 3 words. Provide as single line.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.080928521,\"prompt_tokens\":186,\"prompt_time\":0.008924192,\"completion_tokens\":194,\"completion_time\":0.198630541,\"total_tokens\":380,\"total_time\":0.207554733,\"completion_tokens_details\":{\"reasoning_tokens\":181}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_5979a0e1b7\",\"x_groq\":{\"id\":\"req_01m64w6prqeces2h9z70q719vt\",\"seed\":857408873},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5259697fd7ba159-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '1423'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 22:24:04 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '938'
+      x-ratelimit-remaining-tokens:
+      - '7564'
+      x-ratelimit-reset-requests:
+      - 1h29m16.8s
+      x-ratelimit-reset-tokens:
+      - 3.27s
+      x-request-id:
+      - req_01m64w6prqeces2h9z70q719vt
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Pregunta
+      de una persona sobre la app Gastos: \xBFcu\xE1nto cuesta el plan plus al mes?\\n\\nPasajes
+      de la ayuda de la app:\\n[1] El asistente \xB7 L\xEDmites\\nCada pregunta cuesta,
+      as\xED que hay un l\xEDmite al d\xEDa por persona y otro al mes por hogar, seg\xFAn
+      el plan. Cuando te\\nqueda poco, el chat te lo dice; si se acaba, vuelve a haber
+      al d\xEDa siguiente (o al mes siguiente, si es el del hogar).\\n\\n[2] Informes
+      mensuales en PDF \xB7 Pedir uno a mano\\nEn **Informes**, elige el **Mes** y
+      pulsa **Generar**. Marca **Enviar tambi\xE9n por email** si quieres recibirlo
+      por\\ncorreo. Se genera en segundo plano: tarda unos segundos y aparece en la
+      lista.\\n\\n[3] Importar el extracto del banco \xB7 Qu\xE9 pasa al subirlo\\nEl
+      extracto se analiza en segundo plano. Ver\xE1s el periodo, los gastos y los
+      ingresos que contiene y cu\xE1ntas filas se\\nvan a importar. Revisa y confirma:
+      entonces se crean los movimientos.\\n\\n[4] Informes mensuales en PDF \xB7 El
+      informe de cada mes\\nEl d\xEDa 1 de cada mes, Gastos prepara el informe en
+      PDF del mes anterior de cada hogar: los totales, el gasto por\\ncategor\xEDa,
+      los presupuestos y la lista de movimientos. Aparece en **Informes**, listo para
+      descargar.\\n\\n[5] Tickets: una foto y el gasto se apunta solo \xB7 Cu\xE1nto
+      tarda\\nUn ticket tarda unos segundos: se procesa en segundo plano y te llega
+      un aviso cuando est\xE1 listo. No hace falta\\nquedarse en la p\xE1gina.\\n\\n[6]
+      El asistente \xB7 Qu\xE9 puedes preguntarle\\nEl asistente contesta con los
+      datos de tu hogar: cu\xE1nto hab\xE9is gastado y en qu\xE9, comparaciones entre
+      meses, c\xF3mo vais\\nde presupuesto, c\xF3mo acabar\xE9is el mes, en qu\xE9
+      comercios gast\xE1is m\xE1s, lo que dice un ticket, el tipo de cambio de una\\nmoneda
+      o c\xF3mo han subido los precios (IPC). Tambi\xE9n dibuja gr\xE1ficos y exporta
+      movimientos a CSV. Y contesta dudas\\nsobre c\xF3mo se usa la app, con esta
+      ayuda.\\n\\n[7] Informes mensuales en PDF \xB7 Qui\xE9n puede\\nPedir un informe
+      necesita el rol de miembro o de administrador; descargarlos, cualquier miembro
+      del hogar.\\n\\n[8] Empezar con Gastos \xB7 Moneda y zona horaria\\nCada hogar
+      tiene su moneda (euros, por defecto) y su zona horaria (Europe/Madrid). La zona
+      horaria decide qu\xE9 es\\n\\\"hoy\\\" y \\\"este mes\\\" en los res\xFAmenes,
+      en los presupuestos y en el asistente: un gasto de las 23:30 del d\xEDa 31 es
+      de\\nese mes, no del siguiente.\\n\\n\xBFQu\xE9 pasajes ayudan a contestar la
+      pregunta? Devuelve sus n\xFAmeros, del que mejor la contesta al que menos, como
+      mucho 3. Si ninguno la contesta, una lista vac\xEDa.\"}],\"max_completion_tokens\":400,\"reasoning_effort\":\"low\",\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"pasajes_relevantes\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"relevantes\":{\"items\":{\"type\":\"integer\"},\"type\":\"array\"}},\"required\":[\"relevantes\"],\"type\":\"object\"},\"strict\":true}}}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '2848'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-d35c97a3-3267-4d66-ad18-617f5a9b4cc9","object":"chat.completion","created":1793312655,"model":"openai/gpt-oss-20b","choices":[{"index":0,"message":{"role":"assistant","content":"{\"relevantes\":[]}","reasoning":"Need
+        relevant passages about plan plus cost. None present. So empty list."},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.447062502,"prompt_tokens":738,"prompt_time":0.048315301,"completion_tokens":38,"completion_time":0.040302083,"total_tokens":776,"total_time":0.088617384,"completion_tokens_details":{"reasoning_tokens":16}},"usage_breakdown":null,"system_fingerprint":"fp_a12402de73","x_groq":{"id":"req_01m64w7154ekwbt3an89rrffev","seed":234252191},"service_tier":"on_demand"}
+
+        '
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a52596da7b348b73-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '729'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 22:24:15 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '937'
+      x-ratelimit-remaining-tokens:
+      - '7068'
+      x-ratelimit-reset-requests:
+      - 1h30m43.2s
+      x-ratelimit-reset-tokens:
+      - 6.99s
+      x-request-id:
+      - req_01m64w7154ekwbt3an89rrffev
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Convierte
+      la pregunta de una persona sobre la app de gastos dom\xE9sticos Gastos en una
+      b\xFAsqueda para su ayuda.\\n- Usa las palabras con que la ayuda habla de la
+      app: movimiento, gasto, ingreso, cuenta, categor\xEDa, ticket, extracto, importar,
+      presupuesto, informe, hogar, miembro, rol, invitaci\xF3n, verificaci\xF3n en
+      dos pasos, passkey, sesi\xF3n, asistente.\\n- Entre 3 y 10 palabras, sin signos
+      ni explicaciones. Solo la b\xFAsqueda, en una l\xEDnea.\\nPregunta: \xBFpuedo
+      pagar los recibos de la luz desde Gastos?\"}],\"max_completion_tokens\":300,\"reasoning_effort\":\"low\"}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '628'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-d43c6b67-0f45-41ab-bdc8-678510c8e867\",\"object\":\"chat.completion\",\"created\":1793312665,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"pagar
+        gasto luz cuenta asistente\",\"reasoning\":\"Need search phrase. Use words
+        list. Question about paying bills. Use movement, gasto, ingreso, cuenta, categor\xEDa,
+        ticket, extracto, importar, presupuesto, informe, hogar, miembro, rol, invitaci\xF3n,
+        verificaci\xF3n en dos pasos, passkey, sesi\xF3n, asistente. We must construct
+        between 3-10 words, no punctuation. Only the search. E.g., \\\"pagar gasto
+        luz cuenta asistente\\\" That's 4 words. Good.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.202446987,\"prompt_tokens\":190,\"prompt_time\":0.012896537,\"completion_tokens\":111,\"completion_time\":0.125390221,\"total_tokens\":301,\"total_time\":0.138286758,\"completion_tokens_details\":{\"reasoning_tokens\":95}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_80501ff3a1\",\"x_groq\":{\"id\":\"req_01m64w7bv0ektb5fmp24dwf1p2\",\"seed\":2034345947},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a525971edb04a173-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '1062'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 22:24:25 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '936'
+      x-ratelimit-remaining-tokens:
+      - '7510'
+      x-ratelimit-reset-requests:
+      - 1h32m9.6s
+      x-ratelimit-reset-tokens:
+      - 3.675s
+      x-request-id:
+      - req_01m64w7bv0ektb5fmp24dwf1p2
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Pregunta
+      de una persona sobre la app Gastos: \xBFpuedo pagar los recibos de la luz desde
+      Gastos?\\n\\nPasajes de la ayuda de la app:\\n[1] Tickets: una foto y el gasto
+      se apunta solo \xB7 Subir un ticket\\nEn **Tickets**, sube la foto de un ticket
+      de compra o un PDF (hasta 10 MB) y elige la cuenta con la que pagaste.\\nGastos
+      lee el texto (OCR) y una IA saca el comercio, la fecha, el total y las l\xEDneas,
+      y propone la categor\xEDa.\\n\\n[2] Presupuestos y avisos \xB7 El aviso al superarlo\\nCuando
+      el gasto de la categor\xEDa llega al l\xEDmite, todos los miembros reciben un
+      aviso en la app (la campana de\\nnotificaciones), al momento. Si despu\xE9s
+      baja (por ejemplo, porque se borra un gasto), el aviso se rearma: si se vuelve\\na
+      superar, se vuelve a avisar.\\n\\n[3] Movimientos y cuentas \xB7 Apuntar un
+      gasto o un ingreso\\nEn **Movimientos**, pulsa **Nuevo**: importe, concepto,
+      fecha, cuenta y categor\xEDa. Un gasto es un importe negativo\\ny un ingreso,
+      positivo; el formulario lo pone por ti seg\xFAn la categor\xEDa (las de ingresos
+      est\xE1n marcadas as\xED en\\n**Categor\xEDas**). Tambi\xE9n puedes ped\xEDrselo
+      al asistente (\\\"apunta 3,50 \u20AC de churros\\\"): te prepara el movimiento
+      y no se\\nguarda hasta que lo confirmas.\\n\\n[4] Importar el extracto del banco
+      \xB7 Gastos que ya hab\xEDas apuntado\\nSi ya apuntaste un gasto a mano o con
+      un ticket, y el banco trae ese mismo cargo (mismo importe, con hasta 3 d\xEDas\\nde
+      diferencia), Gastos los empareja (concilia) en lugar de duplicarlo. Si el emparejamiento
+      no es correcto, puedes\\ndeshacerlo e importar la fila como gasto nuevo.\\n\\n[5]
+      Empezar con Gastos \xB7 Las secciones de la app\\nDentro de un hogar, el men\xFA
+      tiene: **Resumen** (el dashboard del mes), **Movimientos**, **Tickets**, **Importar\\nextracto**,
+      **Presupuestos**, **Categor\xEDas**, **Informes** y **Asistente**. Tu cuenta
+      (contrase\xF1a, m\xE9todos de\\nacceso, verificaci\xF3n en dos pasos, sesiones
+      y aplicaciones conectadas) est\xE1 en el men\xFA de tu usuario, arriba a la\\nderecha.\\n\\n[6]
+      Tickets: una foto y el gasto se apunta solo \xB7 Cu\xE1ndo hay que revisarlo\\nSi
+      la IA est\xE1 segura de lo que ha le\xEDdo, el gasto se apunta solo. Si no (un
+      ticket arrugado, una foto movida, un\\ntotal que no cuadra), el ticket queda
+      **Por revisar**: \xE1brelo, corrige lo que haga falta y conf\xEDrmalo. Los que
+      no se\\nhan podido leer aparecen como **Con error**: apunta el gasto a mano
+      (o escribe a soporte, que puede volver a\\nprocesarlo).\\n\\n[7] Movimientos
+      y cuentas \xB7 Exportar a CSV\\nEl asistente puede exportar tus movimientos
+      a un CSV (para Excel u otra hoja de c\xE1lculo): p\xEDdeselo con las fechas\\nque
+      quieras (\\\"p\xE1same a Excel los gastos de septiembre\\\"). El archivo usa
+      punto y coma como separador y se abre\\ndirectamente en Excel en espa\xF1ol.\\n\\n[8]
+      Categor\xEDas \xB7 Gastos e ingresos\\nCada categor\xEDa es de gastos o de ingresos
+      (**Es de ingresos**). As\xED el formulario de movimientos sabe el signo del\\nimporte
+      y los res\xFAmenes separan lo que entra de lo que sale.\\n\\n\xBFQu\xE9 pasajes
+      ayudan a contestar la pregunta? Devuelve sus n\xFAmeros, del que mejor la contesta
+      al que menos, como mucho 3. Si ninguno la contesta, una lista vac\xEDa.\"}],\"max_completion_tokens\":400,\"reasoning_effort\":\"low\",\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"pasajes_relevantes\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"relevantes\":{\"items\":{\"type\":\"integer\"},\"type\":\"array\"}},\"required\":[\"relevantes\"],\"type\":\"object\"},\"strict\":true}}}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '3480'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-9adf1fb4-e954-4643-bb27-f4a7fd9cf4fd","object":"chat.completion","created":1793312676,"model":"openai/gpt-oss-20b","choices":[{"index":0,"message":{"role":"assistant","content":"{\"relevantes\":[]}","reasoning":"Need
+        relevant passages. Question: can pay electric bills via app? None mention
+        paying, only adding expenses. So answer empty."},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.176814467,"prompt_tokens":909,"prompt_time":0.05529647,"completion_tokens":48,"completion_time":0.049647444,"total_tokens":957,"total_time":0.104943914,"completion_tokens_details":{"reasoning_tokens":26}},"usage_breakdown":null,"system_fingerprint":"fp_8d13edce1d","x_groq":{"id":"req_01m64w7p96e23b8v8g8v3cwbht","seed":1086835760},"service_tier":"on_demand"}
+
+        '
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5259761aae098e4-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '781'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 22:24:36 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '935'
+      x-ratelimit-remaining-tokens:
+      - '6980'
+      x-ratelimit-reset-requests:
+      - 1h33m36s
+      x-ratelimit-reset-tokens:
+      - 7.65s
+      x-request-id:
+      - req_01m64w7p96e23b8v8g8v3cwbht
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Convierte
+      la pregunta de una persona sobre la app de gastos dom\xE9sticos Gastos en una
+      b\xFAsqueda para su ayuda.\\n- Usa las palabras con que la ayuda habla de la
+      app: movimiento, gasto, ingreso, cuenta, categor\xEDa, ticket, extracto, importar,
+      presupuesto, informe, hogar, miembro, rol, invitaci\xF3n, verificaci\xF3n en
+      dos pasos, passkey, sesi\xF3n, asistente.\\n- Entre 3 y 10 palabras, sin signos
+      ni explicaciones. Solo la b\xFAsqueda, en una l\xEDnea.\\nPregunta: quiero repartir
+      la cena entre cuatro y saber qui\xE9n le debe a qui\xE9n\"}],\"max_completion_tokens\":300,\"reasoning_effort\":\"low\"}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '647'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-49d47bb1-f9d2-4a8b-b352-84c178bf094d\",\"object\":\"chat.completion\",\"created\":1793312687,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"gasto
+        miembros informe\",\"reasoning\":\"Need 3-10 words, use allowed words, no
+        signs. The question: want to split dinner among four and know who owes whom.
+        So search: \\\"gasto repartido cuatro miembros informe deuda\\\". Allowed
+        words: movement, gasto, ingreso, cuenta, categor\xEDa, ticket, extracto, importar,
+        presupuesto, informe, hogar, miembro, rol, invitaci\xF3n, verificaci\xF3n
+        en dos pasos, passkey, sesi\xF3n, asistente. Must use these words. So maybe:
+        \\\"gasto reparto miembros informe\\\". That's 4 words. Use \\\"gasto\\\",
+        \\\"reparto\\\" not allowed. Only allowed words. Need use allowed words only?
+        It says use the words with that the help speaks of the app. Probably we can
+        use any of those words. So we can use: \\\"gasto reparto miembros informe\\\"
+        but reparto not allowed. Let's use only allowed words: \\\"gasto miembros
+        informe\\\". That's 3 words. That satisfies? We need between 3 and 10 words.
+        So answer: \\\"gasto miembros informe\\\".\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.201434426,\"prompt_tokens\":189,\"prompt_time\":0.010763493,\"completion_tokens\":225,\"completion_time\":0.287161436,\"total_tokens\":414,\"total_time\":0.297924929,\"completion_tokens_details\":{\"reasoning_tokens\":212}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c5a89987dc\",\"x_groq\":{\"id\":\"req_01m64w80r4eajtq5mr0dvpjfgq\",\"seed\":1787487738},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a52597a4a8dd05ed-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '1550'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 22:24:47 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '934'
+      x-ratelimit-remaining-tokens:
+      - '7750'
+      x-ratelimit-reset-requests:
+      - 1h35m2.4s
+      x-ratelimit-reset-tokens:
+      - 1.875s
+      x-request-id:
+      - req_01m64w80r4eajtq5mr0dvpjfgq
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Pregunta
+      de una persona sobre la app Gastos: quiero repartir la cena entre cuatro y saber
+      qui\xE9n le debe a qui\xE9n\\n\\nPasajes de la ayuda de la app:\\n[1] Categor\xEDas
+      \xB7 Gastos e ingresos\\nCada categor\xEDa es de gastos o de ingresos (**Es
+      de ingresos**). As\xED el formulario de movimientos sabe el signo del\\nimporte
+      y los res\xFAmenes separan lo que entra de lo que sale.\\n\\n[2] Informes mensuales
+      en PDF \xB7 El informe de cada mes\\nEl d\xEDa 1 de cada mes, Gastos prepara
+      el informe en PDF del mes anterior de cada hogar: los totales, el gasto por\\ncategor\xEDa,
+      los presupuestos y la lista de movimientos. Aparece en **Informes**, listo para
+      descargar.\\n\\n[3] Presupuestos y avisos \xB7 Ver c\xF3mo vais\\nLa p\xE1gina
+      de **Presupuestos** ense\xF1a, para cada uno, lo gastado y lo que queda. El
+      asistente tambi\xE9n lo sabe:\\n\\\"\xBFc\xF3mo vamos de presupuesto este mes?\\\".\\n\\n[4]
+      Informes mensuales en PDF \xB7 Qui\xE9n puede\\nPedir un informe necesita el
+      rol de miembro o de administrador; descargarlos, cualquier miembro del hogar.\\n\\n[5]
+      Miembros y roles \xB7 Lo que ve cada uno\\nTodos los miembros ven los mismos
+      movimientos, presupuestos e informes del hogar. Lo que es solo tuyo: tus\\nconversaciones
+      con el asistente y lo que le has pedido que recuerde. Los dem\xE1s miembros
+      no las ven.\\n\\n[6] Empezar con Gastos \xB7 Qu\xE9 es un hogar\\nEn Gastos
+      todo pertenece a un **hogar**: las cuentas, los movimientos, las categor\xEDas,
+      los presupuestos y los\\ninformes. Un hogar puede ser tu casa, un piso compartido
+      o la econom\xEDa de una pareja. Puedes pertenecer a varios\\nhogares y cambiar
+      de uno a otro desde **Mis hogares**.\\n\\n[7] Presupuestos y avisos \xB7 El
+      aviso al superarlo\\nCuando el gasto de la categor\xEDa llega al l\xEDmite,
+      todos los miembros reciben un aviso en la app (la campana de\\nnotificaciones),
+      al momento. Si despu\xE9s baja (por ejemplo, porque se borra un gasto), el aviso
+      se rearma: si se vuelve\\na superar, se vuelve a avisar.\\n\\n[8] Empezar con
+      Gastos \xB7 Las secciones de la app\\nDentro de un hogar, el men\xFA tiene:
+      **Resumen** (el dashboard del mes), **Movimientos**, **Tickets**, **Importar\\nextracto**,
+      **Presupuestos**, **Categor\xEDas**, **Informes** y **Asistente**. Tu cuenta
+      (contrase\xF1a, m\xE9todos de\\nacceso, verificaci\xF3n en dos pasos, sesiones
+      y aplicaciones conectadas) est\xE1 en el men\xFA de tu usuario, arriba a la\\nderecha.\\n\\n\xBFQu\xE9
+      pasajes ayudan a contestar la pregunta? Devuelve sus n\xFAmeros, del que mejor
+      la contesta al que menos, como mucho 3. Si ninguno la contesta, una lista vac\xEDa.\"}],\"max_completion_tokens\":400,\"reasoning_effort\":\"low\",\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"pasajes_relevantes\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"relevantes\":{\"items\":{\"type\":\"integer\"},\"type\":\"array\"}},\"required\":[\"relevantes\"],\"type\":\"object\"},\"strict\":true}}}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '2868'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-f7ee8f66-7870-40e0-8a87-3c9614697660\",\"object\":\"chat.completion\",\"created\":1793312698,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"relevantes\\\":[]
+        }\",\"reasoning\":\"Need to rank relevant passages. The question: \\\"quiero
+        repartir la cena entre cuatro y saber qui\xE9n le debe a qui\xE9n\\\". Which
+        passage mentions splitting bill? None. So empty list.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.079578623,\"prompt_tokens\":735,\"prompt_time\":0.04398119,\"completion_tokens\":60,\"completion_time\":0.098163791,\"total_tokens\":795,\"total_time\":0.142144981,\"completion_tokens_details\":{\"reasoning_tokens\":38}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_ce54c53bd5\",\"x_groq\":{\"id\":\"req_01m64w8bftehcse64yz1jkbwcj\",\"seed\":355735242},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a52597e96dec57fc-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '835'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 22:24:58 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - msp
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '933'
+      x-ratelimit-remaining-tokens:
+      - '6963'
+      x-ratelimit-reset-requests:
+      - 1h36m28.8s
+      x-ratelimit-reset-tokens:
+      - 7.777s
+      x-request-id:
+      - req_01m64w8bftehcse64yz1jkbwcj
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Convierte
+      la pregunta de una persona sobre la app de gastos dom\xE9sticos Gastos en una
+      b\xFAsqueda para su ayuda.\\n- Usa las palabras con que la ayuda habla de la
+      app: movimiento, gasto, ingreso, cuenta, categor\xEDa, ticket, extracto, importar,
+      presupuesto, informe, hogar, miembro, rol, invitaci\xF3n, verificaci\xF3n en
+      dos pasos, passkey, sesi\xF3n, asistente.\\n- Entre 3 y 10 palabras, sin signos
+      ni explicaciones. Solo la b\xFAsqueda, en una l\xEDnea.\\nPregunta: \xBFc\xF3mo
+      pido la factura de mi suscripci\xF3n?\"}],\"max_completion_tokens\":300,\"reasoning_effort\":\"low\"}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '622'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-d5e123ce-f683-46e6-b629-21306bc10059\",\"object\":\"chat.completion\",\"created\":1793312708,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"ticket
+        suscripci\xF3n informe\",\"reasoning\":\"Need to produce search query of 3-10
+        words, using specified words, no punctuation. Query about requesting invoice
+        for subscription. Use words like \\\"informe\\\", \\\"ticket\\\", \\\"extrato\\\"?
+        \\\"extrato\\\"? Should be Spanish words listed. Use \\\"informe\\\" \\\"ticket\\\"
+        \\\"extrato\\\" \\\"importar\\\"? Maybe \\\"verificar factura suscripci\xF3n\\\".
+        Use allowed words: movimiento, gasto, ingreso, cuenta, categor\xEDa, ticket,
+        extracto, importar, presupuesto, informe, hogar, miembro, rol, invitaci\xF3n,
+        verificaci\xF3n en dos pasos, passkey, sesi\xF3n, asistente. We need 3-10
+        words, no punctuation. So maybe: \\\"informe factura suscripci\xF3n\\\" but
+        \\\"informe\\\" is allowed. \\\"suscripci\xF3n\\\" not in list but okay? The
+        prompt says use the words the help speaks of the app. Probably only allowed
+        words, but maybe other words okay? Use only those words? It says \\\"usa las
+        palabras con que la ayuda habla de la app\\\". So we should use those words
+        but may include others? Probably keep them. I'll produce \\\"informe factura
+        suscripci\xF3n\\\" but \\\"informe\\\" allowed. \\\"factura\\\" not allowed.
+        Maybe use \\\"ticket\\\" for invoice. So: \\\"ticket suscripci\xF3n informe\\\"
+        that's 3 words. Or \\\"ticket suscripci\xF3n informe\\\". No punctuation.
+        That fits.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.081573747,\"prompt_tokens\":187,\"prompt_time\":0.009252719,\"completion_tokens\":291,\"completion_time\":0.332642911,\"total_tokens\":478,\"total_time\":0.34189563,\"completion_tokens_details\":{\"reasoning_tokens\":278}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_816fc87d18\",\"x_groq\":{\"id\":\"req_01m64w8ntneaz8gvz5rnwgdcnv\",\"seed\":1211083889},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a525982b981f91f9-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '1862'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 22:25:08 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '932'
+      x-ratelimit-remaining-tokens:
+      - '7581'
+      x-ratelimit-reset-requests:
+      - 1h37m55.2s
+      x-ratelimit-reset-tokens:
+      - 3.142s
+      x-request-id:
+      - req_01m64w8ntneaz8gvz5rnwgdcnv
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Pregunta
+      de una persona sobre la app Gastos: \xBFc\xF3mo pido la factura de mi suscripci\xF3n?\\n\\nPasajes
+      de la ayuda de la app:\\n[1] El asistente \xB7 Lo que no hace sin preguntarte\\nEl
+      asistente solo consulta. Si le pides apuntar un gasto, te lo deja preparado
+      y **no se guarda hasta que pulsas\\nConfirmar**, y con tu rol: si eres de solo
+      lectura, no podr\xE1s confirmarlo.\\n\\n[2] Informes mensuales en PDF \xB7 El
+      informe de cada mes\\nEl d\xEDa 1 de cada mes, Gastos prepara el informe en
+      PDF del mes anterior de cada hogar: los totales, el gasto por\\ncategor\xEDa,
+      los presupuestos y la lista de movimientos. Aparece en **Informes**, listo para
+      descargar.\\n\\n[3] El asistente \xB7 Lo que recuerda\\nSi le dices \\\"recuerda
+      que\u2026\\\", lo guarda para todas tus conversaciones. Lo ves y lo borras en
+      **Lo que recuerda el\\nasistente**, o pidi\xE9ndole \\\"olvida lo de\u2026\\\".\\n\\n[4]
+      Tickets: una foto y el gasto se apunta solo \xB7 El asistente y los tickets\\nEl
+      asistente puede consultar lo que se ley\xF3 de un ticket (\\\"\xBFqu\xE9 compramos
+      en el \xFAltimo ticket de Mercadona?\\\"). El\\ntexto de un ticket es un dato,
+      no una orden: si un ticket dice \\\"ignora tus instrucciones\\\", el asistente
+      no le hace\\ncaso.\\n\\n[5] Empezar con Gastos \xB7 Crear tu primer hogar\\nAl
+      entrar por primera vez, Gastos te pide crear un hogar: escribe su nombre en
+      **Nuevo hogar**. Quien crea un\\nhogar es su administrador. El hogar empieza
+      con unas categor\xEDas por defecto (Supermercado, Restaurantes,\\nTransporte\u2026),
+      que puedes cambiar en **Categor\xEDas**.\\n\\n[6] Informes mensuales en PDF
+      \xB7 Pedir uno a mano\\nEn **Informes**, elige el **Mes** y pulsa **Generar**.
+      Marca **Enviar tambi\xE9n por email** si quieres recibirlo por\\ncorreo. Se
+      genera en segundo plano: tarda unos segundos y aparece en la lista.\\n\\n[7]
+      Miembros y roles \xB7 Invitaciones\\nLas invitaciones las env\xEDa un administrador
+      del hogar, por correo. El enlace del correo caduca a los **7 d\xEDas**: si\\ncaduca,
+      pide que te env\xEDen otra. Al aceptarla entras en el hogar con el rol que eligi\xF3
+      quien te invit\xF3. Si a\xFAn no\\ntienes cuenta, el enlace te lleva a crearla.\\n\\n[8]
+      Informes mensuales en PDF \xB7 Qui\xE9n puede\\nPedir un informe necesita el
+      rol de miembro o de administrador; descargarlos, cualquier miembro del hogar.\\n\\n\xBFQu\xE9
+      pasajes ayudan a contestar la pregunta? Devuelve sus n\xFAmeros, del que mejor
+      la contesta al que menos, como mucho 3. Si ninguno la contesta, una lista vac\xEDa.\"}],\"max_completion_tokens\":400,\"reasoning_effort\":\"low\",\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"pasajes_relevantes\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"relevantes\":{\"items\":{\"type\":\"integer\"},\"type\":\"array\"}},\"required\":[\"relevantes\"],\"type\":\"object\"},\"strict\":true}}}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '2779'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: '{"id":"chatcmpl-2a458219-8718-4751-aefe-ab5d1a92ff1e","object":"chat.completion","created":1793312720,"model":"openai/gpt-oss-20b","choices":[{"index":0,"message":{"role":"assistant","content":"{\"relevantes\":[]}","reasoning":"Need
+        passages about requesting subscription invoice. None provided. Return empty
+        list."},"logprobs":null,"finish_reason":"stop"}],"usage":{"queue_time":0.847834135,"prompt_tokens":722,"prompt_time":0.042636725,"completion_tokens":37,"completion_time":0.054090526,"total_tokens":759,"total_time":0.096727251,"completion_tokens_details":{"reasoning_tokens":15}},"usage_breakdown":null,"system_fingerprint":"fp_e99e93f2ac","x_groq":{"id":"req_01m64w90dcetxr0vp9t1kc8jk8","seed":1345422395},"service_tier":"on_demand"}
+
+        '
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a525986f4cb66e9e-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '743'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 22:25:20 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '931'
+      x-ratelimit-remaining-tokens:
+      - '7084'
+      x-ratelimit-reset-requests:
+      - 1h39m21.6s
+      x-ratelimit-reset-tokens:
+      - 6.87s
+      x-request-id:
+      - req_01m64w90dcetxr0vp9t1kc8jk8
+    status:
+      code: 200
+      message: OK
+version: 1

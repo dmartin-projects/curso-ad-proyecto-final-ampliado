@@ -156,4 +156,6 @@ test('una duda sobre la app: contesta con la ayuda (RAG) y la cita', async ({ pa
   await preguntar(page, 'ayuda: ¿cómo meto el extracto del banco?');
   const respuesta = page.getByRole('article', { name: 'Respuesta del asistente' }).last();
   await expect(respuesta).toContainText('Según la ayuda (Importar el extracto del banco)');
+  // ejercicio 2 del 100: las secciones, debajo de la respuesta
+  await expect(respuesta.getByLabel('Fuentes')).toContainText('Importar el extracto del banco ›');
 });

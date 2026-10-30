@@ -9,6 +9,7 @@ from asistente.application.ports.i_emisor_de_eventos import IEmisorDeEventos
 from asistente.application.ports.i_observador_agente import IObservadorAgente
 from asistente.domain.exceptions.pregunta_cancelada_exception import PreguntaCanceladaException
 from asistente.domain.vo.archivo_exportado import ArchivoExportado
+from asistente.domain.vo.ayuda_consultada import AyudaConsultada
 from asistente.domain.vo.grafico import Grafico
 from asistente.domain.vo.propuesta_preparada import PropuestaPreparada
 from asistente.domain.vo.recuerdo_guardado import RecuerdoGuardado
@@ -34,6 +35,7 @@ class ObservadorDelChat(IObservadorAgente):
         self.archivos: list[dict] = []
         self.propuestas: list[dict] = []
         self.recuerdos: list[dict] = []  # módulo 99
+        self.fuentes: list[dict] = []  # ejercicio 2 del 100
 
     def comprobar(self) -> None:
         if self.emisor.cancelado():
@@ -64,6 +66,13 @@ class ObservadorDelChat(IObservadorAgente):
             datos = archivo_a_datos(artefacto)
             self.archivos.append(datos)
             self.emisor.emitir("archivo", {**datos, "url": self.almacen.url(artefacto.ruta)})
+        elif isinstance(artefacto, AyudaConsultada):  # ejercicio 2 del 100: las secciones de la ayuda, citadas
+            nuevas = [
+                {"fuente": f, "titulo": t} for f, t in artefacto.fuentes if f not in {x["fuente"] for x in self.fuentes}
+            ]
+            if nuevas:
+                self.fuentes.extend(nuevas)
+                self.emisor.emitir("fuentes", {"fuentes": nuevas})
         elif isinstance(artefacto, RecuerdoGuardado):  # módulo 99: "lo recordaré", con su botón de olvidar
             datos = {"id": artefacto.id, "texto": artefacto.texto}
             self.recuerdos.append(datos)

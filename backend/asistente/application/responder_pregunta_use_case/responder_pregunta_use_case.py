@@ -155,6 +155,7 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
             raise
         finally:
             self._apuntar(contador, contexto, CanalDeConsumo.CHAT)
+            self._apuntar(contador.ayuda, contexto, CanalDeConsumo.AYUDA)  # ejercicio 1 del 100
 
         titulo = None
         primera = not conversacion.resumen and not any(m.rol == RolMensaje.USUARIO for m in historial)
@@ -227,6 +228,7 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
             "archivos": observador.archivos,
             "propuestas": observador.propuestas,
             "recuerdos": observador.recuerdos,
+            "fuentes": observador.fuentes,  # ejercicio 2 del 100
             "seguimiento": list(r.estructurada.seguimiento) if r.estructurada else [],
             "motivo": str(r.motivo),
             "uso": {

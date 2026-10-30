@@ -18,7 +18,7 @@ from asistente.application.indexar_ayuda_use_case.dtos.indexar_ayuda_input_dto i
 from asistente.application.ports.i_llm import ILLM
 from asistente.infrastructure import container
 from asistente.infrastructure.database.repositories.indice_de_ayuda_pg import IndiceDeAyudaPG
-from asistente.management.commands.evaluar_ayuda import PREGUNTAS, evaluar, tabla
+from asistente.management.commands.evaluar_ayuda import PREGUNTAS, SIN_RESPUESTA, abstenciones, evaluar, tabla
 
 pytestmark = [pytest.mark.vcr, pytest.mark.usefixtures("clave"), pytest.mark.django_db]
 
@@ -50,6 +50,27 @@ def test_groq_la_busqueda_en_la_ayuda_paso_a_paso():
     assert reordenada["recall@3"] >= solo["recall@3"]  # si el modelo no mejora la búsqueda, sobra
     assert salida == SALIDA
 
+
+def test_groq_las_preguntas_sin_respuesta():  # ejercicio 3
+    container.indexar_ayuda().ejecutar(IndexarAyudaInputDTO())
+    llm = Pausado(container.llm("openai/gpt-oss-20b"), float(os.environ.get("PAUSA", "0")))
+    salida = abstenciones(BuscadorDeAyuda(indice=IndiceDeAyudaPG(), embeddings=None, llm=llm), _sin_respuesta()) + "\n"
+    print(salida)
+    assert salida == SIN_RESPUESTA_SALIDA
+
+
+def _sin_respuesta() -> list[str]:
+    return yaml.safe_load(SIN_RESPUESTA.read_text())
+
+
+SIN_RESPUESTA_SALIDA = (
+    "sin respuesta en la ayuda: 5 de 5 sin pasajes\n"
+    "    ¿hay una app de Gastos para el Apple Watch? → nada\n"
+    "    ¿cuánto cuesta el plan plus al mes? → nada\n"
+    "    ¿puedo pagar los recibos de la luz desde Gastos? → nada\n"
+    "    quiero repartir la cena entre cuatro y saber quién le debe a quién → nada\n"
+    "    ¿cómo pido la factura de mi suscripción? → nada\n"
+)
 
 SALIDA = (
     "texto                              recall@1 0.50 · recall@3 0.71 · MRR 0.62 · en los 8 candidatos 0.85 · 0 tokens\n"

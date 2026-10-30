@@ -16,6 +16,7 @@ from asistente.infrastructure import container
 from asistente.infrastructure.database.repositories.indice_de_ayuda_pg import IndiceDeAyudaPG
 
 PREGUNTAS = Path(__file__).resolve().parents[2] / "tests" / "rag" / "preguntas_de_ayuda.yaml"
+SIN_RESPUESTA = PREGUNTAS.with_name("preguntas_sin_respuesta.yaml")  # ejercicio 3
 
 
 def posicion(fuentes: list[str], esperado: str) -> int | None:
@@ -63,6 +64,17 @@ def tabla(filas: list[tuple[str, dict]]) -> str:
             linea += f" · {m['tokens']} tokens"
         lineas += [linea, *(f"    fuera de los 3 primeros: {f}" for f in m["fallos"])]
     return "\n".join(lineas)
+
+
+def abstenciones(buscador: BuscadorDeAyuda, preguntas: list[str]) -> str:
+    """Ejercicio 3: de las preguntas que la ayuda no contesta, en cuántas no devuelve nada (lo correcto)."""
+    lineas, vacias = [], 0
+    for pregunta in preguntas:
+        r = buscador.buscar(pregunta)
+        vacias += not r.pasajes
+        devuelto = ", ".join(p.fuente for p in r.pasajes) or "nada"
+        lineas.append(f"    {pregunta} → {devuelto}")
+    return "\n".join([f"sin respuesta en la ayuda: {vacias} de {len(preguntas)} sin pasajes", *lineas])
 
 
 class Command(BaseCommand):

@@ -76,6 +76,6 @@ def test_la_tool_cita_la_fuente_o_dice_que_no_hay_nada():
     llm = LLMFake([LLMFake.responder("ticket foto"), LLMFake.responder('{"relevantes": [1]}')])
     tool = BuscarAyudaTool(buscador=BuscadorDeAyuda(indice=indice(), embeddings=None, llm=llm))
     r = tool.ejecutar(contexto(), tool.validar(json.dumps({"pregunta": "¿cómo subo una foto del ticket?"})))
-    assert r["pasajes"][0]["fuente"].startswith("tickets#") and "cita" in r["nota"]
+    assert r.para_el_modelo["pasajes"][0]["fuente"].startswith("tickets#") and "cita" in r.para_el_modelo["nota"]
     vacio = BuscarAyudaTool(buscador=BuscadorDeAyuda(indice=IndiceDeAyudaFake(), embeddings=None, llm=None))
-    assert vacio.ejecutar(contexto(), vacio.validar('{"pregunta": "¿y esto?"}'))["pasajes"] == []
+    assert vacio.ejecutar(contexto(), vacio.validar('{"pregunta": "¿y esto?"}')).para_el_modelo["pasajes"] == []

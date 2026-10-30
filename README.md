@@ -281,3 +281,5 @@ cd backend
 uv run python manage.py indexar_ayuda          # la primera vez descarga el modelo de embeddings (≈ 240 MB)
 uv run python manage.py evaluar_ayuda          # recall@k y MRR de cada paso (--sin-llm: sin gastar tokens)
 ```
+
+Ejercicios: lo que gasta `buscar_ayuda` con el modelo pequeño, en el libro de cuentas (canal `ayuda`); las secciones de la ayuda que ha usado cada respuesta, debajo de ella en el chat ("Según la ayuda: …"); y las preguntas que la ayuda no contesta (`tests/rag/preguntas_sin_respuesta.yaml`): la reordenación no devuelve nada y el asistente lo dice, en lugar de citar algo que "se parece".

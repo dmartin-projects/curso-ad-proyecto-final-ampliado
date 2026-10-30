@@ -1,10 +1,12 @@
 # oauth/infrastructure/server/validador_gastos.py — las reglas de Gastos dentro de oauthlib (OAUTH2_VALIDATOR_CLASS,
 # módulos 90 y 92): sin scopes por defecto, cuentas desactivadas fuera, claims del usuario y, desde el 92, amr, acr y
-# auth_time de la autenticación real
+# auth_time de la autenticación real; desde el 104, ningún recurso (RFC 8707) que no se concediera
 import hashlib
 from datetime import UTC, datetime
 
+from oauth2_provider.models import get_grant_model
 from oauth2_provider.oauth2_validators import OAuth2Validator
+from oauthlib.oauth2.rfc6749 import errors
 
 from oauth.infrastructure.database.models.autenticacion_de_concesion_model import (
     AutenticacionDeConcesion as AutenticacionDeConcesionModel,
@@ -19,6 +21,27 @@ class ValidadorGastos(OAuth2Validator):
     def validate_refresh_token(self, refresh_token, client, request, *args, **kwargs):
         valido = super().validate_refresh_token(refresh_token, client, request, *args, **kwargs)
         return valido and request.user.is_active  # una cuenta desactivada ya no renueva tokens
+
+    def _check_and_set_request_resource(self, request):
+        """Módulo 104 (RFC 8707 y MCP): `resource` va en la autorización Y en el canje. DOT ya impide pedir en el canje
+        (o en el refresh) un recurso distinto del concedido, pero si lo concedido no tenía recurso, acepta cualquiera:
+        una app conectada para la API conseguiría tokens del servidor MCP sin que la persona viera nunca «Solo en:
+        …/api/mcp» en la pantalla de consentimiento. Sin recurso concedido, pedir uno es invalid_target."""
+        if request.grant_type == "authorization_code":
+            concesion = get_grant_model().objects.filter(code=request.code, application=request.client).first()
+            concedido = (concesion.resource or []) if concesion else []
+        elif request.grant_type == "refresh_token":
+            refresh = getattr(request, "refresh_token_instance", None)
+            concedido = (refresh.resource or []) if refresh else []
+        else:  # client credentials: no hay consentimiento de nadie (y el servidor MCP pide una persona)
+            concedido = None
+        super()._check_and_set_request_resource(request)
+        if concedido == [] and request.resource:
+            raise errors.CustomOAuth2Error(
+                error="invalid_target",
+                description="Ese recurso no se pidió al autorizar: la persona no lo ha consentido.",
+                request=request,
+            )
 
     def get_additional_claims(self):
         """Los claims del usuario. Cada uno sale solo con su scope (`oidc_claim_scope` de DOT: email → "email",

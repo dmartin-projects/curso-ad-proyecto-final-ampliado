@@ -1,4 +1,4 @@
-# asistente/application/tools/tool.py — qué es una tool para el asistente (módulos 94 y 97)
+# asistente/application/tools/tool.py — qué es una tool para el asistente (módulos 94, 97, 102 y 104)
 from abc import ABC, abstractmethod
 from typing import Any, ClassVar
 
@@ -31,6 +31,8 @@ class Tool(ABC):
     # eso no se puede usar en una pregunta que ya ha leído texto de terceros)
     lee_terceros: ClassVar[bool] = False
     persiste: ClassVar[bool] = False
+    # Módulo 104: sus argumentos salen de Gastos (a otro servidor): tras leer terceros, tampoco se puede usar
+    envia_fuera: ClassVar[bool] = False
 
     def declaracion(self) -> DeclaracionTool:
         return DeclaracionTool(self.nombre, self.descripcion, esquema_json(self.Argumentos))

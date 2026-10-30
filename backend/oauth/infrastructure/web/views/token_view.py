@@ -1,4 +1,5 @@
 # oauth/infrastructure/web/views/token_view.py — el token endpoint, con la consulta del dispositivo del RFC 8628 (ejercicio 3 del módulo 90)
+# y, desde el 104, los errores de recurso (RFC 8707) en JSON
 from django.db import transaction
 from django.http import JsonResponse
 from django.utils import timezone
@@ -14,7 +15,15 @@ def _error(error) -> JsonResponse:
 
 
 class TokenView(dot.TokenView):
-    """El token endpoint de DOT; cambia solo la consulta del dispositivo."""
+    """El token endpoint de DOT; cambia la consulta del dispositivo y el Content-Type de algunos errores."""
+
+    def post(self, request, *args, **kwargs):
+        respuesta = super().post(request, *args, **kwargs)
+        # Módulo 104: un error que oauthlib lanza al guardar el token (invalid_target, RFC 8707: un recurso que no se
+        # concedió) sale con el cuerpo en JSON pero sin su Content-Type, y RFC 6749 §5.2 lo pide
+        if respuesta.status_code >= 400 and respuesta.content.startswith(b"{"):
+            respuesta["Content-Type"] = "application/json"
+        return respuesta
 
     def device_flow_token_response(self, request, device_code, *args, **kwargs):
         with transaction.atomic():  # dos consultas a la vez con el mismo device_code: una espera a la otra

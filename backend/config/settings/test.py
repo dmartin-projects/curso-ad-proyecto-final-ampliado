@@ -28,5 +28,7 @@ MFA_CLAVES = [Fernet.generate_key().decode()]
 ASISTENTE_EMBEDDINGS = ""
 # Módulo 102: sin clasificador de inyecciones (sería una llamada a Groq por cada ticket): los tests usan un fake
 ASISTENTE_DETECTOR_INYECCION = ""
+# Módulo 104: el servidor MCP, en el host del cliente de pruebas (httpx con un ASGITransport)
+ASISTENTE_MCP_URL = "http://testserver/api/mcp"
 # Módulo 101: el rol del text-to-SQL (la contraseña la pone un fixture de sesión con ALTER ROLE)
 ASISTENTE_SQL_PASSWORD = "gastos-asistente-sql-test"

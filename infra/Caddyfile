@@ -26,10 +26,10 @@
 	# /api y /estadisticas, SOLO a través de Vercel: el rewrite añade X-Origen-Vercel con el secreto del
 	# entorno. Directo, 403: así la IP de X-Real-IP (la pone Vercel) es de fiar y nadie se salta Vercel.
 	@vercel {
-		path /api/* /estadisticas/*
+		path /api/* /estadisticas/* /.well-known/oauth-protected-resource/* /.well-known/oauth-authorization-server/* /.well-known/openid-configuration/*
 		header X-Origen-Vercel {args[2]}
 	}
-	@directo path /api/* /estadisticas/*
+	@directo path /api/* /estadisticas/* /.well-known/oauth-protected-resource/* /.well-known/oauth-authorization-server/* /.well-known/openid-configuration/*
 
 	handle @vercel {
 		# Para Django, UNA sola IP: la del navegador (NUM_PROXIES = 1). Sin esto, Caddy añadiría la de

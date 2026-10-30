@@ -7,7 +7,7 @@
   "git": { "deploymentEnabled": false },
   "routes": [
     {
-      "src": "^/(api|estadisticas)/(.*)$",
+      "src": "^/(api|estadisticas|\\.well-known/(?:oauth-protected-resource|oauth-authorization-server|openid-configuration))/(.*)$",
       "dest": "${API_ORIGEN}/$1/$2",
       "env": ["API_ORIGEN"],
       "headers": { "x-vercel-enable-rewrite-caching": "0" },

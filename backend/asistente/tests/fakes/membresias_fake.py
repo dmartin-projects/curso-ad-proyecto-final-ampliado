@@ -15,6 +15,9 @@ class MembresiasFake(IMembresias):
     def hogar_de(self, usuario_id, hogar_id):
         return self.hogares.get((usuario_id, hogar_id))
 
+    def hogares_de(self, usuario_id):  # módulo 104
+        return tuple(h for (u, _), h in self.hogares.items() if u == usuario_id)
+
     def miembros(self, actor, hogar_id):
         actor.exigir(Rol.LECTOR)
         return self.miembros_por_hogar.get(hogar_id, ())

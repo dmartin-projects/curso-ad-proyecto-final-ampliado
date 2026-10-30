@@ -34,6 +34,7 @@ JWT_REFRESH_COOKIE["secure"] = True  # módulo 35
 # ── Authorization server (módulo 90): sin valores por defecto, que no se despliegue con los de desarrollo ──
 OAUTH_ISSUER = env("OAUTH_ISSUER")  # https://gastos.tudominio.com/api/oauth
 OAUTH2_PROVIDER.update(urls_del_emisor(OAUTH_ISSUER))
+ASISTENTE_MCP_URL = f"{FRONTEND_URL}/api/mcp"  # módulo 104: el mismo origen que el authorization server
 OAUTH2_PROVIDER["OIDC_RSA_PRIVATE_KEY"] = env.str("OIDC_RSA_PRIVATE_KEY", multiline=True)
 # (OIDC_RSA_PRIVATE_KEYS_INACTIVE, el de base.py: vacío salvo mientras se rota la clave, ejercicio 2 y runbook)
 

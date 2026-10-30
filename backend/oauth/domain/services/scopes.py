@@ -1,4 +1,4 @@
-# oauth/domain/services/scopes.py — qué scopes pide cada clase de cliente, y qué significan en un hogar (módulo 90)
+# oauth/domain/services/scopes.py — qué scopes pide cada clase de cliente, y qué significan en un hogar (módulos 90 y 104)
 from collections.abc import Iterable
 
 from core.domain.enums.rol import Rol
@@ -18,3 +18,13 @@ def techo(scopes: Iterable[str]) -> Rol | None:
     """El rol más alto que permiten estos scopes en un hogar; None si ninguno da acceso a los hogares."""
     roles = [TECHO[Scope(s)] for s in scopes if s in TECHO]
     return max(roles, key=lambda r: r.nivel, default=None)
+
+
+def con_implicados(scopes: Iterable[str]) -> frozenset[str]:
+    """Módulo 104: los scopes y los que van incluidos en ellos (MCP: «servers MUST account for scope hierarchies»).
+    Un scope de los hogares incluye los de techo menor o igual: quien puede escribir (MIEMBRO) puede leer (LECTOR)."""
+    scopes = frozenset(scopes)
+    nivel = techo(scopes)
+    if nivel is None:
+        return scopes
+    return scopes | {str(s) for s, rol in TECHO.items() if rol.nivel <= nivel.nivel}

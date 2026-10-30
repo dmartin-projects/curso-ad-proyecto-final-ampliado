@@ -460,6 +460,12 @@ ASISTENTE_SQL_COSTE_MAXIMO = 100_000  # ejercicio 2 del 101: el coste estimado (
 # proveedor (Groq). Vacío: sin clasificador (las demás defensas siguen). El umbral: la puntuación desde la que se retira
 ASISTENTE_DETECTOR_INYECCION = env("ASISTENTE_DETECTOR_INYECCION", default="meta-llama/llama-prompt-guard-2-86m")
 ASISTENTE_UMBRAL_INYECCION = env.float("ASISTENTE_UMBRAL_INYECCION", default=0.5)
+# Módulo 104: MCP. La URI canónica del servidor MCP de Gastos (la que los clientes piden con `resource` al autorizar y
+# la que tiene que llevar el token), bajo /api como el resto: en producción, {FRONTEND_URL}/api/mcp
+ASISTENTE_MCP_URL = env("ASISTENTE_MCP_URL", default="http://localhost:8000/api/mcp")
+# Los servidores MCP de OTROS de los que el agente usa tools: [{"nombre", "url", "token", "aprobadas": {tool: huella}}]
+# (manage.py huellas_mcp para aprobar). El token de cada uno, el que ESE servidor emite: nunca el de la persona
+ASISTENTE_MCP_SERVIDORES = env.json("ASISTENTE_MCP_SERVIDORES", default=[])
 # Módulo 98: el proveedor, como lo nombran las convenciones GenAI de OpenTelemetry (gen_ai.provider.name)
 ASISTENTE_PROVEEDOR = env("ASISTENTE_PROVEEDOR", default="groq")
 # Las cuotas de cada plan: tokens al día por persona (entrada + salida) y dólares al mes por hogar. Una pregunta del chat

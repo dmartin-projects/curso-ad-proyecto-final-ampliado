@@ -5,6 +5,7 @@
 from asistente.application.ports.i_membresias import IMembresias
 from asistente.domain.read_models.hogar_del_usuario import HogarDelUsuario
 from asistente.domain.read_models.miembro_del_hogar import MiembroDelHogar
+from hogares.application.listar_hogares_use_case.dtos.listar_hogares_input_dto import ListarHogaresInputDTO
 from hogares.application.listar_miembros_use_case.dtos.listar_miembros_input_dto import ListarMiembrosInputDTO
 from hogares.infrastructure import container as hogares
 from hogares.infrastructure.database.repositories.hogar_query_service_orm import HogarQueryServiceORM
@@ -16,6 +17,13 @@ class MembresiasEnHogares(IMembresias):
         if h is None:
             return None
         return HogarDelUsuario(id=h.id, nombre=h.nombre, moneda=h.moneda, zona_horaria=h.zona_horaria, rol=h.mi_rol)
+
+    def hogares_de(self, usuario_id):
+        pagina = hogares.listar_hogares().ejecutar(ListarHogaresInputDTO(usuario_id, orden=("nombre",)))
+        return tuple(
+            HogarDelUsuario(id=h.id, nombre=h.nombre, moneda=h.moneda, zona_horaria=h.zona_horaria, rol=h.mi_rol)
+            for h in pagina.results
+        )
 
     def miembros(self, actor, hogar_id):
         leidos = hogares.listar_miembros().ejecutar(ListarMiembrosInputDTO(hogar_id, actor, orden=("creado",)))

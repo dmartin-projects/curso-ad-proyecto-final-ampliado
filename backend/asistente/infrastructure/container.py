@@ -3,6 +3,7 @@
 # El único sitio que decide QUÉ adapters se usan y con qué ajustes: el LLM (con su reserva), las tools con sus ports y
 # el contexto de una pregunta. El resto recibe las piezas ya montadas; los tests pasan fakes y no llegan nunca aquí.
 import functools
+import logging
 from collections.abc import Callable
 
 from django.conf import settings
@@ -121,9 +122,11 @@ from asistente.application.tools.resumen_mes_tool import ResumenMesTool
 from asistente.application.tools.tendencia_tool import TendenciaTool
 from asistente.application.tools.tipo_de_cambio_tool import TipoDeCambioTool
 from asistente.application.tools.tool import Tool
+from asistente.application.tools.tool_remota import ToolRemota
 from asistente.application.tools.top_comercios_tool import TopComerciosTool
 from asistente.application.ver_contexto_use_case.i_ver_contexto_use_case import IVerContextoUseCase
 from asistente.application.ver_contexto_use_case.ver_contexto_use_case import VerContextoUseCase
+from asistente.domain.exceptions.servicio_externo_no_disponible_exception import ServicioExternoNoDisponibleException
 from asistente.domain.vo.precio import Precio
 from asistente.infrastructure.ayuda.fuente_de_ayuda_en_disco import FuenteDeAyudaEnDisco
 from asistente.infrastructure.database.repositories.carpeta_command_repository_orm import CarpetaCommandRepositoryORM
@@ -159,6 +162,8 @@ from asistente.infrastructure.llm.detector_con_politica import DetectorConPoliti
 from asistente.infrastructure.llm.detector_prompt_guard import DetectorPromptGuard
 from asistente.infrastructure.llm.llm_con_reserva import LLMConReserva
 from asistente.infrastructure.llm.openai_compatible_llm import OpenAICompatibleLLM
+from asistente.infrastructure.mcp.pool import PoolMCP
+from asistente.infrastructure.mcp.servidor_mcp_remoto import ServidorMCPRemoto
 from asistente.infrastructure.messaging.programador_de_compactacion_celery import ProgramadorDeCompactacionCelery
 from asistente.infrastructure.sql.consultas_sql_postgres import ConsultasSQLPostgres
 from asistente.infrastructure.storage.almacen_django import AlmacenDjango
@@ -233,6 +238,7 @@ def tools(chat: bool = False) -> list[Tool]:
         OlvidarTool(recuerdos=RecuerdoCommandRepositoryORM(), consultas=RecuerdoQueryServiceORM()),  # su ejercicio 1
         BuscarAyudaTool(buscador=buscador_de_ayuda()),  # módulo 100
         *_text_to_sql(),  # módulo 101: solo si se enciende (ASISTENTE_TEXT_TO_SQL) y el rol tiene contraseña
+        *_remotas(),  # módulo 104: las tools aprobadas de otros servidores MCP
     ]
 
 
@@ -529,3 +535,41 @@ def agente_para_evals(modelo: str | None = None) -> Callable[[], Agente]:
     tiene que ser el que se evalúa) y sin clasificador (se evalúa al modelo, no a las barreras: eso es el red team)."""
     llm_evaluado = llm(modelo or settings.ASISTENTE_MODELO)
     return lambda: Agente(llm=llm_evaluado, tools=tools(chat=True), telemetria=TelemetriaOTel())
+
+
+# ── Módulo 104: MCP ──
+logger = logging.getLogger(__name__)
+
+
+def hogares_de(usuario_id: int) -> list[dict]:
+    """Para listar_hogares del servidor MCP: los hogares de la persona, con su rol."""
+    return [
+        {"id": h.id, "nombre": h.nombre, "moneda": h.moneda, "rol": h.rol}
+        for h in MembresiasEnHogares().hogares_de(usuario_id)
+    ]
+
+
+@functools.lru_cache(maxsize=1)
+def pool_mcp() -> PoolMCP:
+    """Uno por proceso: su bucle de asyncio y un cliente abierto por servidor."""
+    return PoolMCP()
+
+
+def servidores_mcp() -> list[ServidorMCPRemoto]:
+    return [
+        ServidorMCPRemoto(
+            nombre=s["nombre"], url=s["url"], token=s["token"], aprobadas=s.get("aprobadas", {}), pool=pool_mcp()
+        )
+        for s in settings.ASISTENTE_MCP_SERVIDORES
+    ]
+
+
+def _remotas() -> list[Tool]:
+    """Las tools de los servidores configurados. Si uno no responde, el chat sigue sin las suyas (y queda en el log)."""
+    remotas: list[Tool] = []
+    for servidor in servidores_mcp():
+        try:
+            remotas += [ToolRemota(servidor=servidor, declaracion=d) for d in servidor.tools()]
+        except ServicioExternoNoDisponibleException:
+            logger.warning("Servidor MCP %s no disponible: el chat, sin sus tools", servidor.nombre)
+    return remotas

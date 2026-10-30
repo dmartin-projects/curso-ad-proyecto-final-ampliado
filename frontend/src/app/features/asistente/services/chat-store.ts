@@ -105,6 +105,12 @@ export const ChatStore = signalStore(
             datos: { ...s.datos, propuestas: [...(s.datos.propuestas ?? []), propuesta] },
           }));
         }
+        case 'recuerdo': {
+          const recuerdo = sinEvento(ev);
+          return patchState(store, (s) => ({
+            datos: { ...s.datos, recuerdos: [...(s.datos.recuerdos ?? []), recuerdo] },
+          }));
+        }
         case 'titulo':
           return patchState(store, { titulo: ev.titulo });
         case 'fin': {

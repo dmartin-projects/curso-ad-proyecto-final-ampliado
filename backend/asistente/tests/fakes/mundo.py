@@ -19,6 +19,7 @@ from asistente.application.tools.listar_cuentas_tool import ListarCuentasTool
 from asistente.application.tools.listar_miembros_tool import ListarMiembrosTool
 from asistente.application.tools.prevision_fin_de_mes_tool import PrevisionFinDeMesTool
 from asistente.application.tools.proponer_movimiento_tool import ProponerMovimientoTool
+from asistente.application.tools.recordar_tool import RecordarTool
 from asistente.application.tools.resumen_mes_tool import ResumenMesTool
 from asistente.application.tools.tendencia_tool import TendenciaTool
 from asistente.application.tools.tipo_de_cambio_tool import TipoDeCambioTool
@@ -31,6 +32,7 @@ from asistente.tests.fakes.festivos_fake import FestivosFake
 from asistente.tests.fakes.indice_de_precios_fake import IndiceDePreciosFake
 from asistente.tests.fakes.llm_fake import LLMFake
 from asistente.tests.fakes.membresias_fake import MembresiasFake
+from asistente.tests.fakes.recuerdo_repositorio_fake import RecuerdoRepositorioFake
 from asistente.tests.fakes.tickets_fake import TicketsFake
 from asistente.tests.fakes.tipo_de_cambio_fake import TipoDeCambioFake
 from core.domain.vo.mes import Mes
@@ -77,13 +79,14 @@ class Mundo:
         self.membresias = membresias()
         self.exportador = ExportadorDeMovimientosFake()
         self.cronometro = Cronometro()
+        self.recuerdos = RecuerdoRepositorioFake()
 
     def tools(self):
         """Las dos del módulo 94."""
         return [ResumenMesTool(finanzas=self.finanzas), GastoPorCategoriaTool(finanzas=self.finanzas)]
 
     def catalogo(self, chat: bool = False):
-        """Todas (módulos 95 y 97), sobre los fakes: lo mismo que monta container.tools(chat) con los adapters."""
+        """Todas (módulos 95, 97 y 99), sobre los fakes: lo mismo que monta container.tools(chat) con los adapters."""
         f = self.finanzas
         consulta = [
             *self.tools(),
@@ -108,6 +111,7 @@ class Mundo:
             GraficoTool(calculadora=CalculadoraDeGraficos(consulta)),
             ExportarTool(finanzas=f, exportador=self.exportador),
             ProponerMovimientoTool(finanzas=f),
+            RecordarTool(recuerdos=self.recuerdos, reloj=reloj()),  # módulo 99
         ]
 
     def agente(self, guion: list, limites: Limites | None = None, tools=None) -> tuple[Agente, LLMFake]:

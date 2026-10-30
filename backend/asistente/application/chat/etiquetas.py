@@ -21,4 +21,5 @@ ETIQUETAS = {
     "exportar": "Preparando el archivo",
     "grafico": "Preparando el gráfico",
     "proponer_movimiento": "Preparando el movimiento",
+    "recordar": "Tomando nota",  # módulo 99
 }

@@ -6,7 +6,8 @@ class AsistenteConfig(AppConfig):
     verbose_name = "Asistente (agente de IA)"
 
     def ready(self):
-        # Ejercicio 2 del módulo 98: un adapter de entrada que Django no descubre solo
+        # Los adapters de entrada que Django y Celery no descubren solos (módulos 98 y 99)
         from .infrastructure.metrics import metricas_asistente
+        from .infrastructure.tasks import compactar_conversacion_task  # noqa: F401 (módulo 99)
 
         metricas_asistente.registrar()  # sin OpenTelemetry activo, el SDK nunca llama a la función

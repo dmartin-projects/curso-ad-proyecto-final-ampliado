@@ -2118,6 +2118,60 @@ paths:
               schema:
                 $ref: '#/components/schemas/Propuesta'
           description: ''
+  /api/v1/hogares/{hogar_pk}/asistente/recuerdos/:
+    get:
+      operationId: hogares_asistente_recuerdos_list
+      description: |-
+        Lo que el asistente recuerda de quien pide en este hogar (lo guarda la tool `recordar`). Se ve y se borra; no se
+        escribe a mano: un recuerdo es lo que se le pidió al asistente, con sus palabras.
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Recuerdo'
+          description: ''
+  /api/v1/hogares/{hogar_pk}/asistente/recuerdos/{id}/:
+    delete:
+      operationId: hogares_asistente_recuerdos_destroy
+      description: |-
+        Lo que el asistente recuerda de quien pide en este hogar (lo guarda la tool `recordar`). Se ve y se borra; no se
+        escribe a mano: un recuerdo es lo que se le pidió al asistente, con sus palabras.
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/hogares/{hogar_pk}/categorias/:
     get:
       operationId: hogares_categorias_list
@@ -6475,6 +6529,23 @@ components:
       required:
       - categoria
       - ids
+    Recuerdo:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        texto:
+          type: string
+          readOnly: true
+        creado:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - creado
+      - id
+      - texto
     RegistroRequest:
       type: object
       description: 'Solo datos que no son secretos: la contraseña se elige al completar

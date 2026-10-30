@@ -1,4 +1,4 @@
-# asistente/application/agent/limites.py — las guardas del agent loop (módulos 94 y 96)
+# asistente/application/agent/limites.py — las guardas del agent loop (módulos 94, 96 y 99)
 from dataclasses import dataclass
 
 
@@ -16,6 +16,9 @@ class Limites:
     max_tokens: int | None = None
     # Módulo 96: tokens (estimados) del historial que viaja en cada llamada; lo que no quepa, fuera (ventana.py)
     max_tokens_historial: int = 3000
+    # Módulo 99: tokens (estimados) de los resultados de tools de ESTA pregunta; pasados, los más antiguos se retiran
+    # (aligerar.py). None: nunca. Por encima de lo que ocupan las preguntas normales: es para las que encadenan muchas
+    max_tokens_resultados: int | None = 4000
 
     def __post_init__(self):
         if self.max_iteraciones < 2:  # una para pedir tools y otra para contestar con sus resultados

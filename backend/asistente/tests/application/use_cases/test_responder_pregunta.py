@@ -19,6 +19,8 @@ from asistente.domain.exceptions.cuota_agotada_exception import CuotaAgotadaExce
 from asistente.domain.exceptions.llm_no_disponible_exception import LLMNoDisponibleException
 from asistente.domain.read_models.mes_resumido import MesResumido
 from asistente.domain.vo.consumo import Consumo
+from asistente.domain.vo.mensaje import Mensaje
+from asistente.domain.vo.mensaje_de_conversacion import MensajeDeConversacion
 from asistente.domain.vo.uso import Uso
 from asistente.tests.fakes.almacen_de_archivos_fake import AlmacenDeArchivosFake
 from asistente.tests.fakes.consultas_de_finanzas_fake import resumen
@@ -29,6 +31,7 @@ from asistente.tests.fakes.lector_de_adjuntos_fake import LectorDeAdjuntosFake
 from asistente.tests.fakes.llm_fake import LLMFake
 from asistente.tests.fakes.mundo import ANA, HOGAR, OCTUBRE, Mundo, membresias, reloj
 from asistente.tests.fakes.plan_del_hogar_repositorio_fake import PlanDelHogarRepositorioFake
+from asistente.tests.fakes.programador_de_compactacion_fake import ProgramadorDeCompactacionFake
 from asistente.tests.fakes.propuesta_command_repository_fake import PropuestaCommandRepositoryFake
 from asistente.tests.fakes.tarifas_fake import TarifasFake
 from core.domain.enums.rol import Rol
@@ -56,6 +59,7 @@ class Chat:
         self.llm, self.auxiliar = LLMFake(guion), LLMFake(titulos or [LLMFake.responder("Gasto del mes")])
         self.almacen, self.lector = AlmacenDeArchivosFake(), LectorDeAdjuntosFake()
         self.consumos, self.planes = ConsumoRepositorioFake(), PlanDelHogarRepositorioFake()
+        self.recuerdos, self.compactacion = self.mundo.recuerdos, ProgramadorDeCompactacionFake()  # los de la tool
         self.uow = UnidadDeTrabajoFake(self.conversaciones, self.propuestas)
         self.caso = ResponderPreguntaUseCase(
             conversaciones=self.conversaciones,
@@ -71,6 +75,8 @@ class Chat:
             tarifas=TarifasFake(),
             consumos=self.consumos,
             consultas_de_consumo=self.consumos,
+            recuerdos=self.recuerdos,
+            compactacion=self.compactacion,
         )
         self.conversacion = Conversacion(ANA, HOGAR)
         self.conversaciones.guardar(self.conversacion)
@@ -225,3 +231,46 @@ def test_sin_cuota_ni_se_guarda_la_pregunta_ni_se_llama_al_modelo():
     with pytest.raises(CuotaAgotadaException):
         chat.preguntar("¿Una más?")
     assert chat.llm.peticiones == [] and chat.conversaciones.mensajes == []
+
+
+# ── Módulo 99: la memoria ──
+def test_recordar_guarda_lo_que_se_pide_y_viaja_en_la_siguiente():
+    chat = Chat(
+        [
+            LLMFake.llamar("recordar", texto="La cuenta común es la de ING."),
+            LLMFake.responder("Anotado."),
+            estructurada("Anotado."),
+            LLMFake.responder("En ING."),
+            estructurada("En ING."),
+        ],
+        titulos=[LLMFake.responder("Cuenta común"), LLMFake.responder("La cuenta común")],
+    )
+    chat.preguntar("Recuerda que la cuenta común es la de ING")
+    assert ("recuerdo", {"id": 1, "texto": "La cuenta común es la de ING."}) in chat.emisor.eventos
+    assert chat.conversaciones.visibles(chat.conversacion.id)[-1].datos["recuerdos"] == [
+        {"id": 1, "texto": "La cuenta común es la de ING."}
+    ]
+
+    otra = Conversacion(ANA, HOGAR)
+    chat.conversaciones.guardar(otra)
+    chat.preguntar("¿Cuál es la cuenta común?", conversacion_id=otra.id)  # otra conversación: el recuerdo, también
+    primera = chat.llm.peticiones[3].mensajes[0].texto
+    assert primera.startswith("<recuerdos>\n- La cuenta común es la de ING.\n</recuerdos>")
+
+
+def test_cada_respuesta_programa_la_compactacion():
+    chat = Chat([LLMFake.responder("Hola."), estructurada("Hola.")])
+    chat.preguntar("Hola")
+    assert chat.compactacion.programadas == [(ANA, HOGAR, chat.conversacion.id)]
+
+
+def test_con_resumen_viaja_el_resumen_y_lo_de_despues():
+    chat = Chat([LLMFake.responder("Sí."), estructurada("Sí.")])
+    viejo = MensajeDeConversacion(Mensaje.usuario("Algo antiguo"), visible=True, texto="Algo antiguo")
+    chat.conversaciones.anadir(chat.conversacion.id, [viejo])
+    chat.conversacion.resumir("Preguntó algo antiguo.", 1)
+    chat.conversaciones.guardar_resumen(chat.conversacion)
+    chat.preguntar("¿Y ahora?")
+    enviados = [m.texto for m in chat.llm.peticiones[0].mensajes]
+    assert len(enviados) == 2 and "Preguntó algo antiguo." in enviados[0] and enviados[1] == "¿Y ahora?"
+    assert chat.auxiliar.peticiones == []  # con resumen, no es la primera pregunta: sin título nuevo

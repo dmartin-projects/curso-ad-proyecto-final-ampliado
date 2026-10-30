@@ -13,6 +13,8 @@ def conversacion_a_bo(fila: ConversacionModel) -> Conversacion:
         titulo_manual=fila.titulo_manual,
         carpeta_id=fila.carpeta_id,
         id=fila.pk,
+        resumen=fila.resumen,
+        resumido_hasta=fila.resumido_hasta,
     )
 
 

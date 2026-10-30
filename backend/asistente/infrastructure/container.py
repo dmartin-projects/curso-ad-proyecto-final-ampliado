@@ -13,6 +13,12 @@ from asistente.application.agent.limites import Limites
 from asistente.application.asignar_plan_use_case.asignar_plan_use_case import AsignarPlanUseCase
 from asistente.application.asignar_plan_use_case.i_asignar_plan_use_case import IAsignarPlanUseCase
 from asistente.application.chat.calculadora_de_graficos import CalculadoraDeGraficos
+from asistente.application.compactar_conversacion_use_case.compactar_conversacion_use_case import (
+    CompactarConversacionUseCase,
+)
+from asistente.application.compactar_conversacion_use_case.i_compactar_conversacion_use_case import (
+    ICompactarConversacionUseCase,
+)
 from asistente.application.confirmar_propuesta_use_case.confirmar_propuesta_use_case import ConfirmarPropuestaUseCase
 from asistente.application.confirmar_propuesta_use_case.i_confirmar_propuesta_use_case import (
     IConfirmarPropuestaUseCase,
@@ -61,6 +67,8 @@ from asistente.application.listar_graficos_fijados_use_case.i_listar_graficos_fi
 from asistente.application.listar_graficos_fijados_use_case.listar_graficos_fijados_use_case import (
     ListarGraficosFijadosUseCase,
 )
+from asistente.application.listar_recuerdos_use_case.i_listar_recuerdos_use_case import IListarRecuerdosUseCase
+from asistente.application.listar_recuerdos_use_case.listar_recuerdos_use_case import ListarRecuerdosUseCase
 from asistente.application.modificar_carpeta_use_case.i_modificar_carpeta_use_case import IModificarCarpetaUseCase
 from asistente.application.modificar_carpeta_use_case.modificar_carpeta_use_case import ModificarCarpetaUseCase
 from asistente.application.modificar_conversacion_use_case.i_modificar_conversacion_use_case import (
@@ -75,6 +83,8 @@ from asistente.application.obtener_conversacion_use_case.i_obtener_conversacion_
 from asistente.application.obtener_conversacion_use_case.obtener_conversacion_use_case import (
     ObtenerConversacionUseCase,
 )
+from asistente.application.olvidar_recuerdo_use_case.i_olvidar_recuerdo_use_case import IOlvidarRecuerdoUseCase
+from asistente.application.olvidar_recuerdo_use_case.olvidar_recuerdo_use_case import OlvidarRecuerdoUseCase
 from asistente.application.ports.i_llm import ILLM
 from asistente.application.ports.i_observador_agente import IObservadorAgente
 from asistente.application.quitar_grafico_use_case.i_quitar_grafico_use_case import IQuitarGraficoUseCase
@@ -97,6 +107,7 @@ from asistente.application.tools.listar_cuentas_tool import ListarCuentasTool
 from asistente.application.tools.listar_miembros_tool import ListarMiembrosTool
 from asistente.application.tools.prevision_fin_de_mes_tool import PrevisionFinDeMesTool
 from asistente.application.tools.proponer_movimiento_tool import ProponerMovimientoTool
+from asistente.application.tools.recordar_tool import RecordarTool
 from asistente.application.tools.resumen_mes_tool import ResumenMesTool
 from asistente.application.tools.tendencia_tool import TendenciaTool
 from asistente.application.tools.tipo_de_cambio_tool import TipoDeCambioTool
@@ -120,6 +131,8 @@ from asistente.infrastructure.database.repositories.plan_del_hogar_repository_or
 from asistente.infrastructure.database.repositories.propuesta_command_repository_orm import (
     PropuestaCommandRepositoryORM,
 )
+from asistente.infrastructure.database.repositories.recuerdo_command_repository_orm import RecuerdoCommandRepositoryORM
+from asistente.infrastructure.database.repositories.recuerdo_query_service_orm import RecuerdoQueryServiceORM
 from asistente.infrastructure.externos.eurostat_indice_de_precios import IndiceDePreciosEurostat
 from asistente.infrastructure.externos.frankfurter_tipo_de_cambio import TipoDeCambioFrankfurter
 from asistente.infrastructure.externos.nager_festivos import FestivosNager
@@ -130,6 +143,7 @@ from asistente.infrastructure.hogares.membresias_en_hogares import MembresiasEnH
 from asistente.infrastructure.llm.cliente_openai import cliente_del_proceso
 from asistente.infrastructure.llm.llm_con_reserva import LLMConReserva
 from asistente.infrastructure.llm.openai_compatible_llm import OpenAICompatibleLLM
+from asistente.infrastructure.messaging.programador_de_compactacion_celery import ProgramadorDeCompactacionCelery
 from asistente.infrastructure.storage.almacen_django import AlmacenDjango
 from asistente.infrastructure.tarifas.tarifas_desde_ajustes import TarifasDesdeAjustes
 from asistente.infrastructure.telemetria.llm_medido import LLMMedido
@@ -197,6 +211,7 @@ def tools(chat: bool = False) -> list[Tool]:
         GraficoTool(calculadora=CalculadoraDeGraficos(consulta)),
         ExportarTool(finanzas=finanzas, exportador=ExportadorEnFinanzas(almacen=AlmacenDjango())),
         ProponerMovimientoTool(finanzas=finanzas),
+        RecordarTool(recuerdos=RecuerdoCommandRepositoryORM(), reloj=RelojDjango()),  # módulo 99
     ]
 
 
@@ -272,6 +287,8 @@ def responder_pregunta() -> IResponderPreguntaUseCase:
         tarifas=TarifasDesdeAjustes(),
         consumos=ConsumoRepositoryORM(),
         consultas_de_consumo=ConsumoQueryServiceORM(),
+        recuerdos=RecuerdoQueryServiceORM(),
+        compactacion=ProgramadorDeCompactacionCelery(),
     )
 
 
@@ -383,3 +400,24 @@ def contar_hogares_sin_cuota() -> IContarHogaresSinCuotaUseCase:  # ejercicio 2 
         tarifas=TarifasDesdeAjustes(),
         reloj=RelojDjango(),
     )
+
+
+# ── Módulo 99: el contexto largo ──
+def compactar_conversacion() -> ICompactarConversacionUseCase:
+    return CompactarConversacionUseCase(
+        conversaciones=ConversacionCommandRepositoryORM(),
+        llm=llm_auxiliar(),
+        consumos=ConsumoRepositoryORM(),
+        tarifas=TarifasDesdeAjustes(),
+        reloj=RelojDjango(),
+        uow=UnidadDeTrabajoDjango(),
+        umbral=settings.ASISTENTE_TOKENS_PARA_RESUMIR,
+    )
+
+
+def listar_recuerdos() -> IListarRecuerdosUseCase:
+    return ListarRecuerdosUseCase(consultas=RecuerdoQueryServiceORM())
+
+
+def olvidar_recuerdo() -> IOlvidarRecuerdoUseCase:
+    return OlvidarRecuerdoUseCase(recuerdos=RecuerdoCommandRepositoryORM(), uow=UnidadDeTrabajoDjango())

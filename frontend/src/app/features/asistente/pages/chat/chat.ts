@@ -29,12 +29,14 @@ import { GraficoDelChatCard } from '../../components/grafico-del-chat/grafico-de
 import { ListaConversaciones } from '../../components/lista-conversaciones/lista-conversaciones';
 import { Mensaje } from '../../components/mensaje/mensaje';
 import { PropuestaCard } from '../../components/propuesta/propuesta';
+import { Recuerdos } from '../../components/recuerdos/recuerdos';
 import {
   Carpeta,
   Conversacion,
   GraficoDelChat,
   Pregunta,
   PropuestaDelChat,
+  Recuerdo,
 } from '../../interfaces/asistente.models';
 import { AsistenteApi } from '../../services/asistente-api';
 import { ChatStore } from '../../services/chat-store';
@@ -60,6 +62,7 @@ const SUGERENCIAS = [
     ListaConversaciones,
     Mensaje,
     PropuestaCard,
+    Recuerdos,
   ],
   providers: [ChatStore],
   templateUrl: './chat.html',
@@ -88,6 +91,10 @@ export default class Chat {
   protected readonly cuota = injectQuery(() => ({
     queryKey: clavesAsistente.cuota(this.hogarId()),
     queryFn: () => lastValueFrom(this.api.cuota(this.hogarId())),
+  }));
+  protected readonly recuerdos = injectQuery(() => ({
+    queryKey: clavesAsistente.recuerdos(this.hogarId()),
+    queryFn: () => lastValueFrom(this.api.recuerdos(this.hogarId())),
   }));
   protected readonly carpetas = injectQuery(() => ({
     queryKey: clavesAsistente.carpetas(this.hogarId()),
@@ -172,6 +179,12 @@ export default class Chat {
 
   protected async descargar(c: Conversacion) {
     guardarArchivo(await lastValueFrom(this.api.markdown(this.hogarId(), c.id)));
+  }
+
+  protected async olvidar(r: Recuerdo) {
+    await lastValueFrom(this.api.olvidar(this.hogarId(), r.id));
+    await this.invalidar();
+    this.avisos.exito('Olvidado.');
   }
 
   protected async borrarCarpeta(c: Carpeta) {

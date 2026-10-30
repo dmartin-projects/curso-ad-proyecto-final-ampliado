@@ -1,4 +1,4 @@
-# asistente/application/agent/agente.py — el agent loop, escrito a mano (módulos 94, 96, 97 y 98)
+# asistente/application/agent/agente.py — el agent loop, escrito a mano (módulos 94, 96, 97, 98 y 99)
 """Preguntar al modelo, ejecutar las tools que pide, devolverle los resultados y repetir hasta que conteste con texto.
 
     agente = Agente(llm=llm, tools=[ResumenMesTool(finanzas=…), …])
@@ -17,6 +17,9 @@ que las tools producen para la interfaz (gráficos, archivos, propuestas: ConArt
 el modelo y se devuelve en ResultadoAgente.artefactos.
 
 Módulo 98: la pregunta y cada tool, dentro de un `with` de la telemetría (spans y métricas; por defecto, ninguna).
+
+Módulo 99, el contexto largo: la `memoria` (recuerdos y resumen) va fija al principio, y si los resultados de las tools
+de esta pregunta pasan de su presupuesto, los más antiguos se retiran (aligerar.py).
 """
 
 import json
@@ -26,6 +29,7 @@ from collections import Counter
 from collections.abc import Callable
 from traceback import format_tb
 
+from asistente.application.agent.aligerar import aligerar
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.agent.estructurar import estructurar
 from asistente.application.agent.instrucciones import VERSION, instrucciones
@@ -42,6 +46,7 @@ from asistente.application.tools.tool import Tool
 from asistente.domain.enums.motivo_fin import MotivoFin
 from asistente.domain.enums.motivo_parada import MotivoParada
 from asistente.domain.exceptions.tool_exception import ToolException
+from asistente.domain.services.tokens import estimar_tokens
 from asistente.domain.vo.artefacto import Artefacto
 from asistente.domain.vo.llamada_tool import LlamadaTool
 from asistente.domain.vo.mensaje import Mensaje
@@ -81,20 +86,24 @@ class Agente:
         contexto: ContextoPregunta,
         estructurada: bool = False,
         al_texto: Callable[[str], None] | None = None,
+        memoria: tuple[Mensaje, ...] = (),
     ) -> ResultadoAgente:
         """`historial` es la conversación ENTERA (el modelo es stateless) y acaba con la pregunta del usuario. Lo
         que hay que añadirle está en ResultadoAgente.nuevos; quien llama decide dónde guardarlo. Viaja lo que cabe
         en el presupuesto de contexto (ventana.py). Con `estructurada`, una llamada más da la respuesta en JSON.
         Con `al_texto` (módulo 97), el texto de cada vuelta va saliendo por ahí mientras el modelo lo escribe."""
         with self.telemetria.pregunta(contexto) as medir:  # módulo 98: el span de la pregunta, que envuelve los demás
-            resultado = self._responder(historial, contexto, estructurada, al_texto)
+            resultado = self._responder(historial, contexto, estructurada, al_texto, memoria)
             medir(resultado)
             return resultado
 
-    def _responder(self, historial, contexto, estructurada, al_texto) -> ResultadoAgente:
+    def _responder(self, historial, contexto, estructurada, al_texto, memoria) -> ResultadoAgente:
         inicio = self.cronometro()
         sistema = instrucciones(contexto)  # el mismo en todas las vueltas: el prefijo que el proveedor cachea
-        mensajes, nuevos, llamadas, modelos = list(ventana(historial, self.limites.max_tokens_historial)), [], [], []
+        # Módulo 99: la memoria (recuerdos y resumen), fija al principio; el historial, en lo que quede del presupuesto
+        presupuesto = max(0, self.limites.max_tokens_historial - sum(estimar_tokens(m.texto) for m in memoria))
+        mensajes = [*memoria, *ventana(historial, presupuesto)]
+        nuevos, llamadas, modelos = [], [], []
         uso = Uso()
         artefactos: list[Artefacto] = []
         usos_por_tool: Counter[str] = Counter()
@@ -124,6 +133,11 @@ class Agente:
                 logger.warning("Agente: %.0f s y sin terminar; última vuelta, sin tools", self.limites.segundos)
             if sin_tokens:
                 logger.warning("Agente: %s tokens y sin terminar; última vuelta, sin tools", uso.total)
+            if self.limites.max_tokens_resultados is not None:  # módulo 99: lo ya usado, fuera si no cabe
+                mensajes, retiradas = aligerar(mensajes, self.limites.max_tokens_resultados)
+                for ll in llamadas:  # retirado, se puede volver a pedir: no es "la misma llamada de antes"
+                    if ll.id in retiradas:
+                        ya_llamadas.discard((ll.nombre, _normalizado(ll.argumentos)))
             peticion = PeticionLLM(
                 sistema=sistema,
                 mensajes=tuple(mensajes),

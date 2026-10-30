@@ -45,6 +45,12 @@
       (descartar)="descartar.emit($event)"
     />
   }
+  @for (r of m.datos.recuerdos ?? []; track r.id) {
+    <p class="m-0 flex items-center gap-1 text-sm text-texto-suave" role="note">
+      <mat-icon class="!h-4 !w-4 !text-base" aria-hidden="true">bookmark</mat-icon>
+      Lo recordaré: «{{ r.texto }}»
+    </p>
+  }
   @if (ultimo() && m.datos.seguimiento?.length) {
     <mat-chip-set aria-label="Preguntas de seguimiento">
       @for (s of m.datos.seguimiento; track s) {

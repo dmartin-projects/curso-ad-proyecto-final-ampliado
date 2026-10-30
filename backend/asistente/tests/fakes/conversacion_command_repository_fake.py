@@ -1,6 +1,7 @@
-# asistente/tests/fakes/conversacion_command_repository_fake.py (módulo 97)
+# asistente/tests/fakes/conversacion_command_repository_fake.py (módulos 97 y 99)
 from asistente.domain.exceptions.conversacion_no_encontrada_exception import ConversacionNoEncontradaException
 from asistente.domain.repositories.i_conversacion_command_repository import IConversacionCommandRepository
+from asistente.domain.services.intercambios import emparejar as _emparejar
 from core.tests.fakes.almacen_en_memoria import AlmacenEnMemoria, copia
 
 
@@ -40,10 +41,19 @@ class ConversacionCommandRepositoryFake(AlmacenEnMemoria, IConversacionCommandRe
         self._datos.pop(conversacion.id, None)
         self.mensajes = [m for m in self.mensajes if m["conversacion_id"] != conversacion.id]
 
-    def historial(self, conversacion_id):
-        return tuple(
-            m["mdc"].mensaje for m in self.mensajes if m["conversacion_id"] == conversacion_id and not m["incompleto"]
-        )
+    def guardar_resumen(self, conversacion):
+        guardada = self._datos[conversacion.id]
+        guardada.resumen, guardada.resumido_hasta = conversacion.resumen, conversacion.resumido_hasta
+
+    def historial(self, conversacion_id, despues_de=None):
+        return tuple(m["mdc"].mensaje for m in self._de(conversacion_id, despues_de) if not m["incompleto"])
+
+    def intercambios(self, conversacion_id, despues_de=None):
+        visibles = [m for m in self._de(conversacion_id, despues_de) if m["mdc"].visible and not m["incompleto"]]
+        return _emparejar([(m["id"], str(m["mdc"].mensaje.rol), m["mdc"].texto) for m in visibles])
+
+    def _de(self, conversacion_id, despues_de):
+        return [m for m in self.mensajes if m["conversacion_id"] == conversacion_id and m["id"] > (despues_de or 0)]
 
     def anadir(self, conversacion_id, mensajes):
         ids = []

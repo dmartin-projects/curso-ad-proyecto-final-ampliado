@@ -1,22 +1,24 @@
 <div class="grid gap-4 md:grid-cols-[18rem_1fr]">
-  <app-lista-conversaciones
-    class="hidden md:block"
-    [hogarId]="hogarId()"
-    [conversaciones]="conversaciones.data() ?? []"
-    [carpetas]="carpetas.data() ?? []"
-    [actual]="chat.conversacionId()"
-    [carpeta]="carpeta()"
-    [buscando]="!!busqueda()"
-    (nueva)="nueva()"
-    (filtrar)="carpeta.set($event)"
-    (crearCarpeta)="crearCarpeta($event)"
-    (borrarCarpeta)="borrarCarpeta($event)"
-    (renombrarCarpeta)="renombrarCarpeta($event)"
-    (buscar)="busqueda.set($event)"
-    (descargar)="descargar($event)"
-    (mover)="mover($event)"
-    (borrar)="borrar($event)"
-  />
+  <div class="hidden flex-col gap-3 md:flex">
+    <app-lista-conversaciones
+      [hogarId]="hogarId()"
+      [conversaciones]="conversaciones.data() ?? []"
+      [carpetas]="carpetas.data() ?? []"
+      [actual]="chat.conversacionId()"
+      [carpeta]="carpeta()"
+      [buscando]="!!busqueda()"
+      (nueva)="nueva()"
+      (filtrar)="carpeta.set($event)"
+      (crearCarpeta)="crearCarpeta($event)"
+      (borrarCarpeta)="borrarCarpeta($event)"
+      (renombrarCarpeta)="renombrarCarpeta($event)"
+      (buscar)="busqueda.set($event)"
+      (descargar)="descargar($event)"
+      (mover)="mover($event)"
+      (borrar)="borrar($event)"
+    />
+    <app-recuerdos [recuerdos]="recuerdos.data() ?? []" (olvidar)="olvidar($event)" />
+  </div>
 
   <section class="flex min-h-[70vh] flex-col gap-4" aria-labelledby="titulo-chat">
     <header class="flex items-center gap-2">

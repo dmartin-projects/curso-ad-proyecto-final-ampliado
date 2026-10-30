@@ -1,16 +1,16 @@
-"""Módulos 95 y 97: reglas que cumple TODO el catálogo. Una tool nueva que se las salte rompe este test, no la seguridad."""
+"""Módulos 95, 97 y 99: reglas que cumple TODO el catálogo. Una tool nueva que se las salte rompe este test, no la seguridad."""
 
 import pytest
 
 from asistente.domain.exceptions.tool_exception import ToolException
 from asistente.tests.fakes.mundo import Mundo
 
-CATALOGO = Mundo().catalogo(chat=True)  # el del chat: el de consulta y las tres de su canal
+CATALOGO = Mundo().catalogo(chat=True)  # el del chat: el de consulta y las de su canal
 
 
-def test_dieciocho_tools_sin_nombres_repetidos():  # las 11 del 95, las 2 de sus ejercicios y las 5 del 97
+def test_diecinueve_tools_sin_nombres_repetidos():  # las 11 del 95, 2 de sus ejercicios, 5 del 97 y recordar (99)
     nombres = [t.nombre for t in CATALOGO]
-    assert len(nombres) == len(set(nombres)) == 18
+    assert len(nombres) == len(set(nombres)) == 19
 
 
 @pytest.mark.parametrize("tool", CATALOGO, ids=lambda t: t.nombre)

@@ -1,0 +1,23 @@
+<mat-expansion-panel class="!shadow-none">
+  <mat-expansion-panel-header>
+    <mat-panel-title>Lo que recuerda el asistente ({{ recuerdos().length }})</mat-panel-title>
+  </mat-expansion-panel-header>
+  <ul class="m-0 flex list-none flex-col gap-1 p-0" aria-label="Recuerdos">
+    @for (r of recuerdos(); track r.id) {
+      <li class="flex items-start gap-1 text-sm">
+        <span class="flex-1">{{ r.texto }}</span>
+        <button
+          mat-icon-button
+          [attr.aria-label]="'Olvidar «' + r.texto + '»'"
+          (click)="olvidar.emit(r)"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </li>
+    } @empty {
+      <li class="text-sm text-texto-suave">
+        Nada todavía. Pídeselo en el chat: «recuerda que la cuenta común es la de ING».
+      </li>
+    }
+  </ul>
+</mat-expansion-panel>

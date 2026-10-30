@@ -43,6 +43,8 @@ def _respuesta_del_llm(cuerpo: dict) -> tuple[str, dict | None]:
             return "Aquí tienes la evolución de los últimos meses.", None
         if "propuesta" in resultado:
             return "Te lo dejo preparado: confírmalo abajo.", None
+        if "recordado" in resultado:  # módulo 99
+            return "Anotado: lo tendré en cuenta en las próximas conversaciones.", None
         if "error" in resultado:
             return f"No he podido: {resultado['error']}", None
         return f"En {resultado['mes']} gastasteis {resultado['gastos'].replace('.', ',')} €.", None
@@ -55,6 +57,9 @@ def _respuesta_del_llm(cuerpo: dict) -> tuple[str, dict | None]:
             "argumentos": {"meses": 3},
         }
         return "", {"name": "grafico", "arguments": json.dumps(argumentos)}
+    if pregunta.startswith("recuerda que"):  # módulo 99
+        texto = ultimo["content"][len("recuerda que ") :].strip().rstrip(".")
+        return "", {"name": "recordar", "arguments": json.dumps({"texto": texto[0].upper() + texto[1:] + "."})}
     if "apunta" in pregunta:
         argumentos = {"importe": "3.50", "concepto": "Churros", "cuenta": "Cuenta común"}
         return "", {"name": "proponer_movimiento", "arguments": json.dumps(argumentos)}

@@ -1,0 +1,105 @@
+interactions:
+- request:
+    body: "{\"model\":\"openai/gpt-oss-20b\",\"messages\":[{\"role\":\"user\",\"content\":\"Resume
+      esta conversaci\xF3n entre una persona y el asistente de gastos de su hogar,
+      para que el asistente pueda seguirla sin leerla entera.\\n- Conserva qu\xE9
+      se pregunt\xF3 y las cifras, meses, categor\xEDas y comercios de las respuestas,
+      exactos.\\n- Conserva lo que la persona cont\xF3 de s\xED misma o del hogar.\\n-
+      Nada que no est\xE9 en la conversaci\xF3n. Sin saludos ni valoraciones.\\n-
+      Como mucho 150 palabras, en frases cortas: \xABPregunt\xF3 por\u2026; el asistente
+      contest\xF3\u2026\xBB.\\n<conversacion>\\nPersona: \xBFCu\xE1nto gastamos en
+      septiembre?\\nAsistente: En septiembre gastasteis 776,59 \u20AC. Lo que m\xE1s,
+      Supermercado (312,40 \u20AC) y Restaurantes (148,20 \u20AC).\\nPersona: \xBFY
+      en agosto?\\nAsistente: En agosto, 1.120,35 \u20AC: m\xE1s que en septiembre
+      por las vacaciones (Viajes, 402,10 \u20AC).\\nPersona: La cuenta com\xFAn es
+      la de ING, por cierto\\nAsistente: Entendido: la cuenta com\xFAn es la de ING.\\n</conversacion>\"}],\"max_completion_tokens\":750,\"reasoning_effort\":\"low\"}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1020'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-a258f5d9-8edb-41dd-82ac-fe4e2506c01c\",\"object\":\"chat.completion\",\"created\":1793309550,\"model\":\"openai/gpt-oss-20b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"Pregunt\xF3
+        por gastos de septiembre; el asistente contest\xF3 776,59\u202F\u20AC, con
+        mayor gasto en Supermercado (312,40\u202F\u20AC) y Restaurantes (148,20\u202F\u20AC).
+        \ \\nPregunt\xF3 por gastos de agosto; el asistente contest\xF3 1.120,35\u202F\u20AC,
+        m\xE1s que septiembre por Viajes (402,10\u202F\u20AC).  \\nPregunt\xF3 sobre
+        la cuenta com\xFAn; el asistente confirm\xF3 que es la de ING.  \\nEl usuario
+        coment\xF3 que la cuenta com\xFAn es la de ING.\",\"reasoning\":\"Need summary
+        \\u003c=150 words, short sentences.\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.179815789,\"prompt_tokens\":302,\"prompt_time\":0.024954716,\"completion_tokens\":129,\"completion_time\":0.152994944,\"total_tokens\":431,\"total_time\":0.17794966,\"completion_tokens_details\":{\"reasoning_tokens\":10}},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_9b8528b477\",\"x_groq\":{\"id\":\"req_01m64s89mrehb9sp7t3zyg5k8n\",\"seed\":1480269930},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5254b10ce6d7000-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '1092'
+      content-type:
+      - application/json
+      date:
+      - Thu, 29 Oct 2026 21:32:30 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '999'
+      x-ratelimit-remaining-tokens:
+      - '7475'
+      x-ratelimit-reset-requests:
+      - 1m26.4s
+      x-ratelimit-reset-tokens:
+      - 3.937s
+      x-request-id:
+      - req_01m64s89mrehb9sp7t3zyg5k8n
+    status:
+      code: 200
+      message: OK
+version: 1

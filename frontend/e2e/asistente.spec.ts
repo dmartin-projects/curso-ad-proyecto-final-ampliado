@@ -136,3 +136,17 @@ test('sin cuota: el aviso, y la pregunta no sale (un 429 antes del stream)', asy
     await request.delete('http://localhost:8000/e2e/asistente/cuota');
   }
 });
+
+test('la memoria: «recuerda que…», se ve en la lista y se olvida', async ({ page }) => {
+  await abrirAsistente(page);
+  await preguntar(page, 'Recuerda que la cuenta común es la de ING');
+  await expect(page.getByRole('note')).toContainText(
+    'Lo recordaré: «La cuenta común es la de ING.»',
+  );
+
+  await page.getByText('Lo que recuerda el asistente (1)').click();
+  const lista = page.getByRole('list', { name: 'Recuerdos' });
+  await expect(lista).toContainText('La cuenta común es la de ING.');
+  await lista.getByRole('button', { name: 'Olvidar «La cuenta común es la de ING.»' }).click();
+  await expect(page.getByText('Lo que recuerda el asistente (0)')).toBeVisible();
+});

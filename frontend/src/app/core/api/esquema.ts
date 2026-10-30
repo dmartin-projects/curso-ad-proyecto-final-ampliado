@@ -1156,6 +1156,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hogares/{hogar_pk}/asistente/recuerdos/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lo que el asistente recuerda de quien pide en este hogar (lo guarda la tool `recordar`). Se ve y se borra; no se
+         *     escribe a mano: un recuerdo es lo que se le pidió al asistente, con sus palabras.
+         */
+        get: operations["hogares_asistente_recuerdos_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hogares/{hogar_pk}/asistente/recuerdos/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * @description Lo que el asistente recuerda de quien pide en este hogar (lo guarda la tool `recordar`). Se ve y se borra; no se
+         *     escribe a mano: un recuerdo es lo que se le pidió al asistente, con sus palabras.
+         */
+        delete: operations["hogares_asistente_recuerdos_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/hogares/{hogar_pk}/categorias/": {
         parameters: {
             query?: never;
@@ -2775,6 +2815,12 @@ export interface components {
         RecategorizarSoporteRequest: {
             ids: number[];
             categoria: number;
+        };
+        Recuerdo: {
+            readonly id: number;
+            readonly texto: string;
+            /** Format: date-time */
+            readonly creado: string;
         };
         /** @description Solo datos que no son secretos: la contraseña se elige al completar el registro. */
         RegistroRequest: {
@@ -4870,6 +4916,48 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["Propuesta"];
                 };
+            };
+        };
+    };
+    hogares_asistente_recuerdos_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Recuerdo"][];
+                };
+            };
+        };
+    };
+    hogares_asistente_recuerdos_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

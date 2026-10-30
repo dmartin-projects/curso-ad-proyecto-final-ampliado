@@ -1,4 +1,5 @@
-"""Módulo 98: el libro de cuentas y los planes en PostgreSQL: las sumas de las cuotas y el informe por hogar."""
+"""Módulos 98 y 99: el libro de cuentas y los planes en PostgreSQL (las sumas de las cuotas y el informe por hogar) y
+el resumen de una conversación."""
 
 from datetime import UTC, datetime
 from decimal import Decimal
@@ -63,3 +64,21 @@ def test_el_plan_basico_no_necesita_fila():
     assert planes.plan_de(casa.pk) == Plan.PLUS
     planes.asignar(casa.pk, Plan.BASICO)
     assert planes.plan_de(casa.pk) == Plan.BASICO
+
+
+def test_guardar_el_resumen_no_sube_la_conversacion_en_la_lista():  # módulo 99
+    from asistente.domain.bo.conversacion import Conversacion
+    from asistente.infrastructure.database.models.conversacion_model import Conversacion as ConversacionModel
+    from asistente.infrastructure.database.repositories.conversacion_command_repository_orm import (
+        ConversacionCommandRepositoryORM,
+    )
+
+    ana, casa = UsuarioFactory(), HogarFactory()
+    repo, conversacion = ConversacionCommandRepositoryORM(), Conversacion(ana.pk, casa.pk)
+    repo.guardar(conversacion)
+    antes = ConversacionModel.objects.get(pk=conversacion.id).actualizado
+    conversacion.resumir("Resumen.", 3)
+    repo.guardar_resumen(conversacion)
+    fila = ConversacionModel.objects.get(pk=conversacion.id)
+    assert (fila.resumen, fila.resumido_hasta, fila.actualizado) == ("Resumen.", 3, antes)
+    assert repo.obtener(ana.pk, casa.pk, conversacion.id).resumen == "Resumen."

@@ -8,6 +8,7 @@ export type ConversacionDetalle = S['ConversacionDetalle'];
 export type Carpeta = S['Carpeta'];
 export type Propuesta = S['Propuesta'];
 export type Cuota = S['Cuota'];
+export type Recuerdo = S['Recuerdo'];
 
 /** Un gráfico del chat: los datos y QUÉ los produce (la especificación, para fijarlo en el dashboard). */
 export interface GraficoDelChat extends GraficoDeDatos {
@@ -19,6 +20,12 @@ export interface ArchivoDelChat {
   nombre: string;
   filas: number;
   url?: string; // firmada: caduca. Al abrir la conversación, la API da una nueva
+}
+
+/** Módulo 99: lo que la persona pidió recordar, en el momento en que el asistente lo guarda. */
+export interface RecuerdoDelChat {
+  id: number;
+  texto: string;
 }
 
 export interface PropuestaDelChat {
@@ -33,6 +40,7 @@ export interface DatosDelMensaje {
   graficos?: GraficoDelChat[];
   archivos?: ArchivoDelChat[];
   propuestas?: PropuestaDelChat[];
+  recuerdos?: RecuerdoDelChat[];
   seguimiento?: string[];
 }
 
@@ -56,6 +64,7 @@ export type EventoChat =
   | ({ evento: 'grafico' } & GraficoDelChat)
   | ({ evento: 'archivo' } & ArchivoDelChat)
   | ({ evento: 'propuesta' } & PropuestaDelChat)
+  | ({ evento: 'recuerdo' } & RecuerdoDelChat)
   | { evento: 'titulo'; titulo: string }
   | ({ evento: 'fin'; mensaje: number; texto: string } & DatosDelMensaje)
   | { evento: 'error'; detalle: string };

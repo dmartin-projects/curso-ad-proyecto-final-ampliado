@@ -1,6 +1,7 @@
-# asistente/infrastructure/database/repositories/conversacion_command_repository_orm.py (módulo 97)
+# asistente/infrastructure/database/repositories/conversacion_command_repository_orm.py (módulos 97 y 99)
 from asistente.domain.exceptions.conversacion_no_encontrada_exception import ConversacionNoEncontradaException
 from asistente.domain.repositories.i_conversacion_command_repository import IConversacionCommandRepository
+from asistente.domain.services.intercambios import emparejar
 from asistente.infrastructure.database.mappers.conversacion_mapper import conversacion_a_bo
 from asistente.infrastructure.database.mappers.mensaje_mapper import mensaje_a_json, mensaje_de_json
 from asistente.infrastructure.database.models.conversacion_model import Conversacion as ConversacionModel
@@ -27,6 +28,11 @@ class ConversacionCommandRepositoryORM(IConversacionCommandRepository):
         guardar_fila(fila, ["titulo", "titulo_manual", "carpeta"], {})  # "actualizado" siempre: sube en la lista
         conversacion.id = fila.pk
 
+    def guardar_resumen(self, conversacion):  # módulo 99: update() no toca "actualizado" (auto_now es de save())
+        ConversacionModel.objects.filter(pk=conversacion.id).update(
+            resumen=conversacion.resumen, resumido_hasta=conversacion.resumido_hasta
+        )
+
     def eliminar(self, conversacion):
         ConversacionModel.objects.filter(pk=conversacion.id).delete()
 
@@ -46,9 +52,17 @@ class ConversacionCommandRepositoryORM(IConversacionCommandRepository):
         fila.datos = {**(fila.datos or {}), "exportados": [*(fila.datos or {}).get("exportados", []), ruta]}
         fila.save(update_fields=["datos"])
 
-    def historial(self, conversacion_id):
-        filas = MensajeModel.objects.filter(conversacion_id=conversacion_id, incompleto=False).order_by("id")
-        return tuple(mensaje_de_json(c) for c in filas.values_list("contenido", flat=True))
+    def historial(self, conversacion_id, despues_de=None):
+        filas = MensajeModel.objects.filter(conversacion_id=conversacion_id, incompleto=False)
+        if despues_de is not None:  # módulo 99: lo anterior ya está en el resumen
+            filas = filas.filter(pk__gt=despues_de)
+        return tuple(mensaje_de_json(c) for c in filas.order_by("id").values_list("contenido", flat=True))
+
+    def intercambios(self, conversacion_id, despues_de=None):
+        filas = MensajeModel.objects.filter(
+            conversacion_id=conversacion_id, visible=True, incompleto=False, pk__gt=despues_de or 0
+        )
+        return emparejar(filas.order_by("id").values_list("id", "rol", "texto"))
 
     def anadir(self, conversacion_id, mensajes):
         filas = MensajeModel.objects.bulk_create(

@@ -1,4 +1,4 @@
-# asistente/application/responder_pregunta_use_case/responder_pregunta_use_case.py — el chat, de punta a punta (módulos 97 y 98)
+# asistente/application/responder_pregunta_use_case/responder_pregunta_use_case.py — el chat, de punta a punta (módulos 97 a 99)
 """Una pregunta en una conversación guardada:
 
 1. la conversación es de quien pregunta (si no, 404) y el contexto sale de la sesión (hogar, Actor LECTOR, "hoy"); si
@@ -9,7 +9,9 @@
    exportado queda ligado a la pregunta en cuanto se guarda (si la pregunta no termina, se borra con la conversación);
 5. la respuesta se guarda con sus turnos intermedios (ocultos), los artefactos y las preguntas de seguimiento;
 6. tras la primera respuesta, el título, con el modelo auxiliar;
-7. lo gastado, por modelo, se apunta SIEMPRE (también si se cancela o falla a mitad): se ha pagado (módulo 98).
+7. lo gastado, por modelo, se apunta SIEMPRE (también si se cancela o falla a mitad): se ha pagado (módulo 98);
+8. módulo 99: viaja con la memoria (los recuerdos de la persona y el resumen de lo antiguo), y al terminar se programa
+   la compactación (resumir lo antiguo, si hace falta, fuera de la respuesta).
 
 Cancelada o sin modelo disponible, la pregunta queda "incompleta": se ve en el chat, pero ya no viaja al modelo.
 """
@@ -21,6 +23,7 @@ from typing import Any
 
 from asistente.application.agent.agente import Agente
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
+from asistente.application.agent.memoria import memoria
 from asistente.application.agent.observador_mudo import ObservadorMudo
 from asistente.application.agent.resultado_agente import ResultadoAgente
 from asistente.application.chat.adjunto import MAX_BYTES, TIPOS, con_adjunto
@@ -33,6 +36,7 @@ from asistente.application.ports.i_lector_de_adjuntos import ILectorDeAdjuntos
 from asistente.application.ports.i_llm import ILLM
 from asistente.application.ports.i_membresias import IMembresias
 from asistente.application.ports.i_observador_agente import IObservadorAgente
+from asistente.application.ports.i_programador_de_compactacion import IProgramadorDeCompactacion
 from asistente.application.ports.i_tarifas import ITarifas
 from asistente.application.responder_pregunta_use_case.dtos.responder_pregunta_input_dto import (
     ResponderPreguntaInputDTO,
@@ -52,6 +56,7 @@ from asistente.domain.repositories.i_consumo_repository import IConsumoRepositor
 from asistente.domain.repositories.i_conversacion_command_repository import IConversacionCommandRepository
 from asistente.domain.repositories.i_plan_del_hogar_repository import IPlanDelHogarRepository
 from asistente.domain.repositories.i_propuesta_command_repository import IPropuestaCommandRepository
+from asistente.domain.repositories.i_recuerdo_query_service import IRecuerdoQueryService
 from asistente.domain.vo.mensaje import Mensaje
 from asistente.domain.vo.mensaje_de_conversacion import MensajeDeConversacion
 from asistente.domain.vo.propuesta_preparada import PropuestaPreparada
@@ -83,6 +88,9 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
         tarifas: ITarifas,
         consumos: IConsumoRepository,
         consultas_de_consumo: IConsumoQueryService,
+        # Módulo 99: la memoria
+        recuerdos: IRecuerdoQueryService,
+        compactacion: IProgramadorDeCompactacion,
     ):
         self.conversaciones, self.propuestas, self.crear_agente = conversaciones, propuestas, crear_agente
         self.llm_auxiliar, self.membresias, self.lector, self.almacen = llm_auxiliar, membresias, lector, almacen
@@ -93,6 +101,7 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
             consumos,
             consultas_de_consumo,
         )
+        self.recuerdos, self.compactacion = recuerdos, compactacion
 
     def ejecutar(self, entrada: ResponderPreguntaInputDTO) -> int | None:
         entrada.actor.exigir(self.rol_minimo)
@@ -109,7 +118,8 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
             tarifas=self.tarifas,
             consumos=self.consultas_de_consumo,
         ).exigir(self.reloj.ahora())
-        historial = self.conversaciones.historial(conversacion.id)
+        historial = self.conversaciones.historial(conversacion.id, conversacion.resumido_hasta)
+        recuerdos = [r.texto for r in self.recuerdos.listar(usuario_id, entrada.hogar_id)]
         pregunta = self._pregunta(entrada)
         with self.uow:
             (pregunta_id,) = self.conversaciones.anadir(conversacion.id, [pregunta])
@@ -125,7 +135,11 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
         contador = ContadorDeUso(observador)
         try:
             r = self.crear_agente(contador).responder(
-                (*historial, pregunta.mensaje), contexto, estructurada=True, al_texto=observador.texto
+                (*historial, pregunta.mensaje),
+                contexto,
+                estructurada=True,
+                al_texto=observador.texto,
+                memoria=memoria(conversacion.resumen, recuerdos),
             )
         except PreguntaCanceladaException:
             logger.info("Pregunta cancelada (conversación %s)", conversacion.id)
@@ -143,7 +157,8 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
             self._apuntar(contador, contexto, CanalDeConsumo.CHAT)
 
         titulo = None
-        if not any(m.rol == RolMensaje.USUARIO for m in historial):  # la primera pregunta: el título
+        primera = not conversacion.resumen and not any(m.rol == RolMensaje.USUARIO for m in historial)
+        if primera:  # la primera pregunta: el título
             titulo, respuesta_titulo = titular(self.llm_auxiliar, entrada.texto)
             del_titulo = ContadorDeUso(ObservadorMudo())
             del_titulo.sumar(respuesta_titulo)
@@ -155,6 +170,7 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
             ids = self.conversaciones.anadir(conversacion.id, mensajes)
             titulada = titulo is not None and conversacion.titular(titulo)
             self.conversaciones.guardar(conversacion)
+            self.compactacion.programar(usuario_id, entrada.hogar_id, conversacion.id)  # tras el commit, aparte
         if titulada:
             emisor.emitir("titulo", {"titulo": conversacion.titulo})
         emisor.emitir("fin", {"mensaje": ids[-1], "texto": r.texto, **datos})
@@ -210,6 +226,7 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
             "graficos": observador.graficos,
             "archivos": observador.archivos,
             "propuestas": observador.propuestas,
+            "recuerdos": observador.recuerdos,
             "seguimiento": list(r.estructurada.seguimiento) if r.estructurada else [],
             "motivo": str(r.motivo),
             "uso": {

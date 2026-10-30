@@ -1,4 +1,4 @@
-# asistente/infrastructure/api/v1/urls.py — las rutas del asistente: la app es dueña de sus endpoints (módulos 97 y 98)
+# asistente/infrastructure/api/v1/urls.py — las rutas del asistente: la app es dueña de sus endpoints (módulos 97 a 99)
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
@@ -8,6 +8,7 @@ from asistente.infrastructure.api.v1.views.cuota_view import CuotaView
 from asistente.infrastructure.api.v1.views.grafico_fijado_viewset import GraficoFijadoViewSet
 from asistente.infrastructure.api.v1.views.preguntar_view import PreguntarView
 from asistente.infrastructure.api.v1.views.propuesta_viewset import PropuestaViewSet
+from asistente.infrastructure.api.v1.views.recuerdo_viewset import RecuerdoViewSet
 
 router = DefaultRouter()
 A = r"hogares/(?P<hogar_pk>\d+)/asistente"
@@ -15,6 +16,7 @@ router.register(f"{A}/conversaciones", ConversacionViewSet, basename="asistente-
 router.register(f"{A}/carpetas", CarpetaViewSet, basename="asistente-carpeta")
 router.register(f"{A}/propuestas", PropuestaViewSet, basename="asistente-propuesta")
 router.register(f"{A}/graficos-fijados", GraficoFijadoViewSet, basename="asistente-grafico-fijado")
+router.register(f"{A}/recuerdos", RecuerdoViewSet, basename="asistente-recuerdo")  # módulo 99
 
 urlpatterns = [
     path(

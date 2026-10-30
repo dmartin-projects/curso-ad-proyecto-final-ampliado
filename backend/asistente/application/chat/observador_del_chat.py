@@ -1,4 +1,4 @@
-# asistente/application/chat/observador_del_chat.py — cada paso del agente, convertido en eventos del chat (módulo 97)
+# asistente/application/chat/observador_del_chat.py — cada paso del agente, convertido en eventos del chat (módulos 97 y 99)
 from collections.abc import Callable
 from typing import Any
 
@@ -11,6 +11,7 @@ from asistente.domain.exceptions.pregunta_cancelada_exception import PreguntaCan
 from asistente.domain.vo.archivo_exportado import ArchivoExportado
 from asistente.domain.vo.grafico import Grafico
 from asistente.domain.vo.propuesta_preparada import PropuestaPreparada
+from asistente.domain.vo.recuerdo_guardado import RecuerdoGuardado
 
 
 class ObservadorDelChat(IObservadorAgente):
@@ -32,6 +33,7 @@ class ObservadorDelChat(IObservadorAgente):
         self.graficos: list[dict] = []
         self.archivos: list[dict] = []
         self.propuestas: list[dict] = []
+        self.recuerdos: list[dict] = []  # módulo 99
 
     def comprobar(self) -> None:
         if self.emisor.cancelado():
@@ -62,6 +64,10 @@ class ObservadorDelChat(IObservadorAgente):
             datos = archivo_a_datos(artefacto)
             self.archivos.append(datos)
             self.emisor.emitir("archivo", {**datos, "url": self.almacen.url(artefacto.ruta)})
+        elif isinstance(artefacto, RecuerdoGuardado):  # módulo 99: "lo recordaré", con su botón de olvidar
+            datos = {"id": artefacto.id, "texto": artefacto.texto}
+            self.recuerdos.append(datos)
+            self.emisor.emitir("recuerdo", datos)
         elif isinstance(artefacto, PropuestaPreparada):
             datos = self.guardar_propuesta(artefacto)  # con su id: la interfaz la confirma por él
             self.propuestas.append(datos)

@@ -13,6 +13,7 @@ import {
   GraficoDelChat,
   Pregunta,
   Propuesta,
+  Recuerdo,
 } from '../interfaces/asistente.models';
 import { LectorSSE } from './eventos-sse';
 
@@ -62,6 +63,15 @@ export class AsistenteApi {
   /** Módulo 98: lo gastado hoy (por quien pide) y este mes (por el hogar), con los límites de su plan. */
   cuota(hogarId: number) {
     return this.http.get<Cuota>(`${this.base(hogarId)}/cuota/`);
+  }
+
+  /** Módulo 99: lo que el asistente recuerda de quien pide (lo guarda la tool `recordar`). */
+  recuerdos(hogarId: number) {
+    return this.http.get<Recuerdo[]>(`${this.base(hogarId)}/recuerdos/`);
+  }
+
+  olvidar(hogarId: number, id: number) {
+    return this.http.delete<void>(`${this.base(hogarId)}/recuerdos/${id}/`);
   }
 
   carpetas(hogarId: number) {

@@ -436,6 +436,9 @@ ASISTENTE_PRECIOS = {
     "openai/gpt-oss-20b": ("0.075", "0.30", "0.037"),
     "qwen/qwen3.8-27b": ("0.80", "4.00", "0.80"),  # ejercicio 2 (sin precio de caché publicado: el de entrada)
 }
+# Módulo 99: tokens (estimados) de conversación sin resumir a partir de los que se resume lo antiguo (con el modelo
+# auxiliar, en una tarea de Celery). Por debajo de la ventana (3.000): se resume antes de tener que quitar nada
+ASISTENTE_TOKENS_PARA_RESUMIR = env.int("ASISTENTE_TOKENS_PARA_RESUMIR", default=1500)
 # Módulo 98: el proveedor, como lo nombran las convenciones GenAI de OpenTelemetry (gen_ai.provider.name)
 ASISTENTE_PROVEEDOR = env("ASISTENTE_PROVEEDOR", default="groq")
 # Las cuotas de cada plan: tokens al día por persona (entrada + salida) y dólares al mes por hogar. Una pregunta del chat

@@ -56,11 +56,15 @@ def declaracion_mcp(tool: Tool) -> types.Tool:
 
 
 class ServidorMCP:
-    def __init__(self, *, tools: list[Tool], contexto, hogares):
+    def __init__(self, *, tools: list[Tool], contexto, hogares, limite=None, al_llamar=None):
         """`contexto(usuario_id, hogar_id)` → ContextoPregunta (o SinPermisoException); `hogares(usuario_id)` → los
-        hogares de la persona. Del container: aquí no se elige ningún adapter."""
+        hogares de la persona. Del container: aquí no se elige ningún adapter.
+
+        Ejercicio 1: `limite(cliente, usuario)` → segundos que esperar (0: puede). Ejercicio 3: `al_llamar(cliente, tool,
+        error)`, para la métrica."""
         self.tools = {t.nombre: t for t in tools}
         self.contexto, self.hogares = contexto, hogares
+        self.limite, self.al_llamar = limite, al_llamar
         self.servidor = Server(
             "gastos",
             title="Gastos",
@@ -76,6 +80,12 @@ class ServidorMCP:
         token = get_access_token()  # el middleware de autenticación del SDK ya lo ha comprobado
         if token is None or SCOPE not in token.scopes:  # (con required_scopes no pasa; si se quitan, que no se abra)
             return _error(f"Hace falta el scope {SCOPE}.")
+        if self.limite is not None and (espera := await sync_to_async(self.limite)(token.client_id, token.subject)):
+            # Un resultado con is_error: el modelo del cliente lo lee y espera (un 429 del transporte lo reintentaría
+            # el SDK sin que nadie lo vea). No se ejecuta nada
+            if self.al_llamar is not None:
+                self.al_llamar(token.client_id, params.name, "limite")
+            return _error(f"Demasiadas llamadas. Vuelve a intentarlo dentro de {espera} s.")
         inicio = time.monotonic()
         resultado = await sync_to_async(self._ejecutar, thread_sensitive=True)(
             int(token.subject), frozenset(token.scopes), params.name, dict(params.arguments or {})
@@ -87,6 +97,8 @@ class ServidorMCP:
             extra={"mcp": {"cliente": token.client_id, "usuario_id": token.subject, "tool": params.name,
                            "error": resultado.is_error, "ms": int((time.monotonic() - inicio) * 1000)}},
         )  # fmt: skip
+        if self.al_llamar is not None:
+            self.al_llamar(token.client_id, params.name, "error" if resultado.is_error else "ok")
         return resultado
 
     def _ejecutar(self, usuario_id: int, scopes: frozenset[str], nombre: str, args: dict) -> types.CallToolResult:

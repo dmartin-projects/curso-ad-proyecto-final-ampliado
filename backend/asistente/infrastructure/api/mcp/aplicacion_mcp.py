@@ -28,6 +28,7 @@ from django.db import close_old_connections
 from mcp.server.auth.settings import AuthSettings
 from mcp.server.transport_security import TransportSecuritySettings
 
+from asistente.infrastructure.api.mcp.limite_de_llamadas import LimiteDeLlamadas
 from asistente.infrastructure.api.mcp.servidor_mcp import SCOPE, ServidorMCP
 from asistente.infrastructure.api.mcp.verificador_de_tokens import VerificadorDeTokensGastos
 
@@ -109,7 +110,13 @@ def crear_aplicacion_mcp() -> AplicacionMCP:
 
     from asistente.infrastructure import container
 
-    servidor = ServidorMCP(tools=container.tools(), contexto=container.contexto, hogares=container.hogares_de)
+    servidor = ServidorMCP(
+        tools=container.tools(),
+        contexto=container.contexto,
+        hogares=container.hogares_de,
+        limite=LimiteDeLlamadas(settings.ASISTENTE_MCP_LLAMADAS_POR_MINUTO).espera,  # ejercicio 1
+        al_llamar=container.contar_llamada_mcp,  # ejercicio 3
+    )
     hosts = [*settings.ALLOWED_HOSTS, *(f"{h}:*" for h in settings.ALLOWED_HOSTS)]
     return AplicacionMCP(
         servidor,

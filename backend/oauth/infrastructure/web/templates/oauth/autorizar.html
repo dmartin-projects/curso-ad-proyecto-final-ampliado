@@ -12,6 +12,10 @@
     <p class="suave">{% blocktranslate with email=user.email %}Has entrado como {{ email }}.{% endblocktranslate %}</p>
     <p>{% translate "Podrá, en tu nombre:" %}</p>
     <ul>{% for descripcion in scopes_descriptions %}<li>{{ descripcion }}</li>{% endfor %}</ul>
+    {% if resource %}
+      {# Ejercicio 2 del 104 (RFC 8707): el acceso solo valdrá en esa dirección; la persona ve a qué se lo da #}
+      <p>{% translate "Solo en:" %} <code id="recurso">{{ resource }}</code></p>
+    {% endif %}
     <p class="suave">{% translate "En cada hogar, nunca más de lo que te permite tu rol. Puedes retirarle el acceso cuando quieras." %}</p>
     <form method="post" id="autorizar">
       {% csrf_token %}

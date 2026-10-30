@@ -564,6 +564,12 @@ def servidores_mcp() -> list[ServidorMCPRemoto]:
     ]
 
 
+def contar_llamada_mcp(cliente: str, tool: str, resultado: str) -> None:
+    """Ejercicio 3 del 104: qué aplicaciones usan el servidor MCP, qué tools y cómo acaban. Etiquetas acotadas: los
+    clientes registrados, las tools del catálogo y tres resultados (ok, error, limite)."""
+    instrumentos.llamadas_mcp.add(1, {"cliente": cliente, "tool": tool, "resultado": resultado})
+
+
 def _remotas() -> list[Tool]:
     """Las tools de los servidores configurados. Si uno no responde, el chat sigue sin las suyas (y queda en el log)."""
     remotas: list[Tool] = []

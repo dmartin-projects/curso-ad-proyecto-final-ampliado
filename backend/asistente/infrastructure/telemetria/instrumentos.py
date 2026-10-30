@@ -76,6 +76,11 @@ inyecciones = _medidor.create_counter(  # ejercicio 1 del 102
     unit="{texto}",
     description="Textos que el clasificador ha tomado por prompt injection, por origen (una tool, adjunto o pregunta)",
 )
+llamadas_mcp = _medidor.create_counter(  # ejercicio 3 del 104
+    "gastos.asistente.mcp.llamadas",
+    unit="{llamada}",
+    description="Llamadas al servidor MCP, por cliente OAuth, tool y resultado (ok, error, limite)",
+)
 cuota_agotada = _medidor.create_counter(
     "gastos.asistente.cuota_agotada",
     unit="{pregunta}",

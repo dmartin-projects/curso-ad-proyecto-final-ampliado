@@ -466,6 +466,8 @@ ASISTENTE_MCP_URL = env("ASISTENTE_MCP_URL", default="http://localhost:8000/api/
 # Los servidores MCP de OTROS de los que el agente usa tools: [{"nombre", "url", "token", "aprobadas": {tool: huella}}]
 # (manage.py huellas_mcp para aprobar). El token de cada uno, el que ESE servidor emite: nunca el de la persona
 ASISTENTE_MCP_SERVIDORES = env.json("ASISTENTE_MCP_SERVIDORES", default=[])
+# Ejercicio 1 del 104: llamadas por minuto al servidor MCP, por persona y cliente
+ASISTENTE_MCP_LLAMADAS_POR_MINUTO = env.int("ASISTENTE_MCP_LLAMADAS_POR_MINUTO", default=60)
 # Módulo 98: el proveedor, como lo nombran las convenciones GenAI de OpenTelemetry (gen_ai.provider.name)
 ASISTENTE_PROVEEDOR = env("ASISTENTE_PROVEEDOR", default="groq")
 # Las cuotas de cada plan: tokens al día por persona (entrada + salida) y dólares al mes por hogar. Una pregunta del chat

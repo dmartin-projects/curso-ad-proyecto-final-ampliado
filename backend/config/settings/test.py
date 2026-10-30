@@ -26,3 +26,5 @@ MFA_CLAVES = [Fernet.generate_key().decode()]
 
 # Módulo 100: sin modelo de embeddings en los tests (no se descarga nada): los que lo necesitan usan un fake
 ASISTENTE_EMBEDDINGS = ""
+# Módulo 101: el rol del text-to-SQL (la contraseña la pone un fixture de sesión con ALTER ROLE)
+ASISTENTE_SQL_PASSWORD = "gastos-asistente-sql-test"

@@ -52,8 +52,9 @@ services:
   migrate:
     <<: *backend
     environment: { OTEL_SERVICE_NAME: gastos-migrate }
-    # módulo 100: y el índice de la ayuda al día (incremental: solo lo que ha cambiado en asistente/ayuda/)
-    command: ["sh", "-c", "python manage.py migrate --noinput && python manage.py indexar_ayuda"]
+    # módulo 100: y el índice de la ayuda al día (incremental: solo lo que ha cambiado en asistente/ayuda/);
+    # módulo 101: y la contraseña del rol del text-to-SQL, si la hay (ASISTENTE_SQL_PASSWORD)
+    command: ["sh", "-c", "python manage.py migrate --noinput && python manage.py indexar_ayuda && python manage.py preparar_rol_sql --si-hay"]
     restart: "no"
 
   web:

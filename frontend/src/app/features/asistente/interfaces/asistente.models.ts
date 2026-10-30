@@ -34,6 +34,14 @@ export interface FuenteDeAyuda {
   titulo: string; // el del documento
 }
 
+/** Módulo 101: una consulta SQL del asistente y lo que devolvió («Ver los datos»). */
+export interface ConsultaDelChat {
+  sql: string;
+  columnas: string[];
+  filas: unknown[][];
+  recortado: boolean;
+}
+
 export interface PropuestaDelChat {
   id: number;
   tipo: string;
@@ -48,6 +56,7 @@ export interface DatosDelMensaje {
   propuestas?: PropuestaDelChat[];
   recuerdos?: RecuerdoDelChat[];
   fuentes?: FuenteDeAyuda[];
+  consultas?: ConsultaDelChat[];
   seguimiento?: string[];
 }
 
@@ -73,6 +82,7 @@ export type EventoChat =
   | ({ evento: 'propuesta' } & PropuestaDelChat)
   | ({ evento: 'recuerdo' } & RecuerdoDelChat)
   | { evento: 'fuentes'; fuentes: FuenteDeAyuda[] }
+  | ({ evento: 'datos' } & ConsultaDelChat)
   | { evento: 'titulo'; titulo: string }
   | ({ evento: 'fin'; mensaje: number; texto: string } & DatosDelMensaje)
   | { evento: 'error'; detalle: string };

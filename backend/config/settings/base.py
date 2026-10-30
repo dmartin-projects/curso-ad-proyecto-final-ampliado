@@ -88,6 +88,11 @@ TEMPLATES = [
 DATABASES = {"default": env.db("DATABASE_URL")}
 DATABASES["default"]["CONN_MAX_AGE"] = env.int("DB_CONN_MAX_AGE", default=60)
 DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+# Módulo 101: el text-to-SQL del asistente se conecta a la MISMA base de datos con OTRO usuario: un rol que solo lee
+# unas columnas y, por Row Level Security, solo las filas de un hogar (asistente/migrations/0005_consultas_sql.py).
+# Sin contraseña no hay conexión (ni la tool consultar_sql): manage.py preparar_rol_sql se la pone al rol
+ASISTENTE_SQL_USUARIO = "gastos_asistente_sql"
+ASISTENTE_SQL_PASSWORD = env("ASISTENTE_SQL_PASSWORD", default="")
 
 AUTH_USER_MODEL = "usuarios.Usuario"
 AUTH_PASSWORD_VALIDATORS = [
@@ -445,6 +450,11 @@ ASISTENTE_EMBEDDINGS = env(
     "ASISTENTE_EMBEDDINGS", default="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 )
 ASISTENTE_EMBEDDINGS_CACHE = env("ASISTENTE_EMBEDDINGS_CACHE", default=str(BASE_DIR / ".cache" / "embeddings"))
+# Módulo 101: la tool consultar_sql (text-to-SQL) en el chat. Apagada por defecto: las tools hacen lo mismo con menos
+# riesgo (el módulo 101 lo mide); se enciende para comparar, o para preguntas que ninguna tool contesta
+ASISTENTE_TEXT_TO_SQL = env.bool("ASISTENTE_TEXT_TO_SQL", default=False)
+ASISTENTE_SQL_FILAS = 200  # como mucho, por consulta (la interfaz); al modelo, 50
+ASISTENTE_SQL_SEGUNDOS = 2  # statement_timeout: una consulta que tarda más es una consulta mal hecha
 # Módulo 98: el proveedor, como lo nombran las convenciones GenAI de OpenTelemetry (gen_ai.provider.name)
 ASISTENTE_PROVEEDOR = env("ASISTENTE_PROVEEDOR", default="groq")
 # Las cuotas de cada plan: tokens al día por persona (entrada + salida) y dólares al mes por hogar. Una pregunta del chat

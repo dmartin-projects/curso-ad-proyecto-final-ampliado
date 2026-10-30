@@ -47,6 +47,9 @@ def _respuesta_del_llm(cuerpo: dict) -> tuple[str, dict | None]:
             return "Aquí tienes la evolución de los últimos meses.", None
         if "propuesta" in resultado:
             return "Te lo dejo preparado: confírmalo abajo.", None
+        if "columnas" in resultado:  # módulo 101: el resultado de consultar_sql
+            fila = resultado["filas"][0] if resultado["filas"] else ["nada"]
+            return f"El que más: {fila[0]} ({fila[1]} €).", None
         if "pasajes" in resultado:  # módulo 100: contesta con el primer pasaje, citándolo
             if not resultado["pasajes"]:
                 return "La ayuda no dice nada de eso.", None
@@ -66,6 +69,9 @@ def _respuesta_del_llm(cuerpo: dict) -> tuple[str, dict | None]:
             "argumentos": {"meses": 3},
         }
         return "", {"name": "grafico", "arguments": json.dumps(argumentos)}
+    if pregunta.startswith("datos:"):  # módulo 101: text-to-SQL
+        sql = "select categoria, sum(importe) as total from movimientos where importe < 0 group by categoria order by 2"
+        return "", {"name": "consultar_sql", "arguments": json.dumps({"sql": sql})}
     if pregunta.startswith("ayuda:"):  # módulo 100: una duda sobre la app
         return "", {"name": "buscar_ayuda", "arguments": json.dumps({"pregunta": ultimo["content"][6:].strip()})}
     if pregunta.startswith("recuerda que"):  # módulo 99

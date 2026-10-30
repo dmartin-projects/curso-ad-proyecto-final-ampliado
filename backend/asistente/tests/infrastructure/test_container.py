@@ -93,3 +93,13 @@ def test_el_modelo_auxiliar_con_el_principal_de_reserva(settings):
 def test_cada_plan_tiene_su_cuota_en_los_ajustes():  # módulo 98: un plan sin cuota sería un KeyError en producción
     for plan in Plan:
         assert TarifasDesdeAjustes().cuota(plan).tokens_dia_persona > 0
+
+
+def test_consultar_sql_solo_si_se_enciende_y_hay_rol(settings):  # módulo 101
+    settings.ASISTENTE_API_KEY = "clave"
+    settings.ASISTENTE_TEXT_TO_SQL, settings.ASISTENTE_SQL_PASSWORD = False, "x"
+    assert "consultar_sql" not in container.agente(chat=True).tools
+    settings.ASISTENTE_TEXT_TO_SQL = True
+    assert list(container.agente(chat=True).tools)[-1] == "consultar_sql"
+    settings.ASISTENTE_SQL_PASSWORD = ""
+    assert "consultar_sql" not in container.agente(chat=True).tools

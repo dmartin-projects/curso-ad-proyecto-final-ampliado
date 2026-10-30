@@ -14,6 +14,7 @@ DEBUG = True
 ALLOWED_HOSTS = ["localhost", "127.0.0.1"]
 ROOT_URLCONF = "config.urls_e2e"
 DATABASES["default"]["NAME"] = env("E2E_DB_NAME", default="gastos_e2e")
+ASISTENTE_SQL_PASSWORD = "gastos-asistente-sql-e2e"  # módulo 101: preparar_e2e se la pone al rol
 
 STORAGES["default"] = {"BACKEND": "django.core.files.storage.FileSystemStorage"}
 MEDIA_ROOT = BASE_DIR / "media-e2e"
@@ -66,3 +67,4 @@ SOCIAL_LOGIN["apple"] |= {
 # SPA (http://localhost:4200, rp_id localhost: WebAuthn admite http en localhost)
 MFA_CLAVES = ["ZTJlLXNpbi12YWxvci1uaS1zZWNyZXRvLTAxMjM0NTY="]
 ASISTENTE_EMBEDDINGS = ""  # módulo 100: la ayuda, solo por texto (el E2E prueba la app, no el modelo)
+ASISTENTE_TEXT_TO_SQL = True  # módulo 101: la tool consultar_sql en el chat (el E2E prueba "Ver los datos")

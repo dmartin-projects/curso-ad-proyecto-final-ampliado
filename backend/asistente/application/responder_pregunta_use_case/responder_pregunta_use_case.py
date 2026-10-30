@@ -229,6 +229,7 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
             "propuestas": observador.propuestas,
             "recuerdos": observador.recuerdos,
             "fuentes": observador.fuentes,  # ejercicio 2 del 100
+            "consultas": observador.consultas,  # módulo 101
             "seguimiento": list(r.estructurada.seguimiento) if r.estructurada else [],
             "motivo": str(r.motivo),
             "uso": {

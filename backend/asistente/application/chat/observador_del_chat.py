@@ -10,6 +10,7 @@ from asistente.application.ports.i_observador_agente import IObservadorAgente
 from asistente.domain.exceptions.pregunta_cancelada_exception import PreguntaCanceladaException
 from asistente.domain.vo.archivo_exportado import ArchivoExportado
 from asistente.domain.vo.ayuda_consultada import AyudaConsultada
+from asistente.domain.vo.consulta_sql import ConsultaSQL
 from asistente.domain.vo.grafico import Grafico
 from asistente.domain.vo.propuesta_preparada import PropuestaPreparada
 from asistente.domain.vo.recuerdo_guardado import RecuerdoGuardado
@@ -36,6 +37,7 @@ class ObservadorDelChat(IObservadorAgente):
         self.propuestas: list[dict] = []
         self.recuerdos: list[dict] = []  # módulo 99
         self.fuentes: list[dict] = []  # ejercicio 2 del 100
+        self.consultas: list[dict] = []  # módulo 101: "ver los datos"
 
     def comprobar(self) -> None:
         if self.emisor.cancelado():
@@ -66,6 +68,15 @@ class ObservadorDelChat(IObservadorAgente):
             datos = archivo_a_datos(artefacto)
             self.archivos.append(datos)
             self.emisor.emitir("archivo", {**datos, "url": self.almacen.url(artefacto.ruta)})
+        elif isinstance(artefacto, ConsultaSQL):  # módulo 101: la consulta y sus filas, para "Ver los datos"
+            datos = {
+                "sql": artefacto.sql,
+                "columnas": list(artefacto.columnas),
+                "filas": [list(f) for f in artefacto.filas],
+                "recortado": artefacto.recortado,
+            }
+            self.consultas.append(datos)
+            self.emisor.emitir("datos", datos)
         elif isinstance(artefacto, AyudaConsultada):  # ejercicio 2 del 100: las secciones de la ayuda, citadas
             nuevas = [
                 {"fuente": f, "titulo": t} for f, t in artefacto.fuentes if f not in {x["fuente"] for x in self.fuentes}

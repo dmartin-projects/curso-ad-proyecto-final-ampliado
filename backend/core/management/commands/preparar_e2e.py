@@ -26,4 +26,5 @@ class Command(BaseCommand):
             scopes="openid email gastos:leer gastos:escribir", redirect_uris=["http://127.0.0.1/callback"], verbosity=0,
         )  # fmt: skip
         call_command("indexar_ayuda", verbosity=0)  # módulo 100: la ayuda del asistente (por texto: sin embeddings)
+        call_command("preparar_rol_sql", verbosity=0)  # módulo 101: el rol del text-to-SQL, con su contraseña de E2E
         self.stdout.write(self.style.SUCCESS("BD E2E preparada"))

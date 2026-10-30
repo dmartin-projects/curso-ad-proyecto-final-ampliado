@@ -101,6 +101,7 @@ from asistente.application.tools.buscar_ayuda_tool import BuscarAyudaTool
 from asistente.application.tools.buscar_movimientos_tool import BuscarMovimientosTool
 from asistente.application.tools.comparar_con_ipc_tool import CompararConIpcTool
 from asistente.application.tools.comparar_meses_tool import CompararMesesTool
+from asistente.application.tools.consultar_sql_tool import ConsultarSQLTool
 from asistente.application.tools.detalle_ticket_tool import DetalleTicketTool
 from asistente.application.tools.dias_festivos_tool import DiasFestivosTool
 from asistente.application.tools.estado_presupuestos_tool import EstadoPresupuestosTool
@@ -155,6 +156,7 @@ from asistente.infrastructure.llm.cliente_openai import cliente_del_proceso
 from asistente.infrastructure.llm.llm_con_reserva import LLMConReserva
 from asistente.infrastructure.llm.openai_compatible_llm import OpenAICompatibleLLM
 from asistente.infrastructure.messaging.programador_de_compactacion_celery import ProgramadorDeCompactacionCelery
+from asistente.infrastructure.sql.consultas_sql_postgres import ConsultasSQLPostgres
 from asistente.infrastructure.storage.almacen_django import AlmacenDjango
 from asistente.infrastructure.tarifas.tarifas_desde_ajustes import TarifasDesdeAjustes
 from asistente.infrastructure.telemetria.llm_medido import LLMMedido
@@ -225,6 +227,7 @@ def tools(chat: bool = False) -> list[Tool]:
         RecordarTool(recuerdos=RecuerdoCommandRepositoryORM(), reloj=RelojDjango()),  # módulo 99
         OlvidarTool(recuerdos=RecuerdoCommandRepositoryORM(), consultas=RecuerdoQueryServiceORM()),  # su ejercicio 1
         BuscarAyudaTool(buscador=buscador_de_ayuda()),  # módulo 100
+        *_text_to_sql(),  # módulo 101: solo si se enciende (ASISTENTE_TEXT_TO_SQL) y el rol tiene contraseña
     ]
 
 
@@ -463,4 +466,23 @@ def indexar_ayuda() -> IIndexarAyudaUseCase:
         indice=IndiceDeAyudaPG(),
         embeddings=embeddings(descargar=True),  # el comando del despliegue: puede (y debe) traer el modelo
         uow=UnidadDeTrabajoDjango(),
+    )
+
+
+# ── Módulo 101: text-to-SQL ──
+def _text_to_sql() -> list[Tool]:
+    consultas = ConsultasSQLPostgres()
+    return [ConsultarSQLTool(consultas=consultas)] if settings.ASISTENTE_TEXT_TO_SQL and consultas.disponible() else []
+
+
+def agente_sql() -> Agente:
+    """El de la comparación (manage.py comparar_sql_y_tools): el mismo bucle y el mismo prompt, con UNA tool."""
+    limites = Limites(
+        segundos=settings.ASISTENTE_SEGUNDOS_POR_PREGUNTA, max_tokens=settings.ASISTENTE_TOKENS_POR_PREGUNTA
+    )
+    return Agente(
+        llm=llm(),
+        tools=[ConsultarSQLTool(consultas=ConsultasSQLPostgres())],
+        limites=limites,
+        telemetria=TelemetriaOTel(),
     )

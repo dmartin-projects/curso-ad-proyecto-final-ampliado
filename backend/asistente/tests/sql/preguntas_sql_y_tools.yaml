@@ -1,0 +1,12 @@
+# Módulo 101: las mismas preguntas, por dos caminos (las tools del catálogo y una sola tool de SQL), sobre la casa de
+# los tests (fakes/casa.py). `correcta`: una expresión regular que una respuesta correcta tiene que cumplir.
+- pregunta: ¿Cuánto gastamos en septiembre?
+  correcta: "776,59"
+- pregunta: ¿En qué categoría gastamos más en septiembre?
+  correcta: "Supermercado"
+- pregunta: ¿Cuál ha sido nuestro gasto más grande de octubre?
+  correcta: "301,25"
+- pregunta: ¿Cuántas veces hemos ido al Bar Manolo?
+  correcta: "(?i)\\b(3|tres)\\b"
+- pregunta: ¿Qué día de la semana gastamos más este año?
+  correcta: "(?i)s[áa]bado"

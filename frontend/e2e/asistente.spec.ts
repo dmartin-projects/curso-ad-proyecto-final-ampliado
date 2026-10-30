@@ -159,3 +159,15 @@ test('una duda sobre la app: contesta con la ayuda (RAG) y la cita', async ({ pa
   // ejercicio 2 del 100: las secciones, debajo de la respuesta
   await expect(respuesta.getByLabel('Fuentes')).toContainText('Importar el extracto del banco ›');
 });
+
+test('text-to-SQL: la respuesta, y «Ver los datos» con la consulta y sus filas', async ({
+  page,
+}) => {
+  await abrirAsistente(page);
+  await preguntar(page, 'datos: ¿en qué categoría gastamos más?');
+  const respuesta = page.getByRole('article', { name: 'Respuesta del asistente' }).last();
+  await expect(respuesta).toContainText('El que más:');
+  await respuesta.getByText(/Ver los datos \(\d+ filas\)/).click();
+  await expect(respuesta.getByLabel('Consulta SQL')).toContainText('group by categoria');
+  await expect(respuesta.locator('td').first()).toBeVisible();
+});

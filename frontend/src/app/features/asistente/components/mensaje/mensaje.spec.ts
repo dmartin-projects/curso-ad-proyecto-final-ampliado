@@ -74,4 +74,32 @@ describe('Mensaje (módulo 97)', () => {
       'menu_book Según la ayuda: Informes mensuales en PDF › Pedir uno a mano;Informes mensuales en PDF › Quién puede',
     );
   });
+
+  it('«Ver los datos»: la consulta SQL y sus filas (módulo 101)', () => {
+    const el: HTMLElement = montar({
+      rol: 'modelo',
+      texto: 'Los sábados.',
+      datos: {
+        consultas: [
+          {
+            sql: 'select dia, sum(importe) from movimientos group by dia',
+            columnas: ['dia', 'total'],
+            filas: [
+              ['sábado', '-851.60'],
+              ['lunes', '-567.50'],
+            ],
+            recortado: false,
+          },
+        ],
+      },
+    }).nativeElement;
+    expect(el.querySelector('summary')?.textContent?.trim()).toBe('Ver los datos (2 filas)');
+    expect(el.querySelector('[aria-label="Consulta SQL"]')?.textContent).toContain('group by dia');
+    expect([...el.querySelectorAll('td')].map((td) => td.textContent)).toEqual([
+      'sábado',
+      '-851.60',
+      'lunes',
+      '-567.50',
+    ]);
+  });
 });

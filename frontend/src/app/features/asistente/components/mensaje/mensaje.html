@@ -45,6 +45,36 @@
       (descartar)="descartar.emit($event)"
     />
   }
+  @for (c of m.datos.consultas ?? []; track $index) {
+    <details class="w-full rounded-lg bg-superficie-alta px-3 py-2 text-sm">
+      <summary class="cursor-pointer">
+        Ver los datos ({{ c.filas.length }}{{ c.recortado ? '+' : '' }} filas)
+      </summary>
+      <pre class="my-2 overflow-x-auto whitespace-pre-wrap text-xs" aria-label="Consulta SQL">{{
+        c.sql
+      }}</pre>
+      <div class="overflow-x-auto">
+        <table class="w-full text-left">
+          <thead>
+            <tr>
+              @for (col of c.columnas; track $index) {
+                <th class="pr-3 font-medium">{{ col }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (fila of c.filas; track $index) {
+              <tr>
+                @for (valor of fila; track $index) {
+                  <td class="pr-3">{{ valor }}</td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </details>
+  }
   @if (m.datos.fuentes?.length) {
     <p class="m-0 flex flex-wrap items-center gap-1 text-sm text-texto-suave" aria-label="Fuentes">
       <mat-icon class="!h-4 !w-4 !text-base" aria-hidden="true">menu_book</mat-icon>

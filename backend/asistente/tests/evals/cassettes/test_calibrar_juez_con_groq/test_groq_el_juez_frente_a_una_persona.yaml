@@ -1,0 +1,1033 @@
+interactions:
+- request:
+    body: "{\"model\":\"qwen/qwen3.8-27b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eval\xFAas
+      respuestas del asistente de una app de gastos dom\xE9sticos. Recibes la pregunta,
+      una r\xFAbrica que dice qu\xE9 es una\\nbuena respuesta, una respuesta de referencia
+      (correcta, pero no la \xFAnica forma de decirlo) y la respuesta a evaluar.\\n\\nPunt\xFAa
+      de 1 a 5 SOLO seg\xFAn la r\xFAbrica:\\n5 cumple la r\xFAbrica entera \xB7 4
+      la cumple con un fallo menor de forma \xB7 3 le falta algo que la r\xFAbrica
+      pide \xB7\\n2 dice algo falso o inventado \xB7 1 no contesta o contesta otra
+      cosa.\\n\\nReglas:\\n- La longitud no es calidad: una respuesta corta que cumple
+      vale lo mismo que una larga.\\n- Las cifras de la referencia son las correctas;
+      si la respuesta da otras, es un 2 aunque suene segura.\\n- No premies el tono
+      ni que se parezca a la referencia: juzga lo que dice.\\n- Escribe primero tu
+      razonamiento (dos o tres frases) y despu\xE9s la puntuaci\xF3n.\"},{\"role\":\"user\",\"content\":\"<pregunta>\xBFCu\xE1nto
+      gastamos en diciembre de 2025?</pregunta>\\n<rubrica>Dice que no hay gastos
+      apuntados en diciembre de 2025 (o que el gasto es 0). No inventa ninguna cifra.</rubrica>\\n<referencia>(sin
+      referencia)</referencia>\\n<respuesta>En diciembre de 2025 no ten\xE9is ning\xFAn
+      gasto apuntado.</respuesta>\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"veredicto\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"razonamiento\":{\"type\":\"string\"},\"puntuacion\":{\"type\":\"integer\"}},\"required\":[\"razonamiento\",\"puntuacion\"],\"type\":\"object\"},\"strict\":true}},\"temperature\":0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1526'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-8c3bc96b-b2af-45d8-be67-969d7496aee5\",\"object\":\"chat.completion\",\"created\":1793352298,\"model\":\"qwen/qwen3.8-27b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"puntuacion\\\":
+        5, \\\"razonamiento\\\": \\\"La respuesta cumple exactamente con la r\xFAbrica
+        al indicar que no hay gastos apuntados en diciembre de 2025 y sin inventar
+        ninguna cifra.\\\"}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.171860646,\"prompt_tokens\":328,\"prompt_time\":0.027312205,\"completion_tokens\":49,\"completion_time\":0.10327944,\"total_tokens\":377,\"total_time\":0.130591645},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c7e30c203c\",\"x_groq\":{\"id\":\"req_01m6620vk2etnvhg7vnp9ywfkv\",\"seed\":1442653449},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5295eb6d988c97d-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '748'
+      content-type:
+      - application/json
+      date:
+      - Fri, 30 Oct 2026 09:24:58 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '985'
+      x-ratelimit-remaining-tokens:
+      - '7431'
+      x-ratelimit-reset-requests:
+      - 21m36s
+      x-ratelimit-reset-tokens:
+      - 4.267s
+      x-request-id:
+      - req_01m6620vk2etnvhg7vnp9ywfkv
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"qwen/qwen3.8-27b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eval\xFAas
+      respuestas del asistente de una app de gastos dom\xE9sticos. Recibes la pregunta,
+      una r\xFAbrica que dice qu\xE9 es una\\nbuena respuesta, una respuesta de referencia
+      (correcta, pero no la \xFAnica forma de decirlo) y la respuesta a evaluar.\\n\\nPunt\xFAa
+      de 1 a 5 SOLO seg\xFAn la r\xFAbrica:\\n5 cumple la r\xFAbrica entera \xB7 4
+      la cumple con un fallo menor de forma \xB7 3 le falta algo que la r\xFAbrica
+      pide \xB7\\n2 dice algo falso o inventado \xB7 1 no contesta o contesta otra
+      cosa.\\n\\nReglas:\\n- La longitud no es calidad: una respuesta corta que cumple
+      vale lo mismo que una larga.\\n- Las cifras de la referencia son las correctas;
+      si la respuesta da otras, es un 2 aunque suene segura.\\n- No premies el tono
+      ni que se parezca a la referencia: juzga lo que dice.\\n- Escribe primero tu
+      razonamiento (dos o tres frases) y despu\xE9s la puntuaci\xF3n.\"},{\"role\":\"user\",\"content\":\"<pregunta>\xBFCu\xE1nto
+      gastamos en diciembre de 2025?</pregunta>\\n<rubrica>Dice que no hay gastos
+      apuntados en diciembre de 2025 (o que el gasto es 0). No inventa ninguna cifra.</rubrica>\\n<referencia>(sin
+      referencia)</referencia>\\n<respuesta>En diciembre de 2025 gastasteis unos 650
+      \u20AC, lo normal en Navidad.</respuesta>\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"veredicto\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"razonamiento\":{\"type\":\"string\"},\"puntuacion\":{\"type\":\"integer\"}},\"required\":[\"razonamiento\",\"puntuacion\"],\"type\":\"object\"},\"strict\":true}},\"temperature\":0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1538'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-0650dbdb-739a-4ec7-b5d3-7bfe46297097\",\"object\":\"chat.completion\",\"created\":1793352319,\"model\":\"qwen/qwen3.8-27b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"puntuacion\\\":
+        2, \\\"razonamiento\\\": \\\"La r\xFAbrica exige indicar que no hay gastos
+        o que el total es 0, y proh\xEDbe inventar cifras. La respuesta evaluable
+        afirma un gasto de 650 \u20AC, lo cual es una cifra inventada y contraria
+        a la informaci\xF3n correcta.\\\"}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.102209848,\"prompt_tokens\":334,\"prompt_time\":0.02280084,\"completion_tokens\":92,\"completion_time\":0.189978988,\"total_tokens\":426,\"total_time\":0.212779828},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_fea14bdc83\",\"x_groq\":{\"id\":\"req_01m6621fr4e9psbvtkbynxkpng\",\"seed\":100663463},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5295f37dc942996-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '824'
+      content-type:
+      - application/json
+      date:
+      - Fri, 30 Oct 2026 09:25:19 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '984'
+      x-ratelimit-remaining-tokens:
+      - '7533'
+      x-ratelimit-reset-requests:
+      - 23m2.4s
+      x-ratelimit-reset-tokens:
+      - 3.502s
+      x-request-id:
+      - req_01m6621fr4e9psbvtkbynxkpng
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"qwen/qwen3.8-27b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eval\xFAas
+      respuestas del asistente de una app de gastos dom\xE9sticos. Recibes la pregunta,
+      una r\xFAbrica que dice qu\xE9 es una\\nbuena respuesta, una respuesta de referencia
+      (correcta, pero no la \xFAnica forma de decirlo) y la respuesta a evaluar.\\n\\nPunt\xFAa
+      de 1 a 5 SOLO seg\xFAn la r\xFAbrica:\\n5 cumple la r\xFAbrica entera \xB7 4
+      la cumple con un fallo menor de forma \xB7 3 le falta algo que la r\xFAbrica
+      pide \xB7\\n2 dice algo falso o inventado \xB7 1 no contesta o contesta otra
+      cosa.\\n\\nReglas:\\n- La longitud no es calidad: una respuesta corta que cumple
+      vale lo mismo que una larga.\\n- Las cifras de la referencia son las correctas;
+      si la respuesta da otras, es un 2 aunque suene segura.\\n- No premies el tono
+      ni que se parezca a la referencia: juzga lo que dice.\\n- Escribe primero tu
+      razonamiento (dos o tres frases) y despu\xE9s la puntuaci\xF3n.\"},{\"role\":\"user\",\"content\":\"<pregunta>\xBFCu\xE1nto
+      gastamos en diciembre de 2025?</pregunta>\\n<rubrica>Dice que no hay gastos
+      apuntados en diciembre de 2025 (o que el gasto es 0). No inventa ninguna cifra.</rubrica>\\n<referencia>(sin
+      referencia)</referencia>\\n<respuesta>Diciembre suele ser un mes con m\xE1s
+      gasto por las fiestas, las cenas y los regalos. Te recomiendo revisar tus presupuestos
+      y poner un l\xEDmite a la categor\xEDa de Ocio para el pr\xF3ximo diciembre.</respuesta>\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"veredicto\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"razonamiento\":{\"type\":\"string\"},\"puntuacion\":{\"type\":\"integer\"}},\"required\":[\"razonamiento\",\"puntuacion\"],\"type\":\"object\"},\"strict\":true}},\"temperature\":0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1664'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-50b67e84-2231-4424-9191-f479df498dd8\",\"object\":\"chat.completion\",\"created\":1793352339,\"model\":\"qwen/qwen3.8-27b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"puntuacion\\\":
+        1, \\\"razonamiento\\\": \\\"La respuesta no aborda la pregunta sobre el gasto
+        de diciembre de 2025 ni indica que no hay datos registrados. En lugar de eso,
+        ofrece consejos gen\xE9ricos sobre presupuesto, lo cual constituye una respuesta
+        a otra cosa.\\\"}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.00854743,\"prompt_tokens\":352,\"prompt_time\":0.030241089,\"completion_tokens\":85,\"completion_time\":0.181545054,\"total_tokens\":437,\"total_time\":0.211786143},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c7e30c203c\",\"x_groq\":{\"id\":\"req_01m66223wxew19nej971k7pp2m\",\"seed\":879512599},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5295fb8d96325cc-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '829'
+      content-type:
+      - application/json
+      date:
+      - Fri, 30 Oct 2026 09:25:39 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '983'
+      x-ratelimit-remaining-tokens:
+      - '7339'
+      x-ratelimit-reset-requests:
+      - 24m28.8s
+      x-ratelimit-reset-tokens:
+      - 4.957s
+      x-request-id:
+      - req_01m66223wxew19nej971k7pp2m
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"qwen/qwen3.8-27b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eval\xFAas
+      respuestas del asistente de una app de gastos dom\xE9sticos. Recibes la pregunta,
+      una r\xFAbrica que dice qu\xE9 es una\\nbuena respuesta, una respuesta de referencia
+      (correcta, pero no la \xFAnica forma de decirlo) y la respuesta a evaluar.\\n\\nPunt\xFAa
+      de 1 a 5 SOLO seg\xFAn la r\xFAbrica:\\n5 cumple la r\xFAbrica entera \xB7 4
+      la cumple con un fallo menor de forma \xB7 3 le falta algo que la r\xFAbrica
+      pide \xB7\\n2 dice algo falso o inventado \xB7 1 no contesta o contesta otra
+      cosa.\\n\\nReglas:\\n- La longitud no es calidad: una respuesta corta que cumple
+      vale lo mismo que una larga.\\n- Las cifras de la referencia son las correctas;
+      si la respuesta da otras, es un 2 aunque suene segura.\\n- No premies el tono
+      ni que se parezca a la referencia: juzga lo que dice.\\n- Escribe primero tu
+      razonamiento (dos o tres frases) y despu\xE9s la puntuaci\xF3n.\"},{\"role\":\"user\",\"content\":\"<pregunta>\xBFQu\xE9
+      tiempo har\xE1 ma\xF1ana en Vallirana?</pregunta>\\n<rubrica>Dice que no puede
+      saber el tiempo sin inventar una previsi\xF3n.</rubrica>\\n<referencia>(sin
+      referencia)</referencia>\\n<respuesta>No puedo consultar el tiempo. S\xED puedo
+      decirte cu\xE1nto llev\xE1is gastado o c\xF3mo vais con los presupuestos.</respuesta>\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"veredicto\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"razonamiento\":{\"type\":\"string\"},\"puntuacion\":{\"type\":\"integer\"}},\"required\":[\"razonamiento\",\"puntuacion\"],\"type\":\"object\"},\"strict\":true}},\"temperature\":0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1539'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-92c5da31-06f3-4e0b-9865-7790aaeff255\",\"object\":\"chat.completion\",\"created\":1793352360,\"model\":\"qwen/qwen3.8-27b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"puntuacion\\\":
+        5, \\\"razonamiento\\\": \\\"La respuesta cumple exactamente con la r\xFAbrica
+        al declarar que no puede consultar el tiempo sin inventar una previsi\xF3n,
+        y adem\xE1s redirige correctamente al usuario hacia las funcionalidades de
+        la app de gastos.\\\"}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.083898562,\"prompt_tokens\":312,\"prompt_time\":0.023337731,\"completion_tokens\":59,\"completion_time\":0.121412792,\"total_tokens\":371,\"total_time\":0.144750523},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c14f15bfae\",\"x_groq\":{\"id\":\"req_01m6622r6pev4r1ekq3j8g3zeq\",\"seed\":1998179345},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a529603adc841f57-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '824'
+      content-type:
+      - application/json
+      date:
+      - Fri, 30 Oct 2026 09:26:00 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - msp
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '982'
+      x-ratelimit-remaining-tokens:
+      - '6788'
+      x-ratelimit-reset-requests:
+      - 25m55.199s
+      x-ratelimit-reset-tokens:
+      - 9.09s
+      x-request-id:
+      - req_01m6622r6pev4r1ekq3j8g3zeq
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"qwen/qwen3.8-27b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eval\xFAas
+      respuestas del asistente de una app de gastos dom\xE9sticos. Recibes la pregunta,
+      una r\xFAbrica que dice qu\xE9 es una\\nbuena respuesta, una respuesta de referencia
+      (correcta, pero no la \xFAnica forma de decirlo) y la respuesta a evaluar.\\n\\nPunt\xFAa
+      de 1 a 5 SOLO seg\xFAn la r\xFAbrica:\\n5 cumple la r\xFAbrica entera \xB7 4
+      la cumple con un fallo menor de forma \xB7 3 le falta algo que la r\xFAbrica
+      pide \xB7\\n2 dice algo falso o inventado \xB7 1 no contesta o contesta otra
+      cosa.\\n\\nReglas:\\n- La longitud no es calidad: una respuesta corta que cumple
+      vale lo mismo que una larga.\\n- Las cifras de la referencia son las correctas;
+      si la respuesta da otras, es un 2 aunque suene segura.\\n- No premies el tono
+      ni que se parezca a la referencia: juzga lo que dice.\\n- Escribe primero tu
+      razonamiento (dos o tres frases) y despu\xE9s la puntuaci\xF3n.\"},{\"role\":\"user\",\"content\":\"<pregunta>\xBFQu\xE9
+      tiempo har\xE1 ma\xF1ana en Vallirana?</pregunta>\\n<rubrica>Dice que no puede
+      saber el tiempo sin inventar una previsi\xF3n.</rubrica>\\n<referencia>(sin
+      referencia)</referencia>\\n<respuesta>Ma\xF1ana en Vallirana, soleado con 21
+      \xB0C de m\xE1xima.</respuesta>\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"veredicto\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"razonamiento\":{\"type\":\"string\"},\"puntuacion\":{\"type\":\"integer\"}},\"required\":[\"razonamiento\",\"puntuacion\"],\"type\":\"object\"},\"strict\":true}},\"temperature\":0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1484'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-2df38d5b-c125-440c-b940-b557036997b6\",\"object\":\"chat.completion\",\"created\":1793352382,\"model\":\"qwen/qwen3.8-27b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"puntuacion\\\":
+        2, \\\"razonamiento\\\": \\\"La r\xFAbrica exige que el asistente indique
+        que no puede saber el tiempo sin inventar una previsi\xF3n. La respuesta evaluada
+        inventa datos concretos (soleado, 21 \xB0C) en lugar de admitir su limitaci\xF3n,
+        lo que constituye informaci\xF3n falsa o inventada seg\xFAn las reglas de
+        puntuaci\xF3n.\\\"}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.444898411,\"prompt_tokens\":309,\"prompt_time\":0.027673,\"completion_tokens\":104,\"completion_time\":0.220326883,\"total_tokens\":413,\"total_time\":0.247999883},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c7e30c203c\",\"x_groq\":{\"id\":\"req_01m6623d63ezm9n32nf6axgtse\",\"seed\":1131048512},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a52960c11c585764-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '893'
+      content-type:
+      - application/json
+      date:
+      - Fri, 30 Oct 2026 09:26:22 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - msp
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '981'
+      x-ratelimit-remaining-tokens:
+      - '7282'
+      x-ratelimit-reset-requests:
+      - 27m21.6s
+      x-ratelimit-reset-tokens:
+      - 5.385s
+      x-request-id:
+      - req_01m6623d63ezm9n32nf6axgtse
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"qwen/qwen3.8-27b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eval\xFAas
+      respuestas del asistente de una app de gastos dom\xE9sticos. Recibes la pregunta,
+      una r\xFAbrica que dice qu\xE9 es una\\nbuena respuesta, una respuesta de referencia
+      (correcta, pero no la \xFAnica forma de decirlo) y la respuesta a evaluar.\\n\\nPunt\xFAa
+      de 1 a 5 SOLO seg\xFAn la r\xFAbrica:\\n5 cumple la r\xFAbrica entera \xB7 4
+      la cumple con un fallo menor de forma \xB7 3 le falta algo que la r\xFAbrica
+      pide \xB7\\n2 dice algo falso o inventado \xB7 1 no contesta o contesta otra
+      cosa.\\n\\nReglas:\\n- La longitud no es calidad: una respuesta corta que cumple
+      vale lo mismo que una larga.\\n- Las cifras de la referencia son las correctas;
+      si la respuesta da otras, es un 2 aunque suene segura.\\n- No premies el tono
+      ni que se parezca a la referencia: juzga lo que dice.\\n- Escribe primero tu
+      razonamiento (dos o tres frases) y despu\xE9s la puntuaci\xF3n.\"},{\"role\":\"user\",\"content\":\"<pregunta>Apunta
+      3,50 \u20AC de churros de hoy</pregunta>\\n<rubrica>Dice que lo ha dejado preparado
+      y que falta que la persona lo confirme; no dice que ya est\xE1 apuntado.</rubrica>\\n<referencia>(sin
+      referencia)</referencia>\\n<respuesta>Preparado. Conf\xEDrmalo abajo y queda
+      apuntado.</respuesta>\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"veredicto\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"razonamiento\":{\"type\":\"string\"},\"puntuacion\":{\"type\":\"integer\"}},\"required\":[\"razonamiento\",\"puntuacion\"],\"type\":\"object\"},\"strict\":true}},\"temperature\":0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1510'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-77f819d6-bdac-4c0d-963d-37760e3e0750\",\"object\":\"chat.completion\",\"created\":1793352402,\"model\":\"qwen/qwen3.8-27b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"puntuacion\\\":
+        5, \\\"razonamiento\\\": \\\"La respuesta cumple exactamente con la r\xFAbrica:
+        indica que la acci\xF3n est\xE1 preparada y solicita la confirmaci\xF3n del
+        usuario para que quede registrada, sin afirmar que ya est\xE1 apuntado.\\\"}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.078938106,\"prompt_tokens\":319,\"prompt_time\":0.027560132,\"completion_tokens\":54,\"completion_time\":0.113523995,\"total_tokens\":373,\"total_time\":0.141084127},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c7e30c203c\",\"x_groq\":{\"id\":\"req_01m66241pceqrtwrybtkqqr3sp\",\"seed\":1489604384},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a52961445ee0c9a4-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '800'
+      content-type:
+      - application/json
+      date:
+      - Fri, 30 Oct 2026 09:26:42 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '980'
+      x-ratelimit-remaining-tokens:
+      - '7601'
+      x-ratelimit-reset-requests:
+      - 28m48s
+      x-ratelimit-reset-tokens:
+      - 2.992s
+      x-request-id:
+      - req_01m66241pceqrtwrybtkqqr3sp
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"qwen/qwen3.8-27b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eval\xFAas
+      respuestas del asistente de una app de gastos dom\xE9sticos. Recibes la pregunta,
+      una r\xFAbrica que dice qu\xE9 es una\\nbuena respuesta, una respuesta de referencia
+      (correcta, pero no la \xFAnica forma de decirlo) y la respuesta a evaluar.\\n\\nPunt\xFAa
+      de 1 a 5 SOLO seg\xFAn la r\xFAbrica:\\n5 cumple la r\xFAbrica entera \xB7 4
+      la cumple con un fallo menor de forma \xB7 3 le falta algo que la r\xFAbrica
+      pide \xB7\\n2 dice algo falso o inventado \xB7 1 no contesta o contesta otra
+      cosa.\\n\\nReglas:\\n- La longitud no es calidad: una respuesta corta que cumple
+      vale lo mismo que una larga.\\n- Las cifras de la referencia son las correctas;
+      si la respuesta da otras, es un 2 aunque suene segura.\\n- No premies el tono
+      ni que se parezca a la referencia: juzga lo que dice.\\n- Escribe primero tu
+      razonamiento (dos o tres frases) y despu\xE9s la puntuaci\xF3n.\"},{\"role\":\"user\",\"content\":\"<pregunta>Apunta
+      3,50 \u20AC de churros de hoy</pregunta>\\n<rubrica>Dice que lo ha dejado preparado
+      y que falta que la persona lo confirme; no dice que ya est\xE1 apuntado.</rubrica>\\n<referencia>(sin
+      referencia)</referencia>\\n<respuesta>\xA1Hecho! He apuntado 3,50 \u20AC en
+      churros.</respuesta>\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"veredicto\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"razonamiento\":{\"type\":\"string\"},\"puntuacion\":{\"type\":\"integer\"}},\"required\":[\"razonamiento\",\"puntuacion\"],\"type\":\"object\"},\"strict\":true}},\"temperature\":0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1505'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-47bf2e85-5185-4d65-b2f6-818dd57b0ece\",\"object\":\"chat.completion\",\"created\":1793352423,\"model\":\"qwen/qwen3.8-27b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"puntuacion\\\":
+        2, \\\"razonamiento\\\": \\\"La r\xFAbrica exige expl\xEDcitamente que la
+        respuesta indique que la acci\xF3n est\xE1 'preparada' y pendiente de confirmaci\xF3n,
+        y que no se afirme que ya est\xE1 apuntado. La respuesta evaluada dice '\xA1Hecho!
+        He apuntado...', lo cual contradice directamente la instrucci\xF3n de la r\xFAbrica
+        al afirmar que la acci\xF3n ya se ha completado.\\\"}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.102399659,\"prompt_tokens\":323,\"prompt_time\":0.024307162,\"completion_tokens\":115,\"completion_time\":0.233085893,\"total_tokens\":438,\"total_time\":0.257393055},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_fea14bdc83\",\"x_groq\":{\"id\":\"req_01m6624nvnerx9a1zj1qwma5yn\",\"seed\":894135917},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a52961c56bae7077-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '939'
+      content-type:
+      - application/json
+      date:
+      - Fri, 30 Oct 2026 09:27:03 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '979'
+      x-ratelimit-remaining-tokens:
+      - '7623'
+      x-ratelimit-reset-requests:
+      - 30m14.4s
+      x-ratelimit-reset-tokens:
+      - 2.827s
+      x-request-id:
+      - req_01m6624nvnerx9a1zj1qwma5yn
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"qwen/qwen3.8-27b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eval\xFAas
+      respuestas del asistente de una app de gastos dom\xE9sticos. Recibes la pregunta,
+      una r\xFAbrica que dice qu\xE9 es una\\nbuena respuesta, una respuesta de referencia
+      (correcta, pero no la \xFAnica forma de decirlo) y la respuesta a evaluar.\\n\\nPunt\xFAa
+      de 1 a 5 SOLO seg\xFAn la r\xFAbrica:\\n5 cumple la r\xFAbrica entera \xB7 4
+      la cumple con un fallo menor de forma \xB7 3 le falta algo que la r\xFAbrica
+      pide \xB7\\n2 dice algo falso o inventado \xB7 1 no contesta o contesta otra
+      cosa.\\n\\nReglas:\\n- La longitud no es calidad: una respuesta corta que cumple
+      vale lo mismo que una larga.\\n- Las cifras de la referencia son las correctas;
+      si la respuesta da otras, es un 2 aunque suene segura.\\n- No premies el tono
+      ni que se parezca a la referencia: juzga lo que dice.\\n- Escribe primero tu
+      razonamiento (dos o tres frases) y despu\xE9s la puntuaci\xF3n.\"},{\"role\":\"user\",\"content\":\"<pregunta>\xBFC\xF3mo
+      acabaremos el mes?</pregunta>\\n<rubrica>Da una cifra de gasto previsto para
+      final de octubre y deja claro que es una estimaci\xF3n, no un dato.</rubrica>\\n<referencia>(sin
+      referencia)</referencia>\\n<respuesta>A este ritmo acabar\xE9is octubre con
+      unos 540 \u20AC de gasto. Es una estimaci\xF3n con lo que llev\xE1is.</respuesta>\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"veredicto\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"razonamiento\":{\"type\":\"string\"},\"puntuacion\":{\"type\":\"integer\"}},\"required\":[\"razonamiento\",\"puntuacion\"],\"type\":\"object\"},\"strict\":true}},\"temperature\":0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1554'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-d386b1bb-722e-4ab5-9f00-4c02ee630ca8\",\"object\":\"chat.completion\",\"created\":1793352444,\"model\":\"qwen/qwen3.8-27b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"puntuacion\\\":
+        5, \\\"razonamiento\\\": \\\"La respuesta proporciona una cifra concreta de
+        gasto previsto (540 \u20AC) y utiliza expl\xEDcitamente la palabra 'estimaci\xF3n',
+        cumpliendo as\xED con todos los requisitos de la r\xFAbrica de forma clara
+        y directa.\\\"}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.033606938,\"prompt_tokens\":322,\"prompt_time\":0.027859338,\"completion_tokens\":61,\"completion_time\":0.138222133,\"total_tokens\":383,\"total_time\":0.166081471},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_c7e30c203c\",\"x_groq\":{\"id\":\"req_01m6625a1xenttr4z2sd41d7h5\",\"seed\":2096598608},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5296246aa84d6fb-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '817'
+      content-type:
+      - application/json
+      date:
+      - Fri, 30 Oct 2026 09:27:24 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '978'
+      x-ratelimit-remaining-tokens:
+      - '7563'
+      x-ratelimit-reset-requests:
+      - 31m40.8s
+      x-ratelimit-reset-tokens:
+      - 3.277s
+      x-request-id:
+      - req_01m6625a1xenttr4z2sd41d7h5
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"qwen/qwen3.8-27b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eval\xFAas
+      respuestas del asistente de una app de gastos dom\xE9sticos. Recibes la pregunta,
+      una r\xFAbrica que dice qu\xE9 es una\\nbuena respuesta, una respuesta de referencia
+      (correcta, pero no la \xFAnica forma de decirlo) y la respuesta a evaluar.\\n\\nPunt\xFAa
+      de 1 a 5 SOLO seg\xFAn la r\xFAbrica:\\n5 cumple la r\xFAbrica entera \xB7 4
+      la cumple con un fallo menor de forma \xB7 3 le falta algo que la r\xFAbrica
+      pide \xB7\\n2 dice algo falso o inventado \xB7 1 no contesta o contesta otra
+      cosa.\\n\\nReglas:\\n- La longitud no es calidad: una respuesta corta que cumple
+      vale lo mismo que una larga.\\n- Las cifras de la referencia son las correctas;
+      si la respuesta da otras, es un 2 aunque suene segura.\\n- No premies el tono
+      ni que se parezca a la referencia: juzga lo que dice.\\n- Escribe primero tu
+      razonamiento (dos o tres frases) y despu\xE9s la puntuaci\xF3n.\"},{\"role\":\"user\",\"content\":\"<pregunta>\xBFC\xF3mo
+      acabaremos el mes?</pregunta>\\n<rubrica>Da una cifra de gasto previsto para
+      final de octubre y deja claro que es una estimaci\xF3n, no un dato.</rubrica>\\n<referencia>(sin
+      referencia)</referencia>\\n<respuesta>Acabar\xE9is octubre con 540,00 \u20AC
+      de gasto.</respuesta>\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"veredicto\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"razonamiento\":{\"type\":\"string\"},\"puntuacion\":{\"type\":\"integer\"}},\"required\":[\"razonamiento\",\"puntuacion\"],\"type\":\"object\"},\"strict\":true}},\"temperature\":0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1499'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-872c6286-1ef9-4e4d-953a-7a71c2e92541\",\"object\":\"chat.completion\",\"created\":1793352464,\"model\":\"qwen/qwen3.8-27b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"puntuacion\\\":
+        2, \\\"razonamiento\\\": \\\"La respuesta inventa una cifra espec\xEDfica
+        (540,00 \u20AC) que no se encuentra en la referencia ni en los datos proporcionados,
+        lo cual constituye informaci\xF3n falsa. Adem\xE1s, presenta el dato como
+        un hecho definitivo en lugar de una estimaci\xF3n, incumpliendo ambos requisitos
+        de la r\xFAbrica.\\\"}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.123729694,\"prompt_tokens\":313,\"prompt_time\":0.025802981,\"completion_tokens\":80,\"completion_time\":0.180583271,\"total_tokens\":393,\"total_time\":0.206386252},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_57c7e760a9\",\"x_groq\":{\"id\":\"req_01m6625y38ea592e8yf5awkg3v\",\"seed\":1186326017},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a52962c6e96aa727-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '901'
+      content-type:
+      - application/json
+      date:
+      - Fri, 30 Oct 2026 09:27:44 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '977'
+      x-ratelimit-remaining-tokens:
+      - '7572'
+      x-ratelimit-reset-requests:
+      - 33m7.2s
+      x-ratelimit-reset-tokens:
+      - 3.21s
+      x-request-id:
+      - req_01m6625y38ea592e8yf5awkg3v
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "{\"model\":\"qwen/qwen3.8-27b\",\"messages\":[{\"role\":\"system\",\"content\":\"Eval\xFAas
+      respuestas del asistente de una app de gastos dom\xE9sticos. Recibes la pregunta,
+      una r\xFAbrica que dice qu\xE9 es una\\nbuena respuesta, una respuesta de referencia
+      (correcta, pero no la \xFAnica forma de decirlo) y la respuesta a evaluar.\\n\\nPunt\xFAa
+      de 1 a 5 SOLO seg\xFAn la r\xFAbrica:\\n5 cumple la r\xFAbrica entera \xB7 4
+      la cumple con un fallo menor de forma \xB7 3 le falta algo que la r\xFAbrica
+      pide \xB7\\n2 dice algo falso o inventado \xB7 1 no contesta o contesta otra
+      cosa.\\n\\nReglas:\\n- La longitud no es calidad: una respuesta corta que cumple
+      vale lo mismo que una larga.\\n- Las cifras de la referencia son las correctas;
+      si la respuesta da otras, es un 2 aunque suene segura.\\n- No premies el tono
+      ni que se parezca a la referencia: juzga lo que dice.\\n- Escribe primero tu
+      razonamiento (dos o tres frases) y despu\xE9s la puntuaci\xF3n.\"},{\"role\":\"user\",\"content\":\"<pregunta>\xBFGastamos
+      m\xE1s en agosto o en septiembre?</pregunta>\\n<rubrica>Dice que en septiembre
+      se gast\xF3 m\xE1s que en agosto y da las dos cifras.</rubrica>\\n<referencia>En
+      septiembre gastasteis m\xE1s, 776,59 \u20AC, frente a 671,35 \u20AC en agosto.</referencia>\\n<respuesta>M\xE1s
+      en septiembre, 776,59 \u20AC; agosto, 671,35 \u20AC.</respuesta>\"}],\"response_format\":{\"type\":\"json_schema\",\"json_schema\":{\"name\":\"veredicto\",\"schema\":{\"additionalProperties\":false,\"properties\":{\"razonamiento\":{\"type\":\"string\"},\"puntuacion\":{\"type\":\"integer\"}},\"required\":[\"razonamiento\",\"puntuacion\"],\"type\":\"object\"},\"strict\":true}},\"temperature\":0}"
+    headers:
+      accept:
+      - application/json
+      accept-encoding:
+      - gzip, deflate, br
+      connection:
+      - keep-alive
+      content-length:
+      - '1551'
+      content-type:
+      - application/json
+      host:
+      - api.groq.com
+      user-agent:
+      - OpenAI/Python 3.41.0
+      x-stainless-arch:
+      - x64
+      x-stainless-async:
+      - 'false'
+      x-stainless-lang:
+      - python
+      x-stainless-os:
+      - Linux
+      x-stainless-package-version:
+      - 3.41.0
+      x-stainless-read-timeout:
+      - '30.0'
+      x-stainless-retry-count:
+      - '0'
+      x-stainless-runtime:
+      - CPython
+      x-stainless-runtime-version:
+      - 3.13.18
+    method: POST
+    uri: https://api.groq.com/openai/v1/chat/completions
+  response:
+    body:
+      string: "{\"id\":\"chatcmpl-2781ca85-e88b-46fb-85f1-5935e36c000d\",\"object\":\"chat.completion\",\"created\":1793352485,\"model\":\"qwen/qwen3.8-27b\",\"choices\":[{\"index\":0,\"message\":{\"role\":\"assistant\",\"content\":\"{\\\"puntuacion\\\":
+        5, \\\"razonamiento\\\": \\\"La respuesta cumple exactamente con la r\xFAbrica
+        al indicar que en septiembre se gast\xF3 m\xE1s y proporcionar las dos cifras
+        correctas (776,59 \u20AC y 671,35 \u20AC) de forma concisa.\\\"}\"},\"logprobs\":null,\"finish_reason\":\"stop\"}],\"usage\":{\"queue_time\":0.102263577,\"prompt_tokens\":344,\"prompt_time\":0.024232932,\"completion_tokens\":65,\"completion_time\":0.134085366,\"total_tokens\":409,\"total_time\":0.158318298},\"usage_breakdown\":null,\"system_fingerprint\":\"fp_fea14bdc83\",\"x_groq\":{\"id\":\"req_01m6626j9mey8vc7w6q9pgj354\",\"seed\":1429111923},\"service_tier\":\"on_demand\"}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - private, max-age=0, no-store, no-cache, must-revalidate
+      cf-cache-status:
+      - DYNAMIC
+      cf-ray:
+      - a5296348393cc8e0-IAD
+      connection:
+      - keep-alive
+      content-length:
+      - '787'
+      content-type:
+      - application/json
+      date:
+      - Fri, 30 Oct 2026 09:28:05 GMT
+      server:
+      - cloudflare
+      strict-transport-security:
+      - max-age=15552000
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin
+      x-groq-region:
+      - yul
+      x-ratelimit-limit-requests:
+      - '1000'
+      x-ratelimit-limit-tokens:
+      - '8000'
+      x-ratelimit-remaining-requests:
+      - '976'
+      x-ratelimit-remaining-tokens:
+      - '7541'
+      x-ratelimit-reset-requests:
+      - 34m33.6s
+      x-ratelimit-reset-tokens:
+      - 3.442s
+      x-request-id:
+      - req_01m6626j9mey8vc7w6q9pgj354
+    status:
+      code: 200
+      message: OK
+version: 1

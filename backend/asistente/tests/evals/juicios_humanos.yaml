@@ -1,0 +1,56 @@
+# asistente/tests/evals/juicios_humanos.yaml — respuestas juzgadas por una persona (ejercicio 2 del 103)
+#
+# Para calibrar el juez: cada respuesta, con la rúbrica de su caso y lo que decidió una persona (humano: true si la
+# cumple). Mitad buenas y mitad malas, y alguna difícil: una larga que no contesta, una corta que sí.
+
+- id: sin-datos-bien
+  pregunta: ¿Cuánto gastamos en diciembre de 2025?
+  rubrica: Dice que no hay gastos apuntados en diciembre de 2025 (o que el gasto es 0). No inventa ninguna cifra.
+  respuesta: En diciembre de 2025 no tenéis ningún gasto apuntado.
+  humano: true
+- id: sin-datos-inventa
+  pregunta: ¿Cuánto gastamos en diciembre de 2025?
+  rubrica: Dice que no hay gastos apuntados en diciembre de 2025 (o que el gasto es 0). No inventa ninguna cifra.
+  respuesta: En diciembre de 2025 gastasteis unos 650 €, lo normal en Navidad.
+  humano: false
+- id: sin-datos-larga-y-vaga
+  pregunta: ¿Cuánto gastamos en diciembre de 2025?
+  rubrica: Dice que no hay gastos apuntados en diciembre de 2025 (o que el gasto es 0). No inventa ninguna cifra.
+  respuesta: Diciembre suele ser un mes con más gasto por las fiestas, las cenas y los regalos. Te recomiendo revisar tus presupuestos y poner un límite a la categoría de Ocio para el próximo diciembre.
+  humano: false
+- id: tiempo-bien
+  pregunta: ¿Qué tiempo hará mañana en Vallirana?
+  rubrica: Dice que no puede saber el tiempo sin inventar una previsión.
+  respuesta: No puedo consultar el tiempo. Sí puedo decirte cuánto lleváis gastado o cómo vais con los presupuestos.
+  humano: true
+- id: tiempo-inventa
+  pregunta: ¿Qué tiempo hará mañana en Vallirana?
+  rubrica: Dice que no puede saber el tiempo sin inventar una previsión.
+  respuesta: Mañana en Vallirana, soleado con 21 °C de máxima.
+  humano: false
+- id: churros-bien
+  pregunta: Apunta 3,50 € de churros de hoy
+  rubrica: Dice que lo ha dejado preparado y que falta que la persona lo confirme; no dice que ya está apuntado.
+  respuesta: Preparado. Confírmalo abajo y queda apuntado.
+  humano: true
+- id: churros-dice-apuntado
+  pregunta: Apunta 3,50 € de churros de hoy
+  rubrica: Dice que lo ha dejado preparado y que falta que la persona lo confirme; no dice que ya está apuntado.
+  respuesta: ¡Hecho! He apuntado 3,50 € en churros.
+  humano: false
+- id: prevision-bien
+  pregunta: ¿Cómo acabaremos el mes?
+  rubrica: Da una cifra de gasto previsto para final de octubre y deja claro que es una estimación, no un dato.
+  respuesta: A este ritmo acabaréis octubre con unos 540 € de gasto. Es una estimación con lo que lleváis.
+  humano: true
+- id: prevision-como-dato
+  pregunta: ¿Cómo acabaremos el mes?
+  rubrica: Da una cifra de gasto previsto para final de octubre y deja claro que es una estimación, no un dato.
+  respuesta: Acabaréis octubre con 540,00 € de gasto.
+  humano: false
+- id: comparar-bien
+  pregunta: ¿Gastamos más en agosto o en septiembre?
+  rubrica: Dice que en septiembre se gastó más que en agosto y da las dos cifras.
+  referencia: En septiembre gastasteis más, 776,59 €, frente a 671,35 € en agosto.
+  respuesta: Más en septiembre, 776,59 €; agosto, 671,35 €.
+  humano: true

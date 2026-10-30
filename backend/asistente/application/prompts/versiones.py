@@ -16,4 +16,5 @@ PUBLICADAS: dict[tuple[str, str], str] = {
     ("ordenar_pasajes", "2026-10-30.1"): "ed66dca126e1",
     ("politica_inyeccion", "2026-10-30.1"): "174947be633d",  # ejercicio 3 del 102
     ("juez", "2026-10-30.1"): "5da618900f82",  # módulo 103
+    ("comparar", "2026-10-30.1"): "1daed8d7ce0e",  # ejercicio 3 del 103
 }

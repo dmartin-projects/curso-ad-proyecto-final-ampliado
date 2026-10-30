@@ -1,6 +1,8 @@
 import { HttpClient, HttpEventType } from '@angular/common/http';
 import { inject, Service } from '@angular/core';
-import { mergeMap, Observable } from 'rxjs';
+import { map, mergeMap, Observable } from 'rxjs';
+
+import { archivoDe } from '../../../core/http/archivos';
 
 import {
   Carpeta,
@@ -18,9 +20,10 @@ export class AsistenteApi {
   private readonly http = inject(HttpClient);
   private readonly base = (h: number) => `/api/v1/hogares/${h}/asistente`;
 
-  conversaciones(hogarId: number, carpeta?: number | null) {
+  /** Con `q` (ejercicio 2 del 97), las que lo tienen en el título o en algún mensaje. */
+  conversaciones(hogarId: number, carpeta?: number | null, q = '') {
     return this.http.get<Conversacion[]>(`${this.base(hogarId)}/conversaciones/`, {
-      params: carpeta ? { carpeta } : {},
+      params: { ...(carpeta ? { carpeta } : {}), ...(q.trim() ? { q: q.trim() } : {}) },
     });
   }
 
@@ -41,6 +44,16 @@ export class AsistenteApi {
     );
   }
 
+  /** Ejercicio 3 del 97: por la API (con el JWT), no con un <a href>, que no lleva la cabecera Authorization. */
+  markdown(hogarId: number, id: number) {
+    return this.http
+      .get(`${this.base(hogarId)}/conversaciones/${id}/markdown/`, {
+        responseType: 'blob',
+        observe: 'response',
+      })
+      .pipe(map((r) => archivoDe(r, `conversacion-${id}.md`)));
+  }
+
   borrar(hogarId: number, id: number) {
     return this.http.delete<void>(`${this.base(hogarId)}/conversaciones/${id}/`);
   }
@@ -51,6 +64,10 @@ export class AsistenteApi {
 
   crearCarpeta(hogarId: number, nombre: string) {
     return this.http.post<Carpeta>(`${this.base(hogarId)}/carpetas/`, { nombre });
+  }
+
+  renombrarCarpeta(hogarId: number, id: number, nombre: string) {
+    return this.http.patch<Carpeta>(`${this.base(hogarId)}/carpetas/${id}/`, { nombre });
   }
 
   borrarCarpeta(hogarId: number, id: number) {

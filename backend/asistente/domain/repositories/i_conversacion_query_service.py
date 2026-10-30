@@ -9,9 +9,15 @@ from asistente.domain.read_models.conversacion_listada import ConversacionListad
 class IConversacionQueryService(ABC):
     @abstractmethod
     def listar(
-        self, usuario_id: int, hogar_id: int, carpeta_id: int | None = None, limite: int = 50
+        self,
+        usuario_id: int,
+        hogar_id: int,
+        carpeta_id: int | None = None,
+        limite: int = 50,
+        busqueda: str | None = None,
     ) -> tuple[ConversacionListada, ...]:
-        """Las más recientes primero; con `carpeta_id`, solo las de esa carpeta."""
+        """Las más recientes primero; con `carpeta_id`, solo las de esa carpeta; con `busqueda` (ejercicio 2), las que
+        la tienen en el título o en algún mensaje visible, sin mirar tildes ni mayúsculas."""
 
     @abstractmethod
     def detalle(self, usuario_id: int, hogar_id: int, conversacion_id: int) -> ConversacionDetalle | None: ...

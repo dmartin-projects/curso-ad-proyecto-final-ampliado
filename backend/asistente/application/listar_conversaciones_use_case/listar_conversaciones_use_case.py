@@ -18,5 +18,7 @@ class ListarConversacionesUseCase(IListarConversacionesUseCase):
 
     def ejecutar(self, entrada: ListarConversacionesInputDTO) -> list[ConversacionOutputDTO]:
         entrada.actor.exigir(self.rol_minimo)
-        leidas = self.consultas.listar(entrada.actor.usuario_id, entrada.hogar_id, entrada.carpeta_id)
+        leidas = self.consultas.listar(
+            entrada.actor.usuario_id, entrada.hogar_id, entrada.carpeta_id, busqueda=entrada.busqueda
+        )
         return [ConversacionOutputDTO.desde_read_model(c) for c in leidas]

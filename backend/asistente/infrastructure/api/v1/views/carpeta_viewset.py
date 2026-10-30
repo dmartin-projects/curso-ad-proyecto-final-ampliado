@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from asistente.application.crear_carpeta_use_case.dtos.crear_carpeta_input_dto import CrearCarpetaInputDTO
 from asistente.application.eliminar_carpeta_use_case.dtos.eliminar_carpeta_input_dto import EliminarCarpetaInputDTO
 from asistente.application.listar_carpetas_use_case.dtos.listar_carpetas_input_dto import ListarCarpetasInputDTO
+from asistente.application.modificar_carpeta_use_case.dtos.modificar_carpeta_input_dto import ModificarCarpetaInputDTO
 from asistente.infrastructure import container
 from asistente.infrastructure.api.v1.serializers.carpeta_serializer import CarpetaSerializer
 from asistente.infrastructure.api.v1.views.conversacion_viewset import TODOS
@@ -36,6 +37,15 @@ class CarpetaViewSet(HogarDesdeUrlMixin, viewsets.ViewSet):
         return Response(
             CarpetaSerializer(container.crear_carpeta().ejecutar(entrada)).data, status=status.HTTP_201_CREATED
         )
+
+    @extend_schema(request=CarpetaSerializer, responses=CarpetaSerializer)
+    def partial_update(self, request, *args, **kwargs):  # ejercicio 1: renombrar
+        datos = CarpetaSerializer(data=request.data)
+        datos.is_valid(raise_exception=True)
+        entrada = ModificarCarpetaInputDTO(
+            self.hogar.pk, self.actor, consultas.id_de_la_url(self), datos.validated_data["nombre"]
+        )
+        return Response(CarpetaSerializer(container.modificar_carpeta().ejecutar(entrada)).data)
 
     def destroy(self, request, *args, **kwargs):
         entrada = EliminarCarpetaInputDTO(self.hogar.pk, self.actor, consultas.id_de_la_url(self))

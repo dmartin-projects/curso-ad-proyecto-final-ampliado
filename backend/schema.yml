@@ -1662,6 +1662,42 @@ paths:
                 $ref: '#/components/schemas/Carpeta'
           description: ''
   /api/v1/hogares/{hogar_pk}/asistente/carpetas/{id}/:
+    patch:
+      operationId: hogares_asistente_carpetas_partial_update
+      description: Las carpetas de quien pide, para ordenar sus conversaciones.
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCarpetaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCarpetaRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Carpeta'
+          description: ''
     delete:
       operationId: hogares_asistente_carpetas_destroy
       description: Las carpetas de quien pide, para ordenar sus conversaciones.
@@ -1703,6 +1739,11 @@ paths:
           type: string
           pattern: ^\d+$
         required: true
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: En el título o en los mensajes, sin tildes ni mayúsculas
       tags:
       - hogares
       security:
@@ -1840,6 +1881,36 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/hogares/{hogar_pk}/asistente/conversaciones/{id}/markdown/:
+    get:
+      operationId: hogares_asistente_conversaciones_markdown_retrieve
+      description: Las conversaciones con el asistente de quien pide, en este hogar
+        (las de los demás miembros no se ven).
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            text/markdown:
+              schema:
+                type: string
+          description: ''
   /api/v1/hogares/{hogar_pk}/asistente/conversaciones/{id}/preguntar/:
     post:
       operationId: hogares_asistente_conversaciones_preguntar_create
@@ -6013,6 +6084,13 @@ components:
       - nombre
       - sincronizada
       - ultimo_uso
+    PatchedCarpetaRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 60
     PatchedCategoriaRequest:
       type: object
       description: 'Limita los campos relacionados al hogar de la URL: no se puede

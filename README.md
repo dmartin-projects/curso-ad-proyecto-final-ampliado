@@ -254,3 +254,5 @@ Ejercicios: calibrar la estimación de *tokens* con lo que contó Groq en los *c
 curl -N -X POST localhost:8000/api/v1/hogares/1/asistente/conversaciones/1/preguntar/ \
   -H "Authorization: Bearer $ACCESS" -H 'Content-Type: application/json' -d '{"texto": "¿Cuánto llevamos este mes?"}'
 ```
+
+Ejercicios: renombrar una carpeta (`PATCH …/asistente/carpetas/{id}/`), buscar en las conversaciones (`?q=`, en el título y en los mensajes, sin tildes ni mayúsculas) y descargar una conversación en Markdown (`GET …/conversaciones/{id}/markdown/`, en el menú de cada conversación).

@@ -1,5 +1,5 @@
 # asistente/infrastructure/database/repositories/conversacion_query_service_orm.py (módulo 97)
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from asistente.domain.read_models.carpeta_listada import CarpetaListada
 from asistente.domain.read_models.conversacion_detalle import ConversacionDetalle
@@ -19,10 +19,15 @@ def _listada(fila: dict) -> ConversacionListada:
 
 
 class ConversacionQueryServiceORM(IConversacionQueryService):
-    def listar(self, usuario_id, hogar_id, carpeta_id=None, limite=50):
+    def listar(self, usuario_id, hogar_id, carpeta_id=None, limite=50, busqueda=None):
         filas = ConversacionModel.objects.filter(usuario_id=usuario_id, hogar_id=hogar_id)
         if carpeta_id is not None:
             filas = filas.filter(carpeta_id=carpeta_id)
+        if busqueda:  # ejercicio 2: unaccent (la extensión del módulo 73), como la búsqueda de movimientos
+            en_mensajes = MensajeModel.objects.filter(visible=True, texto__unaccent__icontains=busqueda)
+            filas = filas.filter(
+                Q(titulo__unaccent__icontains=busqueda) | Q(pk__in=en_mensajes.values("conversacion_id"))
+            )
         return tuple(_listada(f) for f in filas.order_by("-actualizado", "-id").values(*CAMPOS)[:limite])
 
     def detalle(self, usuario_id, hogar_id, conversacion_id):

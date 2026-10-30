@@ -9,6 +9,8 @@ from asistente.application.crear_conversacion_use_case.crear_conversacion_use_ca
 from asistente.application.crear_conversacion_use_case.dtos.crear_conversacion_input_dto import (
     CrearConversacionInputDTO,
 )
+from asistente.application.modificar_carpeta_use_case.dtos.modificar_carpeta_input_dto import ModificarCarpetaInputDTO
+from asistente.application.modificar_carpeta_use_case.modificar_carpeta_use_case import ModificarCarpetaUseCase
 from asistente.application.modificar_conversacion_use_case.dtos.modificar_conversacion_input_dto import (
     ModificarConversacionInputDTO,
 )
@@ -99,3 +101,18 @@ def test_borrar_una_conversacion_borra_sus_archivos(repos):
         EliminarConversacionInputDTO(HOGAR, ANA, c.id)
     )
     assert list(almacen.archivos) == [otra]
+
+
+def test_renombrar_una_carpeta_sin_repetir_nombre(repos):  # ejercicio 1
+    crear = CrearCarpetaUseCase(carpetas=repos["carpetas"], uow=repos["uow"])
+    viaje, _ = (
+        crear.ejecutar(CrearCarpetaInputDTO(HOGAR, ANA, "Viaje")),
+        crear.ejecutar(CrearCarpetaInputDTO(HOGAR, ANA, "Casa")),
+    )
+    renombrar = ModificarCarpetaUseCase(carpetas=repos["carpetas"], uow=repos["uow"])
+    assert renombrar.ejecutar(ModificarCarpetaInputDTO(HOGAR, ANA, viaje.id, "Lisboa")).nombre == "Lisboa"
+    assert renombrar.ejecutar(ModificarCarpetaInputDTO(HOGAR, ANA, viaje.id, "Lisboa")).nombre == "Lisboa"  # el mismo
+    with pytest.raises(CarpetaRepetidaException):
+        renombrar.ejecutar(ModificarCarpetaInputDTO(HOGAR, ANA, viaje.id, "Casa"))
+    with pytest.raises(CarpetaNoEncontradaException):
+        renombrar.ejecutar(ModificarCarpetaInputDTO(HOGAR, LUIS, viaje.id, "Mía"))

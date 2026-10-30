@@ -9,3 +9,4 @@ class ListarConversacionesInputDTO:
     hogar_id: int
     actor: Actor
     carpeta_id: int | None = None
+    busqueda: str | None = None  # ejercicio 2

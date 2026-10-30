@@ -50,6 +50,8 @@ from asistente.application.listar_graficos_fijados_use_case.i_listar_graficos_fi
 from asistente.application.listar_graficos_fijados_use_case.listar_graficos_fijados_use_case import (
     ListarGraficosFijadosUseCase,
 )
+from asistente.application.modificar_carpeta_use_case.i_modificar_carpeta_use_case import IModificarCarpetaUseCase
+from asistente.application.modificar_carpeta_use_case.modificar_carpeta_use_case import ModificarCarpetaUseCase
 from asistente.application.modificar_conversacion_use_case.i_modificar_conversacion_use_case import (
     IModificarConversacionUseCase,
 )
@@ -273,6 +275,10 @@ def obtener_conversacion() -> IObtenerConversacionUseCase:
 
 def crear_carpeta() -> ICrearCarpetaUseCase:
     return CrearCarpetaUseCase(carpetas=CarpetaCommandRepositoryORM(), uow=UnidadDeTrabajoDjango())
+
+
+def modificar_carpeta() -> IModificarCarpetaUseCase:  # ejercicio 1 del 97
+    return ModificarCarpetaUseCase(carpetas=CarpetaCommandRepositoryORM(), uow=UnidadDeTrabajoDjango())
 
 
 def eliminar_carpeta() -> IEliminarCarpetaUseCase:

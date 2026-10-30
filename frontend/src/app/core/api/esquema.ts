@@ -982,7 +982,8 @@ export interface paths {
         delete: operations["hogares_asistente_carpetas_destroy"];
         options?: never;
         head?: never;
-        patch?: never;
+        /** @description Las carpetas de quien pide, para ordenar sus conversaciones. */
+        patch: operations["hogares_asistente_carpetas_partial_update"];
         trace?: never;
     };
     "/api/v1/hogares/{hogar_pk}/asistente/conversaciones/": {
@@ -1020,6 +1021,23 @@ export interface paths {
         head?: never;
         /** @description Las conversaciones con el asistente de quien pide, en este hogar (las de los demás miembros no se ven). */
         patch: operations["hogares_asistente_conversaciones_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/hogares/{hogar_pk}/asistente/conversaciones/{id}/markdown/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Las conversaciones con el asistente de quien pide, en este hogar (las de los demás miembros no se ven). */
+        get: operations["hogares_asistente_conversaciones_markdown_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/hogares/{hogar_pk}/asistente/conversaciones/{id}/preguntar/": {
@@ -2564,6 +2582,9 @@ export interface components {
             creada: string;
             /** Format: date-time */
             ultimo_uso: string | null;
+        };
+        PatchedCarpetaRequest: {
+            nombre?: string;
         };
         /** @description Limita los campos relacionados al hogar de la URL: no se puede apuntar a datos de otro hogar (módulo 33). */
         PatchedCategoriaRequest: {
@@ -4468,11 +4489,40 @@ export interface operations {
             };
         };
     };
+    hogares_asistente_carpetas_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCarpetaRequest"];
+                "multipart/form-data": components["schemas"]["PatchedCarpetaRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Carpeta"];
+                };
+            };
+        };
+    };
     hogares_asistente_conversaciones_list: {
         parameters: {
             query?: {
                 /** @description Solo las de esa carpeta */
                 carpeta?: number;
+                /** @description En el título o en los mensajes, sin tildes ni mayúsculas */
+                q?: string;
             };
             header?: never;
             path: {
@@ -4584,6 +4634,28 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ConversacionDetalle"];
+                };
+            };
+        };
+    };
+    hogares_asistente_conversaciones_markdown_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "text/markdown": string;
                 };
             };
         };

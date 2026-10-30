@@ -86,3 +86,33 @@ test('detener una respuesta a medias', async ({ page }) => {
     await expect(page.getByText('Sin respuesta: no se completó.')).toBeVisible({ timeout: 5000 });
   }).toPass({ timeout: 20_000 }); // cada recarga arranca la app entera: unos segundos con `ng serve`
 });
+
+test('ejercicios del 97: buscar, renombrar una carpeta y descargar en Markdown', async ({
+  page,
+}) => {
+  await abrirAsistente(page);
+  await preguntar(page, '¿Cuánto llevamos gastado este mes?');
+  await expect(page.getByRole('heading', { name: 'Gastos del mes' })).toBeVisible();
+  const lista = page.getByRole('navigation', { name: 'Conversaciones' });
+
+  await lista.getByRole('searchbox', { name: 'Buscar' }).fill('GASTADO');
+  await expect(lista.getByRole('link', { name: /Gastos del mes/ }).first()).toBeVisible();
+  await lista.getByRole('searchbox', { name: 'Buscar' }).fill('zzz-nada');
+  await expect(lista).toContainText('Ninguna conversación lo menciona.');
+  await lista.getByRole('searchbox', { name: 'Buscar' }).fill('');
+
+  const nombre = `Viaje ${Date.now()}`;
+  await lista.getByRole('textbox', { name: 'Nueva carpeta' }).fill(nombre);
+  await lista.getByRole('button', { name: 'Crear la carpeta' }).click();
+  await lista.getByRole('option', { name: new RegExp(nombre) }).click();
+  await lista.getByRole('button', { name: `Renombrar «${nombre}»` }).click();
+  await lista.getByRole('textbox').last().fill(`${nombre} a Lisboa`);
+  await lista.getByRole('button', { name: 'Guardar el nombre' }).click();
+  await expect(lista.getByRole('option', { name: new RegExp(`${nombre} a Lisboa`) })).toBeVisible();
+  await lista.getByRole('option', { name: new RegExp(`${nombre} a Lisboa`) }).click(); // fuera el filtro
+
+  await lista.getByRole('button', { name: 'Opciones de Gastos del mes' }).first().click();
+  const descarga = page.waitForEvent('download');
+  await page.getByRole('menuitem', { name: 'Descargar en Markdown' }).click();
+  expect((await descarga).suggestedFilename()).toMatch(/^conversacion-\d+\.md$/);
+});

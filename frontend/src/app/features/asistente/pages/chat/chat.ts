@@ -22,6 +22,7 @@ import { Avisos } from '../../../../core/http/avisos';
 import { ErrorApi } from '../../../../core/http/errores';
 import { Confirmaciones } from '../../../../shared/components/confirmar/confirmaciones';
 import { MarkdownLigero } from '../../../../shared/pipes/markdown-ligero';
+import { guardarArchivo } from '../../../../shared/utils/descargar';
 import { Entrada } from '../../components/entrada/entrada';
 import { GraficoDelChatCard } from '../../components/grafico-del-chat/grafico-del-chat';
 import { ListaConversaciones } from '../../components/lista-conversaciones/lista-conversaciones';
@@ -73,12 +74,14 @@ export default class Chat {
   protected readonly sugerencias = SUGERENCIAS;
   protected readonly hogarId = computed(() => this.hogar.activoId()!);
   protected readonly carpeta = signal<number | null>(null);
+  protected readonly busqueda = signal('');
   protected readonly editando = signal(false);
   private readonly final = viewChild<ElementRef<HTMLElement>>('final');
 
   protected readonly conversaciones = injectQuery(() => ({
-    queryKey: clavesAsistente.conversaciones(this.hogarId(), this.carpeta()),
-    queryFn: () => lastValueFrom(this.api.conversaciones(this.hogarId(), this.carpeta())),
+    queryKey: clavesAsistente.conversaciones(this.hogarId(), this.carpeta(), this.busqueda()),
+    queryFn: () =>
+      lastValueFrom(this.api.conversaciones(this.hogarId(), this.carpeta(), this.busqueda())),
   }));
   protected readonly carpetas = injectQuery(() => ({
     queryKey: clavesAsistente.carpetas(this.hogarId()),
@@ -150,6 +153,19 @@ export default class Chat {
     } catch (e) {
       if (e instanceof ErrorApi) this.avisos.error(e.errores['nombre']?.[0] ?? e.titulo);
     }
+  }
+
+  protected async renombrarCarpeta({ carpeta, nombre }: { carpeta: Carpeta; nombre: string }) {
+    try {
+      await lastValueFrom(this.api.renombrarCarpeta(this.hogarId(), carpeta.id, nombre));
+      await this.invalidar();
+    } catch (e) {
+      if (e instanceof ErrorApi) this.avisos.error(e.errores['nombre']?.[0] ?? e.titulo);
+    }
+  }
+
+  protected async descargar(c: Conversacion) {
+    guardarArchivo(await lastValueFrom(this.api.markdown(this.hogarId(), c.id)));
   }
 
   protected async borrarCarpeta(c: Carpeta) {

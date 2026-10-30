@@ -42,3 +42,37 @@ describe('AsistenteApi.preguntar (SSE con HttpClient, módulo 97)', () => {
     ]);
   });
 });
+
+describe('AsistenteApi, ejercicios del 97', () => {
+  beforeEach(() => TestBed.configureTestingModule({ providers: proveedoresDeTest() }));
+
+  it('busca con ?q= sin espacios, y sin q si no hay nada que buscar', () => {
+    const api = TestBed.inject(AsistenteApi);
+    const http = TestBed.inject(HttpTestingController);
+    api.conversaciones(3, 5, '  cafe ').subscribe();
+    api.conversaciones(3, null, '   ').subscribe();
+    const [con, sin] = http.match((r) => r.url.endsWith('/conversaciones/'));
+    expect([con.request.params.get('q'), con.request.params.get('carpeta')]).toEqual(['cafe', '5']);
+    expect(sin.request.params.keys()).toEqual([]);
+  });
+
+  it('la conversación en Markdown, con el nombre que da el servidor', () => {
+    const api = TestBed.inject(AsistenteApi);
+    let nombre = '';
+    api.markdown(3, 7).subscribe((a) => (nombre = a.nombre));
+    TestBed.inject(HttpTestingController)
+      .expectOne('/api/v1/hogares/3/asistente/conversaciones/7/markdown/')
+      .flush(new Blob(['# Hola\n']), {
+        headers: { 'Content-Disposition': 'attachment; filename="conversacion-7.md"' },
+      });
+    expect(nombre).toBe('conversacion-7.md');
+  });
+
+  it('renombrar una carpeta es un PATCH con el nombre', () => {
+    TestBed.inject(AsistenteApi).renombrarCarpeta(3, 4, 'Lisboa').subscribe();
+    const req = TestBed.inject(HttpTestingController).expectOne(
+      '/api/v1/hogares/3/asistente/carpetas/4/',
+    );
+    expect([req.request.method, req.request.body]).toEqual(['PATCH', { nombre: 'Lisboa' }]);
+  });
+});

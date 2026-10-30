@@ -1,6 +1,8 @@
 # asistente/infrastructure/api/v1/views/conversacion_viewset.py — las conversaciones de quien pregunta (módulo 97)
+from django.http import HttpResponse
 from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -21,6 +23,7 @@ from asistente.application.obtener_conversacion_use_case.dtos.obtener_conversaci
     ObtenerConversacionInputDTO,
 )
 from asistente.infrastructure import container
+from asistente.infrastructure.api.v1.presenters.conversacion_en_markdown import en_markdown
 from asistente.infrastructure.api.v1.serializers.conversacion_detalle_serializer import ConversacionDetalleSerializer
 from asistente.infrastructure.api.v1.serializers.conversacion_serializer import ConversacionSerializer
 from asistente.infrastructure.database.models.conversacion_model import Conversacion as ConversacionModel
@@ -49,14 +52,18 @@ class ConversacionViewSet(HogarDesdeUrlMixin, viewsets.ViewSet):
         return leida
 
     @extend_schema(
-        parameters=[OpenApiParameter("carpeta", int, description="Solo las de esa carpeta")],
+        parameters=[
+            OpenApiParameter("carpeta", int, description="Solo las de esa carpeta"),
+            OpenApiParameter("q", str, description="En el título o en los mensajes, sin tildes ni mayúsculas"),
+        ],
         responses=ConversacionSerializer(many=True),
     )
     def list(self, request, *args, **kwargs):
         carpeta = request.query_params.get("carpeta")
         if carpeta is not None and not carpeta.isdigit():
             raise ValidationError({"carpeta": ["Un número entero."]})
-        entrada = ListarConversacionesInputDTO(self.hogar.pk, self.actor, int(carpeta) if carpeta else None)
+        busqueda = request.query_params.get("q", "").strip()[:100] or None  # ejercicio 2
+        entrada = ListarConversacionesInputDTO(self.hogar.pk, self.actor, int(carpeta) if carpeta else None, busqueda)
         return Response(ConversacionSerializer(container.listar_conversaciones().ejecutar(entrada), many=True).data)
 
     @extend_schema(request=ConversacionSerializer, responses={201: ConversacionDetalleSerializer})
@@ -79,6 +86,14 @@ class ConversacionViewSet(HogarDesdeUrlMixin, viewsets.ViewSet):
         entrada = ModificarConversacionInputDTO(self.hogar.pk, self.actor, conversacion_id, datos.a_dominio())
         container.modificar_conversacion().ejecutar(entrada)
         return Response(ConversacionDetalleSerializer(self._leer(conversacion_id)).data)
+
+    @extend_schema(responses={(200, "text/markdown"): str})
+    @action(detail=True, methods=["get"])
+    def markdown(self, request, *args, **kwargs):  # ejercicio 3: la conversación, para guardarla o compartirla
+        leida = self._leer(consultas.id_de_la_url(self))
+        respuesta = HttpResponse(en_markdown(leida), content_type="text/markdown; charset=utf-8")
+        respuesta["Content-Disposition"] = f'attachment; filename="conversacion-{leida.conversacion.id}.md"'
+        return respuesta
 
     def destroy(self, request, *args, **kwargs):
         entrada = EliminarConversacionInputDTO(self.hogar.pk, self.actor, consultas.id_de_la_url(self))

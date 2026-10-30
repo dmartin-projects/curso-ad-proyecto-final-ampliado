@@ -3,6 +3,12 @@
     <mat-icon>add_comment</mat-icon> Nueva conversación
   </button>
 
+  <mat-form-field subscriptSizing="dynamic">
+    <mat-icon matPrefix>search</mat-icon>
+    <mat-label>Buscar</mat-label>
+    <input matInput type="search" (input)="texto.next($any($event.target).value)" />
+  </mat-form-field>
+
   <mat-chip-listbox
     aria-label="Carpetas"
     [value]="carpeta()"
@@ -23,7 +29,9 @@
   </mat-chip-listbox>
   <form class="flex items-center gap-1" (ngSubmit)="guardarCarpeta()">
     <mat-form-field class="flex-1" subscriptSizing="dynamic">
-      <mat-label>Nueva carpeta</mat-label>
+      <mat-label>{{
+        renombrando() ? 'Nuevo nombre de «' + renombrando()!.nombre + '»' : 'Nueva carpeta'
+      }}</mat-label>
       <input
         matInput
         name="carpeta"
@@ -32,10 +40,25 @@
         (ngModelChange)="nombreCarpeta.set($event)"
       />
     </mat-form-field>
-    <button mat-icon-button type="submit" aria-label="Crear la carpeta">
-      <mat-icon>create_new_folder</mat-icon>
-    </button>
+    @if (renombrando()) {
+      <button mat-icon-button type="submit" aria-label="Guardar el nombre">
+        <mat-icon>check</mat-icon>
+      </button>
+    } @else {
+      <button mat-icon-button type="submit" aria-label="Crear la carpeta">
+        <mat-icon>create_new_folder</mat-icon>
+      </button>
+    }
   </form>
+  @if (carpeta() !== null && !renombrando()) {
+    @for (c of carpetas(); track c.id) {
+      @if (c.id === carpeta()) {
+        <button mat-button (click)="empezarARenombrar(c)">
+          <mat-icon>drive_file_rename_outline</mat-icon> Renombrar «{{ c.nombre }}»
+        </button>
+      }
+    }
+  }
 
   <mat-nav-list>
     @for (c of conversaciones(); track c.id) {
@@ -69,11 +92,16 @@
               <mat-icon>folder_off</mat-icon> Sacar de la carpeta
             </button>
           }
+          <button mat-menu-item (click)="descargar.emit(c)">
+            <mat-icon>download</mat-icon> Descargar en Markdown
+          </button>
           <button mat-menu-item (click)="borrar.emit(c)"><mat-icon>delete</mat-icon> Borrar</button>
         </mat-menu>
       </div>
     } @empty {
-      <p class="px-4 text-sm text-texto-suave">Aún no hay conversaciones.</p>
+      <p class="px-4 text-sm text-texto-suave">
+        {{ buscando() ? 'Ninguna conversación lo menciona.' : 'Aún no hay conversaciones.' }}
+      </p>
     }
   </mat-nav-list>
 </nav>

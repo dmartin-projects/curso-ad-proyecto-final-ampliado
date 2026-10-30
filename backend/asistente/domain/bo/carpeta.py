@@ -24,3 +24,6 @@ class Carpeta:
 
     def __post_init__(self):
         self.nombre = comprobar_nombre(self.nombre)
+
+    def renombrar(self, nombre: str) -> None:  # ejercicio 1
+        self.nombre = comprobar_nombre(nombre)

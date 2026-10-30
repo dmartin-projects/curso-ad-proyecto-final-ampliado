@@ -1,4 +1,4 @@
-"""Módulos 95, 97 y 99: reglas que cumple TODO el catálogo. Una tool nueva que se las salte rompe este test, no la seguridad."""
+"""Módulos 95, 97, 99 y 100: reglas que cumple TODO el catálogo. Una tool nueva que se las salte rompe este test, no la seguridad."""
 
 import pytest
 
@@ -8,9 +8,9 @@ from asistente.tests.fakes.mundo import Mundo
 CATALOGO = Mundo().catalogo(chat=True)  # el del chat: el de consulta y las de su canal
 
 
-def test_veinte_tools_sin_nombres_repetidos():  # 11 del 95, 2 de sus ejercicios, 5 del 97, recordar y olvidar (99)
+def test_veintiuna_tools_sin_nombres_repetidos():  # 11 del 95 y 2 de sus ejercicios, 5 del 97, 2 del 99 y 1 del 100
     nombres = [t.nombre for t in CATALOGO]
-    assert len(nombres) == len(set(nombres)) == 20
+    assert len(nombres) == len(set(nombres)) == 21
 
 
 @pytest.mark.parametrize("tool", CATALOGO, ids=lambda t: t.nombre)

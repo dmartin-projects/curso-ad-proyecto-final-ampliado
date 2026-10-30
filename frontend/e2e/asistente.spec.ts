@@ -150,3 +150,10 @@ test('la memoria: «recuerda que…», se ve en la lista y se olvida', async ({ 
   await lista.getByRole('button', { name: 'Olvidar «La cuenta común es la de ING.»' }).click();
   await expect(page.getByText('Lo que recuerda el asistente (0)')).toBeVisible();
 });
+
+test('una duda sobre la app: contesta con la ayuda (RAG) y la cita', async ({ page }) => {
+  await abrirAsistente(page);
+  await preguntar(page, 'ayuda: ¿cómo meto el extracto del banco?');
+  const respuesta = page.getByRole('article', { name: 'Respuesta del asistente' }).last();
+  await expect(respuesta).toContainText('Según la ayuda (Importar el extracto del banco)');
+});

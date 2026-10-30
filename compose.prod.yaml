@@ -52,7 +52,8 @@ services:
   migrate:
     <<: *backend
     environment: { OTEL_SERVICE_NAME: gastos-migrate }
-    command: ["python", "manage.py", "migrate", "--noinput"]
+    # módulo 100: y el índice de la ayuda al día (incremental: solo lo que ha cambiado en asistente/ayuda/)
+    command: ["sh", "-c", "python manage.py migrate --noinput && python manage.py indexar_ayuda"]
     restart: "no"
 
   web:
@@ -244,7 +245,7 @@ services:
       options: { max-size: "10m", max-file: "3" }
 
   db:
-    image: postgres:17
+    image: pgvector/pgvector:pg17 # postgres:17 con pgvector (módulo 100); el volumen de datos sirve tal cual
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB}

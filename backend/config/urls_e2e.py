@@ -32,6 +32,10 @@ def _respuesta_del_llm(cuerpo: dict) -> tuple[str, dict | None]:
     el E2E prueba la aplicación (streaming, propuestas, gráficos), no al modelo (eso son las evals, módulo 103)."""
     mensajes = cuerpo["messages"]
     ultimo = mensajes[-1]
+    if cuerpo.get("response_format", {}).get("json_schema", {}).get("name") == "pasajes_relevantes":  # módulo 100
+        return json.dumps({"relevantes": [1, 2, 3]}), None  # la reordenación: el orden que trae
+    if ultimo["content"].startswith("Convierte la pregunta"):  # módulo 100: reescribir la búsqueda, tal cual
+        return ultimo["content"].rsplit("Pregunta:", 1)[1].strip(), None
     if "response_format" in cuerpo:  # estructurar.py: la respuesta en JSON, con preguntas de seguimiento
         respuesta = next(m["content"] for m in reversed(mensajes) if m["role"] == "assistant")
         return json.dumps({"texto": respuesta, "cifras": [], "seguimiento": ["¿Y en agosto?"]}), None
@@ -43,6 +47,11 @@ def _respuesta_del_llm(cuerpo: dict) -> tuple[str, dict | None]:
             return "Aquí tienes la evolución de los últimos meses.", None
         if "propuesta" in resultado:
             return "Te lo dejo preparado: confírmalo abajo.", None
+        if "pasajes" in resultado:  # módulo 100: contesta con el primer pasaje, citándolo
+            if not resultado["pasajes"]:
+                return "La ayuda no dice nada de eso.", None
+            p = resultado["pasajes"][0]
+            return f"Según la ayuda ({p['titulo']}): {p['texto'].split(chr(10))[0]}", None
         if "recordado" in resultado:  # módulo 99
             return "Anotado: lo tendré en cuenta en las próximas conversaciones.", None
         if "error" in resultado:
@@ -57,6 +66,8 @@ def _respuesta_del_llm(cuerpo: dict) -> tuple[str, dict | None]:
             "argumentos": {"meses": 3},
         }
         return "", {"name": "grafico", "arguments": json.dumps(argumentos)}
+    if pregunta.startswith("ayuda:"):  # módulo 100: una duda sobre la app
+        return "", {"name": "buscar_ayuda", "arguments": json.dumps({"pregunta": ultimo["content"][6:].strip()})}
     if pregunta.startswith("recuerda que"):  # módulo 99
         texto = ultimo["content"][len("recuerda que ") :].strip().rstrip(".")
         return "", {"name": "recordar", "arguments": json.dumps({"texto": texto[0].upper() + texto[1:] + "."})}

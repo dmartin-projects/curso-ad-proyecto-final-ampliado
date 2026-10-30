@@ -23,3 +23,6 @@ EXIGIR_CASOS_DE_USO = True  # módulo 88: una escritura sin use case (sin sus ev
 OAUTH2_PROVIDER["OIDC_RSA_PRIVATE_KEY"] = nueva_clave_pem()
 # Módulo 92: una clave nueva para cifrar los secretos TOTP; las de los tests nunca han cifrado nada fuera de ellos
 MFA_CLAVES = [Fernet.generate_key().decode()]
+
+# Módulo 100: sin modelo de embeddings en los tests (no se descarga nada): los que lo necesitan usan un fake
+ASISTENTE_EMBEDDINGS = ""

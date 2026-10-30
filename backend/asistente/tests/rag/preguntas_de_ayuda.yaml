@@ -1,0 +1,71 @@
+# Módulo 100: el conjunto de evaluación de la búsqueda en la ayuda. Cada pregunta, con el trozo que la contesta
+# (archivo#sección). Escritas como las escribe la gente, con OTRAS palabras que las de la ayuda: si solo valieran las
+# mismas palabras, bastaría con buscar texto. Al cambiar la ayuda, se revisa esto en el mismo pull request.
+- pregunta: ¿cómo meto los movimientos de mi banco sin teclearlos uno a uno?
+  esperado: importar-extractos#Qué archivos sirven
+- pregunta: si subo dos veces el mismo extracto, ¿se me duplica todo?
+  esperado: importar-extractos#Sin duplicados
+- pregunta: ya había apuntado la compra a mano y luego me viene en el fichero del banco, ¿sale repetida?
+  esperado: importar-extractos#Gastos que ya habías apuntado
+- pregunta: ¿se puede subir el PDF que me da el banco?
+  esperado: importar-extractos#Qué archivos sirven
+- pregunta: quiero que mi pareja pueda ver nuestras cuentas, ¿cómo la meto?
+  esperado: miembros-y-roles#Invitaciones
+- pregunta: el enlace para unirme al hogar ya no funciona
+  esperado: miembros-y-roles#Invitaciones
+- pregunta: ¿qué diferencia hay entre administrador y miembro?
+  esperado: miembros-y-roles#Los tres roles
+- pregunta: mi hijo solo debería mirar, no tocar nada
+  esperado: miembros-y-roles#Los tres roles
+- pregunta: ¿pueden mis compañeros de piso leer lo que hablo con el asistente?
+  esperado: miembros-y-roles#Lo que ve cada uno
+- pregunta: me quiero ir del hogar pero soy el único que lo administra
+  esperado: miembros-y-roles#Salir de un hogar
+- pregunta: ¿cómo hago una foto a la factura del súper para que se apunte sola?
+  esperado: tickets#Subir un ticket
+- pregunta: el ticket se ha quedado pendiente de que lo mire alguien, ¿por qué?
+  esperado: tickets#Cuándo hay que revisarlo
+- pregunta: ¿cuánto tarda en leerse una foto de un recibo?
+  esperado: tickets#Cuánto tarda
+- pregunta: quiero ponerme un tope de gasto para comer fuera
+  esperado: presupuestos#Crear un presupuesto
+- pregunta: ¿me avisáis cuando me paso de lo que quería gastar?
+  esperado: presupuestos#El aviso al superarlo
+- pregunta: ¿dónde descargo el resumen del mes en pdf?
+  esperado: informes#El informe de cada mes
+- pregunta: necesito el informe de agosto ahora y que me llegue al correo
+  esperado: informes#Pedir uno a mano
+- pregunta: no me fío solo de la contraseña, ¿hay algo más seguro?
+  esperado: seguridad-de-la-cuenta#Verificación en dos pasos
+- pregunta: he perdido el móvil con la app de códigos
+  esperado: seguridad-de-la-cuenta#Verificación en dos pasos
+- pregunta: entré en el ordenador de la biblioteca y no cerré la sesión
+  esperado: seguridad-de-la-cuenta#Sesiones abiertas
+- pregunta: quiero entrar con la huella del móvil
+  esperado: seguridad-de-la-cuenta#Passkeys
+- pregunta: ¿puedo entrar con mi cuenta de Google?
+  esperado: seguridad-de-la-cuenta#Formas de entrar
+- pregunta: ¿cómo quito el permiso que le di a gastos-cli?
+  esperado: seguridad-de-la-cuenta#Aplicaciones conectadas
+- pregunta: ¿cómo creo una subcategoría dentro de Ocio?
+  esperado: categorias#Categorías y subcategorías
+- pregunta: quiero cambiar el orden en que salen las categorías
+  esperado: categorias#Ordenar y dar color
+- pregunta: ¿cómo apunto lo que me ha costado la gasolina?
+  esperado: movimientos#Apuntar un gasto o un ingreso
+- pregunta: necesito sacar los gastos a una hoja de cálculo
+  esperado: movimientos#Exportar a CSV
+- pregunta: ¿dónde busco un pago de Amazon de hace meses?
+  esperado: movimientos#Buscar y filtrar
+- pregunta: ¿por qué un gasto del día 31 por la noche me sale en ese mes?
+  esperado: empezar#Moneda y zona horaria
+- pregunta: tengo la economía de casa y la del piso de la playa por separado
+  esperado: empezar#Qué es un hogar
+- pregunta: ¿el asistente me apunta cosas sin preguntarme?
+  esperado: asistente#Lo que no hace sin preguntarte
+- pregunta: quiero que el asistente se acuerde de que no cuento el alquiler
+  esperado: asistente#Lo que recuerda
+- pregunta: me dice que no puedo hacer más preguntas hoy
+  esperado: asistente#Límites
+- pregunta: ¿puedo poner en la pantalla principal un gráfico que me hizo el asistente?
+  esperado: asistente#Gráficos en el resumen

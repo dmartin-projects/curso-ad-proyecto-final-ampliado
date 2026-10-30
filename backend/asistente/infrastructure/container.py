@@ -12,6 +12,7 @@ from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.agent.limites import Limites
 from asistente.application.asignar_plan_use_case.asignar_plan_use_case import AsignarPlanUseCase
 from asistente.application.asignar_plan_use_case.i_asignar_plan_use_case import IAsignarPlanUseCase
+from asistente.application.ayuda.buscador_de_ayuda import BuscadorDeAyuda
 from asistente.application.chat.calculadora_de_graficos import CalculadoraDeGraficos
 from asistente.application.compactar_conversacion_use_case.compactar_conversacion_use_case import (
     CompactarConversacionUseCase,
@@ -51,6 +52,8 @@ from asistente.application.eliminar_conversacion_use_case.i_eliminar_conversacio
 )
 from asistente.application.fijar_grafico_use_case.fijar_grafico_use_case import FijarGraficoUseCase
 from asistente.application.fijar_grafico_use_case.i_fijar_grafico_use_case import IFijarGraficoUseCase
+from asistente.application.indexar_ayuda_use_case.i_indexar_ayuda_use_case import IIndexarAyudaUseCase
+from asistente.application.indexar_ayuda_use_case.indexar_ayuda_use_case import IndexarAyudaUseCase
 from asistente.application.informe_de_costes_use_case.i_informe_de_costes_use_case import IInformeDeCostesUseCase
 from asistente.application.informe_de_costes_use_case.informe_de_costes_use_case import InformeDeCostesUseCase
 from asistente.application.listar_carpetas_use_case.i_listar_carpetas_use_case import IListarCarpetasUseCase
@@ -85,6 +88,7 @@ from asistente.application.obtener_conversacion_use_case.obtener_conversacion_us
 )
 from asistente.application.olvidar_recuerdo_use_case.i_olvidar_recuerdo_use_case import IOlvidarRecuerdoUseCase
 from asistente.application.olvidar_recuerdo_use_case.olvidar_recuerdo_use_case import OlvidarRecuerdoUseCase
+from asistente.application.ports.i_embeddings import IEmbeddings
 from asistente.application.ports.i_llm import ILLM
 from asistente.application.ports.i_observador_agente import IObservadorAgente
 from asistente.application.quitar_grafico_use_case.i_quitar_grafico_use_case import IQuitarGraficoUseCase
@@ -93,6 +97,7 @@ from asistente.application.responder_pregunta_use_case.i_responder_pregunta_use_
     IResponderPreguntaUseCase,
 )
 from asistente.application.responder_pregunta_use_case.responder_pregunta_use_case import ResponderPreguntaUseCase
+from asistente.application.tools.buscar_ayuda_tool import BuscarAyudaTool
 from asistente.application.tools.buscar_movimientos_tool import BuscarMovimientosTool
 from asistente.application.tools.comparar_con_ipc_tool import CompararConIpcTool
 from asistente.application.tools.comparar_meses_tool import CompararMesesTool
@@ -117,6 +122,7 @@ from asistente.application.tools.top_comercios_tool import TopComerciosTool
 from asistente.application.ver_contexto_use_case.i_ver_contexto_use_case import IVerContextoUseCase
 from asistente.application.ver_contexto_use_case.ver_contexto_use_case import VerContextoUseCase
 from asistente.domain.vo.precio import Precio
+from asistente.infrastructure.ayuda.fuente_de_ayuda_en_disco import FuenteDeAyudaEnDisco
 from asistente.infrastructure.database.repositories.carpeta_command_repository_orm import CarpetaCommandRepositoryORM
 from asistente.infrastructure.database.repositories.consumo_query_service_orm import ConsumoQueryServiceORM
 from asistente.infrastructure.database.repositories.consumo_repository_orm import ConsumoRepositoryORM
@@ -130,12 +136,14 @@ from asistente.infrastructure.database.repositories.grafico_fijado_command_repos
 from asistente.infrastructure.database.repositories.grafico_fijado_query_service_orm import (
     GraficoFijadoQueryServiceORM,
 )
+from asistente.infrastructure.database.repositories.indice_de_ayuda_pg import IndiceDeAyudaPG
 from asistente.infrastructure.database.repositories.plan_del_hogar_repository_orm import PlanDelHogarRepositoryORM
 from asistente.infrastructure.database.repositories.propuesta_command_repository_orm import (
     PropuestaCommandRepositoryORM,
 )
 from asistente.infrastructure.database.repositories.recuerdo_command_repository_orm import RecuerdoCommandRepositoryORM
 from asistente.infrastructure.database.repositories.recuerdo_query_service_orm import RecuerdoQueryServiceORM
+from asistente.infrastructure.embeddings.embeddings_fastembed import EmbeddingsFastembed
 from asistente.infrastructure.externos.eurostat_indice_de_precios import IndiceDePreciosEurostat
 from asistente.infrastructure.externos.frankfurter_tipo_de_cambio import TipoDeCambioFrankfurter
 from asistente.infrastructure.externos.nager_festivos import FestivosNager
@@ -216,6 +224,7 @@ def tools(chat: bool = False) -> list[Tool]:
         ProponerMovimientoTool(finanzas=finanzas),
         RecordarTool(recuerdos=RecuerdoCommandRepositoryORM(), reloj=RelojDjango()),  # módulo 99
         OlvidarTool(recuerdos=RecuerdoCommandRepositoryORM(), consultas=RecuerdoQueryServiceORM()),  # su ejercicio 1
+        BuscarAyudaTool(buscador=buscador_de_ayuda()),  # módulo 100
     ]
 
 
@@ -430,4 +439,28 @@ def olvidar_recuerdo() -> IOlvidarRecuerdoUseCase:
 def ver_contexto() -> IVerContextoUseCase:  # ejercicio 2 del 99
     return VerContextoUseCase(
         conversaciones=ConversacionCommandRepositoryORM(), recuerdos=RecuerdoQueryServiceORM(), limites=Limites()
+    )
+
+
+# ── Módulo 100: la ayuda (RAG) ──
+def embeddings(descargar: bool = False) -> IEmbeddings | None:
+    """None si no hay modelo configurado (los tests, el E2E): la búsqueda va solo por texto. Solo los comandos
+    descargan el modelo (`descargar`); el chat usa el que haya en la caché, o busca por texto."""
+    if not settings.ASISTENTE_EMBEDDINGS:
+        return None
+    return EmbeddingsFastembed(
+        modelo=settings.ASISTENTE_EMBEDDINGS, cache=settings.ASISTENTE_EMBEDDINGS_CACHE, descargar=descargar
+    )
+
+
+def buscador_de_ayuda(llm: ILLM | None = None) -> BuscadorDeAyuda:
+    return BuscadorDeAyuda(indice=IndiceDeAyudaPG(), embeddings=embeddings(), llm=llm or llm_auxiliar())
+
+
+def indexar_ayuda() -> IIndexarAyudaUseCase:
+    return IndexarAyudaUseCase(
+        fuente=FuenteDeAyudaEnDisco(),
+        indice=IndiceDeAyudaPG(),
+        embeddings=embeddings(descargar=True),  # el comando del despliegue: puede (y debe) traer el modelo
+        uow=UnidadDeTrabajoDjango(),
     )

@@ -2,7 +2,7 @@
 name: gastos-dev # nombre del proyecto propio: no comparte contenedores ni volúmenes con compose.prod.yaml
 services:
   db:
-    image: postgres:17
+    image: pgvector/pgvector:pg17 # PostgreSQL 17 con la extensión pgvector (módulo 100: la búsqueda en la ayuda)
     environment:
       POSTGRES_DB: gastos
       POSTGRES_USER: gastos

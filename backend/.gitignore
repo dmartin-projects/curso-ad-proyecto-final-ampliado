@@ -10,3 +10,5 @@ wheels/
 .venv
 media-e2e/
 staticfiles/
+# módulo 100: el modelo de embeddings (ASISTENTE_EMBEDDINGS_CACHE)
+.cache/

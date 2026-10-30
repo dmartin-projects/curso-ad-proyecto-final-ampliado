@@ -65,3 +65,4 @@ SOCIAL_LOGIN["apple"] |= {
 # del personal, ejercicio 1) y runserver son dos procesos y tienen que leer lo mismo. Las passkeys, para el origen de la
 # SPA (http://localhost:4200, rp_id localhost: WebAuthn admite http en localhost)
 MFA_CLAVES = ["ZTJlLXNpbi12YWxvci1uaS1zZWNyZXRvLTAxMjM0NTY="]
+ASISTENTE_EMBEDDINGS = ""  # módulo 100: la ayuda, solo por texto (el E2E prueba la app, no el modelo)

@@ -4,7 +4,9 @@ from datetime import UTC, date, datetime
 from asistente.application.agent.agente import Agente
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.agent.limites import Limites
+from asistente.application.ayuda.buscador_de_ayuda import BuscadorDeAyuda
 from asistente.application.chat.calculadora_de_graficos import CalculadoraDeGraficos
+from asistente.application.tools.buscar_ayuda_tool import BuscarAyudaTool
 from asistente.application.tools.buscar_movimientos_tool import BuscarMovimientosTool
 from asistente.application.tools.comparar_con_ipc_tool import CompararConIpcTool
 from asistente.application.tools.comparar_meses_tool import CompararMesesTool
@@ -30,6 +32,7 @@ from asistente.domain.read_models.miembro_del_hogar import MiembroDelHogar
 from asistente.tests.fakes.consultas_de_finanzas_fake import ConsultasDeFinanzasFake
 from asistente.tests.fakes.exportador_de_movimientos_fake import ExportadorDeMovimientosFake
 from asistente.tests.fakes.festivos_fake import FestivosFake
+from asistente.tests.fakes.indice_de_ayuda_fake import IndiceDeAyudaFake
 from asistente.tests.fakes.indice_de_precios_fake import IndiceDePreciosFake
 from asistente.tests.fakes.llm_fake import LLMFake
 from asistente.tests.fakes.membresias_fake import MembresiasFake
@@ -114,6 +117,7 @@ class Mundo:
             ProponerMovimientoTool(finanzas=f),
             RecordarTool(recuerdos=self.recuerdos, reloj=reloj()),  # módulo 99
             OlvidarTool(recuerdos=self.recuerdos, consultas=self.recuerdos),  # su ejercicio 1
+            BuscarAyudaTool(buscador=BuscadorDeAyuda(indice=IndiceDeAyudaFake(), embeddings=None, llm=None)),  # 100
         ]
 
     def agente(self, guion: list, limites: Limites | None = None, tools=None) -> tuple[Agente, LLMFake]:

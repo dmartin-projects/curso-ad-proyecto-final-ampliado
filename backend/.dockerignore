@@ -12,3 +12,6 @@ staticfiles/
 .coverage
 htmlcov/
 .git
+# módulo 100: el modelo de embeddings de quien ha indexado en local (ASISTENTE_EMBEDDINGS_CACHE): la imagen
+# descarga el suyo al construirse
+.cache/

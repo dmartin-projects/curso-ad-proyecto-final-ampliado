@@ -35,6 +35,17 @@ ENV PATH="/app/.venv/bin:$PATH" \
     XDG_CACHE_HOME=/tmp/.cache \
     DJANGO_SETTINGS_MODULE=config.settings.prod
 
+# Módulo 100: el modelo de embeddings, DENTRO de la imagen (≈ 240 MB): el contenedor no lo descarga al arrancar ni
+# depende de Hugging Face en producción. Sin modelo (ASISTENTE_EMBEDDINGS vacío), la búsqueda en la ayuda va por texto
+# /tmp en tmpfs durante el paso: Hugging Face y onnxruntime escriben como root en XDG_CACHE_HOME (/tmp/.cache), y si
+# eso quedara en la imagen, el usuario app no podría crear ahí la caché de fontconfig (WeasyPrint)
+ENV ASISTENTE_EMBEDDINGS_CACHE=/app/.cache/embeddings
+RUN --mount=type=tmpfs,target=/tmp DJANGO_SETTINGS_MODULE=config.settings.build python -c "\
+from django.conf import settings; import django; django.setup(); \
+from fastembed import TextEmbedding; \
+TextEmbedding(model_name=settings.ASISTENTE_EMBEDDINGS, cache_dir=settings.ASISTENTE_EMBEDDINGS_CACHE)" \
+    && chown -R app:app /app/.cache
+
 # Estáticos en el build (los de DRF y drf-spectacular; los sirve WhiteNoise). Sin traducciones que compilar:
 # si añades locale/, añade aquí compilemessages (y gettext arriba).
 RUN DJANGO_SETTINGS_MODULE=config.settings.build python manage.py collectstatic --noinput

@@ -20,6 +20,7 @@ dependencies = [
     "djangorestframework>=3.18.3",
     "djangorestframework-simplejwt>=5.5.1",
     "drf-spectacular>=0.30.0",
+    "fastembed>=0.9.1",
     "gunicorn>=26.2.0",
     "httpx>=0.28.1",
     "openai>=3.41",
@@ -33,6 +34,7 @@ dependencies = [
     "opentelemetry-instrumentation-psycopg>=0.66b1",
     "opentelemetry-instrumentation-redis>=0.66b1",
     "opentelemetry-sdk>=1.45.1",
+    "pgvector>=0.5.1",
     "pillow>=13.0.0",
     "psycopg[binary,pool]>=3.3.6",
     "pyotp>=2.10.0",
@@ -127,7 +129,7 @@ layers = [
     "(infrastructure.container)", # composition root: monta los use cases con los adapters de salida
     "(infrastructure.messaging) | (infrastructure.finanzas) | (infrastructure.hogares) | (infrastructure.tickets) | (infrastructure.externos) | (infrastructure.server) | (infrastructure.providers)", # adapters de salida: el publicador de eventos, el ACL hacia finanzas, lo que se enchufa en django-oauth-toolkit…
     "(infrastructure.cache) | (infrastructure.realtime)", # …la caché del dashboard, el aviso por WebSocket…
-    "(infrastructure.database) | (infrastructure.storage) | (infrastructure.auth) | (infrastructure.crypto) | (infrastructure.mfa) | (infrastructure.ocr) | (infrastructure.ia) | (infrastructure.lectores) | (infrastructure.pdf) | (infrastructure.i18n) | (infrastructure.llm) | (infrastructure.telemetria) | (infrastructure.tarifas) | (infrastructure.signals.finanzas_signals) | (infrastructure.signals.hogares_signals) | (infrastructure.signals.tickets_signals) | (infrastructure.signals.importaciones_signals) | (infrastructure.signals.informes_signals)", # …la base de datos, los servicios externos y las signals que la app ofrece
+    "(infrastructure.database) | (infrastructure.storage) | (infrastructure.auth) | (infrastructure.crypto) | (infrastructure.mfa) | (infrastructure.ocr) | (infrastructure.ia) | (infrastructure.lectores) | (infrastructure.pdf) | (infrastructure.i18n) | (infrastructure.llm) | (infrastructure.telemetria) | (infrastructure.tarifas) | (infrastructure.embeddings) | (infrastructure.ayuda) | (infrastructure.signals.finanzas_signals) | (infrastructure.signals.hogares_signals) | (infrastructure.signals.tickets_signals) | (infrastructure.signals.importaciones_signals) | (infrastructure.signals.informes_signals)", # …la base de datos, los servicios externos y las signals que la app ofrece
     "(application)", # use cases, sus DTOs y los ports de la aplicación
     "(domain)", # BOs, value objects, eventos, excepciones, read models e interfaces de los repositorios
 ]
@@ -445,9 +447,12 @@ protected_modules = [
     "asistente.infrastructure.database.repositories.consumo_repository_orm",
     "asistente.infrastructure.database.repositories.conversacion_command_repository_orm",
     "asistente.infrastructure.database.repositories.grafico_fijado_command_repository_orm",
+    "asistente.infrastructure.database.repositories.indice_de_ayuda_pg",
     "asistente.infrastructure.database.repositories.plan_del_hogar_repository_orm",
     "asistente.infrastructure.database.repositories.propuesta_command_repository_orm",
     "asistente.infrastructure.database.repositories.recuerdo_command_repository_orm",
+    "asistente.infrastructure.ayuda",
+    "asistente.infrastructure.embeddings",
     "asistente.infrastructure.externos",
     "asistente.infrastructure.finanzas",
     "asistente.infrastructure.hogares",

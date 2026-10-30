@@ -19,7 +19,7 @@ jobs:
 
     services:                                  # contenedores auxiliares durante el job
       postgres:
-        image: postgres:17
+        image: pgvector/pgvector:pg17 # con pgvector (módulo 100)
         env:
           POSTGRES_DB: gastos
           POSTGRES_USER: gastos
@@ -229,7 +229,7 @@ jobs:
 
     services:
       postgres:
-        image: postgres:17
+        image: pgvector/pgvector:pg17 # con pgvector (módulo 100)
         env:
           POSTGRES_DB: gastos_e2e                # el nombre que usa config.settings.e2e
           POSTGRES_USER: gastos

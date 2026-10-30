@@ -14,3 +14,4 @@ class CostePorHogar:
     tokens_salida: int
     coste: Decimal  # lo conocido; los modelos sin precio no suman (ver sin_precio)
     sin_precio: int  # llamadas de modelos sin precio en la tabla
+    canal: str = ""  # ejercicio 1: con --por-canal, "chat" o "titulo" (sin él, todos juntos)

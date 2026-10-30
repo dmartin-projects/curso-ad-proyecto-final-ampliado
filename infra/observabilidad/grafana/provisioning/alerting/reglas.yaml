@@ -181,3 +181,24 @@ groups:
           - refId: C
             datasourceUid: __expr__
             model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [5] } }] }
+      # Ejercicio 2 del módulo 98: una alerta de NEGOCIO (nadie está roto: hay hogares que quieren más)
+      - uid: asistente-hogares-sin-cuota
+        title: Hay hogares sin cuota del asistente este mes
+        condition: C
+        for: 1h
+        annotations:
+          summary: "{{ $values.A }} hogar(es) han gastado ya la cuota del mes de su plan"
+          description: "manage.py coste_asistente dice cuáles. ¿Un plan que se queda corto? ¿Un uso raro?"
+        labels: { severidad: info }
+        noDataState: OK
+        execErrState: Error
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: max(gastos_asistente_hogares_sin_cuota)
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0] } }] }

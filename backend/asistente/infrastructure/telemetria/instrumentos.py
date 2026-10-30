@@ -12,7 +12,8 @@ las unidades entre llaves desaparecen):
     gen_ai_invoke_agent_duration_seconds_*                 gen_ai_client_inference_usage_cache_read_input_tokens_total
     gen_ai_execute_tool_duration_seconds_*                 gen_ai_client_inference_usage_reasoning_output_tokens_total
     gastos_asistente_coste_usd_total                       gastos_asistente_preguntas_total
-    gastos_asistente_cuota_agotada_total
+    gastos_asistente_cuota_agotada_total                   gastos_asistente_vueltas_bucket (ejercicio 3)
+    gastos_asistente_tokens_por_pregunta_bucket (ejercicio 3)
 """
 
 from opentelemetry import metrics
@@ -74,4 +75,19 @@ cuota_agotada = _medidor.create_counter(
     "gastos.asistente.cuota_agotada",
     unit="{pregunta}",
     description="Preguntas rechazadas por la cuota, por cuál (persona u hogar)",
+)
+
+# Ejercicio 3: comparar versiones del prompt con datos. Por pregunta y con la versión como etiqueta (pocos valores: las
+# publicadas). Un cambio de prompt que ahorra una vuelta se ve aquí en un día, sin esperar a las evals del módulo 103
+vueltas = _medidor.create_histogram(
+    "gastos.asistente.vueltas",
+    unit="{vuelta}",
+    description="Llamadas al modelo por pregunta, por versión del prompt",
+    explicit_bucket_boundaries_advisory=[1, 2, 3, 4, 5, 6, 7],
+)
+tokens_por_pregunta = _medidor.create_histogram(
+    "gastos.asistente.tokens_por_pregunta",
+    unit="{token}",
+    description="Tokens (entrada + salida) de una pregunta entera, por versión del prompt",
+    explicit_bucket_boundaries_advisory=[1000, 2000, 4000, 6000, 8000, 12000, 16000, 24000, 32000],
 )

@@ -7,3 +7,4 @@ from datetime import date
 class InformeDeCostesInputDTO:
     desde: date  # incluido
     hasta: date  # excluido: "octubre" es del 1 de octubre al 1 de noviembre
+    por_canal: bool = False  # ejercicio 1: lo que se ve (chat) y lo que no (títulos), por separado

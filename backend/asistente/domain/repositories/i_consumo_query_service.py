@@ -16,5 +16,9 @@ class IConsumoQueryService(ABC):
         """El coste conocido del hogar desde ese momento."""
 
     @abstractmethod
-    def por_hogar(self, desde: datetime, hasta: datetime) -> tuple[CostePorHogar, ...]:
-        """Por hogar y modelo, los que más cuestan primero."""
+    def por_hogar(self, desde: datetime, hasta: datetime, por_canal: bool = False) -> tuple[CostePorHogar, ...]:
+        """Por hogar y modelo (y canal, si se pide: ejercicio 1), los que más cuestan primero."""
+
+    @abstractmethod
+    def coste_por_hogar(self, desde: datetime) -> dict[int, Decimal]:
+        """Ejercicio 2: el coste conocido de cada hogar con gasto desde ese momento."""

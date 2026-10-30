@@ -452,6 +452,101 @@
           "mode": "multi"
         }
       }
+    },
+    {
+      "id": 11,
+      "title": "Por versión del prompt: vueltas por pregunta (media)",
+      "description": "Ejercicio 3: un prompt nuevo que ahorra una vuelta, medido con el tráfico de verdad",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus}"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "sum by (gen_ai_prompt_version) (rate(gastos_asistente_vueltas_sum[1h])) / sum by (gen_ai_prompt_version) (rate(gastos_asistente_vueltas_count[1h]))",
+          "legendFormat": "{{gen_ai_prompt_version}}",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "id": 12,
+      "title": "Por versión del prompt: tokens por pregunta (p50 y p95)",
+      "description": "",
+      "type": "timeseries",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${prometheus}"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 28,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.5, sum by (le, gen_ai_prompt_version) (rate(gastos_asistente_tokens_por_pregunta_bucket[1h])))",
+          "legendFormat": "p50 · {{gen_ai_prompt_version}}",
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          }
+        },
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, gen_ai_prompt_version) (rate(gastos_asistente_tokens_por_pregunta_bucket[1h])))",
+          "legendFormat": "p95 · {{gen_ai_prompt_version}}",
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "${prometheus}"
+          }
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
     }
   ],
   "editable": true,

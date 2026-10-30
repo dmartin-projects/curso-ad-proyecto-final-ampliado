@@ -60,6 +60,9 @@ class TelemetriaOTel(ITelemetriaDelAgente):
                         "gastos.asistente.vueltas": r.iteraciones,
                     }
                 )
+                version = {"gen_ai.prompt.version": VERSION}  # ejercicio 3
+                instrumentos.vueltas.record(r.iteraciones, version)
+                instrumentos.tokens_por_pregunta.record(r.uso.total, version)
 
             try:
                 yield medir

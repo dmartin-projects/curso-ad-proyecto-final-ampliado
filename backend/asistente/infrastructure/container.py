@@ -19,6 +19,12 @@ from asistente.application.confirmar_propuesta_use_case.i_confirmar_propuesta_us
 )
 from asistente.application.consultar_cuota_use_case.consultar_cuota_use_case import ConsultarCuotaUseCase
 from asistente.application.consultar_cuota_use_case.i_consultar_cuota_use_case import IConsultarCuotaUseCase
+from asistente.application.contar_hogares_sin_cuota_use_case.contar_hogares_sin_cuota_use_case import (
+    ContarHogaresSinCuotaUseCase,
+)
+from asistente.application.contar_hogares_sin_cuota_use_case.i_contar_hogares_sin_cuota_use_case import (
+    IContarHogaresSinCuotaUseCase,
+)
 from asistente.application.crear_carpeta_use_case.crear_carpeta_use_case import CrearCarpetaUseCase
 from asistente.application.crear_carpeta_use_case.i_crear_carpeta_use_case import ICrearCarpetaUseCase
 from asistente.application.crear_conversacion_use_case.crear_conversacion_use_case import CrearConversacionUseCase
@@ -368,3 +374,12 @@ def informe_de_costes() -> IInformeDeCostesUseCase:
 
 def asignar_plan() -> IAsignarPlanUseCase:
     return AsignarPlanUseCase(planes=PlanDelHogarRepositoryORM(), uow=UnidadDeTrabajoDjango())
+
+
+def contar_hogares_sin_cuota() -> IContarHogaresSinCuotaUseCase:  # ejercicio 2 del 98
+    return ContarHogaresSinCuotaUseCase(
+        consumos=ConsumoQueryServiceORM(),
+        planes=PlanDelHogarRepositoryORM(),
+        tarifas=TarifasDesdeAjustes(),
+        reloj=RelojDjango(),
+    )

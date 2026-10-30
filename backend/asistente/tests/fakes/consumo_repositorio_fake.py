@@ -27,7 +27,14 @@ class ConsumoRepositorioFake(IConsumoRepository, IConsumoQueryService):
             (c.coste or Decimal(0) for c in self.consumos if c.hogar_id == hogar_id and c.momento >= desde), Decimal(0)
         )
 
-    def por_hogar(self, desde, hasta):
+    def coste_por_hogar(self, desde):
+        costes: dict = {}
+        for c in self.consumos:
+            if c.momento >= desde:
+                costes[c.hogar_id] = costes.get(c.hogar_id, Decimal(0)) + (c.coste or Decimal(0))
+        return costes
+
+    def por_hogar(self, desde, hasta, por_canal=False):
         grupos: dict = {}
         for c in self.consumos:
             if desde <= c.momento < hasta:

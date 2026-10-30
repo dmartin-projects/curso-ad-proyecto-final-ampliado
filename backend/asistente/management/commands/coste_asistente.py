@@ -24,24 +24,27 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         parser.add_argument("--mes", type=_mes, help="AAAA-MM (por defecto, el mes en curso)")
+        parser.add_argument("--por-canal", action="store_true", help="Separar chat y títulos (ejercicio 1)")
 
     def handle(self, *args, **o):
         desde = o["mes"] or timezone.now().date().replace(day=1)
         hasta = (desde.replace(day=28) + timedelta(days=4)).replace(day=1)  # el día 1 del mes siguiente
-        filas = container.informe_de_costes().ejecutar(InformeDeCostesInputDTO(desde, hasta))
+        filas = container.informe_de_costes().ejecutar(InformeDeCostesInputDTO(desde, hasta, o["por_canal"]))
+        ancho = 34 if o["por_canal"] else 24  # con el canal, "openai/gpt-oss-120b (titulo)" no cabe en 24
         self.stdout.write(f"Coste del asistente, {desde:%Y-%m} (USD, con los precios de cada momento)\n")
-        self.stdout.write(f"{'hogar':<28} {'modelo':<24} {'apuntes':>8} {'entrada':>10} {'caché':>8} "
+        self.stdout.write(f"{'hogar':<28} {'modelo':<{ancho}} {'apuntes':>8} {'entrada':>10} {'caché':>8} "
                           f"{'salida':>8} {'coste':>10}")  # fmt: skip
         total = Decimal(0)
         for f in filas:
             hogar = f"{f.hogar[:22]} ({f.hogar_id})" if f.hogar_id else f.hogar
             coste = f"{f.coste:.4f}" + ("*" if f.sin_precio else "")
+            modelo = f"{f.modelo} ({f.canal})" if f.canal else f.modelo
             self.stdout.write(
-                f"{hogar:<28} {f.modelo:<24} {f.llamadas:>8} {f.tokens_entrada:>10} {f.tokens_cache:>8} "
+                f"{hogar:<28} {modelo:<{ancho}} {f.llamadas:>8} {f.tokens_entrada:>10} {f.tokens_cache:>8} "
                 f"{f.tokens_salida:>8} {coste:>10}"
             )
             total += f.coste
-        self.stdout.write(f"{'total':<28} {'':<24} {sum(f.llamadas for f in filas):>8} "
+        self.stdout.write(f"{'total':<28} {'':<{ancho}} {sum(f.llamadas for f in filas):>8} "
                           f"{sum(f.tokens_entrada for f in filas):>10} {sum(f.tokens_cache for f in filas):>8} "
                           f"{sum(f.tokens_salida for f in filas):>8} {total:>10.4f}")  # fmt: skip
         if any(f.sin_precio for f in filas):

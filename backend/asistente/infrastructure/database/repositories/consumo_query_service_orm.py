@@ -20,10 +20,11 @@ class ConsumoQueryServiceORM(IConsumoQueryService):
         filas = ConsumoModel.objects.filter(hogar_id=hogar_id, momento__gte=desde)
         return filas.aggregate(c=Coalesce(Sum("coste"), CERO))["c"]
 
-    def por_hogar(self, desde, hasta):
+    def por_hogar(self, desde, hasta, por_canal=False):
+        campos = ["hogar_id", "hogar__nombre", "modelo", *(["canal"] if por_canal else [])]
         filas = (
             ConsumoModel.objects.filter(momento__gte=desde, momento__lt=hasta)
-            .values("hogar_id", "hogar__nombre", "modelo")
+            .values(*campos)
             .annotate(
                 llamadas=Count("id"),
                 entrada=Sum("tokens_entrada"),
@@ -32,7 +33,7 @@ class ConsumoQueryServiceORM(IConsumoQueryService):
                 coste_total=Coalesce(Sum("coste"), CERO),
                 sin_precio=Count("id", filter=Q(coste__isnull=True)),
             )
-            .order_by("-coste_total", "hogar_id", "modelo")
+            .order_by("-coste_total", "hogar_id", *campos[2:])
         )
         return tuple(
             CostePorHogar(
@@ -45,6 +46,15 @@ class ConsumoQueryServiceORM(IConsumoQueryService):
                 tokens_salida=f["salida"],
                 coste=f["coste_total"],
                 sin_precio=f["sin_precio"],
+                canal=f.get("canal", ""),
             )
             for f in filas
         )
+
+    def coste_por_hogar(self, desde):
+        filas = (
+            ConsumoModel.objects.filter(momento__gte=desde, hogar__isnull=False)
+            .values("hogar_id")
+            .annotate(c=Coalesce(Sum("coste"), CERO))
+        )
+        return {f["hogar_id"]: f["c"] for f in filas}

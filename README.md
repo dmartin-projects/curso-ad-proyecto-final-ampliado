@@ -265,3 +265,5 @@ cd backend
 uv run python manage.py coste_asistente --mes 2026-10   # por hogar y modelo
 uv run python manage.py plan_asistente --hogar 1 plus   # más cuota (ASISTENTE_PLANES)
 ```
+
+Ejercicios: `coste_asistente --por-canal` (lo que se ve, el chat, y lo que no, los títulos), los hogares que ya han gastado la cuota del mes como métrica (`gastos.asistente.hogares_sin_cuota`, con su alerta) y las versiones del *prompt* comparadas con datos (vueltas y *tokens* por pregunta, por `gen_ai.prompt.version`, en dos paneles nuevos).

@@ -20,4 +20,4 @@ class InformeDeCostesUseCase(IInformeDeCostesUseCase):
             raise ValueError("`hasta` tiene que ser posterior a `desde`.")
         desde = datetime.combine(entrada.desde, time(), UTC)  # el mes de facturación del proveedor: en UTC
         hasta = datetime.combine(entrada.hasta, time(), UTC)
-        return self.consumos.por_hogar(desde, hasta)
+        return self.consumos.por_hogar(desde, hasta, por_canal=entrada.por_canal)

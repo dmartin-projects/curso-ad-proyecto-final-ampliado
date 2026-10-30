@@ -104,3 +104,19 @@ def test_consultar_sql_solo_si_se_enciende_y_hay_rol(settings):  # módulo 101
     assert list(container.agente(chat=True).tools)[-1] == "consultar_sql"
     settings.ASISTENTE_SQL_PASSWORD = ""
     assert "consultar_sql" not in container.agente(chat=True).tools
+
+
+def test_claude_por_el_nombre_del_modelo_y_con_su_clave(settings):
+    """Módulo 106: "claude-…" va a Anthropic con ANTHROPIC_API_KEY; el resto, a Chat Completions. Se mezclan en la
+    misma cadena de reserva."""
+    from asistente.infrastructure.llm.anthropic_llm import AnthropicLLM
+
+    settings.ASISTENTE_MODELO, settings.ASISTENTE_MODELOS_RESERVA = "claude-sonnet-5-5", ["openai/gpt-oss-120b"]
+    settings.ASISTENTE_API_KEY, settings.ANTHROPIC_API_KEY = "clave-groq", ""
+    with pytest.raises(ImproperlyConfigured, match="Falta ANTHROPIC_API_KEY: .* claude-sonnet-5-5"):
+        container.llm()
+    settings.ANTHROPIC_API_KEY = "clave-anthropic"
+    principal, reserva = (m.dentro for m, _ in container.llm().modelos)
+    assert (type(principal), principal.modelo) == (AnthropicLLM, "claude-sonnet-5-5")
+    assert (type(reserva), reserva.modelo) == (OpenAICompatibleLLM, "openai/gpt-oss-120b")
+    assert container.precio("claude-haiku-5-5").cache < container.precio("claude-haiku-5-5").entrada

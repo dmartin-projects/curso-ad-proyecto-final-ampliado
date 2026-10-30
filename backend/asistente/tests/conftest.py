@@ -26,7 +26,8 @@ logging.getLogger("vcr").setLevel(logging.WARNING)  # en INFO, una línea (con e
 @pytest.fixture(scope="module")
 def vcr_config():
     return {
-        "filter_headers": ["authorization", "cookie"],
+        # Módulo 106: Anthropic manda la clave en x-api-key, no en Authorization. Sin esto, se grabaría en el cassette
+        "filter_headers": ["authorization", "x-api-key", "cookie"],
         "before_record_response": _limpiar_respuesta,
         "match_on": ["method", "scheme", "host", "path", "query", "body"],
         "decode_compressed_response": True,
@@ -51,6 +52,7 @@ def clave(settings):
     settings.ASISTENTE_API_KEY = os.environ.get("ASISTENTE_API_KEY") or "sin-clave-en-los-tests"
     settings.ASISTENTE_BASE_URL = "https://api.groq.com/openai/v1"
     settings.ASISTENTE_MODELO = "openai/gpt-oss-120b"
+    settings.ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY") or "sin-clave-en-los-tests"  # módulo 106
 
 
 @pytest.fixture

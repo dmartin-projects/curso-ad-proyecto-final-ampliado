@@ -170,6 +170,8 @@ from asistente.infrastructure.finanzas.consultas_en_finanzas import ConsultasEnF
 from asistente.infrastructure.finanzas.ejecutor_de_propuestas_en_finanzas import EjecutorDePropuestasEnFinanzas
 from asistente.infrastructure.finanzas.exportador_en_finanzas import ExportadorEnFinanzas
 from asistente.infrastructure.hogares.membresias_en_hogares import MembresiasEnHogares
+from asistente.infrastructure.llm.anthropic_llm import AnthropicLLM
+from asistente.infrastructure.llm.cliente_anthropic import cliente_anthropic
 from asistente.infrastructure.llm.cliente_openai import cliente_del_proceso
 from asistente.infrastructure.llm.detector_con_politica import DetectorConPolitica
 from asistente.infrastructure.llm.detector_prompt_guard import DetectorPromptGuard
@@ -196,8 +198,10 @@ from core.infrastructure.database.unidad_de_trabajo_django import UnidadDeTrabaj
 
 def llm(modelo: str | None = None) -> ILLM:
     """El principal con su reserva (módulo 94); con `modelo`, solo ese (probar_llm --modelo)."""
-    if not settings.ASISTENTE_API_KEY:  # mejor esto al arrancar que un 401 en mitad de una conversación
-        raise ImproperlyConfigured("Falta ASISTENTE_API_KEY: el asistente no puede hablar con ningún modelo.")
+    for m in [modelo] if modelo else [settings.ASISTENTE_MODELO, *settings.ASISTENTE_MODELOS_RESERVA]:
+        if not _clave(m):  # mejor esto al arrancar que un 401 en mitad de una conversación
+            ajuste = "ANTHROPIC_API_KEY" if _proveedor(m) == "anthropic" else "ASISTENTE_API_KEY"
+            raise ImproperlyConfigured(f"Falta {ajuste}: el asistente no puede hablar con {m}.")
     if modelo:
         return _medido(modelo)
     modelos = [settings.ASISTENTE_MODELO, *settings.ASISTENTE_MODELOS_RESERVA]
@@ -213,7 +217,20 @@ def llm_auxiliar() -> ILLM:
 
 def _medido(modelo: str) -> ILLM:
     """Módulo 98: cada modelo, medido (span y métricas GenAI de OpenTelemetry). Sin OTEL_ENABLED no cuesta nada: la API
-    de OpenTelemetry sin SDK no hace nada."""
+    de OpenTelemetry sin SDK no hace nada.
+
+    Módulo 106: el adapter, por el nombre del modelo. Los de Anthropic empiezan por "claude-"; el resto, Chat
+    Completions (Groq u otro compatible). Así se mezclan en la misma cadena de reserva: Claude de principal y Groq de
+    reserva, o al revés, sin un ajuste de "proveedor" que se pueda olvidar."""
+    if _proveedor(modelo) == "anthropic":
+        return LLMMedido(
+            AnthropicLLM(
+                cliente=cliente_anthropic(settings.ANTHROPIC_API_KEY, settings.ASISTENTE_TIMEOUT), modelo=modelo
+            ),
+            proveedor="anthropic",
+            base_url="https://api.anthropic.com",
+            precio=precio,
+        )
     cliente = cliente_del_proceso(settings.ASISTENTE_BASE_URL, settings.ASISTENTE_API_KEY, settings.ASISTENTE_TIMEOUT)
     return LLMMedido(
         OpenAICompatibleLLM(cliente=cliente, modelo=modelo),
@@ -221,6 +238,14 @@ def _medido(modelo: str) -> ILLM:
         base_url=settings.ASISTENTE_BASE_URL,
         precio=precio,
     )
+
+
+def _proveedor(modelo: str) -> str:
+    return "anthropic" if modelo.startswith("claude-") else settings.ASISTENTE_PROVEEDOR
+
+
+def _clave(modelo: str) -> str:
+    return settings.ANTHROPIC_API_KEY if _proveedor(modelo) == "anthropic" else settings.ASISTENTE_API_KEY
 
 
 def _circuito(modelo: str) -> CircuitBreaker:

@@ -417,6 +417,9 @@ TICKETS_TAMANO_MAXIMO = 10 * 1024 * 1024  # 10 MB
 # En local, sin clave ni límites: ASISTENTE_BASE_URL=http://localhost:11434/v1 (Ollama) y un modelo con tools.
 ASISTENTE_BASE_URL = env("ASISTENTE_BASE_URL", default="https://api.groq.com/openai/v1")
 ASISTENTE_API_KEY = env("ASISTENTE_API_KEY", default="")
+# Módulo 106: la clave de Anthropic, para los modelos "claude-…" (en ASISTENTE_MODELO, la reserva o el auxiliar). Aparte:
+# se puede usar Claude de principal y Groq de reserva
+ANTHROPIC_API_KEY = env("ANTHROPIC_API_KEY", default="")
 ASISTENTE_MODELO = env("ASISTENTE_MODELO", default="openai/gpt-oss-120b")
 ASISTENTE_TIMEOUT = env.float("ASISTENTE_TIMEOUT", default=30.0)  # segundos por intento
 # Módulo 94: si el principal no está disponible (o se ha quedado sin cuota), estos, en orden. En Groq, cada modelo
@@ -438,6 +441,12 @@ ASISTENTE_NAGER_URL = env("ASISTENTE_NAGER_URL", default="https://date.nager.at/
 # console.groq.com/docs/models en octubre de 2026. Un modelo que no esté aquí sale con "coste desconocido".
 ASISTENTE_PRECIOS = {
     "openai/gpt-oss-120b": ("0.15", "0.60", "0.075"),
+    # Módulo 106: los de Anthropic (platform.claude.com/docs/en/about-claude/pricing, octubre de 2026). Haiku 5.5, el de
+    # las peticiones de hasta 100.000 tokens (más largas cuestan 5 veces más). La escritura en la caché (1,25 veces la
+    # entrada) se cuenta como entrada normal (ejercicio 1)
+    "claude-opus-5-5": ("4", "20", "0.20"),
+    "claude-sonnet-5-5": ("2", "10", "0.10"),
+    "claude-haiku-5-5": ("0.10", "0.50", "0.01"),
     "openai/gpt-oss-20b": ("0.075", "0.30", "0.037"),
     "qwen/qwen3.8-27b": ("0.80", "4.00", "0.80"),  # ejercicio 2 (sin precio de caché publicado: el de entrada)
 }

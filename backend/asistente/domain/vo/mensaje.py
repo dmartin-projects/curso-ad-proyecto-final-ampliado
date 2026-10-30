@@ -17,6 +17,9 @@ class Mensaje:
     texto: str = ""
     llamadas: tuple[LlamadaTool, ...] = ()  # solo en mensajes del MODELO
     resultados: tuple[ResultadoTool, ...] = ()  # solo en mensajes TOOL: uno por llamada del turno anterior
+    # Módulo 106: lo que el proveedor pide que se le devuelva TAL CUAL en la siguiente llamada (el razonamiento firmado
+    # de Claude en un turno con tools), como texto JSON que solo entiende su adapter. Para el resto, invisible
+    opaco: tuple[str, ...] = ()
 
     def __post_init__(self):
         if self.rol != RolMensaje.MODELO and self.llamadas:
@@ -34,8 +37,8 @@ class Mensaje:
         return cls(RolMensaje.USUARIO, texto=texto)
 
     @classmethod
-    def modelo(cls, texto: str = "", llamadas: tuple[LlamadaTool, ...] = ()) -> "Mensaje":
-        return cls(RolMensaje.MODELO, texto=texto, llamadas=llamadas)
+    def modelo(cls, texto: str = "", llamadas: tuple[LlamadaTool, ...] = (), opaco: tuple[str, ...] = ()) -> "Mensaje":
+        return cls(RolMensaje.MODELO, texto=texto, llamadas=llamadas, opaco=opaco)
 
     @classmethod
     def de_tools(cls, resultados: tuple[ResultadoTool, ...]) -> "Mensaje":

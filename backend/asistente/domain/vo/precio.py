@@ -14,8 +14,12 @@ class Precio:
     entrada: Decimal
     salida: Decimal  # el razonamiento se cobra como salida (ya está dentro de Uso.salida)
     cache: Decimal  # entrada servida desde la caché
+    cache_escrita: Decimal | None = None  # ejercicio 1 del 106: escribir en la caché (None: como la entrada)
 
     def coste(self, uso: Uso) -> Decimal:
-        sin_cache = uso.entrada - uso.cache
-        total = sin_cache * self.entrada + uso.cache * self.cache + uso.salida * self.salida
+        sin_cache = uso.entrada - uso.cache - uso.cache_escrita
+        escritura = self.entrada if self.cache_escrita is None else self.cache_escrita
+        total = (
+            sin_cache * self.entrada + uso.cache * self.cache + uso.cache_escrita * escritura + uso.salida * self.salida
+        )
         return (total / MILLON).quantize(Decimal("0.000001"))

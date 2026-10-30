@@ -8,6 +8,8 @@ class Uso:
     salida: int = 0  # todo lo generado: la respuesta visible, las tool calls Y el razonamiento
     razonamiento: int = 0  # de la salida, los tokens de razonamiento (no se ven, se pagan)
     cache: int = 0  # de la entrada, los servidos desde la caché del proveedor (prompt caching: más baratos)
+    # Ejercicio 1 del 106: de la entrada, los ESCRITOS en la caché (Anthropic los cobra un 25 % más caros; Groq, no)
+    cache_escrita: int = 0
 
     def __add__(self, otro: "Uso") -> "Uso":
         return Uso(
@@ -15,6 +17,7 @@ class Uso:
             self.salida + otro.salida,
             self.razonamiento + otro.razonamiento,
             self.cache + otro.cache,
+            self.cache_escrita + otro.cache_escrita,
         )
 
     @property

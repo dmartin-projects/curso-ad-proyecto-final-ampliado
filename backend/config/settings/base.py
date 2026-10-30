@@ -442,11 +442,11 @@ ASISTENTE_NAGER_URL = env("ASISTENTE_NAGER_URL", default="https://date.nager.at/
 ASISTENTE_PRECIOS = {
     "openai/gpt-oss-120b": ("0.15", "0.60", "0.075"),
     # Módulo 106: los de Anthropic (platform.claude.com/docs/en/about-claude/pricing, octubre de 2026). Haiku 5.5, el de
-    # las peticiones de hasta 100.000 tokens (más largas cuestan 5 veces más). La escritura en la caché (1,25 veces la
-    # entrada) se cuenta como entrada normal (ejercicio 1)
-    "claude-opus-5-5": ("4", "20", "0.20"),
-    "claude-sonnet-5-5": ("2", "10", "0.10"),
-    "claude-haiku-5-5": ("0.10", "0.50", "0.01"),
+    # las peticiones de hasta 100.000 tokens (más largas cuestan 5 veces más). Ejercicio 1: el cuarto, escribir en la
+    # caché de 5 minutos (1,25 veces la entrada)
+    "claude-opus-5-5": ("4", "20", "0.20", "5"),
+    "claude-sonnet-5-5": ("2", "10", "0.10", "2.50"),
+    "claude-haiku-5-5": ("0.10", "0.50", "0.01", "0.125"),
     "openai/gpt-oss-20b": ("0.075", "0.30", "0.037"),
     "qwen/qwen3.8-27b": ("0.80", "4.00", "0.80"),  # ejercicio 2 (sin precio de caché publicado: el de entrada)
 }

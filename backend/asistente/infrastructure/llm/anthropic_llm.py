@@ -72,6 +72,17 @@ class AnthropicLLM(ILLM):
             m = s.get_final_message()
         return respuesta(m, self._modelo, int((time.monotonic() - inicio) * 1000))
 
+    def contar_tokens(self, peticion: PeticionLLM) -> int:
+        """Ejercicio 2: los tokens de entrada de una petición con el tokenizer del modelo, sin generar nada (gratis, con
+        su propio límite de peticiones por minuto). La documentación lo llama estimación: puede diferir un poco de lo que
+        cuente la llamada. `estimar_tokens` (módulo 96) cuenta caracteres, sin red; esto, el proveedor."""
+        c = cuerpo(self._modelo, peticion, cache=False)
+        aceptados = {
+            k: c[k] for k in ("model", "system", "messages", "tools", "tool_choice", "output_config") if k in c
+        }
+        with _errores(self._modelo):
+            return self.cliente.messages.count_tokens(**aceptados).input_tokens
+
 
 class _errores:
     """Los errores del SDK, traducidos a los del port (como en OpenAICompatibleLLM). Los reintentos los hace el SDK
@@ -199,4 +210,5 @@ def uso(u) -> Uso:
         salida=u.output_tokens,
         razonamiento=(detalle.thinking_tokens or 0) if detalle else 0,
         cache=leidos,
+        cache_escrita=escritos,  # ejercicio 1
     )

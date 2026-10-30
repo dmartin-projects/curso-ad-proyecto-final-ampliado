@@ -8,9 +8,9 @@ from asistente.tests.fakes.mundo import Mundo
 CATALOGO = Mundo().catalogo(chat=True)  # el del chat: el de consulta y las de su canal
 
 
-def test_diecinueve_tools_sin_nombres_repetidos():  # las 11 del 95, 2 de sus ejercicios, 5 del 97 y recordar (99)
+def test_veinte_tools_sin_nombres_repetidos():  # 11 del 95, 2 de sus ejercicios, 5 del 97, recordar y olvidar (99)
     nombres = [t.nombre for t in CATALOGO]
-    assert len(nombres) == len(set(nombres)) == 19
+    assert len(nombres) == len(set(nombres)) == 20
 
 
 @pytest.mark.parametrize("tool", CATALOGO, ids=lambda t: t.nombre)

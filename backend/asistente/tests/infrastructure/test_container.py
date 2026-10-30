@@ -73,7 +73,7 @@ def test_el_chat_ademas_con_las_de_su_canal(settings):
     """Módulo 97: gráficos, archivos y propuestas solo en el chat (la terminal no los puede enseñar)."""
     settings.ASISTENTE_API_KEY = "clave"
     consulta, chat = list(container.agente().tools), list(container.agente(chat=True).tools)
-    assert chat == [*consulta, "grafico", "exportar", "proponer_movimiento", "recordar"]  # recordar: módulo 99
+    assert chat == [*consulta, "grafico", "exportar", "proponer_movimiento", "recordar", "olvidar"]  # módulo 99
 
 
 def test_el_modelo_auxiliar_con_el_principal_de_reserva(settings):

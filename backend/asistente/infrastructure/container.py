@@ -105,6 +105,7 @@ from asistente.application.tools.grafico_tool import GraficoTool
 from asistente.application.tools.listar_categorias_tool import ListarCategoriasTool
 from asistente.application.tools.listar_cuentas_tool import ListarCuentasTool
 from asistente.application.tools.listar_miembros_tool import ListarMiembrosTool
+from asistente.application.tools.olvidar_tool import OlvidarTool
 from asistente.application.tools.prevision_fin_de_mes_tool import PrevisionFinDeMesTool
 from asistente.application.tools.proponer_movimiento_tool import ProponerMovimientoTool
 from asistente.application.tools.recordar_tool import RecordarTool
@@ -113,6 +114,8 @@ from asistente.application.tools.tendencia_tool import TendenciaTool
 from asistente.application.tools.tipo_de_cambio_tool import TipoDeCambioTool
 from asistente.application.tools.tool import Tool
 from asistente.application.tools.top_comercios_tool import TopComerciosTool
+from asistente.application.ver_contexto_use_case.i_ver_contexto_use_case import IVerContextoUseCase
+from asistente.application.ver_contexto_use_case.ver_contexto_use_case import VerContextoUseCase
 from asistente.domain.vo.precio import Precio
 from asistente.infrastructure.database.repositories.carpeta_command_repository_orm import CarpetaCommandRepositoryORM
 from asistente.infrastructure.database.repositories.consumo_query_service_orm import ConsumoQueryServiceORM
@@ -212,6 +215,7 @@ def tools(chat: bool = False) -> list[Tool]:
         ExportarTool(finanzas=finanzas, exportador=ExportadorEnFinanzas(almacen=AlmacenDjango())),
         ProponerMovimientoTool(finanzas=finanzas),
         RecordarTool(recuerdos=RecuerdoCommandRepositoryORM(), reloj=RelojDjango()),  # módulo 99
+        OlvidarTool(recuerdos=RecuerdoCommandRepositoryORM(), consultas=RecuerdoQueryServiceORM()),  # su ejercicio 1
     ]
 
 
@@ -421,3 +425,9 @@ def listar_recuerdos() -> IListarRecuerdosUseCase:
 
 def olvidar_recuerdo() -> IOlvidarRecuerdoUseCase:
     return OlvidarRecuerdoUseCase(recuerdos=RecuerdoCommandRepositoryORM(), uow=UnidadDeTrabajoDjango())
+
+
+def ver_contexto() -> IVerContextoUseCase:  # ejercicio 2 del 99
+    return VerContextoUseCase(
+        conversaciones=ConversacionCommandRepositoryORM(), recuerdos=RecuerdoQueryServiceORM(), limites=Limites()
+    )

@@ -17,6 +17,7 @@ from asistente.application.tools.grafico_tool import GraficoTool
 from asistente.application.tools.listar_categorias_tool import ListarCategoriasTool
 from asistente.application.tools.listar_cuentas_tool import ListarCuentasTool
 from asistente.application.tools.listar_miembros_tool import ListarMiembrosTool
+from asistente.application.tools.olvidar_tool import OlvidarTool
 from asistente.application.tools.prevision_fin_de_mes_tool import PrevisionFinDeMesTool
 from asistente.application.tools.proponer_movimiento_tool import ProponerMovimientoTool
 from asistente.application.tools.recordar_tool import RecordarTool
@@ -112,6 +113,7 @@ class Mundo:
             ExportarTool(finanzas=f, exportador=self.exportador),
             ProponerMovimientoTool(finanzas=f),
             RecordarTool(recuerdos=self.recuerdos, reloj=reloj()),  # módulo 99
+            OlvidarTool(recuerdos=self.recuerdos, consultas=self.recuerdos),  # su ejercicio 1
         ]
 
     def agente(self, guion: list, limites: Limites | None = None, tools=None) -> tuple[Agente, LLMFake]:

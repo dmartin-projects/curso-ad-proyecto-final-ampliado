@@ -22,4 +22,5 @@ ETIQUETAS = {
     "grafico": "Preparando el gráfico",
     "proponer_movimiento": "Preparando el movimiento",
     "recordar": "Tomando nota",  # módulo 99
+    "olvidar": "Borrando la nota",  # su ejercicio 1
 }

@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from asistente.application.cancelar_analisis_use_case.dtos.cancelar_analisis_input_dto import CancelarAnalisisInputDTO
 from asistente.application.pedir_analisis_use_case.dtos.pedir_analisis_input_dto import PedirAnalisisInputDTO
 from asistente.infrastructure import container
 from asistente.infrastructure.api.v1.serializers.analisis_serializer import (
@@ -32,3 +33,15 @@ class AnalisisView(HogarDesdeUrlMixin, APIView):
         entrada = PedirAnalisisInputDTO(self.hogar.pk, self.actor, tarea, datos.validated_data.get("mes"))
         mes = container.pedir_analisis().ejecutar(entrada)
         return Response({"tarea": tarea, "mes": mes}, status=status.HTTP_202_ACCEPTED)
+
+
+class CancelarAnalisisView(HogarDesdeUrlMixin, APIView):
+    """Ejercicio 1: pedir que pare. 202 también: el worker lo verá entre especialista y especialista."""
+
+    permission_classes = [IsAuthenticated, RolEnHogar]
+    roles_por_metodo = {"DELETE": Membresia.Rol.LECTOR}
+
+    @extend_schema(responses={202: None})
+    def delete(self, request, hogar_pk: int, tarea, **kwargs):
+        container.cancelar_analisis().ejecutar(CancelarAnalisisInputDTO(self.hogar.pk, self.actor, str(tarea)))
+        return Response(status=status.HTTP_202_ACCEPTED)

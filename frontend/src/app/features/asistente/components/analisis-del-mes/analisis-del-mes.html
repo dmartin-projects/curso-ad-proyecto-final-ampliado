@@ -9,6 +9,7 @@
       @for (p of pasos(); track $index) {
         <p class="m-0 text-sm text-texto-suave">{{ p }}</p>
       }
+      <button mat-button (click)="cancelar.emit()">Cancelar el análisis</button>
     </div>
   }
   @if (error(); as e) {

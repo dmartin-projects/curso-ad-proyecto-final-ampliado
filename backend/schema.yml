@@ -1638,6 +1638,31 @@ paths:
               schema:
                 $ref: '#/components/schemas/AnalisisPedido'
           description: ''
+  /api/v1/hogares/{hogar_pk}/asistente/analisis/{tarea}/:
+    delete:
+      operationId: hogares_asistente_analisis_destroy
+      description: 'Ejercicio 1: pedir que pare. 202 también: el worker lo verá entre
+        especialista y especialista.'
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: tarea
+        schema:
+          type: string
+          format: uuid
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '202':
+          description: No response body
   /api/v1/hogares/{hogar_pk}/asistente/carpetas/:
     get:
       operationId: hogares_asistente_carpetas_list

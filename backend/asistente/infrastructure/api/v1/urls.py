@@ -2,7 +2,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
-from asistente.infrastructure.api.v1.views.analisis_view import AnalisisView
+from asistente.infrastructure.api.v1.views.analisis_view import AnalisisView, CancelarAnalisisView
 from asistente.infrastructure.api.v1.views.carpeta_viewset import CarpetaViewSet
 from asistente.infrastructure.api.v1.views.conversacion_viewset import ConversacionViewSet
 from asistente.infrastructure.api.v1.views.cuota_view import CuotaView
@@ -27,5 +27,10 @@ urlpatterns = [
     ),
     path("hogares/<int:hogar_pk>/asistente/cuota/", CuotaView.as_view(), name="asistente-cuota"),  # módulo 98
     path("hogares/<int:hogar_pk>/asistente/analisis/", AnalisisView.as_view(), name="asistente-analisis"),  # 105
+    path(  # ejercicio 1 del 105
+        "hogares/<int:hogar_pk>/asistente/analisis/<uuid:tarea>/",
+        CancelarAnalisisView.as_view(),
+        name="asistente-analisis-cancelar",
+    ),
     *router.urls,
 ]

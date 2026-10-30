@@ -455,6 +455,7 @@ protected_modules = [
     "asistente.infrastructure.database.repositories.propuesta_command_repository_orm",
     "asistente.infrastructure.database.repositories.recuerdo_command_repository_orm",
     "asistente.infrastructure.ayuda",
+    "asistente.infrastructure.cache",
     "asistente.infrastructure.embeddings",
     "asistente.infrastructure.externos",
     "asistente.infrastructure.finanzas",

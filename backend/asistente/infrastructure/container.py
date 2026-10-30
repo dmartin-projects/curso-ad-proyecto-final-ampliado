@@ -17,6 +17,8 @@ from asistente.application.analizar_mes_use_case.i_analizar_mes_use_case import 
 from asistente.application.asignar_plan_use_case.asignar_plan_use_case import AsignarPlanUseCase
 from asistente.application.asignar_plan_use_case.i_asignar_plan_use_case import IAsignarPlanUseCase
 from asistente.application.ayuda.buscador_de_ayuda import BuscadorDeAyuda
+from asistente.application.cancelar_analisis_use_case.cancelar_analisis_use_case import CancelarAnalisisUseCase
+from asistente.application.cancelar_analisis_use_case.i_cancelar_analisis_use_case import ICancelarAnalisisUseCase
 from asistente.application.chat.calculadora_de_graficos import CalculadoraDeGraficos
 from asistente.application.compactar_conversacion_use_case.compactar_conversacion_use_case import (
     CompactarConversacionUseCase,
@@ -139,6 +141,7 @@ from asistente.application.ver_contexto_use_case.ver_contexto_use_case import Ve
 from asistente.domain.exceptions.servicio_externo_no_disponible_exception import ServicioExternoNoDisponibleException
 from asistente.domain.vo.precio import Precio
 from asistente.infrastructure.ayuda.fuente_de_ayuda_en_disco import FuenteDeAyudaEnDisco
+from asistente.infrastructure.cache.control_de_analisis_en_cache import ControlDeAnalisisEnCache
 from asistente.infrastructure.database.repositories.carpeta_command_repository_orm import CarpetaCommandRepositoryORM
 from asistente.infrastructure.database.repositories.consumo_query_service_orm import ConsumoQueryServiceORM
 from asistente.infrastructure.database.repositories.consumo_repository_orm import ConsumoRepositoryORM
@@ -637,7 +640,12 @@ def pedir_analisis() -> IPedirAnalisisUseCase:
         tarifas=TarifasDesdeAjustes(),
         consumos=ConsumoQueryServiceORM(),
         reloj=RelojDjango(),
+        control=ControlDeAnalisisEnCache(),  # ejercicio 3
     )
+
+
+def cancelar_analisis() -> ICancelarAnalisisUseCase:  # ejercicio 1
+    return CancelarAnalisisUseCase(control=ControlDeAnalisisEnCache())
 
 
 def analizar_mes() -> IAnalizarMesUseCase:
@@ -650,4 +658,6 @@ def analizar_mes() -> IAnalizarMesUseCase:
         tarifas=TarifasDesdeAjustes(),
         reloj=RelojDjango(),
         uow=UnidadDeTrabajoDjango(),
+        control=ControlDeAnalisisEnCache(),  # ejercicios 1 y 3
+        max_tokens=settings.ASISTENTE_ANALISIS_MAX_TOKENS,  # ejercicio 2
     )

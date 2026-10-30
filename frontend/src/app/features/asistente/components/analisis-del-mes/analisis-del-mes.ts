@@ -14,4 +14,5 @@ export class AnalisisDelMes {
   readonly enCurso = input.required<boolean>();
   readonly error = input('');
   readonly analizar = output();
+  readonly cancelar = output(); // ejercicio 1
 }

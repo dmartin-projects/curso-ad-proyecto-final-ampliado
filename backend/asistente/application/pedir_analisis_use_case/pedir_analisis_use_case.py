@@ -8,9 +8,11 @@ from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.cuotas.calcular_cuota import calcular_cuota
 from asistente.application.pedir_analisis_use_case.dtos.pedir_analisis_input_dto import PedirAnalisisInputDTO
 from asistente.application.pedir_analisis_use_case.i_pedir_analisis_use_case import IPedirAnalisisUseCase
+from asistente.application.ports.i_control_de_analisis import IControlDeAnalisis
 from asistente.application.ports.i_membresias import IMembresias
 from asistente.application.ports.i_programador_de_analisis import IProgramadorDeAnalisis
 from asistente.application.ports.i_tarifas import ITarifas
+from asistente.domain.exceptions.analisis_en_curso_exception import AnalisisEnCursoException
 from asistente.domain.repositories.i_consumo_query_service import IConsumoQueryService
 from asistente.domain.repositories.i_plan_del_hogar_repository import IPlanDelHogarRepository
 from core.application.ports.i_reloj import IReloj
@@ -33,9 +35,11 @@ class PedirAnalisisUseCase(IPedirAnalisisUseCase):
         tarifas: ITarifas,
         consumos: IConsumoQueryService,
         reloj: IReloj,
+        control: IControlDeAnalisis | None = None,  # ejercicio 3: uno a la vez
     ):
         self.membresias, self.programador = membresias, programador
         self.planes, self.tarifas, self.consumos, self.reloj = planes, tarifas, consumos, reloj
+        self.control = control
 
     def ejecutar(self, entrada: PedirAnalisisInputDTO) -> str:
         entrada.actor.exigir(self.rol_minimo)
@@ -49,6 +53,10 @@ class PedirAnalisisUseCase(IPedirAnalisisUseCase):
             contexto, self.reloj.ahora(), planes=self.planes, tarifas=self.tarifas, consumos=self.consumos
         )
         cuota.exigir(self.reloj.ahora())
+        if self.control is not None and not self.control.empezar(
+            entrada.actor.usuario_id, entrada.hogar_id, entrada.tarea
+        ):
+            raise AnalisisEnCursoException()
         self.programador.programar(entrada.actor.usuario_id, entrada.hogar_id, str(mes), entrada.tarea)
         return str(mes)
 

@@ -19,9 +19,11 @@ export class AnalisisDelMesStore {
   readonly enCurso = signal(false);
   readonly error = signal('');
   private escucha?: Subscription;
+  private tarea?: { hogarId: number; id: string };
 
   analizar(hogarId: number): Promise<number | null> {
     const tarea = crypto.randomUUID();
+    this.tarea = { hogarId, id: tarea };
     this.pasos.set([]);
     this.error.set('');
     this.enCurso.set(true);
@@ -47,6 +49,13 @@ export class AnalisisDelMesStore {
         ),
       );
     });
+  }
+
+  /** Ejercicio 1: pide que pare; el aviso "cancelado" llega cuando el worker lo ve. */
+  async cancelar() {
+    if (!this.tarea || !this.enCurso()) return;
+    this.pasos.update((p) => [...p, 'Cancelando']);
+    await lastValueFrom(this.api.cancelarAnalisis(this.tarea.hogarId, this.tarea.id));
   }
 
   private terminar(error: string, conversacion: number | null): number | null {

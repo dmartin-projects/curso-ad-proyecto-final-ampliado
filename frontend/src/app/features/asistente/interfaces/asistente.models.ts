@@ -99,7 +99,7 @@ export interface Pregunta {
 /** Módulo 105: un aviso del análisis del mes, por el WebSocket (evento "asistente.analisis"). */
 export interface AvisoDeAnalisis {
   tarea: string;
-  estado: 'en_curso' | 'terminado' | 'fallido';
+  estado: 'en_curso' | 'terminado' | 'fallido' | 'cancelado'; // cancelado: ejercicio 1
   paso: string;
   conversacion?: number;
 }

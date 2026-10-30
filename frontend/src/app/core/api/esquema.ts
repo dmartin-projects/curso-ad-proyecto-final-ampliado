@@ -970,6 +970,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hogares/{hogar_pk}/asistente/analisis/{tarea}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Ejercicio 1: pedir que pare. 202 también: el worker lo verá entre especialista y especialista. */
+        delete: operations["hogares_asistente_analisis_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/hogares/{hogar_pk}/asistente/carpetas/": {
         parameters: {
             query?: never;
@@ -4578,6 +4595,27 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["AnalisisPedido"];
                 };
+            };
+        };
+    };
+    hogares_asistente_analisis_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: number;
+                tarea: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
         };
     };

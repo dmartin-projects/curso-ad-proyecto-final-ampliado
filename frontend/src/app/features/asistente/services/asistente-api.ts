@@ -71,6 +71,11 @@ export class AsistenteApi {
     return this.http.post<AnalisisPedido>(`${this.base(hogarId)}/analisis/`, { tarea, mes });
   }
 
+  /** Ejercicio 1 del 105: pedir que pare (lo verá el worker entre especialista y especialista). */
+  cancelarAnalisis(hogarId: number, tarea: string) {
+    return this.http.delete<void>(`${this.base(hogarId)}/analisis/${tarea}/`);
+  }
+
   /** Módulo 99: lo que el asistente recuerda de quien pide (lo guarda la tool `recordar`). */
   recuerdos(hogarId: number) {
     return this.http.get<Recuerdo[]>(`${this.base(hogarId)}/recuerdos/`);

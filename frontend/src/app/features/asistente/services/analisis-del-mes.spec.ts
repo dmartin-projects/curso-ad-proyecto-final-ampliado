@@ -73,6 +73,25 @@ describe('AnalisisDelMesStore (módulo 105)', () => {
   });
 });
 
+describe('AnalisisDelMesStore: cancelar (ejercicio 1 del 105)', () => {
+  it('pide que pare y, cuando el worker lo ve, termina sin error ni conversación', async () => {
+    const { store, avisar, http } = montar();
+    const fin = store.analizar(3);
+    http
+      .expectOne(() => true)
+      .flush({ tarea: TAREA, mes: '2026-10' }, { status: 202, statusText: 'Accepted' });
+    const cancelando = store.cancelar();
+    const del = http.expectOne(`/api/v1/hogares/3/asistente/analisis/${TAREA}/`);
+    expect(del.request.method).toBe('DELETE');
+    del.flush(null, { status: 202, statusText: 'Accepted' });
+    await cancelando;
+    expect(store.pasos()).toEqual(['Cancelando']);
+    avisar({ tarea: TAREA, estado: 'cancelado', paso: 'Análisis cancelado.' });
+    expect(await fin).toBeNull();
+    expect([store.enCurso(), store.error()]).toEqual([false, '']);
+  });
+});
+
 describe('AnalisisDelMes (módulo 105)', () => {
   it('el botón, los pasos mientras dura y el error', () => {
     TestBed.configureTestingModule({ providers: proveedoresDeTest() });

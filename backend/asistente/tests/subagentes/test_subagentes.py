@@ -152,7 +152,7 @@ class ProgramadorFake(IProgramadorDeAnalisis):
         self.programados.append((usuario_id, hogar_id, mes, tarea))
 
 
-def pedir(mes=None, tarea=TAREA, planes=None):
+def pedir(mes=None, tarea=TAREA, planes=None, control=None):
     programador = ProgramadorFake()
     caso = PedirAnalisisUseCase(
         membresias=membresias(),
@@ -161,6 +161,7 @@ def pedir(mes=None, tarea=TAREA, planes=None):
         tarifas=TarifasFake(),
         consumos=ConsumoRepositorioFake(),
         reloj=reloj(),
+        control=control,
     )
     return caso.ejecutar(PedirAnalisisInputDTO(HOGAR, Actor(ANA, Rol.LECTOR), tarea, mes)), programador
 

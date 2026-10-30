@@ -468,6 +468,8 @@ ASISTENTE_MCP_URL = env("ASISTENTE_MCP_URL", default="http://localhost:8000/api/
 ASISTENTE_MCP_SERVIDORES = env.json("ASISTENTE_MCP_SERVIDORES", default=[])
 # Ejercicio 1 del 104: llamadas por minuto al servidor MCP, por persona y cliente
 ASISTENTE_MCP_LLAMADAS_POR_MINUTO = env.int("ASISTENTE_MCP_LLAMADAS_POR_MINUTO", default=60)
+# Ejercicio 2 del 105: los tokens de todo un análisis del mes (orquestador y especialistas); se para al pasarlo
+ASISTENTE_ANALISIS_MAX_TOKENS = env.int("ASISTENTE_ANALISIS_MAX_TOKENS", default=60_000)
 # Módulo 98: el proveedor, como lo nombran las convenciones GenAI de OpenTelemetry (gen_ai.provider.name)
 ASISTENTE_PROVEEDOR = env("ASISTENTE_PROVEEDOR", default="groq")
 # Las cuotas de cada plan: tokens al día por persona (entrada + salida) y dólares al mes por hogar. Una pregunta del chat

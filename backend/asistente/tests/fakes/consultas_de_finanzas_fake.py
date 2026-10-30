@@ -1,9 +1,10 @@
-# asistente/tests/fakes/consultas_de_finanzas_fake.py — IConsultasDeFinanzas en memoria (módulos 94 y 95)
+# asistente/tests/fakes/consultas_de_finanzas_fake.py — IConsultasDeFinanzas en memoria (módulos 94, 95 y 97)
 from datetime import date
 from decimal import Decimal
 
 from asistente.application.ports.i_consultas_de_finanzas import IConsultasDeFinanzas
 from asistente.domain.read_models.categoria_del_hogar import CategoriaDelHogar
+from asistente.domain.read_models.cuenta_del_hogar import CuentaDelHogar
 from asistente.domain.read_models.gasto_de_categoria import GastoDeCategoria
 from asistente.domain.read_models.movimiento_encontrado import MovimientoEncontrado
 from asistente.domain.read_models.movimientos_encontrados import MovimientosEncontrados
@@ -42,6 +43,7 @@ class ConsultasDeFinanzasFake(IConsultasDeFinanzas):
         self.resumenes = dict(resumenes or {})
         self.categorias_por_hogar: dict[int, tuple[CategoriaDelHogar, ...]] = {}
         self.movimientos_por_hogar: dict[int, list[tuple]] = {}  # (fecha, importe, concepto, categoría, comercio)
+        self.cuentas_por_hogar: dict[int, tuple[CuentaDelHogar, ...]] = {}
         self.consultas: list[tuple] = []
 
     @classmethod
@@ -57,6 +59,8 @@ class ConsultasDeFinanzasFake(IConsultasDeFinanzas):
             (date.fromisoformat(f), Decimal(i), concepto, categoria, comercio)
             for f, i, concepto, categoria, comercio in casa.MOVIMIENTOS
         ]
+        saldo = sum((Decimal(i) for _, i, *_ in casa.MOVIMIENTOS), Decimal(0))
+        fake.cuentas_por_hogar[hogar_id] = (CuentaDelHogar(1, casa.CUENTA, "banco", True, saldo),)
         return fake
 
     def resumen_del_mes(self, actor, hogar_id, mes):
@@ -97,3 +101,7 @@ class ConsultasDeFinanzasFake(IConsultasDeFinanzas):
     def categorias(self, actor, hogar_id):
         actor.exigir(Rol.LECTOR)
         return self.categorias_por_hogar.get(hogar_id, ())
+
+    def cuentas(self, actor, hogar_id):
+        actor.exigir(Rol.LECTOR)
+        return self.cuentas_por_hogar.get(hogar_id, ())

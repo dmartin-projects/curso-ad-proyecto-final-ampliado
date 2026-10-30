@@ -1,24 +1,32 @@
-# asistente/tests/fakes/mundo.py — un hogar, quien pregunta y el agente con fakes (módulos 94 y 95)
+# asistente/tests/fakes/mundo.py — un hogar, quien pregunta y el agente con fakes (módulos 94, 95 y 97)
 from datetime import UTC, date, datetime
 
 from asistente.application.agent.agente import Agente
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.agent.limites import Limites
+from asistente.application.chat.calculadora_de_graficos import CalculadoraDeGraficos
 from asistente.application.tools.buscar_movimientos_tool import BuscarMovimientosTool
 from asistente.application.tools.comparar_con_ipc_tool import CompararConIpcTool
 from asistente.application.tools.comparar_meses_tool import CompararMesesTool
 from asistente.application.tools.detalle_ticket_tool import DetalleTicketTool
 from asistente.application.tools.dias_festivos_tool import DiasFestivosTool
 from asistente.application.tools.estado_presupuestos_tool import EstadoPresupuestosTool
+from asistente.application.tools.exportar_tool import ExportarTool
 from asistente.application.tools.gasto_por_categoria_tool import GastoPorCategoriaTool
+from asistente.application.tools.grafico_tool import GraficoTool
 from asistente.application.tools.listar_categorias_tool import ListarCategoriasTool
+from asistente.application.tools.listar_cuentas_tool import ListarCuentasTool
+from asistente.application.tools.listar_miembros_tool import ListarMiembrosTool
 from asistente.application.tools.prevision_fin_de_mes_tool import PrevisionFinDeMesTool
+from asistente.application.tools.proponer_movimiento_tool import ProponerMovimientoTool
 from asistente.application.tools.resumen_mes_tool import ResumenMesTool
 from asistente.application.tools.tendencia_tool import TendenciaTool
 from asistente.application.tools.tipo_de_cambio_tool import TipoDeCambioTool
 from asistente.application.tools.top_comercios_tool import TopComerciosTool
 from asistente.domain.read_models.hogar_del_usuario import HogarDelUsuario
+from asistente.domain.read_models.miembro_del_hogar import MiembroDelHogar
 from asistente.tests.fakes.consultas_de_finanzas_fake import ConsultasDeFinanzasFake
+from asistente.tests.fakes.exportador_de_movimientos_fake import ExportadorDeMovimientosFake
 from asistente.tests.fakes.festivos_fake import FestivosFake
 from asistente.tests.fakes.indice_de_precios_fake import IndiceDePreciosFake
 from asistente.tests.fakes.llm_fake import LLMFake
@@ -45,11 +53,18 @@ class Cronometro:
         return self.segundos
 
 
+def membresias(hogar: HogarDelUsuario = CASA) -> MembresiasFake:
+    fake = MembresiasFake({(ANA, hogar.id): hogar})
+    fake.miembros_por_hogar[hogar.id] = (MiembroDelHogar("Ana", "admin"), MiembroDelHogar("Luis", "miembro"))
+    return fake
+
+
+def reloj(ahora: datetime | None = None) -> RelojFake:
+    return RelojFake(HOY, ahora or datetime(2026, 10, 29, 10, 0, tzinfo=UTC))
+
+
 def contexto(hogar: HogarDelUsuario = CASA, ahora: datetime | None = None) -> ContextoPregunta:
-    reloj = RelojFake(HOY, ahora or datetime(2026, 10, 29, 10, 0, tzinfo=UTC))
-    return ContextoPregunta.abrir(
-        usuario_id=ANA, hogar_id=hogar.id, membresias=MembresiasFake({(ANA, hogar.id): hogar}), reloj=reloj
-    )
+    return ContextoPregunta.abrir(usuario_id=ANA, hogar_id=hogar.id, membresias=membresias(hogar), reloj=reloj(ahora))
 
 
 class Mundo:
@@ -59,16 +74,18 @@ class Mundo:
         self.divisas = TipoDeCambioFake()
         self.precios = IndiceDePreciosFake()
         self.festivos = FestivosFake()
+        self.membresias = membresias()
+        self.exportador = ExportadorDeMovimientosFake()
         self.cronometro = Cronometro()
 
     def tools(self):
         """Las dos del módulo 94."""
         return [ResumenMesTool(finanzas=self.finanzas), GastoPorCategoriaTool(finanzas=self.finanzas)]
 
-    def catalogo(self):
-        """Todas (módulo 95 y sus ejercicios), sobre los fakes: lo mismo que monta container.tools() con los adapters."""
+    def catalogo(self, chat: bool = False):
+        """Todas (módulos 95 y 97), sobre los fakes: lo mismo que monta container.tools(chat) con los adapters."""
         f = self.finanzas
-        return [
+        consulta = [
             *self.tools(),
             CompararMesesTool(finanzas=f),
             BuscarMovimientosTool(finanzas=f),
@@ -81,6 +98,16 @@ class Mundo:
             TipoDeCambioTool(divisas=self.divisas),
             CompararConIpcTool(finanzas=f, precios=self.precios),
             DiasFestivosTool(festivos=self.festivos),
+            ListarCuentasTool(finanzas=f),
+            ListarMiembrosTool(membresias=self.membresias),
+        ]
+        if not chat:
+            return consulta
+        return [
+            *consulta,
+            GraficoTool(calculadora=CalculadoraDeGraficos(consulta)),
+            ExportarTool(finanzas=f, exportador=self.exportador),
+            ProponerMovimientoTool(finanzas=f),
         ]
 
     def agente(self, guion: list, limites: Limites | None = None, tools=None) -> tuple[Agente, LLMFake]:

@@ -1,4 +1,4 @@
-"""Módulos 93 y 94: el composition root del asistente."""
+"""Módulos 93, 94 y 97: el composition root del asistente."""
 
 from decimal import Decimal
 
@@ -59,5 +59,20 @@ def test_el_agente_con_sus_tools_y_el_tiempo_de_los_ajustes(settings):
         "tipo_de_cambio",
         "comparar_con_ipc",
         "dias_festivos",
+        "listar_cuentas",
+        "listar_miembros",
     ]
     assert (agente.limites.segundos, agente.limites.max_tokens) == (45, 10000)
+
+
+def test_el_chat_ademas_con_las_de_su_canal(settings):
+    """Módulo 97: gráficos, archivos y propuestas solo en el chat (la terminal no los puede enseñar)."""
+    settings.ASISTENTE_API_KEY = "clave"
+    consulta, chat = list(container.agente().tools), list(container.agente(chat=True).tools)
+    assert chat == [*consulta, "grafico", "exportar", "proponer_movimiento"]
+
+
+def test_el_modelo_auxiliar_con_el_principal_de_reserva(settings):
+    settings.ASISTENTE_API_KEY, settings.ASISTENTE_MODELO = "clave", "openai/gpt-oss-120b"
+    settings.ASISTENTE_MODELO_AUXILIAR = "openai/gpt-oss-20b"
+    assert [m.modelo for m, _ in container.llm_auxiliar().modelos] == ["openai/gpt-oss-20b", "openai/gpt-oss-120b"]

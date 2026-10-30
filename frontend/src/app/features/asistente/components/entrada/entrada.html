@@ -1,0 +1,41 @@
+<form class="flex items-end gap-2" (ngSubmit)="mandar()">
+  <mat-form-field class="flex-1" subscriptSizing="dynamic">
+    <mat-label>Pregunta</mat-label>
+    <textarea
+      matInput
+      name="texto"
+      rows="2"
+      maxlength="2000"
+      [ngModel]="texto()"
+      (ngModelChange)="texto.set($event)"
+      (keydown)="teclas($event)"
+      placeholder="¿Cuánto gastamos este mes en el súper?"
+    ></textarea>
+    @if (archivo(); as a) {
+      <mat-hint>Adjunto: {{ a.name }}</mat-hint>
+    }
+  </mat-form-field>
+  <input
+    #selector
+    type="file"
+    class="hidden"
+    accept="image/jpeg,image/png,image/webp,application/pdf"
+    (change)="elegir($event)"
+    aria-label="Elegir un adjunto"
+  />
+  <button
+    mat-icon-button
+    type="button"
+    (click)="selector.click()"
+    aria-label="Adjuntar una foto o un PDF"
+  >
+    <mat-icon>attach_file</mat-icon>
+  </button>
+  @if (ocupado()) {
+    <button mat-stroked-button type="button" (click)="detener.emit()">
+      <mat-icon>stop</mat-icon> Detener
+    </button>
+  } @else {
+    <button mat-flat-button type="submit" [disabled]="!texto().trim()">Enviar</button>
+  }
+</form>

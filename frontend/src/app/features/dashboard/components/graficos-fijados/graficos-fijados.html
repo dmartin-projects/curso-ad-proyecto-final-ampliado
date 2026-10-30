@@ -1,0 +1,31 @@
+@for (g of graficos(); track g.id) {
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>{{ g.especificacion.titulo }}</mat-card-title>
+      @if (g.fijado_por) {
+        <mat-card-subtitle>Fijado por {{ g.fijado_por }} desde el asistente</mat-card-subtitle>
+      }
+    </mat-card-header>
+    <mat-card-content>
+      @if (g.grafico; as datos) {
+        @let c = chart(datos);
+        <app-grafico
+          class="h-56"
+          [tipo]="c.tipo"
+          [datos]="c.datos"
+          [opciones]="c.opciones"
+          [etiqueta]="g.especificacion.titulo"
+        />
+      } @else {
+        <p class="text-texto-suave">{{ g.error }}</p>
+      }
+    </mat-card-content>
+    @if (puedeQuitar()) {
+      <mat-card-actions>
+        <button mat-button (click)="quitar.emit(g)">
+          <mat-icon>push_pin</mat-icon> Quitar del dashboard
+        </button>
+      </mat-card-actions>
+    }
+  </mat-card>
+}

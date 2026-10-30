@@ -7,6 +7,10 @@
   --color-superficie-alta: var(--mat-sys-surface-container);
   --color-texto: var(--mat-sys-on-surface);
   --color-texto-suave: var(--mat-sys-on-surface-variant);
+  --color-primario-contenedor: var(
+    --mat-sys-primary-container
+  ); /* las preguntas del chat (módulo 97) */
+  --color-texto-primario-contenedor: var(--mat-sys-on-primary-container);
   --color-error: var(--mat-sys-error);
   /* light-dark(): legible (contraste ≥ 4,5:1, WCAG AA) sobre el fondo claro Y sobre el oscuro (módulo 82) */
   --color-gasto: light-dark(oklch(0.5 0.19 27), oklch(0.78 0.13 27));

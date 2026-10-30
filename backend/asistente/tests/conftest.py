@@ -61,7 +61,7 @@ def casa(db):
     ana = UsuarioFactory(email="ana@example.com", nombre="Ana")
     hogar = HogarFactory(nombre=datos.NOMBRE)
     MembresiaFactory(hogar=hogar, usuario=ana, rol="admin")
-    cuenta = CuentaFactory(hogar=hogar, nombre="Cuenta común")
+    cuenta = CuentaFactory(hogar=hogar, nombre=datos.CUENTA)
     categorias = {}
     for nombre, padre, es_ingreso in datos.CATEGORIAS:
         categorias[nombre] = CategoriaFactory(

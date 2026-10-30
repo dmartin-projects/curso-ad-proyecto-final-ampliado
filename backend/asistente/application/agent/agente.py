@@ -1,4 +1,4 @@
-# asistente/application/agent/agente.py — el agent loop, escrito a mano (módulos 94 y 96)
+# asistente/application/agent/agente.py — el agent loop, escrito a mano (módulos 94, 96 y 97)
 """Preguntar al modelo, ejecutar las tools que pide, devolverle los resultados y repetir hasta que conteste con texto.
 
     agente = Agente(llm=llm, tools=[ResumenMesTool(finanzas=…), …])
@@ -11,6 +11,10 @@ Lo que lo hace apto para producción, y no un ejemplo de blog (Limites):
 - Los errores se DEVUELVEN al modelo como resultado, para que se corrija; nunca revientan el bucle.
 - Resultados recortados: uno enorme llenaría la context window y dispararía el coste en cada vuelta siguiente.
 La reserva de modelos y el circuit breaker no están aquí: van detrás del port (LLMConReserva), y el bucle no se entera.
+
+Módulo 97, para el chat: con `al_texto`, cada vuelta pide la respuesta en streaming (el texto sale según llega), y lo
+que las tools producen para la interfaz (gráficos, archivos, propuestas: ConArtefacto) se aparta del resultado que lee
+el modelo y se devuelve en ResultadoAgente.artefactos.
 """
 
 import json
@@ -29,10 +33,12 @@ from asistente.application.agent.resultado_agente import ResultadoAgente
 from asistente.application.agent.ventana import ventana
 from asistente.application.ports.i_llm import ILLM
 from asistente.application.ports.i_observador_agente import IObservadorAgente
+from asistente.application.tools.con_artefacto import ConArtefacto
 from asistente.application.tools.tool import Tool
 from asistente.domain.enums.motivo_fin import MotivoFin
 from asistente.domain.enums.motivo_parada import MotivoParada
 from asistente.domain.exceptions.tool_exception import ToolException
+from asistente.domain.vo.artefacto import Artefacto
 from asistente.domain.vo.llamada_tool import LlamadaTool
 from asistente.domain.vo.mensaje import Mensaje
 from asistente.domain.vo.peticion_llm import PeticionLLM
@@ -64,15 +70,21 @@ class Agente:
         self.cronometro = cronometro
 
     def responder(
-        self, historial: tuple[Mensaje, ...], contexto: ContextoPregunta, estructurada: bool = False
+        self,
+        historial: tuple[Mensaje, ...],
+        contexto: ContextoPregunta,
+        estructurada: bool = False,
+        al_texto: Callable[[str], None] | None = None,
     ) -> ResultadoAgente:
         """`historial` es la conversación ENTERA (el modelo es stateless) y acaba con la pregunta del usuario. Lo
         que hay que añadirle está en ResultadoAgente.nuevos; quien llama decide dónde guardarlo. Viaja lo que cabe
-        en el presupuesto de contexto (ventana.py). Con `estructurada`, una llamada más da la respuesta en JSON."""
+        en el presupuesto de contexto (ventana.py). Con `estructurada`, una llamada más da la respuesta en JSON.
+        Con `al_texto` (módulo 97), el texto de cada vuelta va saliendo por ahí mientras el modelo lo escribe."""
         inicio = self.cronometro()
         sistema = instrucciones(contexto)  # el mismo en todas las vueltas: el prefijo que el proveedor cachea
         mensajes, nuevos, llamadas, modelos = list(ventana(historial, self.limites.max_tokens_historial)), [], [], []
         uso = Uso()
+        artefactos: list[Artefacto] = []
         usos_por_tool: Counter[str] = Counter()
         ya_llamadas: set[tuple[str, str]] = set()
 
@@ -87,6 +99,7 @@ class Agente:
                 modelos=tuple(modelos),
                 duracion_ms=int((self.cronometro() - inicio) * 1000),
                 estructurada=forma,
+                artefactos=tuple(artefactos),
             )
             _registrar(resultado, contexto)
             return resultado
@@ -99,14 +112,13 @@ class Agente:
                 logger.warning("Agente: %.0f s y sin terminar; última vuelta, sin tools", self.limites.segundos)
             if sin_tokens:
                 logger.warning("Agente: %s tokens y sin terminar; última vuelta, sin tools", uso.total)
-            r = self.llm.generar(
-                PeticionLLM(
-                    sistema=sistema,
-                    mensajes=tuple(mensajes),
-                    tools=self.declaraciones,
-                    usar_tools=not ultima,  # la última: ve las tools (el historial habla de ellas), no puede pedirlas
-                )
+            peticion = PeticionLLM(
+                sistema=sistema,
+                mensajes=tuple(mensajes),
+                tools=self.declaraciones,
+                usar_tools=not ultima,  # la última: ve las tools (el historial habla de ellas), no puede pedirlas
             )
+            r = self.llm.generar_en_streaming(peticion, al_texto) if al_texto else self.llm.generar(peticion)
             self.observador.respuesta(r)
             uso += r.uso
             modelos.append(r.modelo)
@@ -133,8 +145,11 @@ class Agente:
             for llamada in r.llamadas:
                 self.observador.llamada(llamada)
                 antes = self.cronometro()
-                resultado = self._ejecutar(llamada, contexto, usos_por_tool, ya_llamadas)
+                resultado, artefacto = self._ejecutar(llamada, contexto, usos_por_tool, ya_llamadas)
                 self.observador.resultado(resultado, int((self.cronometro() - antes) * 1000))
+                if artefacto is not None:  # módulo 97: para la interfaz, no para el modelo
+                    artefactos.append(artefacto)
+                    self.observador.artefacto(artefacto)
                 resultados.append(resultado)
             mensaje_tools = Mensaje.de_tools(tuple(resultados))
             mensajes.append(mensaje_tools)
@@ -152,10 +167,12 @@ class Agente:
             return terminar(r.texto, MotivoParada.RESPUESTA_CORTADA)
         return terminar(r.texto, MotivoParada.FIN, forma)
 
-    def _ejecutar(self, llamada: LlamadaTool, contexto, usos: Counter, ya_llamadas: set) -> ResultadoTool:
-        def error(texto: str) -> ResultadoTool:
+    def _ejecutar(
+        self, llamada: LlamadaTool, contexto, usos: Counter, ya_llamadas: set
+    ) -> tuple[ResultadoTool, Artefacto | None]:
+        def error(texto: str) -> tuple[ResultadoTool, None]:
             contenido = json.dumps({"error": texto}, ensure_ascii=False)
-            return ResultadoTool(llamada.id, llamada.nombre, contenido, es_error=True)
+            return ResultadoTool(llamada.id, llamada.nombre, contenido, es_error=True), None
 
         tool = self.tools.get(llamada.nombre)
         if tool is None:  # pasa: los modelos inventan nombres parecidos. Se le dice cuáles hay
@@ -188,7 +205,10 @@ class Agente:
                 "Error en la tool %s: %s\n%s", llamada.nombre, type(e).__name__, "".join(format_tb(e.__traceback__))
             )
             return error(f"Error interno en {llamada.nombre}. No la reintentes: explica al usuario que ha fallado.")
-        return ResultadoTool(llamada.id, llamada.nombre, self._preparar(contenido))
+        artefacto = None
+        if isinstance(contenido, ConArtefacto):  # módulo 97: el modelo lee solo su parte
+            contenido, artefacto = contenido.para_el_modelo, contenido.artefacto
+        return ResultadoTool(llamada.id, llamada.nombre, self._preparar(contenido)), artefacto
 
     def _preparar(self, contenido: dict) -> str:
         """A JSON compacto (sin espacios: son tokens) y recortado si se pasa: lo que lee el modelo no pasa nunca de

@@ -16,7 +16,7 @@ NOMBRE_DE_CATEGORIA = Field(
 )
 
 
-def _clave(texto: str) -> str:
+def clave(texto: str) -> str:
     """Sin mayúsculas, tildes ni espacios de más: "nomina " es "Nómina"."""
     return unicodedata.normalize("NFKD", texto).encode("ascii", "ignore").decode().casefold().strip()
 
@@ -25,7 +25,7 @@ def categoria_por_nombre(finanzas: IConsultasDeFinanzas, contexto: ContextoPregu
     """La categoría de ESTE hogar con ese nombre, o un error con las que hay: el modelo elige bien a la segunda."""
     categorias = finanzas.categorias(contexto.actor, contexto.hogar.id)
     for c in categorias:
-        if _clave(c.nombre) == _clave(nombre):
+        if clave(c.nombre) == clave(nombre):
             return c
     nombres = ", ".join(c.nombre for c in categorias)
     raise ToolException(f"No hay ninguna categoría «{nombre}» en este hogar. Las que hay: {nombres}.")

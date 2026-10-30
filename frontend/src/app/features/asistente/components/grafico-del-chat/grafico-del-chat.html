@@ -1,0 +1,17 @@
+<figure class="m-0 rounded-lg border p-3">
+  <figcaption class="mb-2 flex items-center justify-between gap-2 font-medium">
+    {{ grafico().titulo }}
+    @if (fijable()) {
+      <button mat-button (click)="fijar.emit(grafico())">
+        <mat-icon>push_pin</mat-icon> Fijar en el dashboard
+      </button>
+    }
+  </figcaption>
+  <app-grafico
+    class="h-56"
+    [tipo]="chart().tipo"
+    [datos]="chart().datos"
+    [opciones]="chart().opciones"
+    [etiqueta]="grafico().titulo"
+  />
+</figure>

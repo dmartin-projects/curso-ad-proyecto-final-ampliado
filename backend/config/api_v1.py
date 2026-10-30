@@ -13,5 +13,6 @@ urlpatterns = [
     path("", include("importaciones.infrastructure.api.v1.urls")),
     path("", include("notificaciones.infrastructure.api.v1.urls")),
     path("", include("informes.infrastructure.api.v1.urls")),
+    path("", include("asistente.infrastructure.api.v1.urls")),  # Parte 7: el chat con el asistente (módulo 97)
     path("backoffice/", include("backoffice.infrastructure.api.v1.urls")),
 ]

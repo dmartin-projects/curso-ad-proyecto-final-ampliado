@@ -1,0 +1,116 @@
+import { HttpClient, HttpEventType } from '@angular/common/http';
+import { inject, Service } from '@angular/core';
+import { mergeMap, Observable } from 'rxjs';
+
+import {
+  Carpeta,
+  Conversacion,
+  ConversacionDetalle,
+  EventoChat,
+  GraficoDelChat,
+  Pregunta,
+  Propuesta,
+} from '../interfaces/asistente.models';
+import { LectorSSE } from './eventos-sse';
+
+@Service()
+export class AsistenteApi {
+  private readonly http = inject(HttpClient);
+  private readonly base = (h: number) => `/api/v1/hogares/${h}/asistente`;
+
+  conversaciones(hogarId: number, carpeta?: number | null) {
+    return this.http.get<Conversacion[]>(`${this.base(hogarId)}/conversaciones/`, {
+      params: carpeta ? { carpeta } : {},
+    });
+  }
+
+  crear(hogarId: number, carpeta?: number | null) {
+    return this.http.post<ConversacionDetalle>(`${this.base(hogarId)}/conversaciones/`, {
+      carpeta: carpeta ?? null,
+    });
+  }
+
+  leer(hogarId: number, id: number) {
+    return this.http.get<ConversacionDetalle>(`${this.base(hogarId)}/conversaciones/${id}/`);
+  }
+
+  modificar(hogarId: number, id: number, cambios: { titulo?: string; carpeta?: number | null }) {
+    return this.http.patch<ConversacionDetalle>(
+      `${this.base(hogarId)}/conversaciones/${id}/`,
+      cambios,
+    );
+  }
+
+  borrar(hogarId: number, id: number) {
+    return this.http.delete<void>(`${this.base(hogarId)}/conversaciones/${id}/`);
+  }
+
+  carpetas(hogarId: number) {
+    return this.http.get<Carpeta[]>(`${this.base(hogarId)}/carpetas/`);
+  }
+
+  crearCarpeta(hogarId: number, nombre: string) {
+    return this.http.post<Carpeta>(`${this.base(hogarId)}/carpetas/`, { nombre });
+  }
+
+  borrarCarpeta(hogarId: number, id: number) {
+    return this.http.delete<void>(`${this.base(hogarId)}/carpetas/${id}/`);
+  }
+
+  confirmar(hogarId: number, propuesta: number) {
+    return this.http.post<Propuesta>(
+      `${this.base(hogarId)}/propuestas/${propuesta}/confirmar/`,
+      null,
+    );
+  }
+
+  descartar(hogarId: number, propuesta: number) {
+    return this.http.post<Propuesta>(
+      `${this.base(hogarId)}/propuestas/${propuesta}/descartar/`,
+      null,
+    );
+  }
+
+  fijar(hogarId: number, { tipo, titulo, fuente, argumentos }: GraficoDelChat) {
+    return this.http.post<unknown>(`${this.base(hogarId)}/graficos-fijados/`, {
+      tipo,
+      titulo,
+      fuente,
+      argumentos,
+    });
+  }
+
+  /**
+   * La respuesta, en streaming (Server-Sent Events). Con HttpClient y no con EventSource (solo hace GET y no deja
+   * poner la cabecera Authorization) ni con fetch a pelo (se saltaría los interceptores: el token, el refresh tras un
+   * 401, los errores). Con `reportProgress` y `responseType: 'text'`, cada evento de progreso trae el texto recibido
+   * hasta ahora (`partialText`): se leen los eventos nuevos. Cancelar la suscripción aborta la petición: el backend
+   * lo nota y deja de pagar al modelo.
+   */
+  preguntar(
+    hogarId: number,
+    conversacion: number,
+    { texto, archivo }: Pregunta,
+  ): Observable<EventoChat> {
+    let cuerpo: FormData | { texto: string } = { texto };
+    if (archivo) {
+      cuerpo = new FormData();
+      cuerpo.append('texto', texto);
+      cuerpo.append('archivo', archivo);
+    }
+    const lector = new LectorSSE();
+    return this.http
+      .post(`${this.base(hogarId)}/conversaciones/${conversacion}/preguntar/`, cuerpo, {
+        observe: 'events',
+        reportProgress: true,
+        responseType: 'text',
+      })
+      .pipe(
+        mergeMap((ev) => {
+          if (ev.type === HttpEventType.DownloadProgress) return lector.leer(ev.partialText ?? '');
+          if (ev.type === HttpEventType.Response) return lector.leer(ev.body ?? '');
+          return [];
+        }),
+      );
+  }
+}

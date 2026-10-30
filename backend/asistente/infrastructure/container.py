@@ -1,4 +1,4 @@
-# asistente/infrastructure/container.py — composition root del asistente (módulos 93, 94 y 95)
+# asistente/infrastructure/container.py — composition root del asistente (módulos 93, 94, 95 y 97)
 #
 # El único sitio que decide QUÉ adapters se usan y con qué ajustes: el LLM (con su reserva), las tools con sus ports y
 # el contexto de una pregunta. El resto recibe las piezas ya montadas; los tests pasan fakes y no llegan nunca aquí.
@@ -11,35 +11,116 @@ from django.core.exceptions import ImproperlyConfigured
 from asistente.application.agent.agente import Agente
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.agent.limites import Limites
+from asistente.application.chat.calculadora_de_graficos import CalculadoraDeGraficos
+from asistente.application.confirmar_propuesta_use_case.confirmar_propuesta_use_case import ConfirmarPropuestaUseCase
+from asistente.application.confirmar_propuesta_use_case.i_confirmar_propuesta_use_case import (
+    IConfirmarPropuestaUseCase,
+)
+from asistente.application.crear_carpeta_use_case.crear_carpeta_use_case import CrearCarpetaUseCase
+from asistente.application.crear_carpeta_use_case.i_crear_carpeta_use_case import ICrearCarpetaUseCase
+from asistente.application.crear_conversacion_use_case.crear_conversacion_use_case import CrearConversacionUseCase
+from asistente.application.crear_conversacion_use_case.i_crear_conversacion_use_case import (
+    ICrearConversacionUseCase,
+)
+from asistente.application.descartar_propuesta_use_case.descartar_propuesta_use_case import DescartarPropuestaUseCase
+from asistente.application.descartar_propuesta_use_case.i_descartar_propuesta_use_case import (
+    IDescartarPropuestaUseCase,
+)
+from asistente.application.eliminar_carpeta_use_case.eliminar_carpeta_use_case import EliminarCarpetaUseCase
+from asistente.application.eliminar_carpeta_use_case.i_eliminar_carpeta_use_case import IEliminarCarpetaUseCase
+from asistente.application.eliminar_conversacion_use_case.eliminar_conversacion_use_case import (
+    EliminarConversacionUseCase,
+)
+from asistente.application.eliminar_conversacion_use_case.i_eliminar_conversacion_use_case import (
+    IEliminarConversacionUseCase,
+)
+from asistente.application.fijar_grafico_use_case.fijar_grafico_use_case import FijarGraficoUseCase
+from asistente.application.fijar_grafico_use_case.i_fijar_grafico_use_case import IFijarGraficoUseCase
+from asistente.application.listar_carpetas_use_case.i_listar_carpetas_use_case import IListarCarpetasUseCase
+from asistente.application.listar_carpetas_use_case.listar_carpetas_use_case import ListarCarpetasUseCase
+from asistente.application.listar_conversaciones_use_case.i_listar_conversaciones_use_case import (
+    IListarConversacionesUseCase,
+)
+from asistente.application.listar_conversaciones_use_case.listar_conversaciones_use_case import (
+    ListarConversacionesUseCase,
+)
+from asistente.application.listar_graficos_fijados_use_case.i_listar_graficos_fijados_use_case import (
+    IListarGraficosFijadosUseCase,
+)
+from asistente.application.listar_graficos_fijados_use_case.listar_graficos_fijados_use_case import (
+    ListarGraficosFijadosUseCase,
+)
+from asistente.application.modificar_conversacion_use_case.i_modificar_conversacion_use_case import (
+    IModificarConversacionUseCase,
+)
+from asistente.application.modificar_conversacion_use_case.modificar_conversacion_use_case import (
+    ModificarConversacionUseCase,
+)
+from asistente.application.obtener_conversacion_use_case.i_obtener_conversacion_use_case import (
+    IObtenerConversacionUseCase,
+)
+from asistente.application.obtener_conversacion_use_case.obtener_conversacion_use_case import (
+    ObtenerConversacionUseCase,
+)
 from asistente.application.ports.i_llm import ILLM
 from asistente.application.ports.i_observador_agente import IObservadorAgente
+from asistente.application.quitar_grafico_use_case.i_quitar_grafico_use_case import IQuitarGraficoUseCase
+from asistente.application.quitar_grafico_use_case.quitar_grafico_use_case import QuitarGraficoUseCase
+from asistente.application.responder_pregunta_use_case.i_responder_pregunta_use_case import (
+    IResponderPreguntaUseCase,
+)
+from asistente.application.responder_pregunta_use_case.responder_pregunta_use_case import ResponderPreguntaUseCase
 from asistente.application.tools.buscar_movimientos_tool import BuscarMovimientosTool
 from asistente.application.tools.comparar_con_ipc_tool import CompararConIpcTool
 from asistente.application.tools.comparar_meses_tool import CompararMesesTool
 from asistente.application.tools.detalle_ticket_tool import DetalleTicketTool
 from asistente.application.tools.dias_festivos_tool import DiasFestivosTool
 from asistente.application.tools.estado_presupuestos_tool import EstadoPresupuestosTool
+from asistente.application.tools.exportar_tool import ExportarTool
 from asistente.application.tools.gasto_por_categoria_tool import GastoPorCategoriaTool
+from asistente.application.tools.grafico_tool import GraficoTool
 from asistente.application.tools.listar_categorias_tool import ListarCategoriasTool
+from asistente.application.tools.listar_cuentas_tool import ListarCuentasTool
+from asistente.application.tools.listar_miembros_tool import ListarMiembrosTool
 from asistente.application.tools.prevision_fin_de_mes_tool import PrevisionFinDeMesTool
+from asistente.application.tools.proponer_movimiento_tool import ProponerMovimientoTool
 from asistente.application.tools.resumen_mes_tool import ResumenMesTool
 from asistente.application.tools.tendencia_tool import TendenciaTool
 from asistente.application.tools.tipo_de_cambio_tool import TipoDeCambioTool
 from asistente.application.tools.tool import Tool
 from asistente.application.tools.top_comercios_tool import TopComerciosTool
 from asistente.domain.vo.precio import Precio
+from asistente.infrastructure.database.repositories.carpeta_command_repository_orm import CarpetaCommandRepositoryORM
+from asistente.infrastructure.database.repositories.conversacion_command_repository_orm import (
+    ConversacionCommandRepositoryORM,
+)
+from asistente.infrastructure.database.repositories.conversacion_query_service_orm import ConversacionQueryServiceORM
+from asistente.infrastructure.database.repositories.grafico_fijado_command_repository_orm import (
+    GraficoFijadoCommandRepositoryORM,
+)
+from asistente.infrastructure.database.repositories.grafico_fijado_query_service_orm import (
+    GraficoFijadoQueryServiceORM,
+)
+from asistente.infrastructure.database.repositories.propuesta_command_repository_orm import (
+    PropuestaCommandRepositoryORM,
+)
 from asistente.infrastructure.externos.eurostat_indice_de_precios import IndiceDePreciosEurostat
 from asistente.infrastructure.externos.frankfurter_tipo_de_cambio import TipoDeCambioFrankfurter
 from asistente.infrastructure.externos.nager_festivos import FestivosNager
 from asistente.infrastructure.finanzas.consultas_en_finanzas import ConsultasEnFinanzas
+from asistente.infrastructure.finanzas.ejecutor_de_propuestas_en_finanzas import EjecutorDePropuestasEnFinanzas
+from asistente.infrastructure.finanzas.exportador_en_finanzas import ExportadorEnFinanzas
 from asistente.infrastructure.hogares.membresias_en_hogares import MembresiasEnHogares
 from asistente.infrastructure.llm.cliente_openai import cliente_del_proceso
 from asistente.infrastructure.llm.llm_con_reserva import LLMConReserva
 from asistente.infrastructure.llm.openai_compatible_llm import OpenAICompatibleLLM
+from asistente.infrastructure.storage.almacen_django import AlmacenDjango
+from asistente.infrastructure.tickets.lector_de_adjuntos_en_tickets import LectorDeAdjuntosEnTickets
 from asistente.infrastructure.tickets.tickets_en_tickets import TicketsEnTickets
 from core.application.ports.i_reloj import IReloj
 from core.infrastructure.cache.circuit_breaker import CircuitBreaker
 from core.infrastructure.clock.reloj_django import RelojDjango
+from core.infrastructure.database.unidad_de_trabajo_django import UnidadDeTrabajoDjango
 
 
 def llm(modelo: str | None = None) -> ILLM:
@@ -50,6 +131,14 @@ def llm(modelo: str | None = None) -> ILLM:
     if modelo:
         return OpenAICompatibleLLM(cliente=cliente, modelo=modelo)
     modelos = [settings.ASISTENTE_MODELO, *settings.ASISTENTE_MODELOS_RESERVA]
+    return LLMConReserva([(OpenAICompatibleLLM(cliente=cliente, modelo=m), _circuito(m)) for m in modelos])
+
+
+def llm_auxiliar() -> ILLM:
+    """Módulo 97: el modelo pequeño, para las tareas fáciles (el título de una conversación). Con su reserva: el
+    principal (en Groq, cada modelo tiene su cuota: si el pequeño la agota, el grande suele tenerla)."""
+    cliente = cliente_del_proceso(settings.ASISTENTE_BASE_URL, settings.ASISTENTE_API_KEY, settings.ASISTENTE_TIMEOUT)
+    modelos = [settings.ASISTENTE_MODELO_AUXILIAR, settings.ASISTENTE_MODELO]
     return LLMConReserva([(OpenAICompatibleLLM(cliente=cliente, modelo=m), _circuito(m)) for m in modelos])
 
 
@@ -65,9 +154,25 @@ def precio(modelo: str) -> Precio | None:
     return Precio(*(Decimal(x) for x in p)) if p else None
 
 
-def tools() -> list[Tool]:
-    """El catálogo (módulo 95). El orden es el de la declaración: las más usadas, primero."""
+def tools(chat: bool = False) -> list[Tool]:
+    """El catálogo (módulo 95). El orden es el de la declaración: las más usadas, primero.
+
+    Con `chat` (módulo 97), además las del canal del chat: las que producen algo que solo una interfaz puede enseñar
+    (un gráfico, un archivo para descargar, una propuesta con su botón de confirmar). En la terminal no tendrían sentido.
+    """
     finanzas = ConsultasEnFinanzas()
+    consulta = _de_consulta(finanzas)
+    if not chat:
+        return consulta
+    return [
+        *consulta,
+        GraficoTool(calculadora=CalculadoraDeGraficos(consulta)),
+        ExportarTool(finanzas=finanzas, exportador=ExportadorEnFinanzas(almacen=AlmacenDjango())),
+        ProponerMovimientoTool(finanzas=finanzas),
+    ]
+
+
+def _de_consulta(finanzas: ConsultasEnFinanzas) -> list[Tool]:
     return [
         ResumenMesTool(finanzas=finanzas),
         GastoPorCategoriaTool(finanzas=finanzas),
@@ -82,6 +187,8 @@ def tools() -> list[Tool]:
         TipoDeCambioTool(divisas=_tipo_de_cambio(settings.ASISTENTE_FRANKFURTER_URL)),
         CompararConIpcTool(finanzas=finanzas, precios=_indice_de_precios(settings.ASISTENTE_EUROSTAT_URL)),
         DiasFestivosTool(festivos=_festivos(settings.ASISTENTE_NAGER_URL)),  # ejercicio 1 del 95
+        ListarCuentasTool(finanzas=finanzas),  # módulo 97
+        ListarMiembrosTool(membresias=MembresiasEnHogares()),
     ]
 
 
@@ -101,11 +208,11 @@ def _festivos(base_url: str) -> FestivosNager:
     return FestivosNager(base_url=base_url)
 
 
-def agente(observador: IObservadorAgente | None = None, modelo: str | None = None) -> Agente:
+def agente(observador: IObservadorAgente | None = None, modelo: str | None = None, chat: bool = False) -> Agente:
     limites = Limites(
         segundos=settings.ASISTENTE_SEGUNDOS_POR_PREGUNTA, max_tokens=settings.ASISTENTE_TOKENS_POR_PREGUNTA
     )
-    return Agente(llm=llm(modelo), tools=tools(), limites=limites, observador=observador)
+    return Agente(llm=llm(modelo), tools=tools(chat), limites=limites, observador=observador)
 
 
 def contexto(usuario_id: int, hogar_id: int, reloj: IReloj | None = None) -> ContextoPregunta:
@@ -113,3 +220,100 @@ def contexto(usuario_id: int, hogar_id: int, reloj: IReloj | None = None) -> Con
     return ContextoPregunta.abrir(
         usuario_id=usuario_id, hogar_id=hogar_id, membresias=MembresiasEnHogares(), reloj=reloj or RelojDjango()
     )
+
+
+# ── Módulo 97: el chat ──
+def _calculadora() -> CalculadoraDeGraficos:
+    return CalculadoraDeGraficos(_de_consulta(ConsultasEnFinanzas()))
+
+
+def responder_pregunta() -> IResponderPreguntaUseCase:
+    return ResponderPreguntaUseCase(
+        conversaciones=ConversacionCommandRepositoryORM(),
+        propuestas=PropuestaCommandRepositoryORM(),
+        crear_agente=lambda observador: agente(observador, chat=True),
+        llm_auxiliar=llm_auxiliar(),
+        membresias=MembresiasEnHogares(),
+        lector=LectorDeAdjuntosEnTickets(),
+        almacen=AlmacenDjango(),
+        reloj=RelojDjango(),
+        uow=UnidadDeTrabajoDjango(),
+    )
+
+
+def crear_conversacion() -> ICrearConversacionUseCase:
+    return CrearConversacionUseCase(
+        conversaciones=ConversacionCommandRepositoryORM(),
+        carpetas=CarpetaCommandRepositoryORM(),
+        uow=UnidadDeTrabajoDjango(),
+    )
+
+
+def modificar_conversacion() -> IModificarConversacionUseCase:
+    return ModificarConversacionUseCase(
+        conversaciones=ConversacionCommandRepositoryORM(),
+        carpetas=CarpetaCommandRepositoryORM(),
+        uow=UnidadDeTrabajoDjango(),
+    )
+
+
+def eliminar_conversacion() -> IEliminarConversacionUseCase:
+    return EliminarConversacionUseCase(
+        conversaciones=ConversacionCommandRepositoryORM(), almacen=AlmacenDjango(), uow=UnidadDeTrabajoDjango()
+    )
+
+
+def listar_conversaciones() -> IListarConversacionesUseCase:
+    return ListarConversacionesUseCase(consultas=ConversacionQueryServiceORM())
+
+
+def obtener_conversacion() -> IObtenerConversacionUseCase:
+    return ObtenerConversacionUseCase(consultas=ConversacionQueryServiceORM(), almacen=AlmacenDjango())
+
+
+def crear_carpeta() -> ICrearCarpetaUseCase:
+    return CrearCarpetaUseCase(carpetas=CarpetaCommandRepositoryORM(), uow=UnidadDeTrabajoDjango())
+
+
+def eliminar_carpeta() -> IEliminarCarpetaUseCase:
+    return EliminarCarpetaUseCase(carpetas=CarpetaCommandRepositoryORM(), uow=UnidadDeTrabajoDjango())
+
+
+def listar_carpetas() -> IListarCarpetasUseCase:
+    return ListarCarpetasUseCase(consultas=ConversacionQueryServiceORM())
+
+
+def confirmar_propuesta() -> IConfirmarPropuestaUseCase:
+    return ConfirmarPropuestaUseCase(
+        propuestas=PropuestaCommandRepositoryORM(),
+        ejecutor=EjecutorDePropuestasEnFinanzas(),
+        reloj=RelojDjango(),
+        uow=UnidadDeTrabajoDjango(),
+    )
+
+
+def descartar_propuesta() -> IDescartarPropuestaUseCase:
+    return DescartarPropuestaUseCase(propuestas=PropuestaCommandRepositoryORM(), uow=UnidadDeTrabajoDjango())
+
+
+def fijar_grafico() -> IFijarGraficoUseCase:
+    return FijarGraficoUseCase(
+        graficos=GraficoFijadoCommandRepositoryORM(),
+        calculadora=_calculadora(),
+        membresias=MembresiasEnHogares(),
+        reloj=RelojDjango(),
+        uow=UnidadDeTrabajoDjango(),
+    )
+
+
+def listar_graficos_fijados() -> IListarGraficosFijadosUseCase:
+    return ListarGraficosFijadosUseCase(
+        consultas=GraficoFijadoQueryServiceORM(),
+        calculadora=_calculadora(),
+        membresias=MembresiasEnHogares(),
+        reloj=RelojDjango(),
+    )
+
+
+def quitar_grafico() -> IQuitarGraficoUseCase:
+    return QuitarGraficoUseCase(graficos=GraficoFijadoCommandRepositoryORM(), uow=UnidadDeTrabajoDjango())

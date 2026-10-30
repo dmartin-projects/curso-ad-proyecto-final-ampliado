@@ -3,6 +3,7 @@
 # La fixture `casa` (tests/conftest.py) los escribe en PostgreSQL; ConsultasDeFinanzasFake.de_casa() los tiene en
 # memoria. Los contract tests comprueban que el adapter y el fake dicen lo mismo de los MISMOS datos.
 NOMBRE = "Casa de Ana y Luis"
+CUENTA = "Cuenta común"  # la única cuenta del hogar (módulo 97: listar_cuentas, proponer_movimiento)
 
 # (nombre, categoría principal, es_ingreso)
 CATEGORIAS = [

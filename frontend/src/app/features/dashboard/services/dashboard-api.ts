@@ -3,7 +3,7 @@ import { inject, Service, Signal } from '@angular/core';
 
 import { Dashboard } from '../../../core/api/tipos';
 import { SIN_AVISO_ERROR } from '../../../core/http/contexto';
-import { DiasSemana } from '../interfaces/dashboard.models';
+import { DiasSemana, GraficoFijado } from '../interfaces/dashboard.models';
 
 @Service()
 export class DashboardApi {
@@ -24,5 +24,14 @@ export class DashboardApi {
       // Sin el aviso global de error (snackbar): si el servicio cae, lo dice SU tarjeta y nadie más
       context: new HttpContext().set(SIN_AVISO_ERROR, true),
     }));
+  }
+
+  /** Módulo 97: los gráficos del chat fijados aquí, recalculados en el servidor con los datos de hoy. */
+  graficosFijados(hogarId: number) {
+    return this.http.get<GraficoFijado[]>(`/api/v1/hogares/${hogarId}/asistente/graficos-fijados/`);
+  }
+
+  quitarGrafico(hogarId: number, id: number) {
+    return this.http.delete<void>(`/api/v1/hogares/${hogarId}/asistente/graficos-fijados/${id}/`);
   }
 }

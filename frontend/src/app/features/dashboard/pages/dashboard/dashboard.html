@@ -136,4 +136,18 @@
   <section class="mt-6 grid gap-4 md:grid-cols-2">
     <app-dias-semana [datos]="diasSemana" />
   </section>
+
+  @if (fijados.data()?.length) {
+    <section
+      class="mt-6 grid gap-4 md:grid-cols-2"
+      aria-label="Gráficos fijados desde el asistente"
+    >
+      <app-graficos-fijados
+        class="contents"
+        [graficos]="fijados.data()!"
+        [puedeQuitar]="store.puedeEditar()"
+        (quitar)="quitar($event)"
+      />
+    </section>
+  }
 }

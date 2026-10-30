@@ -4,6 +4,8 @@ from io import StringIO
 
 from django.core.management import call_command
 
+from asistente.application.prompts.sistema import SISTEMA
+
 
 def test_el_prompt_de_otro_dia(casa):
     ana, hogar = casa
@@ -12,4 +14,4 @@ def test_el_prompt_de_otro_dia(casa):
     texto = salida.getvalue()
     assert "Hoy es viernes, 15 de enero de 2027, en Europe/Madrid." in texto
     assert "«diciembre» es 2026-12 y «febrero», 2026-02" in texto
-    assert "[sistema 2026-10-29.1 · huella" in texto
+    assert f"[sistema {SISTEMA.version} · huella {SISTEMA.huella}" in texto

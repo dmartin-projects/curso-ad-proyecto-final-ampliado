@@ -15,6 +15,7 @@ import pytest
 from asistente.application.agent.instrucciones import instrucciones
 from asistente.application.prompts.estructura import ESTRUCTURA
 from asistente.application.prompts.sistema import SISTEMA
+from asistente.application.prompts.titulo import TITULO
 from asistente.application.prompts.versiones import PUBLICADAS
 from asistente.domain.services.tokens import estimar_tokens
 from asistente.tests.fakes.mundo import contexto
@@ -22,7 +23,7 @@ from asistente.tests.fakes.mundo import contexto
 REFERENCIA = Path(__file__).with_name("sistema.txt")
 
 
-@pytest.mark.parametrize("plantilla", [SISTEMA, ESTRUCTURA], ids=lambda p: p.nombre)
+@pytest.mark.parametrize("plantilla", [SISTEMA, ESTRUCTURA, TITULO], ids=lambda p: p.nombre)
 def test_cambiar_el_texto_obliga_a_publicar_una_version(plantilla):
     assert PUBLICADAS.get((plantilla.nombre, plantilla.version)) == plantilla.huella, (
         f"El texto de «{plantilla.nombre}» ha cambiado: sube su versión y añádela a prompts/versiones.py "

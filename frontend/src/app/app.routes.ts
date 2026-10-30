@@ -82,6 +82,13 @@ export const routes: Routes = [
             path: 'informes',
             loadComponent: () => import('./features/informes/pages/informes/informes'),
           },
+          // Módulo 97: el chat con el asistente. La conversación abierta, en ?conversacion=: la MISMA ruta, así que la
+          // page no se destruye al crear una conversación (la respuesta que está llegando sigue en su store)
+          {
+            path: 'asistente',
+            loadComponent: () => import('./features/asistente/pages/chat/chat'),
+            title: 'Asistente',
+          },
         ],
       },
       {

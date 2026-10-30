@@ -950,6 +950,177 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hogares/{hogar_pk}/asistente/carpetas/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Las carpetas de quien pide, para ordenar sus conversaciones. */
+        get: operations["hogares_asistente_carpetas_list"];
+        put?: never;
+        /** @description Las carpetas de quien pide, para ordenar sus conversaciones. */
+        post: operations["hogares_asistente_carpetas_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hogares/{hogar_pk}/asistente/carpetas/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Las carpetas de quien pide, para ordenar sus conversaciones. */
+        delete: operations["hogares_asistente_carpetas_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hogares/{hogar_pk}/asistente/conversaciones/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Las conversaciones con el asistente de quien pide, en este hogar (las de los demás miembros no se ven). */
+        get: operations["hogares_asistente_conversaciones_list"];
+        put?: never;
+        /** @description Las conversaciones con el asistente de quien pide, en este hogar (las de los demás miembros no se ven). */
+        post: operations["hogares_asistente_conversaciones_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hogares/{hogar_pk}/asistente/conversaciones/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Las conversaciones con el asistente de quien pide, en este hogar (las de los demás miembros no se ven). */
+        get: operations["hogares_asistente_conversaciones_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description Las conversaciones con el asistente de quien pide, en este hogar (las de los demás miembros no se ven). */
+        delete: operations["hogares_asistente_conversaciones_destroy"];
+        options?: never;
+        head?: never;
+        /** @description Las conversaciones con el asistente de quien pide, en este hogar (las de los demás miembros no se ven). */
+        patch: operations["hogares_asistente_conversaciones_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/hogares/{hogar_pk}/asistente/conversaciones/{id}/preguntar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Una pregunta en una conversación. La respuesta, en streaming (Server-Sent Events): inicio, tool, texto,
+         *     grafico, archivo, propuesta, titulo y fin (o error).
+         */
+        post: operations["hogares_asistente_conversaciones_preguntar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hogares/{hogar_pk}/asistente/graficos-fijados/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Los gráficos del chat fijados en el dashboard del hogar, recalculados al pedirlos. */
+        get: operations["hogares_asistente_graficos_fijados_list"];
+        put?: never;
+        /** @description Los gráficos del chat fijados en el dashboard del hogar, recalculados al pedirlos. */
+        post: operations["hogares_asistente_graficos_fijados_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hogares/{hogar_pk}/asistente/graficos-fijados/{id}/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Los gráficos del chat fijados en el dashboard del hogar, recalculados al pedirlos. */
+        delete: operations["hogares_asistente_graficos_fijados_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hogares/{hogar_pk}/asistente/propuestas/{id}/confirmar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Sin listado ni detalle: las propuestas se ven dentro de su conversación. Aquí solo se resuelven.
+         *
+         *     El rol no se mira aquí: confirmar ejecuta el use case de la app dueña con el Actor de quien confirma, y ESE use
+         *     case exige su rol (registrar un movimiento: miembro). Un lector recibe el mismo 403 que en el formulario.
+         */
+        post: operations["hogares_asistente_propuestas_confirmar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/hogares/{hogar_pk}/asistente/propuestas/{id}/descartar/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Sin listado ni detalle: las propuestas se ven dentro de su conversación. Aquí solo se resuelven.
+         *
+         *     El rol no se mira aquí: confirmar ejecuta el use case de la app dueña con el Actor de quien confirma, y ESE use
+         *     case exige su rol (registrar un movimiento: miembro). Un lector recibe el mismo 403 que en el formulario.
+         */
+        post: operations["hogares_asistente_propuestas_descartar_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/hogares/{hogar_pk}/categorias/": {
         parameters: {
             query?: never;
@@ -1638,6 +1809,14 @@ export interface components {
             actual: string;
             nueva: string;
         };
+        Carpeta: {
+            readonly id: number;
+            nombre: string;
+            readonly conversaciones: number;
+        };
+        CarpetaRequest: {
+            nombre: string;
+        };
         /** @description Limita los campos relacionados al hogar de la URL: no se puede apuntar a datos de otro hogar (módulo 33). */
         Categoria: {
             readonly id: number;
@@ -1706,6 +1885,23 @@ export interface components {
         Contador: {
             no_leidas: number;
         };
+        /** @description Lee un ConversacionOutputDTO; al crear, la carpeta (opcional); al modificar, el título o la carpeta. */
+        Conversacion: {
+            readonly id: number;
+            titulo?: string;
+            carpeta?: number | null;
+            /** Format: date-time */
+            readonly actualizada: string | null;
+        };
+        ConversacionDetalle: {
+            conversacion: components["schemas"]["Conversacion"];
+            mensajes: components["schemas"]["Mensaje"][];
+        };
+        /** @description Lee un ConversacionOutputDTO; al crear, la carpeta (opcional); al modificar, el título o la carpeta. */
+        ConversacionRequest: {
+            titulo?: string;
+            carpeta?: number | null;
+        };
         Cuenta: {
             readonly id: number;
             nombre: string;
@@ -1764,6 +1960,31 @@ export interface components {
             /** Format: email */
             email: string;
         };
+        /** @description QUÉ dibujar: lo que devuelve el chat en cada gráfico, tal cual (los números no: se recalculan). */
+        Especificacion: {
+            tipo: components["schemas"]["EspecificacionTipoEnum"];
+            titulo: string;
+            fuente: components["schemas"]["FuenteEnum"];
+            argumentos?: {
+                [key: string]: unknown;
+            };
+        };
+        /** @description QUÉ dibujar: lo que devuelve el chat en cada gráfico, tal cual (los números no: se recalculan). */
+        EspecificacionRequest: {
+            tipo: components["schemas"]["EspecificacionTipoEnum"];
+            titulo: string;
+            fuente: components["schemas"]["FuenteEnum"];
+            argumentos?: {
+                [key: string]: unknown;
+            };
+        };
+        /**
+         * @description * `barras` - barras
+         *     * `lineas` - lineas
+         *     * `circular` - circular
+         * @enum {string}
+         */
+        EspecificacionTipoEnum: "barras" | "lineas" | "circular";
         EstablecerPasswordRequest: {
             nueva: string;
         };
@@ -1829,6 +2050,14 @@ export interface components {
          * @enum {string}
          */
         FormatoEnum: "csv" | "pdf";
+        /**
+         * @description * `comparar_meses` - comparar_meses
+         *     * `gasto_por_categoria` - gasto_por_categoria
+         *     * `tendencia` - tendencia
+         *     * `top_comercios` - top_comercios
+         * @enum {string}
+         */
+        FuenteEnum: "comparar_meses" | "gasto_por_categoria" | "tendencia" | "top_comercios";
         GenerarInformeRequest: {
             /**
              * Format: date
@@ -1840,6 +2069,14 @@ export interface components {
              * @default false
              */
             enviar: boolean;
+        };
+        GraficoFijado: {
+            readonly id: number;
+            especificacion: components["schemas"]["Especificacion"];
+            readonly fijado_por: string | null;
+            /** @description etiquetas y series, calculadas ahora */
+            readonly grafico: unknown;
+            readonly error: string | null;
         };
         Hogar: {
             readonly id: number;
@@ -1973,6 +2210,17 @@ export interface components {
             precio_unitario: string;
             /** Format: decimal */
             readonly importe: string;
+        };
+        Mensaje: {
+            id: number;
+            rol: components["schemas"]["RolMensajeEnum"];
+            texto: string;
+            /** @description gráficos, archivos (con su URL), propuestas (con su estado), seguimiento… */
+            datos: unknown;
+            incompleto: boolean;
+            nombre_adjunto: string;
+            /** Format: date-time */
+            creado: string;
         };
         MesDashboard: {
             /** Format: date */
@@ -2327,6 +2575,11 @@ export interface components {
             /** Es de ingresos */
             es_ingreso?: boolean;
         };
+        /** @description Lee un ConversacionOutputDTO; al crear, la carpeta (opcional); al modificar, el título o la carpeta. */
+        PatchedConversacionRequest: {
+            titulo?: string;
+            carpeta?: number | null;
+        };
         PatchedCuentaRequest: {
             nombre?: string;
             tipo?: components["schemas"]["CuentaTipoEnum"];
@@ -2380,6 +2633,14 @@ export interface components {
             clave: string;
             total: number;
         };
+        PreguntaRequest: {
+            texto: string;
+            /**
+             * Format: binary
+             * @description Una foto o un PDF: su texto (OCR) entra en la pregunta
+             */
+            archivo?: string;
+        };
         /** @description Limita los campos relacionados al hogar de la URL: no se puede apuntar a datos de otro hogar (módulo 33). */
         Presupuesto: {
             readonly id: number;
@@ -2408,6 +2669,20 @@ export interface components {
             /** Format: decimal */
             importe: string;
         };
+        Propuesta: {
+            id: number;
+            tipo: string;
+            resumen: string;
+            estado: components["schemas"]["PropuestaEstadoEnum"];
+            resultado: unknown;
+        };
+        /**
+         * @description * `pendiente` - pendiente
+         *     * `confirmada` - confirmada
+         *     * `descartada` - descartada
+         * @enum {string}
+         */
+        PropuestaEstadoEnum: "pendiente" | "confirmada" | "descartada";
         ProveedorSocial: {
             id: string;
             nombre: string;
@@ -2462,6 +2737,12 @@ export interface components {
          * @enum {string}
          */
         RolEnum: "admin" | "miembro" | "lector";
+        /**
+         * @description * `usuario` - usuario
+         *     * `modelo` - modelo
+         * @enum {string}
+         */
+        RolMensajeEnum: "usuario" | "modelo";
         SegundoFactorRequest: {
             factor: components["schemas"]["FactorEnum"];
             codigo?: string;
@@ -4115,6 +4396,332 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Hogar"];
+                };
+            };
+        };
+    };
+    hogares_asistente_carpetas_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Carpeta"][];
+                };
+            };
+        };
+    };
+    hogares_asistente_carpetas_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CarpetaRequest"];
+                "multipart/form-data": components["schemas"]["CarpetaRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Carpeta"];
+                };
+            };
+        };
+    };
+    hogares_asistente_carpetas_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    hogares_asistente_conversaciones_list: {
+        parameters: {
+            query?: {
+                /** @description Solo las de esa carpeta */
+                carpeta?: number;
+            };
+            header?: never;
+            path: {
+                hogar_pk: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Conversacion"][];
+                };
+            };
+        };
+    };
+    hogares_asistente_conversaciones_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["ConversacionRequest"];
+                "multipart/form-data": components["schemas"]["ConversacionRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversacionDetalle"];
+                };
+            };
+        };
+    };
+    hogares_asistente_conversaciones_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversacionDetalle"];
+                };
+            };
+        };
+    };
+    hogares_asistente_conversaciones_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    hogares_asistente_conversaciones_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedConversacionRequest"];
+                "multipart/form-data": components["schemas"]["PatchedConversacionRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConversacionDetalle"];
+                };
+            };
+        };
+    };
+    hogares_asistente_conversaciones_preguntar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: number;
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PreguntaRequest"];
+                "multipart/form-data": components["schemas"]["PreguntaRequest"];
+            };
+        };
+        responses: {
+            /** @description Los pasos de la respuesta (SSE) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    hogares_asistente_graficos_fijados_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraficoFijado"][];
+                };
+            };
+        };
+    };
+    hogares_asistente_graficos_fijados_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["EspecificacionRequest"];
+                "multipart/form-data": components["schemas"]["EspecificacionRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GraficoFijado"];
+                };
+            };
+        };
+    };
+    hogares_asistente_graficos_fijados_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    hogares_asistente_propuestas_confirmar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Propuesta"];
+                };
+            };
+        };
+    };
+    hogares_asistente_propuestas_descartar_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Propuesta"];
                 };
             };
         };

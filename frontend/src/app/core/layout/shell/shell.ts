@@ -23,6 +23,7 @@ const SECCIONES = [
   { ruta: 'presupuestos', icono: 'savings', texto: 'Presupuestos' },
   { ruta: 'categorias', icono: 'category', texto: 'Categorías' },
   { ruta: 'informes', icono: 'picture_as_pdf', texto: 'Informes' },
+  { ruta: 'asistente', icono: 'forum', texto: 'Asistente' }, // módulo 97
 ];
 
 @Component({

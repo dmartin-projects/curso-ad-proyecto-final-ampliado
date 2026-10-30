@@ -1,10 +1,11 @@
-# asistente/application/tools/tool.py — qué es una tool para el asistente (módulo 94)
+# asistente/application/tools/tool.py — qué es una tool para el asistente (módulos 94 y 97)
 from abc import ABC, abstractmethod
 from typing import Any, ClassVar
 
 from pydantic import ValidationError
 
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
+from asistente.application.tools.con_artefacto import ConArtefacto
 from asistente.application.tools.esquema_json import esquema_json
 from asistente.application.tools.sin_argumentos import SinArgumentos
 from asistente.domain.exceptions.tool_exception import ToolException
@@ -37,8 +38,9 @@ class Tool(ABC):
             raise ToolException(f"Argumentos no válidos para {self.nombre}: {_explicar(e)}") from e
 
     @abstractmethod
-    def ejecutar(self, contexto: ContextoPregunta, args: Any) -> dict:
-        """Un dict pequeño, en JSON puro (textos, números, listas): lo que lee el modelo y se paga en cada vuelta."""
+    def ejecutar(self, contexto: ContextoPregunta, args: Any) -> dict | ConArtefacto:
+        """Un dict pequeño, en JSON puro (textos, números, listas): lo que lee el modelo y se paga en cada vuelta. Si
+        además produce algo para la interfaz (un gráfico, un archivo…), un ConArtefacto (módulo 97)."""
 
 
 def _explicar(e: ValidationError) -> str:

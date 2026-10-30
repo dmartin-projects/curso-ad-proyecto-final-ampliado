@@ -26,12 +26,22 @@ export class ErrorApi extends Error {
   }
 }
 
+/** El cuerpo del error: un objeto o, en una petición de texto (el streaming del chat, módulo 97), su JSON. */
+function cuerpo(error: unknown): Partial<Problema> | null {
+  if (typeof error !== 'string') return error as Partial<Problema> | null;
+  try {
+    return JSON.parse(error) as Partial<Problema>;
+  } catch {
+    return null;
+  }
+}
+
 export const erroresInterceptor: HttpInterceptorFn = (req, next) => {
   const avisos = inject(Avisos);
   return next(req).pipe(
     catchError((e: unknown) => {
       if (!(e instanceof HttpErrorResponse)) return throwError(() => e);
-      const p = e.error as Partial<Problema> | null;
+      const p = cuerpo(e.error);
       const error =
         e.status === 0
           ? new ErrorApi(0, 'sin_conexion', 'No se puede conectar con el servidor.')

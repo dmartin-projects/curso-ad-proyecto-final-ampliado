@@ -18,6 +18,7 @@ from tickets.application.listar_tickets_use_case.i_listar_tickets_use_case impor
 from tickets.application.listar_tickets_use_case.listar_tickets_use_case import ListarTicketsUseCase
 from tickets.application.obtener_ticket_use_case.i_obtener_ticket_use_case import IObtenerTicketUseCase
 from tickets.application.obtener_ticket_use_case.obtener_ticket_use_case import ObtenerTicketUseCase
+from tickets.application.ports.i_lector_de_tickets import ILectorDeTickets
 from tickets.application.procesar_ticket_use_case.i_procesar_ticket_use_case import IProcesarTicketUseCase
 from tickets.application.procesar_ticket_use_case.procesar_ticket_use_case import ProcesarTicketUseCase
 from tickets.application.reprocesar_ticket_use_case.i_reprocesar_ticket_use_case import IReprocesarTicketUseCase
@@ -92,3 +93,9 @@ def obtener_ticket() -> IObtenerTicketUseCase:
 
 def contar_tickets_atascados() -> IContarTicketsAtascadosUseCase:
     return ContarTicketsAtascadosUseCase(tickets=TicketQueryServiceORM())
+
+
+def lector_de_tickets() -> ILectorDeTickets:
+    """Módulo 97: el OCR, para el asistente (los adjuntos del chat). Lo que tickets ofrece es el port: quién lee y cómo
+    (Tesseract, la capa de texto de un PDF) sigue siendo cosa suya."""
+    return LectorTesseract()

@@ -9,7 +9,8 @@ import yaml
 
 from asistente.domain.services.tokens import estimar_tokens
 
-CASSETTES = sorted((Path(__file__).parents[2] / "management/commands/cassettes/test_preguntar").glob("*.yaml"))
+# Todas las grabaciones del agente (módulo 97: también las del chat, con streaming: su uso va en el último trozo)
+CASSETTES = sorted(Path(__file__).parents[2].rglob("cassettes/**/*.yaml"))
 
 
 def peticiones():
@@ -18,12 +19,20 @@ def peticiones():
             if "api.groq.com" not in interaccion["request"]["uri"]:
                 continue  # Frankfurter, Eurostat, Nager
             cuerpo = json.loads(interaccion["request"]["body"])
-            uso = json.loads(interaccion["response"]["body"]["string"]).get("usage")
+            uso = _uso(interaccion["response"]["body"]["string"])
             if uso and cuerpo["model"].startswith("openai/gpt-oss") and not _con_cache(uso):
                 # TODO lo que viaja: los mensajes, las tools y el schema del structured output (también se cuenta)
                 enviado = [cuerpo["messages"], cuerpo.get("tools", []), cuerpo.get("response_format", {})]
                 texto = json.dumps(enviado, ensure_ascii=False)
                 yield cassette.stem, texto, uso["prompt_tokens"]
+
+
+def _uso(respuesta: str) -> dict | None:
+    """El `usage` de una respuesta: un JSON o, en streaming, el último trozo de los Server-Sent Events."""
+    if not respuesta.startswith("data:"):
+        return json.loads(respuesta).get("usage")
+    trozos = [json.loads(x[5:]) for x in respuesta.split("\n") if x.startswith("data: {")]
+    return next((t["usage"] for t in reversed(trozos) if t.get("usage")), None)
 
 
 def _con_cache(uso: dict) -> bool:
@@ -33,6 +42,11 @@ def _con_cache(uso: dict) -> bool:
 
 
 MEDIDAS = list(peticiones())
+# Lo que gpt-oss añade a CADA petición sin que viaje en el JSON: su plantilla (el formato "harmony": canales, roles,
+# la fecha de corte…). En una petición pequeña se nota (un "¿Cuánto?" de 30 tokens llega como 87); en una de 3000, no.
+# Medido en los cassettes del 93 y el 94: entre 40 y 60. No va en estimar_tokens: 60 tokens no cambian ningún presupuesto
+# del agente, y así la estimación sigue siendo "del texto".
+PLANTILLA = 60
 
 
 def test_hay_medidas():
@@ -43,7 +57,7 @@ def test_hay_medidas():
 def test_nunca_se_queda_corta_ni_se_pasa_del_doble(nombre, texto, reales):
     """Quedarse corto es lo peligroso (una petición que "cabía" y no cabe); pasarse, desperdiciar presupuesto."""
     estimados = estimar_tokens(texto)
-    assert reales <= estimados <= 2 * reales, f"{nombre}: {estimados} estimados, {reales} reales"
+    assert reales - PLANTILLA <= estimados <= 2 * reales, f"{nombre}: {estimados} estimados, {reales} reales"
 
 
 def test_la_media_de_caracteres_por_token():

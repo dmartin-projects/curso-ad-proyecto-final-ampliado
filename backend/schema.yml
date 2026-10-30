@@ -1605,6 +1605,425 @@ paths:
               schema:
                 $ref: '#/components/schemas/Hogar'
           description: ''
+  /api/v1/hogares/{hogar_pk}/asistente/carpetas/:
+    get:
+      operationId: hogares_asistente_carpetas_list
+      description: Las carpetas de quien pide, para ordenar sus conversaciones.
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Carpeta'
+          description: ''
+    post:
+      operationId: hogares_asistente_carpetas_create
+      description: Las carpetas de quien pide, para ordenar sus conversaciones.
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CarpetaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CarpetaRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Carpeta'
+          description: ''
+  /api/v1/hogares/{hogar_pk}/asistente/carpetas/{id}/:
+    delete:
+      operationId: hogares_asistente_carpetas_destroy
+      description: Las carpetas de quien pide, para ordenar sus conversaciones.
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/hogares/{hogar_pk}/asistente/conversaciones/:
+    get:
+      operationId: hogares_asistente_conversaciones_list
+      description: Las conversaciones con el asistente de quien pide, en este hogar
+        (las de los demás miembros no se ven).
+      parameters:
+      - in: query
+        name: carpeta
+        schema:
+          type: integer
+        description: Solo las de esa carpeta
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Conversacion'
+          description: ''
+    post:
+      operationId: hogares_asistente_conversaciones_create
+      description: Las conversaciones con el asistente de quien pide, en este hogar
+        (las de los demás miembros no se ven).
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConversacionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ConversacionRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversacionDetalle'
+          description: ''
+  /api/v1/hogares/{hogar_pk}/asistente/conversaciones/{id}/:
+    get:
+      operationId: hogares_asistente_conversaciones_retrieve
+      description: Las conversaciones con el asistente de quien pide, en este hogar
+        (las de los demás miembros no se ven).
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversacionDetalle'
+          description: ''
+    patch:
+      operationId: hogares_asistente_conversaciones_partial_update
+      description: Las conversaciones con el asistente de quien pide, en este hogar
+        (las de los demás miembros no se ven).
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedConversacionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedConversacionRequest'
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConversacionDetalle'
+          description: ''
+    delete:
+      operationId: hogares_asistente_conversaciones_destroy
+      description: Las conversaciones con el asistente de quien pide, en este hogar
+        (las de los demás miembros no se ven).
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/hogares/{hogar_pk}/asistente/conversaciones/{id}/preguntar/:
+    post:
+      operationId: hogares_asistente_conversaciones_preguntar_create
+      description: |-
+        Una pregunta en una conversación. La respuesta, en streaming (Server-Sent Events): inicio, tool, texto,
+        grafico, archivo, propuesta, titulo y fin (o error).
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: integer
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - hogares
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PreguntaRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PreguntaRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          description: Los pasos de la respuesta (SSE)
+  /api/v1/hogares/{hogar_pk}/asistente/graficos-fijados/:
+    get:
+      operationId: hogares_asistente_graficos_fijados_list
+      description: Los gráficos del chat fijados en el dashboard del hogar, recalculados
+        al pedirlos.
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/GraficoFijado'
+          description: ''
+    post:
+      operationId: hogares_asistente_graficos_fijados_create
+      description: Los gráficos del chat fijados en el dashboard del hogar, recalculados
+        al pedirlos.
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EspecificacionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EspecificacionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GraficoFijado'
+          description: ''
+  /api/v1/hogares/{hogar_pk}/asistente/graficos-fijados/{id}/:
+    delete:
+      operationId: hogares_asistente_graficos_fijados_destroy
+      description: Los gráficos del chat fijados en el dashboard del hogar, recalculados
+        al pedirlos.
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/hogares/{hogar_pk}/asistente/propuestas/{id}/confirmar/:
+    post:
+      operationId: hogares_asistente_propuestas_confirmar_create
+      description: |-
+        Sin listado ni detalle: las propuestas se ven dentro de su conversación. Aquí solo se resuelven.
+
+        El rol no se mira aquí: confirmar ejecuta el use case de la app dueña con el Actor de quien confirma, y ESE use
+        case exige su rol (registrar un movimiento: miembro). Un lector recibe el mismo 403 que en el formulario.
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Propuesta'
+          description: ''
+  /api/v1/hogares/{hogar_pk}/asistente/propuestas/{id}/descartar/:
+    post:
+      operationId: hogares_asistente_propuestas_descartar_create
+      description: |-
+        Sin listado ni detalle: las propuestas se ven dentro de su conversación. Aquí solo se resuelven.
+
+        El rol no se mira aquí: confirmar ejecuta el use case de la app dueña con el Actor de quien confirma, y ESE use
+        case exige su rol (registrar un movimiento: miembro). Un lector recibe el mismo 403 que en el formulario.
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      - in: path
+        name: id
+        schema:
+          type: string
+          pattern: ^\d+$
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Propuesta'
+          description: ''
   /api/v1/hogares/{hogar_pk}/categorias/:
     get:
       operationId: hogares_categorias_list
@@ -3827,6 +4246,31 @@ components:
       required:
       - actual
       - nueva
+    Carpeta:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 60
+        conversaciones:
+          type: integer
+          readOnly: true
+      required:
+      - conversaciones
+      - id
+      - nombre
+    CarpetaRequest:
+      type: object
+      properties:
+        nombre:
+          type: string
+          minLength: 1
+          maxLength: 60
+      required:
+      - nombre
     Categoria:
       type: object
       description: 'Limita los campos relacionados al hogar de la URL: no se puede
@@ -4010,6 +4454,52 @@ components:
           type: integer
       required:
       - no_leidas
+    Conversacion:
+      type: object
+      description: Lee un ConversacionOutputDTO; al crear, la carpeta (opcional);
+        al modificar, el título o la carpeta.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        titulo:
+          type: string
+          maxLength: 80
+        carpeta:
+          type: integer
+          nullable: true
+        actualizada:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - actualizada
+      - id
+    ConversacionDetalle:
+      type: object
+      properties:
+        conversacion:
+          $ref: '#/components/schemas/Conversacion'
+        mensajes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Mensaje'
+      required:
+      - conversacion
+      - mensajes
+    ConversacionRequest:
+      type: object
+      description: Lee un ConversacionOutputDTO; al crear, la carpeta (opcional);
+        al modificar, el título o la carpeta.
+      properties:
+        titulo:
+          type: string
+          minLength: 1
+          maxLength: 80
+        carpeta:
+          type: integer
+          nullable: true
     Cuenta:
       type: object
       properties:
@@ -4160,6 +4650,55 @@ components:
           minLength: 1
       required:
       - email
+    Especificacion:
+      type: object
+      description: 'QUÉ dibujar: lo que devuelve el chat en cada gráfico, tal cual
+        (los números no: se recalculan).'
+      properties:
+        tipo:
+          $ref: '#/components/schemas/EspecificacionTipoEnum'
+        titulo:
+          type: string
+          maxLength: 80
+        fuente:
+          $ref: '#/components/schemas/FuenteEnum'
+        argumentos:
+          type: object
+          additionalProperties: {}
+      required:
+      - fuente
+      - tipo
+      - titulo
+    EspecificacionRequest:
+      type: object
+      description: 'QUÉ dibujar: lo que devuelve el chat en cada gráfico, tal cual
+        (los números no: se recalculan).'
+      properties:
+        tipo:
+          $ref: '#/components/schemas/EspecificacionTipoEnum'
+        titulo:
+          type: string
+          minLength: 1
+          maxLength: 80
+        fuente:
+          $ref: '#/components/schemas/FuenteEnum'
+        argumentos:
+          type: object
+          additionalProperties: {}
+      required:
+      - fuente
+      - tipo
+      - titulo
+    EspecificacionTipoEnum:
+      enum:
+      - barras
+      - lineas
+      - circular
+      type: string
+      description: |-
+        * `barras` - barras
+        * `lineas` - lineas
+        * `circular` - circular
     EstablecerPasswordRequest:
       type: object
       properties:
@@ -4304,6 +4843,18 @@ components:
       description: |-
         * `csv` - CSV
         * `pdf` - PDF
+    FuenteEnum:
+      enum:
+      - comparar_meses
+      - gasto_por_categoria
+      - tendencia
+      - top_comercios
+      type: string
+      description: |-
+        * `comparar_meses` - comparar_meses
+        * `gasto_por_categoria` - gasto_por_categoria
+        * `tendencia` - tendencia
+        * `top_comercios` - top_comercios
     GenerarInformeRequest:
       type: object
       properties:
@@ -4317,6 +4868,32 @@ components:
           description: Enviarlo también por email a los miembros
       required:
       - mes
+    GraficoFijado:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        especificacion:
+          $ref: '#/components/schemas/Especificacion'
+        fijado_por:
+          type: string
+          readOnly: true
+          nullable: true
+        grafico:
+          readOnly: true
+          nullable: true
+          description: etiquetas y series, calculadas ahora
+        error:
+          type: string
+          readOnly: true
+          nullable: true
+      required:
+      - error
+      - especificacion
+      - fijado_por
+      - grafico
+      - id
     Hogar:
       type: object
       properties:
@@ -4714,6 +5291,33 @@ components:
       - importe
       - orden
       - precio_unitario
+    Mensaje:
+      type: object
+      properties:
+        id:
+          type: integer
+        rol:
+          $ref: '#/components/schemas/RolMensajeEnum'
+        texto:
+          type: string
+        datos:
+          description: gráficos, archivos (con su URL), propuestas (con su estado),
+            seguimiento…
+        incompleto:
+          type: boolean
+        nombre_adjunto:
+          type: string
+        creado:
+          type: string
+          format: date-time
+      required:
+      - creado
+      - datos
+      - id
+      - incompleto
+      - nombre_adjunto
+      - rol
+      - texto
     MesDashboard:
       type: object
       properties:
@@ -5435,6 +6039,18 @@ components:
         es_ingreso:
           type: boolean
           title: Es de ingresos
+    PatchedConversacionRequest:
+      type: object
+      description: Lee un ConversacionOutputDTO; al crear, la carpeta (opcional);
+        al modificar, el título o la carpeta.
+      properties:
+        titulo:
+          type: string
+          minLength: 1
+          maxLength: 80
+        carpeta:
+          type: integer
+          nullable: true
     PatchedCuentaRequest:
       type: object
       properties:
@@ -5545,6 +6161,19 @@ components:
       required:
       - clave
       - total
+    PreguntaRequest:
+      type: object
+      properties:
+        texto:
+          type: string
+          minLength: 1
+          maxLength: 2000
+        archivo:
+          type: string
+          format: binary
+          description: 'Una foto o un PDF: su texto (OCR) entra en la pregunta'
+      required:
+      - texto
     Presupuesto:
       type: object
       description: 'Limita los campos relacionados al hogar de la URL: no se puede
@@ -5616,6 +6245,34 @@ components:
       - categoria
       - importe
       - mes
+    Propuesta:
+      type: object
+      properties:
+        id:
+          type: integer
+        tipo:
+          type: string
+        resumen:
+          type: string
+        estado:
+          $ref: '#/components/schemas/PropuestaEstadoEnum'
+        resultado: {}
+      required:
+      - estado
+      - id
+      - resultado
+      - resumen
+      - tipo
+    PropuestaEstadoEnum:
+      enum:
+      - pendiente
+      - confirmada
+      - descartada
+      type: string
+      description: |-
+        * `pendiente` - pendiente
+        * `confirmada` - confirmada
+        * `descartada` - descartada
     ProveedorSocial:
       type: object
       properties:
@@ -5750,6 +6407,14 @@ components:
         * `admin` - Administrador
         * `miembro` - Miembro
         * `lector` - Solo lectura
+    RolMensajeEnum:
+      enum:
+      - usuario
+      - modelo
+      type: string
+      description: |-
+        * `usuario` - usuario
+        * `modelo` - modelo
     SegundoFactorRequest:
       type: object
       properties:

@@ -1,10 +1,11 @@
 # asistente/infrastructure/finanzas/consultas_en_finanzas.py — IConsultasDeFinanzas con los use cases de finanzas
-# (módulos 94 y 95)
+# (módulos 94, 95 y 97)
 #
 # Anti-corruption layer: llama a los use cases de CONSULTA de finanzas, por su container y con el Actor de quien
 # pregunta (sus permisos por hogar se aplican solos), y traduce sus OutputDTOs a los read models del asistente.
 from asistente.application.ports.i_consultas_de_finanzas import IConsultasDeFinanzas
 from asistente.domain.read_models.categoria_del_hogar import CategoriaDelHogar
+from asistente.domain.read_models.cuenta_del_hogar import CuentaDelHogar
 from asistente.domain.read_models.estado_de_presupuesto import EstadoDePresupuesto
 from asistente.domain.read_models.gasto_de_categoria import GastoDeCategoria
 from asistente.domain.read_models.gasto_de_comercio import GastoDeComercio
@@ -16,6 +17,7 @@ from asistente.domain.read_models.resumen_del_mes import ResumenDelMes
 from core.domain.repositories.queries.paginacion_cursor import PaginacionCursor
 from core.domain.vo.mes import Mes
 from finanzas.application.listar_categorias_use_case.dtos.listar_categorias_input_dto import ListarCategoriasInputDTO
+from finanzas.application.listar_cuentas_use_case.dtos.listar_cuentas_input_dto import ListarCuentasInputDTO
 from finanzas.application.listar_movimientos_use_case.dtos.listar_movimientos_input_dto import ListarMovimientosInputDTO
 from finanzas.application.obtener_dashboard_use_case.dtos.obtener_dashboard_input_dto import ObtenerDashboardInputDTO
 from finanzas.application.obtener_totales_movimientos_use_case.dtos.obtener_totales_movimientos_input_dto import (
@@ -69,3 +71,7 @@ class ConsultasEnFinanzas(IConsultasDeFinanzas):
         todas = finanzas.listar_categorias().ejecutar(ListarCategoriasInputDTO(hogar_id, actor))
         nombres = {c.id: c.nombre for c in todas}
         return tuple(CategoriaDelHogar(c.id, c.nombre, nombres.get(c.padre_id), c.es_ingreso) for c in todas)
+
+    def cuentas(self, actor, hogar_id):
+        leidas = finanzas.listar_cuentas().ejecutar(ListarCuentasInputDTO(hogar_id, actor, orden=("nombre",)))
+        return tuple(CuentaDelHogar(c.id, c.nombre, c.tipo, c.activa, c.saldo) for c in leidas)

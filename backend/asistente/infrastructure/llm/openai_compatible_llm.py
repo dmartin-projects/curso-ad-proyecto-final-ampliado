@@ -1,4 +1,4 @@
-# asistente/infrastructure/llm/openai_compatible_llm.py — el port ILLM sobre la API Chat Completions (módulo 93)
+# asistente/infrastructure/llm/openai_compatible_llm.py — el port ILLM sobre la API Chat Completions (módulos 93 y 97)
 #
 # Chat Completions es el formato de OpenAI, y lo hablan casi todos: Groq (el proveedor del curso), OpenRouter,
 # Together, Cerebras, Mistral, Gemini (su capa de compatibilidad) y, en local, Ollama, vLLM o LM Studio. Por eso el
@@ -9,11 +9,12 @@
 import json
 import logging
 import time
+from collections.abc import Callable
 
 import httpx2
 import openai
 from openai import OpenAI
-from openai.types.chat import ChatCompletion
+from openai.types.chat import ChatCompletion, ChatCompletionChunk
 from tenacity import Retrying, retry_if_exception, stop_after_attempt, wait_exponential_jitter
 
 from asistente.application.ports.i_llm import ILLM
@@ -81,6 +82,86 @@ class OpenAICompatibleLLM(ILLM):
         except openai.APIConnectionError as e:  # también APITimeoutError: sin respuesta del servidor
             raise LLMNoDisponibleException(f"{self._modelo}: {_describir(e)}") from e
         return _respuesta(completion, self._modelo, int((time.perf_counter() - inicio) * 1000))
+
+    def generar_en_streaming(self, peticion: PeticionLLM, al_texto: Callable[[str], None]) -> RespuestaLLM:
+        """Módulo 97: stream=True. El servidor manda la respuesta en trozos (Server-Sent Events) y cada trozo de texto
+        sale por `al_texto` en cuanto llega; las tool calls llegan también en trozos y se juntan aquí. Al final, la
+        misma RespuestaLLM que sin streaming (con el uso: stream_options.include_usage lo pide en el último trozo).
+
+        Se reintenta solo si aún no ha salido ningún texto: lo que ya ha visto la persona no se puede retirar.
+        """
+        cuerpo = {**_cuerpo(self._modelo, peticion), "stream": True, "stream_options": {"include_usage": True}}
+        inicio = time.perf_counter()
+        emitido = False
+
+        def emitir(trozo: str) -> None:
+            nonlocal emitido
+            emitido = True
+            al_texto(trozo)
+
+        try:
+            for intento in Retrying(
+                stop=stop_after_attempt(self._intentos),
+                wait=wait_exponential_jitter(multiplier=self._pausa, max=4, jitter=self._pausa),
+                retry=retry_if_exception(lambda e: not emitido and _reintentable(e)),
+                reraise=True,
+            ):
+                with intento:
+                    with self._cliente.chat.completions.create(**cuerpo) as trozos:
+                        return _juntar(trozos, self._modelo, emitir, inicio)
+        except openai.RateLimitError as e:
+            raise LLMNoDisponibleException(f"{self._modelo}: {_describir(e)}", _retry_after(e.response)) from e
+        except openai.APIStatusError as e:
+            if _reintentable(e):
+                raise LLMNoDisponibleException(f"{self._modelo}: {_describir(e)}") from e
+            raise PeticionLLMException(f"{self._modelo}: {_describir(e)}") from e
+        except openai.APIConnectionError as e:  # también un corte a mitad del stream
+            raise LLMNoDisponibleException(f"{self._modelo}: {_describir(e)}") from e
+        raise AssertionError("inalcanzable")  # pragma: no cover
+
+
+def _juntar(trozos, modelo: str, emitir: Callable[[str], None], inicio: float) -> RespuestaLLM:
+    """Los trozos de un stream de Chat Completions, juntos. El texto y el razonamiento llegan como deltas que se
+    concatenan; cada tool call, en trozos con su `index` (el id y el nombre en el primero, los argumentos repartidos)."""
+    texto, razonamiento, final, servido = [], [], None, modelo
+    llamadas: dict[int, dict] = {}
+    uso = Uso()
+    c: ChatCompletionChunk
+    for c in trozos:
+        servido = c.model or servido
+        if c.usage is not None:  # el último trozo (include_usage): sin choices, con el uso de toda la respuesta
+            uso = _uso(c)
+        if not c.choices:
+            continue
+        eleccion = c.choices[0]
+        delta = eleccion.delta
+        if delta.content:
+            texto.append(delta.content)
+            emitir(delta.content)
+        if extra := (delta.model_extra or {}).get("reasoning"):
+            razonamiento.append(extra)
+        for tc in delta.tool_calls or ():
+            llamada = llamadas.setdefault(tc.index, {"id": "", "nombre": "", "argumentos": []})
+            if tc.id:
+                llamada["id"] = tc.id
+            if tc.function and tc.function.name:
+                llamada["nombre"] = tc.function.name
+            if tc.function and tc.function.arguments:
+                llamada["argumentos"].append(tc.function.arguments)
+        final = eleccion.finish_reason or final
+    tools = tuple(
+        LlamadaTool(id=ll["id"], nombre=ll["nombre"], argumentos="".join(ll["argumentos"]) or "{}")
+        for _, ll in sorted(llamadas.items())
+    )
+    motivo = MotivoFin.TOOLS if tools else MOTIVOS.get(final, MotivoFin.OTRO)
+    return RespuestaLLM(
+        mensaje=Mensaje.modelo(texto="".join(texto), llamadas=tools),
+        motivo=motivo,
+        uso=uso,
+        modelo=servido,
+        duracion_ms=int((time.perf_counter() - inicio) * 1000),
+        razonamiento="".join(razonamiento),
+    )
 
 
 def _reintentable(e: BaseException) -> bool:
@@ -181,7 +262,7 @@ def _respuesta(c: ChatCompletion, modelo: str, duracion_ms: int) -> RespuestaLLM
     )
 
 
-def _uso(c: ChatCompletion) -> Uso:
+def _uso(c: ChatCompletion | ChatCompletionChunk) -> Uso:
     u = c.usage
     if u is None:  # algún proveedor compatible no lo manda: mejor 0 que inventarlo
         return Uso()

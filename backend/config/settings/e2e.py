@@ -32,10 +32,15 @@ MAILERS = {"default": {"BACKEND": "django.core.mail.backends.locmem.EmailBackend
 IA_BASE_URL = "http://localhost:8000/e2e/ia/"
 IA_API_KEY = "e2e"
 
+# Módulo 97: el LLM del asistente, otra vista de este servidor (config/urls_e2e.py), con la forma de Chat Completions
+ASISTENTE_BASE_URL = "http://localhost:8000/e2e/llm/"
+ASISTENTE_API_KEY = "e2e"
+ASISTENTE_MODELOS_RESERVA = []
+
 # Los tests entran muchas veces por minuto: el límite real de "login" (5/min, módulo 35) los haría fallar
 REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {
     **REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"],
-    **{alcance: "1000/min" for alcance in ("login", "mfa", "passkey")},
+    **{alcance: "1000/min" for alcance in ("login", "mfa", "passkey", "asistente")},
 }
 EXIGIR_CASOS_DE_USO = True  # módulo 88: los E2E también fallan si algo escribe sin use case
 # Módulo 90: el authorization server, en el origen de la app (como en producción, donde Vercel reenvía /api/*),

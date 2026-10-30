@@ -207,6 +207,7 @@ REST_FRAMEWORK = {
         "social": "20/min",  # módulo 91: empezar un inicio de sesión con un proveedor
         "mfa": "10/min",  # módulo 92: el segundo factor y el step-up (además del bloqueo por cuenta)
         "passkey": "20/min",  # módulo 92: entrar con una passkey (cada reto se guarda en Redis)
+        "asistente": "20/min",  # módulo 97: cada pregunta cuesta tokens (las cuotas por plan, módulo 98)
     },
     "EXCEPTION_HANDLER": "core.infrastructure.api.exceptions.manejador_errores.manejador_errores",
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
@@ -360,6 +361,9 @@ SPECTACULAR_SETTINGS = {
     "ENUM_NAME_OVERRIDES": {
         "EstadoTicketEnum": "tickets.models.Ticket.Estado",
         "EstadoImportacionEnum": "importaciones.models.Importacion.Estado",
+        # Módulo 97: dos campos "rol" con valores distintos (el de una membresía y el de un mensaje del chat)
+        "RolEnum": "hogares.models.Membresia.Rol",
+        "RolMensajeEnum": "asistente.infrastructure.api.v1.serializers.mensaje_serializer.ROLES",
     },
 }
 
@@ -413,6 +417,8 @@ ASISTENTE_TIMEOUT = env.float("ASISTENTE_TIMEOUT", default=30.0)  # segundos por
 # Módulo 94: si el principal no está disponible (o se ha quedado sin cuota), estos, en orden. En Groq, cada modelo
 # tiene su propia cuota: el de reserva suele estar libre cuando el principal devuelve 429.
 ASISTENTE_MODELOS_RESERVA = env.list("ASISTENTE_MODELOS_RESERVA", default=["openai/gpt-oss-20b"])
+# Módulo 97: el modelo de las tareas fáciles (títulos; resúmenes en el 99): más rápido, más barato y con su propia cuota
+ASISTENTE_MODELO_AUXILIAR = env("ASISTENTE_MODELO_AUXILIAR", default="openai/gpt-oss-20b")
 ASISTENTE_SEGUNDOS_POR_PREGUNTA = env.float("ASISTENTE_SEGUNDOS_POR_PREGUNTA", default=60.0)
 # Ejercicio 1 del 94: tokens (entrada + salida) por pregunta; pasados, la siguiente vuelta es la última. Con la capa
 # gratuita de Groq (8.000 por minuto), una pregunta que pasa de aquí deja sin cuota a las demás de ese minuto.

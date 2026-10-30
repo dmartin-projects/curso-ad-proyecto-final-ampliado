@@ -1,0 +1,55 @@
+@let m = mensaje();
+<article
+  class="flex flex-col gap-3"
+  [class.items-end]="m.rol === 'usuario'"
+  [attr.aria-label]="m.rol === 'usuario' ? 'Tu pregunta' : 'Respuesta del asistente'"
+>
+  <div
+    class="max-w-[85%] rounded-2xl px-4 py-2"
+    [class.bg-primario-contenedor]="m.rol === 'usuario'"
+    [class.text-texto-primario-contenedor]="m.rol === 'usuario'"
+    [class.bg-superficie-alta]="m.rol === 'modelo'"
+  >
+    @if (m.nombreAdjunto) {
+      <p class="m-0 mb-1 flex items-center gap-1 text-sm text-texto-suave">
+        <mat-icon class="!h-4 !w-4 !text-base" aria-hidden="true">attach_file</mat-icon>
+        {{ m.nombreAdjunto }}
+      </p>
+    }
+    <div class="texto-chat" [innerHTML]="m.texto | markdownLigero"></div>
+    @if (m.incompleto) {
+      <p class="m-0 mt-1 text-sm text-texto-suave">Sin respuesta: no se completó.</p>
+    }
+  </div>
+
+  @for (g of m.datos.graficos ?? []; track $index) {
+    <app-grafico-del-chat
+      class="w-full"
+      [grafico]="g"
+      [fijable]="puedeFijar()"
+      (fijar)="fijar.emit($event)"
+    />
+  }
+  @for (a of m.datos.archivos ?? []; track $index) {
+    @if (a.url) {
+      <a mat-stroked-button [href]="a.url" download>
+        <mat-icon>download</mat-icon> {{ a.nombre }} ({{ a.filas }} filas)
+      </a>
+    }
+  }
+  @for (p of m.datos.propuestas ?? []; track p.id) {
+    <app-propuesta
+      class="w-full"
+      [propuesta]="p"
+      (confirmar)="confirmar.emit($event)"
+      (descartar)="descartar.emit($event)"
+    />
+  }
+  @if (ultimo() && m.datos.seguimiento?.length) {
+    <mat-chip-set aria-label="Preguntas de seguimiento">
+      @for (s of m.datos.seguimiento; track s) {
+        <mat-chip (click)="seguir.emit(s)" [disabled]="ocupado()">{{ s }}</mat-chip>
+      }
+    </mat-chip-set>
+  }
+</article>

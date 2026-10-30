@@ -1,0 +1,110 @@
+<div class="grid gap-4 md:grid-cols-[18rem_1fr]">
+  <app-lista-conversaciones
+    class="hidden md:block"
+    [hogarId]="hogarId()"
+    [conversaciones]="conversaciones.data() ?? []"
+    [carpetas]="carpetas.data() ?? []"
+    [actual]="chat.conversacionId()"
+    [carpeta]="carpeta()"
+    (nueva)="nueva()"
+    (filtrar)="carpeta.set($event)"
+    (crearCarpeta)="crearCarpeta($event)"
+    (borrarCarpeta)="borrarCarpeta($event)"
+    (mover)="mover($event)"
+    (borrar)="borrar($event)"
+  />
+
+  <section class="flex min-h-[70vh] flex-col gap-4" aria-labelledby="titulo-chat">
+    <header class="flex items-center gap-2">
+      @if (editando()) {
+        <input
+          #nuevoTitulo
+          class="flex-1 rounded border px-2 py-1 text-xl"
+          aria-label="Título de la conversación"
+          [value]="chat.titulo()"
+          (keydown.enter)="renombrar(nuevoTitulo.value)"
+          (keydown.escape)="editando.set(false)"
+          (blur)="renombrar(nuevoTitulo.value)"
+        />
+      } @else {
+        <h1 id="titulo-chat" class="m-0 flex-1 text-xl">{{ chat.titulo() || 'Asistente' }}</h1>
+        @if (chat.conversacionId()) {
+          <button mat-icon-button (click)="editando.set(true)" aria-label="Cambiar el título">
+            <mat-icon>edit</mat-icon>
+          </button>
+        }
+      }
+      <button mat-stroked-button class="md:!hidden" (click)="nueva()">
+        <mat-icon>add_comment</mat-icon> Nueva
+      </button>
+    </header>
+
+    <div class="flex flex-1 flex-col gap-4" aria-live="polite" [attr.aria-busy]="chat.enCurso()">
+      @for (m of chat.mensajes(); track $index; let ultimo = $last) {
+        <app-mensaje
+          [mensaje]="m"
+          [ultimo]="ultimo && !chat.enCurso()"
+          [ocupado]="chat.enCurso()"
+          [puedeFijar]="hogar.puedeEditar()"
+          (confirmar)="resolver($event, 'confirmar')"
+          (descartar)="resolver($event, 'descartar')"
+          (fijar)="fijar($event)"
+          (seguir)="enviar({ texto: $event })"
+        />
+      } @empty {
+        @if (!chat.enCurso()) {
+          <div class="m-auto max-w-md text-center">
+            <p>
+              Pregunta por los gastos del hogar. Contesta con vuestros datos, y lo que apunte, lo
+              confirmas tú.
+            </p>
+            <mat-chip-set aria-label="Preguntas de ejemplo">
+              @for (s of sugerencias; track s) {
+                <mat-chip (click)="enviar({ texto: s })">{{ s }}</mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        }
+      }
+
+      @if (chat.enCurso()) {
+        <div class="flex flex-col gap-2" role="status">
+          @for (p of chat.pasos(); track $index) {
+            <p class="m-0 flex items-center gap-1 text-sm text-texto-suave">
+              <mat-icon class="!h-4 !w-4 !text-base" aria-hidden="true">search</mat-icon> {{ p }}…
+            </p>
+          }
+          @for (g of chat.datos().graficos ?? []; track $index) {
+            <app-grafico-del-chat [grafico]="g" [fijable]="false" />
+          }
+          @for (p of chat.datos().propuestas ?? []; track p.id) {
+            <app-propuesta
+              [propuesta]="p"
+              (confirmar)="resolver($event, 'confirmar')"
+              (descartar)="resolver($event, 'descartar')"
+            />
+          }
+          @if (chat.borrador()) {
+            <div
+              class="max-w-[85%] rounded-2xl bg-superficie-alta px-4 py-2"
+              [innerHTML]="chat.borrador() | markdownLigero"
+            ></div>
+          } @else {
+            <mat-progress-bar mode="indeterminate" aria-label="El asistente está respondiendo" />
+          }
+        </div>
+      }
+      @if (chat.error(); as error) {
+        <p class="m-0 text-error" role="alert">{{ error }}</p>
+      }
+      <div #final></div>
+    </div>
+
+    <app-entrada
+      class="sticky bottom-0 bg-superficie pt-2"
+      [ocupado]="chat.enCurso()"
+      (enviar)="enviar($event)"
+      (detener)="chat.detener()"
+    />
+  </section>
+</div>

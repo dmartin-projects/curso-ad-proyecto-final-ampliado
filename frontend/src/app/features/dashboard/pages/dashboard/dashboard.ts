@@ -5,7 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { Router, RouterLink } from '@angular/router';
-import { injectQuery, keepPreviousData } from '@tanstack/angular-query-experimental';
+import { injectQuery, keepPreviousData, QueryClient } from '@tanstack/angular-query-experimental';
 import type { ChartData } from 'chart.js';
 import { lastValueFrom } from 'rxjs';
 
@@ -13,6 +13,8 @@ import { HogarStore } from '../../../../core/hogar/hogar-store';
 import { Grafico } from '../../../../shared/components/grafico/grafico';
 import { Importe } from '../../../../shared/components/importe/importe';
 import { DiasSemanaCard } from '../../components/dias-semana/dias-semana';
+import { GraficosFijados } from '../../components/graficos-fijados/graficos-fijados';
+import { GraficoFijado } from '../../interfaces/dashboard.models';
 import { DashboardApi } from '../../services/dashboard-api';
 
 const mesDe = (fecha: Date) => fecha.toLocaleDateString('sv-SE').slice(0, 7); // AAAA-MM
@@ -30,6 +32,7 @@ const mesDe = (fecha: Date) => fecha.toLocaleDateString('sv-SE').slice(0, 7); //
     Grafico,
     Importe,
     DiasSemanaCard,
+    GraficosFijados,
   ],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
@@ -37,7 +40,8 @@ const mesDe = (fecha: Date) => fecha.toLocaleDateString('sv-SE').slice(0, 7); //
 export default class Dashboard {
   private readonly api = inject(DashboardApi);
   private readonly router = inject(Router);
-  private readonly store = inject(HogarStore);
+  protected readonly store = inject(HogarStore);
+  private readonly queryClient = inject(QueryClient);
   readonly mes = input<string>(); // ?mes=2026-10
   protected readonly mesActual = computed(() => this.mes() ?? mesDe(new Date()));
 
@@ -50,6 +54,19 @@ export default class Dashboard {
     queryFn: () => lastValueFrom(this.api.resumen(this.store.activoId()!, this.mesActual())),
     placeholderData: keepPreviousData,
   }));
+
+  /** Módulo 97: los gráficos fijados desde el chat; si no hay, la sección no se pinta. */
+  protected readonly fijados = injectQuery(() => ({
+    queryKey: ['hogar', this.store.activoId(), 'graficos-fijados'],
+    queryFn: () => lastValueFrom(this.api.graficosFijados(this.store.activoId()!)),
+  }));
+
+  protected async quitar(g: GraficoFijado) {
+    await lastValueFrom(this.api.quitarGrafico(this.store.activoId()!, g.id));
+    await this.queryClient.invalidateQueries({
+      queryKey: ['hogar', this.store.activoId(), 'graficos-fijados'],
+    });
+  }
 
   /** Módulo 85: la tarjeta del servicio de estadísticas, con su propio resource (si cae, solo cae ella). */
   protected readonly diasSemana = this.api.diasSemana(computed(() => this.store.activoId()!));

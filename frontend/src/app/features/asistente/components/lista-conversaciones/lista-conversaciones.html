@@ -1,0 +1,79 @@
+<nav aria-label="Conversaciones" class="flex flex-col gap-3">
+  <button mat-flat-button (click)="nueva.emit()">
+    <mat-icon>add_comment</mat-icon> Nueva conversación
+  </button>
+
+  <mat-chip-listbox
+    aria-label="Carpetas"
+    [value]="carpeta()"
+    (change)="filtrar.emit($event.value ?? null)"
+  >
+    @for (c of carpetas(); track c.id) {
+      <mat-chip-option [value]="c.id">
+        {{ c.nombre }} ({{ c.conversaciones }})
+        <button
+          matChipTrailingIcon
+          [attr.aria-label]="'Borrar la carpeta ' + c.nombre"
+          (click)="borrarCarpeta.emit(c)"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-chip-option>
+    }
+  </mat-chip-listbox>
+  <form class="flex items-center gap-1" (ngSubmit)="guardarCarpeta()">
+    <mat-form-field class="flex-1" subscriptSizing="dynamic">
+      <mat-label>Nueva carpeta</mat-label>
+      <input
+        matInput
+        name="carpeta"
+        maxlength="60"
+        [ngModel]="nombreCarpeta()"
+        (ngModelChange)="nombreCarpeta.set($event)"
+      />
+    </mat-form-field>
+    <button mat-icon-button type="submit" aria-label="Crear la carpeta">
+      <mat-icon>create_new_folder</mat-icon>
+    </button>
+  </form>
+
+  <mat-nav-list>
+    @for (c of conversaciones(); track c.id) {
+      <div class="flex items-center">
+        <a
+          mat-list-item
+          class="flex-1"
+          [routerLink]="['/hogares', hogarId(), 'asistente']"
+          [queryParams]="{ conversacion: c.id }"
+          [activated]="c.id === actual()"
+          [attr.aria-current]="c.id === actual() ? 'page' : null"
+        >
+          <span matListItemTitle>{{ c.titulo || 'Conversación nueva' }}</span>
+          <span matListItemLine>{{ c.actualizada | date: 'short' }}</span>
+        </a>
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="menu"
+          [attr.aria-label]="'Opciones de ' + (c.titulo || 'la conversación')"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+          @for (carpeta of carpetas(); track carpeta.id) {
+            <button mat-menu-item (click)="mover.emit({ conversacion: c, carpeta: carpeta.id })">
+              <mat-icon>folder</mat-icon> Mover a {{ carpeta.nombre }}
+            </button>
+          }
+          @if (c.carpeta) {
+            <button mat-menu-item (click)="mover.emit({ conversacion: c, carpeta: null })">
+              <mat-icon>folder_off</mat-icon> Sacar de la carpeta
+            </button>
+          }
+          <button mat-menu-item (click)="borrar.emit(c)"><mat-icon>delete</mat-icon> Borrar</button>
+        </mat-menu>
+      </div>
+    } @empty {
+      <p class="px-4 text-sm text-texto-suave">Aún no hay conversaciones.</p>
+    }
+  </mat-nav-list>
+</nav>

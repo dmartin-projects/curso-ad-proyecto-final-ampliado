@@ -455,6 +455,7 @@ ASISTENTE_EMBEDDINGS_CACHE = env("ASISTENTE_EMBEDDINGS_CACHE", default=str(BASE_
 ASISTENTE_TEXT_TO_SQL = env.bool("ASISTENTE_TEXT_TO_SQL", default=False)
 ASISTENTE_SQL_FILAS = 200  # como mucho, por consulta (la interfaz); al modelo, 50
 ASISTENTE_SQL_SEGUNDOS = 2  # statement_timeout: una consulta que tarda más es una consulta mal hecha
+ASISTENTE_SQL_COSTE_MAXIMO = 100_000  # ejercicio 2 del 101: el coste estimado (EXPLAIN) a partir del que ni se ejecuta
 # Módulo 98: el proveedor, como lo nombran las convenciones GenAI de OpenTelemetry (gen_ai.provider.name)
 ASISTENTE_PROVEEDOR = env("ASISTENTE_PROVEEDOR", default="groq")
 # Las cuotas de cada plan: tokens al día por persona (entrada + salida) y dólares al mes por hogar. Una pregunta del chat

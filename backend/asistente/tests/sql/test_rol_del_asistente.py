@@ -1,6 +1,9 @@
 """Módulo 101: lo que puede y lo que no puede hacer el SQL del modelo. Cada test es un ataque o un error que pasa de
 verdad (y la barrera que lo para), contra PostgreSQL: lo que importa aquí no se puede probar con fakes.
 
+Con el árbol (sqlglot, ejercicio 1) apagado: casi todos estos ataques ya los pararía él, y aquí se prueba que, si se le
+escapara alguno, PostgreSQL lo para igual.
+
 Con transaction=True: la consulta va por OTRA conexión (la del rol), que no vería nada de lo que el test escribiera
 dentro de su transacción."""
 
@@ -33,7 +36,7 @@ def dos_hogares():
 
 
 def consultar(hogar, sql):
-    return ConsultasSQLPostgres().ejecutar(hogar.pk, sql)
+    return ConsultasSQLPostgres(arbol=False).ejecutar(hogar.pk, sql)
 
 
 def test_solo_ve_su_hogar(dos_hogares):

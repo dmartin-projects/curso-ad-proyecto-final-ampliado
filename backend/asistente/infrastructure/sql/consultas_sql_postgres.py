@@ -10,26 +10,50 @@
    una tabla que el rol no puede ni leer ni escribir (la escribe aquí la conexión de la aplicación, antes, y la borra
    después);
 4. la transacción: solo lectura, `statement_timeout` y un LIMIT por fuera (y nunca más filas de las que se leen).
+
+Los ejercicios añaden dos más: el árbol de sqlglot (entre la 1 y la 2: lista blanca de vistas y funciones) y el coste
+estimado con EXPLAIN (antes de la 4: lo absurdo ni se ejecuta). Y cada consulta deja una línea de log y una medida.
 """
 
+import hashlib
+import logging
 import time
 
 import psycopg
 from django.conf import settings
 from django.db import connections
+from opentelemetry import metrics
 
 from asistente.application.ports.i_consultas_sql import IConsultasSQL
 from asistente.domain.exceptions.consulta_sql_exception import ConsultaSQLException
 from asistente.domain.read_models.resultado_sql import ResultadoSQL
+from asistente.infrastructure.sql.validador_sqlglot import validar_arbol
+
+logger = logging.getLogger(__name__)
+# Ejercicio 3: aquí y no en telemetria/instrumentos.py, porque las capas de infraestructura no se importan entre sí
+# (import-linter). El nombre sigue nuestro prefijo; en Prometheus, gastos_asistente_consultas_sql_total{resultado}.
+consultas_sql = metrics.get_meter("gastos.asistente").create_counter(
+    "gastos.asistente.consultas_sql", unit="{consulta}", description="Consultas SQL del asistente, por resultado"
+)
 
 
 class ConsultasSQLPostgres(IConsultasSQL):
+    def __init__(self, *, arbol: bool = True):
+        self.arbol = arbol  # False solo en los tests de las barreras de PostgreSQL: para probarlas sin la primera
+
     def disponible(self):
         return bool(settings.ASISTENTE_SQL_PASSWORD)
 
     def ejecutar(self, hogar_id, sql):
         limite = settings.ASISTENTE_SQL_FILAS
         inicio = time.perf_counter()
+        auditoria = {"hogar_id": hogar_id, "sql": hashlib.sha256(sql.encode()).hexdigest()[:12]}
+        try:
+            if self.arbol:
+                validar_arbol(sql)  # ejercicio 1: el árbol, con una lista blanca de vistas y funciones
+        except ConsultaSQLException as e:
+            _auditar(auditoria, "rechazada", inicio, error=str(e))
+            raise
         try:
             with psycopg.connect(**_datos_de_conexion(), autocommit=False) as conexion, conexion.cursor() as c:
                 c.execute("SET TRANSACTION READ ONLY")
@@ -38,17 +62,50 @@ class ConsultasSQLPostgres(IConsultasSQL):
                 pid = c.fetchone()[0]
                 _contexto(pid, hogar_id)
                 try:
-                    c.execute(f"SELECT * FROM ({sql}) AS consulta LIMIT {limite + 1}")  # noqa: S608 (es la idea)
+                    envuelta = f"SELECT * FROM ({sql}) AS consulta LIMIT {limite + 1}"  # noqa: S608 (es la idea)
+                    auditoria["coste"] = _coste(c, envuelta)  # ejercicio 2: lo que PostgreSQL calcula que costará
+                    if auditoria["coste"] > settings.ASISTENTE_SQL_COSTE_MAXIMO:
+                        raise ConsultaSQLException(
+                            f"La consulta es demasiado cara (coste estimado {auditoria['coste']:.0f}): agrupa y filtra "
+                            "antes, y evita productos cartesianos."
+                        )
+                    c.execute(envuelta)
                     columnas = tuple(d.name for d in c.description)
                     filas = c.fetchmany(limite + 1)
                 finally:
                     _contexto(pid, None)
                     conexion.rollback()  # solo leía: nada que confirmar
+        except ConsultaSQLException as e:
+            _auditar(auditoria, "rechazada", inicio, error=str(e))
+            raise
         except psycopg.Error as e:
+            resultado = "timeout" if isinstance(e, psycopg.errors.QueryCanceled) else "error"
+            _auditar(auditoria, resultado, inicio, error=type(e).__name__)
             raise ConsultaSQLException(_explicar(e)) from e
+        _auditar(auditoria, "ok", inicio, filas=min(len(filas), limite))
         return ResultadoSQL(
             columnas, tuple(filas[:limite]), len(filas) > limite, int((time.perf_counter() - inicio) * 1000)
         )
+
+
+def _coste(c, sql: str) -> float:
+    """EXPLAIN sin ejecutar: el coste estimado por el planificador (unidades arbitrarias: ~1 por página leída). Para
+    lo absurdo (un producto cartesiano de millones de filas) se rechaza ANTES; lo lento de otra forma (pg_sleep), lo
+    corta el statement_timeout."""
+    c.execute(f"EXPLAIN (FORMAT JSON) {sql}")
+    return float(c.fetchone()[0][0]["Plan"]["Total Cost"])
+
+
+def _auditar(datos: dict, resultado: str, inicio: float, **extra) -> None:
+    """Ejercicio 3: una línea por consulta (sin el SQL, que puede llevar datos: su huella) y una métrica por resultado.
+    Para ver, por ejemplo, un hogar que de pronto tiene diez consultas rechazadas: alguien está probando."""
+    ms = int((time.perf_counter() - inicio) * 1000)
+    logger.info(
+        "Consulta SQL del asistente: %s",
+        resultado,
+        extra={"asistente_sql": {**datos, **extra, "ms": ms, "resultado": resultado}},
+    )
+    consultas_sql.add(1, {"resultado": resultado})
 
 
 def _datos_de_conexion() -> dict:

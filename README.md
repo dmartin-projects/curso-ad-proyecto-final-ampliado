@@ -292,3 +292,5 @@ cd backend
 uv run python manage.py preparar_rol_sql      # LOGIN y contraseña para gastos_asistente_sql (la migración lo crea sin ellos)
 uv run python manage.py comparar_sql_y_tools --email demo@example.com --hogar 1
 ```
+
+Ejercicios: el SQL leído como un árbol con `sqlglot` antes de mandarlo (una lista blanca de vistas y funciones: ni `public.*`, ni `pg_sleep`, `set_config` o `dblink`, ni escrituras escondidas en un `WITH`), el coste que estima el planificador (`EXPLAIN`, sin ejecutar) como límite (`ASISTENTE_SQL_COSTE_MAXIMO`) y una línea de log y una métrica por consulta (`gastos.asistente.consultas_sql{resultado}`: ok, rechazada, timeout o error; en el log, la huella del SQL, nunca el texto).

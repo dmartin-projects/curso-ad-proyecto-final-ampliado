@@ -1,0 +1,14 @@
+# asistente/tests/evals/linea_base.yaml — la puerta del CI (módulo 103)
+#
+# Con el modelo de producción (openai/gpt-oss-120b): los casos que aprobaban cuando se fijó la línea base y el mínimo
+# de aprobados. Un cambio que haga fallar uno de ellos no entra. Se actualiza A PROPÓSITO (en el mismo pull request
+# que lo mejora), nunca para que pase un test. Fijada el 30-10-2026 (6 de 7: bar-manolo contestó sin buscar).
+modelo: openai/gpt-oss-120b
+minimo: 6
+tienen_que_aprobar:
+  - gasto-septiembre
+  - agosto-o-septiembre
+  - previsión
+  - sin-datos
+  - fuera-de-su-terreno
+  - apuntar-churros

@@ -1,0 +1,60 @@
+# .github/workflows/evals.yml — las evals del asistente contra Groq DE VERDAD (módulo 103)
+#
+# En cada pull request, el CI (ci.yml) reproduce los cassettes: detecta lo que cambia NUESTRO código. Lo que cambia el
+# proveedor (una versión nueva del modelo con el mismo nombre, otro comportamiento con las tools) no lo ve un cassette:
+# para eso, una vez por semana (y a mano), el golden set con llamadas reales y la misma puerta (linea_base.yaml).
+name: Evals
+
+on:
+  schedule:
+    - cron: "17 5 * * 1" # los lunes a las 5:17 UTC (fuera de las horas de uso: la cuota es por minuto y por día)
+  workflow_dispatch:
+
+concurrency:
+  group: evals
+  cancel-in-progress: false
+
+jobs:
+  golden:
+    runs-on: ubuntu-latest
+    environment: evals # el secreto GROQ_API_KEY, solo para este job
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17
+        env:
+          POSTGRES_DB: gastos
+          POSTGRES_USER: gastos
+          POSTGRES_PASSWORD: gastos
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U gastos" --health-interval 5s --health-timeout 5s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.test
+      DATABASE_URL: postgres://gastos:gastos@localhost:5432/gastos
+      REDIS_URL: redis://localhost:6379/1
+      DJANGO_SECRET_KEY: ci-no-es-secreto
+      JWT_SIGNING_KEY: ci-clave-jwt-de-al-menos-32-bytes-no-es-secreta
+      ASISTENTE_API_KEY: ${{ secrets.GROQ_API_KEY }}
+      PAUSA: "35" # segundos entre llamadas: los tokens por minuto de la capa gratuita
+      EVALS_EN_VIVO: "1" # el texto de cada respuesta cambia de una ejecución a otra: solo la puerta
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Sistema (WeasyPrint, Tesseract, gettext)
+        working-directory: .
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libpango-1.0-0 libpangoft2-1.0-0 tesseract-ocr tesseract-ocr-spa gettext
+      - run: uv sync --locked
+      - name: El golden set con el modelo de producción, sin cassettes (la puerta de linea_base.yaml)
+        # --disable-recording: las llamadas van a Groq de verdad y no se graba nada
+        run: >-
+          uv run pytest -s --disable-recording
+          asistente/tests/evals/test_evals_con_groq.py::test_groq_la_puerta_gpt_oss_120b

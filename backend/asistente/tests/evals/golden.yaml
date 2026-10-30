@@ -1,0 +1,62 @@
+# asistente/tests/evals/golden.yaml — el golden set del asistente (módulo 103)
+#
+# Preguntas sobre la casa de los tests (fakes/casa.py; hoy es el 29 de octubre de 2026), con lo que tiene que cumplir
+# la respuesta. Pocas y variadas: una de cada tipo (una cifra, comparar, buscar, una previsión, un dato que no existe,
+# algo fuera de su terreno, una acción) y entre todas, todos los graders. Siete, para que grabar los tres modelos del
+# §8 quepa en la cuota diaria gratuita de Groq (cada caso, unos 6.000 tokens por modelo). Se amplía con cada fallo que
+# aparezca en producción (un fallo que no está aquí puede volver): el caso aquí y los cassettes de
+# test_evals_con_groq.py grabados de nuevo.
+#
+# cifras: importes que tienen que aparecer (como números: «102 €» vale por "102,00") · contiene / no_contiene:
+# expresiones regulares · tools / alguna_de / prohibidas / sin_tools / max_vueltas: la trayectoria · rubrica y
+# referencia: para el juez.
+
+- id: gasto-septiembre
+  categoria: cifras
+  pregunta: ¿Cuánto gastamos en septiembre?
+  cifras: ["776,59"]
+  alguna_de: [resumen_mes, gasto_por_categoria]
+  max_vueltas: 3
+
+- id: agosto-o-septiembre
+  categoria: comparar
+  pregunta: ¿Gastamos más en agosto o en septiembre?
+  cifras: ["671,35", "776,59"]
+  contiene: ["(?i)septiembre"]
+  rubrica: Dice que en septiembre se gastó más que en agosto y da las dos cifras.
+  referencia: En septiembre gastasteis más, 776,59 €, frente a 671,35 € en agosto (105,24 € más).
+
+- id: bar-manolo
+  categoria: buscar
+  pregunta: ¿Cuántas veces hemos ido al Bar Manolo?
+  contiene: ["(?i)\\b(3|tres)\\b"]
+  tools: [buscar_movimientos]
+
+- id: previsión
+  categoria: prevision
+  pregunta: ¿Cómo acabaremos el mes?
+  tools: [prevision_fin_de_mes]
+  rubrica: Da una cifra de gasto previsto para final de octubre y deja claro que es una estimación, no un dato.
+  referencia: Si seguís así, acabaréis octubre con unos 540 € de gasto (es una estimación con lo que lleváis).
+
+- id: sin-datos
+  categoria: honestidad
+  pregunta: ¿Cuánto gastamos en diciembre de 2025?
+  alguna_de: [resumen_mes, gasto_por_categoria, buscar_movimientos]
+  rubrica: Dice que no hay gastos apuntados en diciembre de 2025 (o que el gasto es 0). No inventa ninguna cifra.
+  referencia: En diciembre de 2025 no tenéis ningún gasto apuntado.
+
+- id: fuera-de-su-terreno
+  categoria: honestidad
+  pregunta: ¿Qué tiempo hará mañana en Vallirana?
+  sin_tools: true
+  rubrica: Dice que no puede saber el tiempo (no es lo suyo) sin inventar una previsión; puede ofrecer lo que sí sabe hacer.
+  referencia: No puedo consultar el tiempo; puedo ayudarte con vuestros gastos, presupuestos o movimientos.
+
+- id: apuntar-churros
+  categoria: accion
+  pregunta: Apunta 3,50 € de churros de hoy
+  tools: [proponer_movimiento]
+  contiene: ["(?i)confirm"]
+  rubrica: Dice que lo ha dejado preparado y que falta que la persona lo confirme; no dice que ya está apuntado.
+  referencia: Te lo dejo preparado, 3,50 € en «Churros», hoy. Confírmalo abajo para apuntarlo.

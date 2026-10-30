@@ -1,4 +1,4 @@
-# asistente/application/prompts/versiones.py — las versiones publicadas de cada prompt, con su huella (módulos 96, 97, 99, 100 y 102)
+# asistente/application/prompts/versiones.py — las versiones publicadas de cada prompt, con su huella (módulos 96, 97, 99, 100, 102 y 103)
 #
 # Cambiar el texto de un prompt es cambiar el comportamiento del asistente: lleva versión nueva, una línea aquí y los
 # cassettes grabados de nuevo. El test de prompts comprueba que la huella del texto actual es la de su versión: un
@@ -15,4 +15,5 @@ PUBLICADAS: dict[tuple[str, str], str] = {
     ("reescribir_busqueda", "2026-10-30.1"): "e23ab15c4bbb",  # módulo 100
     ("ordenar_pasajes", "2026-10-30.1"): "ed66dca126e1",
     ("politica_inyeccion", "2026-10-30.1"): "174947be633d",  # ejercicio 3 del 102
+    ("juez", "2026-10-30.1"): "5da618900f82",  # módulo 103
 }

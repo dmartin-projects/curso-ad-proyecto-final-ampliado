@@ -3,6 +3,7 @@
 # El único sitio que decide QUÉ adapters se usan y con qué ajustes: el LLM (con su reserva), las tools con sus ports y
 # el contexto de una pregunta. El resto recibe las piezas ya montadas; los tests pasan fakes y no llegan nunca aquí.
 import functools
+from collections.abc import Callable
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -520,3 +521,11 @@ def detector_con_politica() -> DetectorConPolitica:
     """Ejercicio 3 del 102: gpt-oss-safeguard-20b con nuestra política (manage.py probar_detector --con-politica)."""
     cliente = cliente_del_proceso(settings.ASISTENTE_BASE_URL, settings.ASISTENTE_API_KEY, settings.ASISTENTE_TIMEOUT)
     return DetectorConPolitica(cliente=cliente)
+
+
+# ── Módulo 103: las evals ──
+def agente_para_evals(modelo: str | None = None) -> Callable[[], Agente]:
+    """Un agente nuevo por caso, con las tools del chat y UN modelo: sin reserva (en una eval, el modelo que contesta
+    tiene que ser el que se evalúa) y sin clasificador (se evalúa al modelo, no a las barreras: eso es el red team)."""
+    llm_evaluado = llm(modelo or settings.ASISTENTE_MODELO)
+    return lambda: Agente(llm=llm_evaluado, tools=tools(chat=True), telemetria=TelemetriaOTel())

@@ -57,6 +57,7 @@ export interface DatosDelMensaje {
   recuerdos?: RecuerdoDelChat[];
   fuentes?: FuenteDeAyuda[];
   consultas?: ConsultaDelChat[];
+  avisos?: string[]; // módulo 102: lo que se ha descartado por seguridad
   seguimiento?: string[];
 }
 
@@ -83,6 +84,7 @@ export type EventoChat =
   | ({ evento: 'recuerdo' } & RecuerdoDelChat)
   | { evento: 'fuentes'; fuentes: FuenteDeAyuda[] }
   | ({ evento: 'datos' } & ConsultaDelChat)
+  | { evento: 'aviso'; texto: string }
   | { evento: 'titulo'; titulo: string }
   | ({ evento: 'fin'; mensaje: number; texto: string } & DatosDelMensaje)
   | { evento: 'error'; detalle: string };

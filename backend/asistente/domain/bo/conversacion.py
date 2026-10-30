@@ -1,4 +1,4 @@
-# asistente/domain/bo/conversacion.py — una conversación con el asistente (módulos 97 y 99)
+# asistente/domain/bo/conversacion.py — una conversación con el asistente (módulos 97, 99 y 102)
 from dataclasses import dataclass
 
 from core.domain.exceptions.validacion_exception import ValidacionException
@@ -31,6 +31,9 @@ class Conversacion:
     # mensaje que el resumen ya cuenta); lo de antes llega como `resumen`. Lo guardado no se toca: la persona lo ve todo
     resumen: str = ""
     resumido_hasta: int | None = None
+    # Módulo 102: el modelo ha leído en ella texto de terceros (un adjunto, un ticket, un concepto de un extracto). Se
+    # queda en el historial y en el resumen, así que la marca no se quita: vale para todas sus preguntas siguientes
+    con_terceros: bool = False
 
     def titular(self, titulo: str) -> bool:
         """El título automático. Devuelve si ha cambiado (no cambia si ya lo eligió la persona)."""
@@ -38,6 +41,9 @@ class Conversacion:
             return False
         self.titulo = _titulo(titulo[:MAX_TITULO])
         return True
+
+    def marcar_con_terceros(self) -> None:
+        self.con_terceros = True
 
     def renombrar(self, titulo: str) -> None:
         self.titulo = _titulo(titulo)

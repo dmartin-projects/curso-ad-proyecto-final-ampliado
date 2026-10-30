@@ -31,6 +31,7 @@ class RecordarTool(Tool):
         "«a partir de ahora…»). No para lo que cuenta de pasada ni para datos que ya están en la app."
     )
     Argumentos = RecordarArgumentos
+    persiste = True  # módulo 102: lo guardado viaja a todas sus conversaciones
     max_llamadas = 2
 
     def __init__(self, *, recuerdos: IRecuerdoCommandRepository, reloj: IReloj):

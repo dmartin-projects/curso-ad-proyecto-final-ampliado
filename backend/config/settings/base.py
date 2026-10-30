@@ -456,6 +456,10 @@ ASISTENTE_TEXT_TO_SQL = env.bool("ASISTENTE_TEXT_TO_SQL", default=False)
 ASISTENTE_SQL_FILAS = 200  # como mucho, por consulta (la interfaz); al modelo, 50
 ASISTENTE_SQL_SEGUNDOS = 2  # statement_timeout: una consulta que tarda más es una consulta mal hecha
 ASISTENTE_SQL_COSTE_MAXIMO = 100_000  # ejercicio 2 del 101: el coste estimado (EXPLAIN) a partir del que ni se ejecuta
+# Módulo 102: el clasificador de prompt injection para el texto de terceros (tickets, extractos, adjuntos), en el mismo
+# proveedor (Groq). Vacío: sin clasificador (las demás defensas siguen). El umbral: la puntuación desde la que se retira
+ASISTENTE_DETECTOR_INYECCION = env("ASISTENTE_DETECTOR_INYECCION", default="meta-llama/llama-prompt-guard-2-86m")
+ASISTENTE_UMBRAL_INYECCION = env.float("ASISTENTE_UMBRAL_INYECCION", default=0.5)
 # Módulo 98: el proveedor, como lo nombran las convenciones GenAI de OpenTelemetry (gen_ai.provider.name)
 ASISTENTE_PROVEEDOR = env("ASISTENTE_PROVEEDOR", default="groq")
 # Las cuotas de cada plan: tokens al día por persona (entrada + salida) y dólares al mes por hogar. Una pregunta del chat

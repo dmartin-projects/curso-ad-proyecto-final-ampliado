@@ -23,6 +23,7 @@ dependencies = [
     "fastembed>=0.9.1",
     "gunicorn>=26.2.0",
     "httpx>=0.28.1",
+    "markdown-it-py>=4.2.0",  # módulo 102: un parser CommonMark de verdad para sanear la respuesta
     "openai>=3.41",
     "opentelemetry-exporter-otlp-proto-http>=1.45.1",
     "opentelemetry-instrumentation-asgi>=0.66b1",
@@ -221,7 +222,7 @@ id = "asistente-dominio-puro"
 name = "El dominio del asistente es Python puro"
 type = "forbidden"
 source_modules = ["asistente.domain"]
-forbidden_modules = ["pydantic", "openai", "httpx2", "tenacity"]
+forbidden_modules = ["pydantic", "openai", "httpx2", "tenacity", "markdown_it"]
 
 [[tool.importlinter.contracts]]
 id = "asistente-proveedores"

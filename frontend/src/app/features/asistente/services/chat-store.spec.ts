@@ -64,6 +64,16 @@ describe('ChatStore (módulo 97)', () => {
     ]);
   });
 
+  it('un aviso de seguridad se queda con la respuesta (módulo 102)', () => {
+    const { chat, eventos } = montar();
+    chat.preguntar({ texto: '¿Qué dice este ticket?' });
+    eventos.next({ evento: 'aviso', texto: 'He descartado lo que ha devuelto detalle_ticket.' });
+    eventos.next({ evento: 'fin', mensaje: 5, texto: 'No he podido leerlo.', seguimiento: [] });
+    expect(chat.mensajes()[1].datos.avisos).toEqual([
+      'He descartado lo que ha devuelto detalle_ticket.',
+    ]);
+  });
+
   it('detener cancela la petición y la pregunta queda sin respuesta', () => {
     const { chat, cancelado } = montar();
     chat.preguntar({ texto: '¿Cuánto?' });

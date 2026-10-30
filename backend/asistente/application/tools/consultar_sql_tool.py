@@ -38,6 +38,7 @@ class ConsultarSQLTool(Tool):
         "mucho 50 filas: agrupa y suma en la consulta."
     )
     Argumentos = ConsultarSQLArgumentos
+    lee_terceros = True  # módulo 102: las filas pueden llevar conceptos de extractos
     max_llamadas = 3
 
     def __init__(self, *, consultas: IConsultasSQL):

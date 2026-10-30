@@ -11,6 +11,7 @@ from asistente.domain.exceptions.pregunta_cancelada_exception import PreguntaCan
 from asistente.domain.vo.archivo_exportado import ArchivoExportado
 from asistente.domain.vo.ayuda_consultada import AyudaConsultada
 from asistente.domain.vo.consulta_sql import ConsultaSQL
+from asistente.domain.vo.contenido_retirado import ContenidoRetirado
 from asistente.domain.vo.grafico import Grafico
 from asistente.domain.vo.propuesta_preparada import PropuestaPreparada
 from asistente.domain.vo.recuerdo_guardado import RecuerdoGuardado
@@ -38,6 +39,7 @@ class ObservadorDelChat(IObservadorAgente):
         self.recuerdos: list[dict] = []  # módulo 99
         self.fuentes: list[dict] = []  # ejercicio 2 del 100
         self.consultas: list[dict] = []  # módulo 101: "ver los datos"
+        self.avisos: list[str] = []  # módulo 102: lo que se ha retirado por seguridad
 
     def comprobar(self) -> None:
         if self.emisor.cancelado():
@@ -88,6 +90,9 @@ class ObservadorDelChat(IObservadorAgente):
             datos = {"id": artefacto.id, "texto": artefacto.texto}
             self.recuerdos.append(datos)
             self.emisor.emitir("recuerdo", datos)
+        elif isinstance(artefacto, ContenidoRetirado):  # módulo 102: la persona sabe que algo no se ha leído
+            self.avisos.append(artefacto.texto)
+            self.emisor.emitir("aviso", {"texto": artefacto.texto})
         elif isinstance(artefacto, PropuestaPreparada):
             datos = self.guardar_propuesta(artefacto)  # con su id: la interfaz la confirma por él
             self.propuestas.append(datos)

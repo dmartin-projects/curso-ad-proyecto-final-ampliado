@@ -84,6 +84,12 @@
       }
     </p>
   }
+  @for (a of m.datos.avisos ?? []; track $index) {
+    <p class="m-0 flex items-center gap-1 text-sm text-texto-suave" role="note">
+      <mat-icon class="!h-4 !w-4 !text-base" aria-hidden="true">shield</mat-icon>
+      {{ a }}
+    </p>
+  }
   @for (r of m.datos.recuerdos ?? []; track r.id) {
     <p class="m-0 flex items-center gap-1 text-sm text-texto-suave" role="note">
       <mat-icon class="!h-4 !w-4 !text-base" aria-hidden="true">bookmark</mat-icon>

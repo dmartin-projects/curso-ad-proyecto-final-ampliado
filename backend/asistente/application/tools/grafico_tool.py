@@ -5,6 +5,7 @@ from pydantic import Field
 
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.chat.calculadora_de_graficos import CalculadoraDeGraficos
+from asistente.application.seguridad.sanear_respuesta import sanear_respuesta
 from asistente.application.tools.con_artefacto import ConArtefacto
 from asistente.application.tools.sin_argumentos import SinArgumentos
 from asistente.application.tools.tool import Tool
@@ -38,7 +39,9 @@ class GraficoTool(Tool):
         self.calculadora = calculadora
 
     def ejecutar(self, contexto: ContextoPregunta, args: GraficoArgumentos) -> ConArtefacto:
-        especificacion = EspecificacionDeGrafico(args.tipo, args.titulo, args.fuente, args.argumentos)
+        # Módulo 102: el título lo escribe el modelo y se enseña, se fija en el dashboard y se descarga: como la respuesta
+        titulo = sanear_respuesta(args.titulo)[0].strip() or "Gráfico"
+        especificacion = EspecificacionDeGrafico(args.tipo, titulo, args.fuente, args.argumentos)
         grafico = self.calculadora.calcular(contexto, especificacion)
         return ConArtefacto(
             {

@@ -25,6 +25,7 @@ class OlvidarTool(Tool):
         "parecidos, te los devuelve para que preguntes cuál."
     )
     Argumentos = OlvidarArgumentos
+    persiste = True  # módulo 102: borrar también es escribir
     max_llamadas = 2
 
     def __init__(self, *, recuerdos: IRecuerdoCommandRepository, consultas: IRecuerdoQueryService):

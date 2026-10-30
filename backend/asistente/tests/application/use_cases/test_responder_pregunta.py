@@ -47,7 +47,7 @@ def estructurada(texto: str, seguimiento=("¿Y por categorías?",)) -> LLMFake:
 class Chat:
     """El use case montado con fakes, una conversación vacía de Ana y lo que el test quiera del modelo."""
 
-    def __init__(self, guion: list, titulos: list | None = None):
+    def __init__(self, guion: list, titulos: list | None = None, vigilante=None):
         self.mundo = Mundo()
         self.mundo.finanzas.resumenes[(HOGAR, OCTUBRE)] = resumen(
             OCTUBRE,
@@ -64,7 +64,9 @@ class Chat:
         self.caso = ResponderPreguntaUseCase(
             conversaciones=self.conversaciones,
             propuestas=self.propuestas,
-            crear_agente=lambda obs: Agente(llm=self.llm, tools=self.mundo.catalogo(chat=True), observador=obs),
+            crear_agente=lambda obs: Agente(
+                llm=self.llm, tools=self.mundo.catalogo(chat=True), observador=obs, vigilante=vigilante
+            ),
             llm_auxiliar=self.auxiliar,
             membresias=membresias(),
             lector=self.lector,
@@ -77,6 +79,7 @@ class Chat:
             consultas_de_consumo=self.consumos,
             recuerdos=self.recuerdos,
             compactacion=self.compactacion,
+            vigilante=vigilante,  # módulo 102
         )
         self.conversacion = Conversacion(ANA, HOGAR)
         self.conversaciones.guardar(self.conversacion)

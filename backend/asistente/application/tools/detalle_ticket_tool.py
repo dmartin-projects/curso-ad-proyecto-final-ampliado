@@ -22,6 +22,7 @@ class DetalleTicketTool(Tool):
     nombre = "detalle_ticket"
     descripcion = "Lo que se leyó de un ticket subido (comercio, fecha, total y líneas) y su estado."
     Argumentos = DetalleTicketArgumentos
+    lee_terceros = True  # módulo 102: lo leído de una foto
 
     def __init__(self, *, tickets: ITickets):
         self.tickets = tickets

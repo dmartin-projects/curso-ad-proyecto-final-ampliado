@@ -171,3 +171,28 @@ test('text-to-SQL: la respuesta, y «Ver los datos» con la consulta y sus filas
   await expect(respuesta.getByLabel('Consulta SQL')).toContainText('group by categoria');
   await expect(respuesta.locator('td').first()).toBeVisible();
 });
+
+test('seguridad: un concepto con instrucciones se descarta y la respuesta sale sin enlaces', async ({
+  page,
+  request,
+}) => {
+  // Módulo 102: un movimiento "del extracto" cuyo concepto le habla al asistente
+  await request.post('http://localhost:8000/e2e/asistente/transferencia');
+  try {
+    await abrirAsistente(page);
+    await preguntar(page, 'seguridad: ¿qué transferencias tenemos?');
+    const respuesta = page.getByRole('article', { name: 'Respuesta del asistente' }).last();
+    await expect(respuesta).toContainText('He descartado un movimiento por seguridad');
+    await expect(respuesta.getByRole('note')).toContainText(
+      'He descartado lo que ha devuelto buscar_movimientos',
+    );
+
+    // Una respuesta con una imagen y un enlace (como la que pediría un ataque): llega sin ninguno de los dos
+    await preguntar(page, 'enlace: dame el detalle');
+    const saneada = page.getByRole('article', { name: 'Respuesta del asistente' }).last();
+    await expect(saneada).toContainText('Hecho. ok Más en tu banco.');
+    await expect(saneada.locator('img, a[href*="atacante"]')).toHaveCount(0);
+  } finally {
+    await request.delete('http://localhost:8000/e2e/asistente/transferencia');
+  }
+});

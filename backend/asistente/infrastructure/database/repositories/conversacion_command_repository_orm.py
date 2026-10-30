@@ -24,8 +24,11 @@ class ConversacionCommandRepositoryORM(IConversacionCommandRepository):
             titulo=conversacion.titulo,
             titulo_manual=conversacion.titulo_manual,
             carpeta_id=conversacion.carpeta_id,
+            con_terceros=conversacion.con_terceros,
         )
-        guardar_fila(fila, ["titulo", "titulo_manual", "carpeta"], {})  # "actualizado" siempre: sube en la lista
+        guardar_fila(
+            fila, ["titulo", "titulo_manual", "carpeta", "con_terceros"], {}
+        )  # "actualizado" siempre: sube en la lista
         conversacion.id = fila.pk
 
     def guardar_resumen(self, conversacion):  # módulo 99: update() no toca "actualizado" (auto_now es de save())

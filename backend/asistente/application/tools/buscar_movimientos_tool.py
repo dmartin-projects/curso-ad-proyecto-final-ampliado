@@ -32,6 +32,7 @@ class BuscarMovimientosTool(Tool):
         "Sin fechas: el mes en curso."
     )
     Argumentos = BuscarMovimientosArgumentos
+    lee_terceros = True  # módulo 102: conceptos de extractos bancarios (los escribe quien hace la transferencia)
 
     def __init__(self, *, finanzas: IConsultasDeFinanzas):
         self.finanzas = finanzas

@@ -1,4 +1,4 @@
-# asistente/application/agent/resultado_agente.py — lo que devuelve el agente al contestar una pregunta (módulos 94, 96 y 97)
+# asistente/application/agent/resultado_agente.py — lo que devuelve el agente al contestar una pregunta (módulos 94, 96, 97 y 102)
 from dataclasses import dataclass
 
 from asistente.domain.enums.motivo_parada import MotivoParada
@@ -21,3 +21,4 @@ class ResultadoAgente:
     duracion_ms: int
     estructurada: RespuestaEstructurada | None = None  # módulo 96: solo si se pidió (y salió bien)
     artefactos: tuple[Artefacto, ...] = ()  # módulo 97: gráficos, archivos y propuestas, en el orden en que salieron
+    terceros: bool = False  # módulo 102: el modelo ha leído texto de terceros (la conversación queda marcada)

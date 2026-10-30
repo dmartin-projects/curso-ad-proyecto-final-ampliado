@@ -26,6 +26,11 @@ class Tool(ABC):
     descripcion: ClassVar[str]
     Argumentos: ClassVar[type[SinArgumentos]] = SinArgumentos
     max_llamadas: ClassVar[int] = 4  # por pregunta: más es casi siempre un modelo dando vueltas
+    # Módulo 102, la procedencia: su resultado lleva texto que no ha escrito la persona (un ticket, un concepto de un
+    # extracto bancario…), y lo revisa el clasificador de inyecciones; o guarda algo sin que nadie lo confirme (y por
+    # eso no se puede usar en una pregunta que ya ha leído texto de terceros)
+    lee_terceros: ClassVar[bool] = False
+    persiste: ClassVar[bool] = False
 
     def declaracion(self) -> DeclaracionTool:
         return DeclaracionTool(self.nombre, self.descripcion, esquema_json(self.Argumentos))

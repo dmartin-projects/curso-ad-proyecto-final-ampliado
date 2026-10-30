@@ -104,3 +104,15 @@ def test_la_lista_las_mas_recientes_primero(casa):
     repo.guardar(nueva)
     repo.guardar(vieja)  # una pregunta nueva en la vieja: sube
     assert [c.titulo for c in ConversacionQueryServiceORM().listar(ana.pk, hogar.pk)] == ["Vieja", "Nueva"]
+
+
+def test_la_marca_de_terceros_se_guarda_con_la_conversacion(casa):
+    """Módulo 102: la pregunta siguiente la lee de aquí."""
+    ana, hogar = casa
+    repo = ConversacionCommandRepositoryORM()
+    c = Conversacion(ana.pk, hogar.pk)
+    repo.guardar(c)
+    assert not repo.obtener(ana.pk, hogar.pk, c.id).con_terceros
+    c.marcar_con_terceros()
+    repo.guardar(c)
+    assert repo.obtener(ana.pk, hogar.pk, c.id).con_terceros

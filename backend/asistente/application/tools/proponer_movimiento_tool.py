@@ -7,6 +7,7 @@ from pydantic import AfterValidator, Field
 
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.ports.i_consultas_de_finanzas import IConsultasDeFinanzas
+from asistente.application.seguridad.sanear_respuesta import sanear_respuesta
 from asistente.application.tools.categoria_por_nombre import categoria_por_nombre, clave
 from asistente.application.tools.con_artefacto import ConArtefacto
 from asistente.application.tools.periodo import FechaOpcional
@@ -58,6 +59,10 @@ class ProponerMovimientoTool(Tool):
         self.finanzas = finanzas
 
     def ejecutar(self, contexto: ContextoPregunta, args: ProponerMovimientoArgumentos) -> ConArtefacto:
+        # Módulo 102: el concepto lo escribe el modelo, y se enseña, se descarga y, confirmado, queda en finanzas
+        concepto = sanear_respuesta(args.concepto)[0].strip()
+        if not concepto:
+            raise ToolException("El concepto no puede ser un enlace ni una imagen: escríbelo como lo diría la persona.")
         fecha = date.fromisoformat(args.fecha) if args.fecha else contexto.hoy
         if fecha > contexto.hoy:
             raise ToolException(
@@ -67,14 +72,14 @@ class ProponerMovimientoTool(Tool):
         categoria = categoria_por_nombre(self.finanzas, contexto, args.categoria) if args.categoria else None
         gasto = args.tipo == "gasto"
         resumen = (
-            f"{'Gasto' if gasto else 'Ingreso'} de {_euros(args.importe)}: «{args.concepto}»"
+            f"{'Gasto' if gasto else 'Ingreso'} de {_euros(args.importe)}: «{concepto}»"
             f"{f', en {categoria.nombre}' if categoria else ''}, el {fecha:%d/%m/%Y}, en {cuenta.nombre}"
         )
         datos = {  # lo que pedirá RegistrarMovimientoUseCase al confirmarla: ids ya comprobados contra el hogar
             "cuenta_id": cuenta.id,
             "fecha": fecha.isoformat(),
             "importe": f"-{args.importe}" if gasto else args.importe,  # en finanzas, un gasto es negativo
-            "concepto": args.concepto,
+            "concepto": concepto,
             "categoria_id": categoria.id if categoria else None,
         }
         return ConArtefacto(

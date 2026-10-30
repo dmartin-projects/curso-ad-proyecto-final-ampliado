@@ -11,7 +11,11 @@
 6. tras la primera respuesta, el título, con el modelo auxiliar;
 7. lo gastado, por modelo, se apunta SIEMPRE (también si se cancela o falla a mitad): se ha pagado (módulo 98);
 8. módulo 99: viaja con la memoria (los recuerdos de la persona y el resumen de lo antiguo), y al terminar se programa
-   la compactación (resumir lo antiguo, si hace falta, fuera de la respuesta).
+   la compactación (resumir lo antiguo, si hace falta, fuera de la respuesta);
+9. módulo 102: el texto de un adjunto pasa por el clasificador de inyecciones (si lo parece, el modelo no lo lee), y
+   una pregunta con adjunto empieza "con terceros" (Procedencia). La marca es de la conversación: si el modelo ha
+   leído terceros, la conversación lo guarda, y sus preguntas siguientes empiezan con ella (el texto sigue en el
+   historial).
 
 Cancelada o sin modelo disponible, la pregunta queda "incompleta": se ve en el chat, pero ya no viaja al modelo.
 """
@@ -26,7 +30,7 @@ from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.agent.memoria import memoria
 from asistente.application.agent.observador_mudo import ObservadorMudo
 from asistente.application.agent.resultado_agente import ResultadoAgente
-from asistente.application.chat.adjunto import MAX_BYTES, TIPOS, con_adjunto
+from asistente.application.chat.adjunto import MAX_BYTES, TIPOS, con_adjunto, lo_que_lee_el_modelo
 from asistente.application.chat.contador_de_uso import ContadorDeUso
 from asistente.application.chat.observador_del_chat import ObservadorDelChat
 from asistente.application.chat.titular import titular
@@ -44,6 +48,7 @@ from asistente.application.responder_pregunta_use_case.dtos.responder_pregunta_i
 from asistente.application.responder_pregunta_use_case.i_responder_pregunta_use_case import (
     IResponderPreguntaUseCase,
 )
+from asistente.application.seguridad.vigilante import Vigilante
 from asistente.domain.bo.conversacion import Conversacion
 from asistente.domain.bo.propuesta import Propuesta
 from asistente.domain.enums.canal_de_consumo import CanalDeConsumo
@@ -57,6 +62,7 @@ from asistente.domain.repositories.i_conversacion_command_repository import ICon
 from asistente.domain.repositories.i_plan_del_hogar_repository import IPlanDelHogarRepository
 from asistente.domain.repositories.i_propuesta_command_repository import IPropuestaCommandRepository
 from asistente.domain.repositories.i_recuerdo_query_service import IRecuerdoQueryService
+from asistente.domain.vo.contenido_retirado import ContenidoRetirado
 from asistente.domain.vo.mensaje import Mensaje
 from asistente.domain.vo.mensaje_de_conversacion import MensajeDeConversacion
 from asistente.domain.vo.propuesta_preparada import PropuestaPreparada
@@ -66,6 +72,7 @@ from core.domain.enums.rol import Rol
 
 logger = logging.getLogger(__name__)
 NO_DISPONIBLE = "El asistente no está disponible ahora mismo. Inténtalo dentro de un momento."
+ADJUNTO_RETIRADO = "(retirado: el texto del documento parecía contener instrucciones para el asistente, no datos)"
 
 
 class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
@@ -91,6 +98,8 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
         # Módulo 99: la memoria
         recuerdos: IRecuerdoQueryService,
         compactacion: IProgramadorDeCompactacion,
+        # Módulo 102: el clasificador de inyecciones, para el texto de los adjuntos (None: sin clasificador)
+        vigilante: Vigilante | None = None,
     ):
         self.conversaciones, self.propuestas, self.crear_agente = conversaciones, propuestas, crear_agente
         self.llm_auxiliar, self.membresias, self.lector, self.almacen = llm_auxiliar, membresias, lector, almacen
@@ -102,6 +111,7 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
             consultas_de_consumo,
         )
         self.recuerdos, self.compactacion = recuerdos, compactacion
+        self.vigilante = vigilante
 
     def ejecutar(self, entrada: ResponderPreguntaInputDTO) -> int | None:
         entrada.actor.exigir(self.rol_minimo)
@@ -120,7 +130,11 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
         ).exigir(self.reloj.ahora())
         historial = self.conversaciones.historial(conversacion.id, conversacion.resumido_hasta)
         recuerdos = [r.texto for r in self.recuerdos.listar(usuario_id, entrada.hogar_id)]
-        pregunta = self._pregunta(entrada)
+        pregunta, retirado = self._pregunta(entrada)
+        # Módulo 102: lo que se lea del adjunto es de terceros desde el principio, y lo que ya leyó la conversación sigue
+        # en el historial
+        if entrada.adjunto is not None or conversacion.con_terceros:
+            contexto = replace(contexto, contenido_de_terceros=True)
         with self.uow:
             (pregunta_id,) = self.conversaciones.anadir(conversacion.id, [pregunta])
             self.conversaciones.guardar(conversacion)  # sube al principio de la lista
@@ -133,6 +147,8 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
             lambda ruta: self._ligar_archivo(pregunta_id, ruta),
         )
         contador = ContadorDeUso(observador)
+        if retirado is not None:
+            observador.artefacto(retirado)
         try:
             r = self.crear_agente(contador).responder(
                 (*historial, pregunta.mensaje),
@@ -170,6 +186,8 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
             mensajes.append(MensajeDeConversacion(r.nuevos[-1], visible=True, texto=r.texto, datos=datos))
             ids = self.conversaciones.anadir(conversacion.id, mensajes)
             titulada = titulo is not None and conversacion.titular(titulo)
+            if r.terceros:  # módulo 102: desde ahora, toda la conversación
+                conversacion.marcar_con_terceros()
             self.conversaciones.guardar(conversacion)
             self.compactacion.programar(usuario_id, entrada.hogar_id, conversacion.id)  # tras el commit, aparte
         if titulada:
@@ -190,23 +208,28 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
             with self.uow:
                 self.consumos.anotar(consumos)
 
-    def _pregunta(self, entrada: ResponderPreguntaInputDTO) -> MensajeDeConversacion:
-        """La pregunta que viaja al modelo y la que se ve: distintas si hay adjunto (el modelo lee también su texto)."""
+    def _pregunta(self, entrada: ResponderPreguntaInputDTO) -> tuple[MensajeDeConversacion, ContenidoRetirado | None]:
+        """La pregunta que viaja al modelo y la que se ve: distintas si hay adjunto (el modelo lee también su texto).
+        Y, si el texto del adjunto parece una inyección (módulo 102), el aviso: el modelo no lo lee."""
         adjunto = entrada.adjunto
         if adjunto is None:
-            return MensajeDeConversacion(Mensaje.usuario(entrada.texto), visible=True, texto=entrada.texto)
+            return MensajeDeConversacion(Mensaje.usuario(entrada.texto), visible=True, texto=entrada.texto), None
         if adjunto.tipo not in TIPOS or not 0 < len(adjunto.contenido) <= MAX_BYTES:
             raise AdjuntoNoValidoException()
         entrada.emisor.emitir("tool", {"nombre": "adjunto", "texto": "Leyendo el adjunto"})
         ruta = self.almacen.guardar(f"asistente/{entrada.hogar_id}", adjunto.contenido)
-        texto = con_adjunto(entrada.texto, self.lector.leer(adjunto.contenido, adjunto.tipo), adjunto.nombre)
-        return MensajeDeConversacion(
-            Mensaje.usuario(texto),
+        leido, retirado = self.lector.leer(adjunto.contenido, adjunto.tipo), None
+        puntuacion = self.vigilante.sospechoso(lo_que_lee_el_modelo(leido), "adjunto") if self.vigilante else None
+        if puntuacion is not None:
+            leido, retirado = ADJUNTO_RETIRADO, ContenidoRetirado("adjunto", puntuacion)
+        mensaje = MensajeDeConversacion(
+            Mensaje.usuario(con_adjunto(entrada.texto, leido, adjunto.nombre)),
             visible=True,
             texto=entrada.texto,
             adjunto=ruta,
             nombre_adjunto=adjunto.nombre[:255],
         )
+        return mensaje, retirado
 
     def _ligar_archivo(self, pregunta_id: int, ruta: str) -> None:
         with self.uow:
@@ -230,6 +253,7 @@ class ResponderPreguntaUseCase(IResponderPreguntaUseCase):
             "recuerdos": observador.recuerdos,
             "fuentes": observador.fuentes,  # ejercicio 2 del 100
             "consultas": observador.consultas,  # módulo 101
+            "avisos": observador.avisos,  # módulo 102
             "seguimiento": list(r.estructurada.seguimiento) if r.estructurada else [],
             "motivo": str(r.motivo),
             "uso": {

@@ -102,4 +102,17 @@ describe('Mensaje (módulo 97)', () => {
       '-567.50',
     ]);
   });
+
+  it('el aviso de lo que se ha descartado por seguridad (módulo 102)', () => {
+    const el: HTMLElement = montar({
+      rol: 'modelo',
+      texto: 'No he podido leer el documento.',
+      datos: {
+        avisos: ['He descartado el documento adjunto: contenía texto que parecía instrucciones.'],
+      },
+    }).nativeElement;
+    expect(el.querySelector('[role="note"]')?.textContent).toContain(
+      'He descartado el documento adjunto',
+    );
+  });
 });

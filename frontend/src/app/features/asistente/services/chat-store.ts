@@ -117,6 +117,10 @@ export const ChatStore = signalStore(
             datos: { ...s.datos, consultas: [...(s.datos.consultas ?? []), consulta] },
           }));
         }
+        case 'aviso': // módulo 102: algo de terceros que el modelo no ha leído
+          return patchState(store, (s) => ({
+            datos: { ...s.datos, avisos: [...(s.datos.avisos ?? []), ev.texto] },
+          }));
         case 'fuentes':
           return patchState(store, (s) => ({
             datos: { ...s.datos, fuentes: [...(s.datos.fuentes ?? []), ...ev.fuentes] },

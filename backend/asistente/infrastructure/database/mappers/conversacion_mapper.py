@@ -15,6 +15,7 @@ def conversacion_a_bo(fila: ConversacionModel) -> Conversacion:
         id=fila.pk,
         resumen=fila.resumen,
         resumido_hasta=fila.resumido_hasta,
+        con_terceros=fila.con_terceros,  # módulo 102
     )
 
 

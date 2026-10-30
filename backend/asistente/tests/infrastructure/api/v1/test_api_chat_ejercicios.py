@@ -94,6 +94,7 @@ def test_en_la_descarga_los_titulos_y_las_propuestas_son_texto_no_markdown(casa,
     eventos(c.post(url(hogar, "conversaciones", cid, "preguntar"), {"texto": "Dibuja y apunta"}, format="json"))
 
     md = c.get(url(hogar, "conversaciones", cid, "markdown")).content.decode()
-    assert "- Gráfico: \\!\\[\\](https://atacante.example/p.png?d=776,59)" in md
+    # Módulo 102: el título y el concepto ya se sanean al crearlos, como la respuesta (sin la imagen, nada que enseñar)
+    assert "- Gráfico: Gráfico" in md and "«Churros»" in md
     html = MarkdownIt("commonmark").render(md)
-    assert "<img" not in html and "<a " not in html
+    assert "<img" not in html and "<a " not in html and "atacante.example" not in html

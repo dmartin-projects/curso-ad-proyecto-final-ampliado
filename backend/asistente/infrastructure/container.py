@@ -97,6 +97,7 @@ from asistente.application.responder_pregunta_use_case.i_responder_pregunta_use_
     IResponderPreguntaUseCase,
 )
 from asistente.application.responder_pregunta_use_case.responder_pregunta_use_case import ResponderPreguntaUseCase
+from asistente.application.seguridad.vigilante import Vigilante
 from asistente.application.tools.buscar_ayuda_tool import BuscarAyudaTool
 from asistente.application.tools.buscar_movimientos_tool import BuscarMovimientosTool
 from asistente.application.tools.comparar_con_ipc_tool import CompararConIpcTool
@@ -153,6 +154,7 @@ from asistente.infrastructure.finanzas.ejecutor_de_propuestas_en_finanzas import
 from asistente.infrastructure.finanzas.exportador_en_finanzas import ExportadorEnFinanzas
 from asistente.infrastructure.hogares.membresias_en_hogares import MembresiasEnHogares
 from asistente.infrastructure.llm.cliente_openai import cliente_del_proceso
+from asistente.infrastructure.llm.detector_prompt_guard import DetectorPromptGuard
 from asistente.infrastructure.llm.llm_con_reserva import LLMConReserva
 from asistente.infrastructure.llm.openai_compatible_llm import OpenAICompatibleLLM
 from asistente.infrastructure.messaging.programador_de_compactacion_celery import ProgramadorDeCompactacionCelery
@@ -272,7 +274,12 @@ def agente(observador: IObservadorAgente | None = None, modelo: str | None = Non
         segundos=settings.ASISTENTE_SEGUNDOS_POR_PREGUNTA, max_tokens=settings.ASISTENTE_TOKENS_POR_PREGUNTA
     )
     return Agente(
-        llm=llm(modelo), tools=tools(chat), limites=limites, observador=observador, telemetria=TelemetriaOTel()
+        llm=llm(modelo),
+        tools=tools(chat),
+        limites=limites,
+        observador=observador,
+        telemetria=TelemetriaOTel(),
+        vigilante=vigilante(),  # módulo 102
     )
 
 
@@ -305,6 +312,7 @@ def responder_pregunta() -> IResponderPreguntaUseCase:
         consultas_de_consumo=ConsumoQueryServiceORM(),
         recuerdos=RecuerdoQueryServiceORM(),
         compactacion=ProgramadorDeCompactacionCelery(),
+        vigilante=vigilante(),  # módulo 102: el texto de los adjuntos
     )
 
 
@@ -485,4 +493,16 @@ def agente_sql() -> Agente:
         tools=[ConsultarSQLTool(consultas=ConsultasSQLPostgres())],
         limites=limites,
         telemetria=TelemetriaOTel(),
+        vigilante=vigilante(),
     )
+
+
+# ── Módulo 102: la seguridad ──
+def vigilante() -> Vigilante | None:
+    """El clasificador de inyecciones (Llama Prompt Guard 2 en Groq), con el mismo cliente que el asistente. None si
+    no se configura: el resto de las defensas no dependen de él."""
+    if not settings.ASISTENTE_DETECTOR_INYECCION:
+        return None
+    cliente = cliente_del_proceso(settings.ASISTENTE_BASE_URL, settings.ASISTENTE_API_KEY, settings.ASISTENTE_TIMEOUT)
+    detector = DetectorPromptGuard(cliente=cliente, modelo=settings.ASISTENTE_DETECTOR_INYECCION)
+    return Vigilante(detector, umbral=settings.ASISTENTE_UMBRAL_INYECCION)

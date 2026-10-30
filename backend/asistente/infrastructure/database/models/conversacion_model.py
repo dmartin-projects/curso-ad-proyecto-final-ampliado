@@ -1,4 +1,4 @@
-# asistente/infrastructure/database/models/conversacion_model.py (módulos 97 y 99)
+# asistente/infrastructure/database/models/conversacion_model.py (módulos 97, 99 y 102)
 from django.conf import settings
 from django.db import models
 
@@ -20,6 +20,7 @@ class Conversacion(ModeloConFechas):
     titulo_manual = models.BooleanField(default=False)
     resumen = models.TextField(blank=True)  # módulo 99: lo antiguo, resumido (ver Conversacion.resumir)
     resumido_hasta = models.BigIntegerField(null=True, blank=True)  # el id del último mensaje que cuenta el resumen
+    con_terceros = models.BooleanField(default=False)  # módulo 102: ha leído texto de terceros (Procedencia)
 
     class Meta:
         ordering = ["-actualizado", "-id"]

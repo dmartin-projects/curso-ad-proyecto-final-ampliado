@@ -15,6 +15,7 @@ class TopComerciosTool(Tool):
     nombre = "top_comercios"
     descripcion = "Los 5 comercios con más gasto de un mes, con cuántas veces se compró en cada uno."
     Argumentos = TopComerciosArgumentos
+    lee_terceros = True  # módulo 102: nombres de comercio leídos de tickets y extractos
 
     def __init__(self, *, finanzas: IConsultasDeFinanzas):
         self.finanzas = finanzas

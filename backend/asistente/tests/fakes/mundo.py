@@ -123,7 +123,9 @@ class Mundo:
             ),
         ]
 
-    def agente(self, guion: list, limites: Limites | None = None, tools=None) -> tuple[Agente, LLMFake]:
+    def agente(self, guion: list, limites: Limites | None = None, tools=None, vigilante=None) -> tuple[Agente, LLMFake]:
         llm = LLMFake(guion)
-        agente = Agente(llm=llm, tools=tools or self.tools(), limites=limites, cronometro=self.cronometro)
+        agente = Agente(
+            llm=llm, tools=tools or self.tools(), limites=limites, cronometro=self.cronometro, vigilante=vigilante
+        )
         return agente, llm

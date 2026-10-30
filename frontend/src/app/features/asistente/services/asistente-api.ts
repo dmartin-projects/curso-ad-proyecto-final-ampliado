@@ -8,6 +8,7 @@ import {
   Carpeta,
   Conversacion,
   ConversacionDetalle,
+  Cuota,
   EventoChat,
   GraficoDelChat,
   Pregunta,
@@ -56,6 +57,11 @@ export class AsistenteApi {
 
   borrar(hogarId: number, id: number) {
     return this.http.delete<void>(`${this.base(hogarId)}/conversaciones/${id}/`);
+  }
+
+  /** Módulo 98: lo gastado hoy (por quien pide) y este mes (por el hogar), con los límites de su plan. */
+  cuota(hogarId: number) {
+    return this.http.get<Cuota>(`${this.base(hogarId)}/cuota/`);
   }
 
   carpetas(hogarId: number) {

@@ -104,6 +104,9 @@
       <div #final></div>
     </div>
 
+    @if (cuota.data(); as c) {
+      <app-cuota [cuota]="c" />
+    }
     <app-entrada
       class="sticky bottom-0 bg-superficie pt-2"
       [ocupado]="chat.enCurso()"

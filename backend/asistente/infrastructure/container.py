@@ -3,7 +3,6 @@
 # El único sitio que decide QUÉ adapters se usan y con qué ajustes: el LLM (con su reserva), las tools con sus ports y
 # el contexto de una pregunta. El resto recibe las piezas ya montadas; los tests pasan fakes y no llegan nunca aquí.
 import functools
-from decimal import Decimal
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -11,11 +10,15 @@ from django.core.exceptions import ImproperlyConfigured
 from asistente.application.agent.agente import Agente
 from asistente.application.agent.contexto_pregunta import ContextoPregunta
 from asistente.application.agent.limites import Limites
+from asistente.application.asignar_plan_use_case.asignar_plan_use_case import AsignarPlanUseCase
+from asistente.application.asignar_plan_use_case.i_asignar_plan_use_case import IAsignarPlanUseCase
 from asistente.application.chat.calculadora_de_graficos import CalculadoraDeGraficos
 from asistente.application.confirmar_propuesta_use_case.confirmar_propuesta_use_case import ConfirmarPropuestaUseCase
 from asistente.application.confirmar_propuesta_use_case.i_confirmar_propuesta_use_case import (
     IConfirmarPropuestaUseCase,
 )
+from asistente.application.consultar_cuota_use_case.consultar_cuota_use_case import ConsultarCuotaUseCase
+from asistente.application.consultar_cuota_use_case.i_consultar_cuota_use_case import IConsultarCuotaUseCase
 from asistente.application.crear_carpeta_use_case.crear_carpeta_use_case import CrearCarpetaUseCase
 from asistente.application.crear_carpeta_use_case.i_crear_carpeta_use_case import ICrearCarpetaUseCase
 from asistente.application.crear_conversacion_use_case.crear_conversacion_use_case import CrearConversacionUseCase
@@ -36,6 +39,8 @@ from asistente.application.eliminar_conversacion_use_case.i_eliminar_conversacio
 )
 from asistente.application.fijar_grafico_use_case.fijar_grafico_use_case import FijarGraficoUseCase
 from asistente.application.fijar_grafico_use_case.i_fijar_grafico_use_case import IFijarGraficoUseCase
+from asistente.application.informe_de_costes_use_case.i_informe_de_costes_use_case import IInformeDeCostesUseCase
+from asistente.application.informe_de_costes_use_case.informe_de_costes_use_case import InformeDeCostesUseCase
 from asistente.application.listar_carpetas_use_case.i_listar_carpetas_use_case import IListarCarpetasUseCase
 from asistente.application.listar_carpetas_use_case.listar_carpetas_use_case import ListarCarpetasUseCase
 from asistente.application.listar_conversaciones_use_case.i_listar_conversaciones_use_case import (
@@ -93,6 +98,8 @@ from asistente.application.tools.tool import Tool
 from asistente.application.tools.top_comercios_tool import TopComerciosTool
 from asistente.domain.vo.precio import Precio
 from asistente.infrastructure.database.repositories.carpeta_command_repository_orm import CarpetaCommandRepositoryORM
+from asistente.infrastructure.database.repositories.consumo_query_service_orm import ConsumoQueryServiceORM
+from asistente.infrastructure.database.repositories.consumo_repository_orm import ConsumoRepositoryORM
 from asistente.infrastructure.database.repositories.conversacion_command_repository_orm import (
     ConversacionCommandRepositoryORM,
 )
@@ -103,6 +110,7 @@ from asistente.infrastructure.database.repositories.grafico_fijado_command_repos
 from asistente.infrastructure.database.repositories.grafico_fijado_query_service_orm import (
     GraficoFijadoQueryServiceORM,
 )
+from asistente.infrastructure.database.repositories.plan_del_hogar_repository_orm import PlanDelHogarRepositoryORM
 from asistente.infrastructure.database.repositories.propuesta_command_repository_orm import (
     PropuestaCommandRepositoryORM,
 )
@@ -117,6 +125,9 @@ from asistente.infrastructure.llm.cliente_openai import cliente_del_proceso
 from asistente.infrastructure.llm.llm_con_reserva import LLMConReserva
 from asistente.infrastructure.llm.openai_compatible_llm import OpenAICompatibleLLM
 from asistente.infrastructure.storage.almacen_django import AlmacenDjango
+from asistente.infrastructure.tarifas.tarifas_desde_ajustes import TarifasDesdeAjustes
+from asistente.infrastructure.telemetria.llm_medido import LLMMedido
+from asistente.infrastructure.telemetria.telemetria_otel import TelemetriaOTel
 from asistente.infrastructure.tickets.lector_de_adjuntos_en_tickets import LectorDeAdjuntosEnTickets
 from asistente.infrastructure.tickets.tickets_en_tickets import TicketsEnTickets
 from core.application.ports.i_reloj import IReloj
@@ -129,19 +140,29 @@ def llm(modelo: str | None = None) -> ILLM:
     """El principal con su reserva (módulo 94); con `modelo`, solo ese (probar_llm --modelo)."""
     if not settings.ASISTENTE_API_KEY:  # mejor esto al arrancar que un 401 en mitad de una conversación
         raise ImproperlyConfigured("Falta ASISTENTE_API_KEY: el asistente no puede hablar con ningún modelo.")
-    cliente = cliente_del_proceso(settings.ASISTENTE_BASE_URL, settings.ASISTENTE_API_KEY, settings.ASISTENTE_TIMEOUT)
     if modelo:
-        return OpenAICompatibleLLM(cliente=cliente, modelo=modelo)
+        return _medido(modelo)
     modelos = [settings.ASISTENTE_MODELO, *settings.ASISTENTE_MODELOS_RESERVA]
-    return LLMConReserva([(OpenAICompatibleLLM(cliente=cliente, modelo=m), _circuito(m)) for m in modelos])
+    return LLMConReserva([(_medido(m), _circuito(m)) for m in modelos])
 
 
 def llm_auxiliar() -> ILLM:
     """Módulo 97: el modelo pequeño, para las tareas fáciles (el título de una conversación). Con su reserva: el
     principal (en Groq, cada modelo tiene su cuota: si el pequeño la agota, el grande suele tenerla)."""
-    cliente = cliente_del_proceso(settings.ASISTENTE_BASE_URL, settings.ASISTENTE_API_KEY, settings.ASISTENTE_TIMEOUT)
     modelos = [settings.ASISTENTE_MODELO_AUXILIAR, settings.ASISTENTE_MODELO]
-    return LLMConReserva([(OpenAICompatibleLLM(cliente=cliente, modelo=m), _circuito(m)) for m in modelos])
+    return LLMConReserva([(_medido(m), _circuito(m)) for m in modelos])
+
+
+def _medido(modelo: str) -> ILLM:
+    """Módulo 98: cada modelo, medido (span y métricas GenAI de OpenTelemetry). Sin OTEL_ENABLED no cuesta nada: la API
+    de OpenTelemetry sin SDK no hace nada."""
+    cliente = cliente_del_proceso(settings.ASISTENTE_BASE_URL, settings.ASISTENTE_API_KEY, settings.ASISTENTE_TIMEOUT)
+    return LLMMedido(
+        OpenAICompatibleLLM(cliente=cliente, modelo=modelo),
+        proveedor=settings.ASISTENTE_PROVEEDOR,
+        base_url=settings.ASISTENTE_BASE_URL,
+        precio=precio,
+    )
 
 
 def _circuito(modelo: str) -> CircuitBreaker:
@@ -152,8 +173,7 @@ def _circuito(modelo: str) -> CircuitBreaker:
 
 def precio(modelo: str) -> Precio | None:
     """None si el modelo no está en la tabla: mejor "coste desconocido" que un coste inventado."""
-    p = settings.ASISTENTE_PRECIOS.get(modelo)
-    return Precio(*(Decimal(x) for x in p)) if p else None
+    return TarifasDesdeAjustes().precio(modelo)
 
 
 def tools(chat: bool = False) -> list[Tool]:
@@ -214,7 +234,9 @@ def agente(observador: IObservadorAgente | None = None, modelo: str | None = Non
     limites = Limites(
         segundos=settings.ASISTENTE_SEGUNDOS_POR_PREGUNTA, max_tokens=settings.ASISTENTE_TOKENS_POR_PREGUNTA
     )
-    return Agente(llm=llm(modelo), tools=tools(chat), limites=limites, observador=observador)
+    return Agente(
+        llm=llm(modelo), tools=tools(chat), limites=limites, observador=observador, telemetria=TelemetriaOTel()
+    )
 
 
 def contexto(usuario_id: int, hogar_id: int, reloj: IReloj | None = None) -> ContextoPregunta:
@@ -240,6 +262,10 @@ def responder_pregunta() -> IResponderPreguntaUseCase:
         almacen=AlmacenDjango(),
         reloj=RelojDjango(),
         uow=UnidadDeTrabajoDjango(),
+        planes=PlanDelHogarRepositoryORM(),
+        tarifas=TarifasDesdeAjustes(),
+        consumos=ConsumoRepositoryORM(),
+        consultas_de_consumo=ConsumoQueryServiceORM(),
     )
 
 
@@ -323,3 +349,22 @@ def listar_graficos_fijados() -> IListarGraficosFijadosUseCase:
 
 def quitar_grafico() -> IQuitarGraficoUseCase:
     return QuitarGraficoUseCase(graficos=GraficoFijadoCommandRepositoryORM(), uow=UnidadDeTrabajoDjango())
+
+
+# ── Módulo 98: cuotas y costes ──
+def consultar_cuota() -> IConsultarCuotaUseCase:
+    return ConsultarCuotaUseCase(
+        membresias=MembresiasEnHogares(),
+        planes=PlanDelHogarRepositoryORM(),
+        tarifas=TarifasDesdeAjustes(),
+        consumos=ConsumoQueryServiceORM(),
+        reloj=RelojDjango(),
+    )
+
+
+def informe_de_costes() -> IInformeDeCostesUseCase:
+    return InformeDeCostesUseCase(consumos=ConsumoQueryServiceORM())
+
+
+def asignar_plan() -> IAsignarPlanUseCase:
+    return AsignarPlanUseCase(planes=PlanDelHogarRepositoryORM(), uow=UnidadDeTrabajoDjango())

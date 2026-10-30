@@ -115,3 +115,69 @@ groups:
           - refId: C
             datasourceUid: __expr__
             model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [100] } }] }
+  # Módulo 98: el asistente. Lo que cuesta y lo que se nota; cada una dice qué mirar en el panel "Gastos · asistente"
+  - orgId: 1
+    name: gastos-asistente
+    folder: Gastos
+    interval: 1m
+    rules:
+      - uid: asistente-coste
+        title: El asistente gasta más de lo previsto
+        condition: C
+        for: 0m # el dinero no espera: una hora cara ya es el aviso
+        annotations:
+          summary: "{{ $values.A }} USD en la última hora (el presupuesto es 0,50 USD/h)"
+          description: "Panel 'Coste por hora, por modelo'. ¿Un hogar con un bucle? manage.py coste_asistente lo dice por hogar"
+        labels: { severidad: critica }
+        noDataState: OK
+        execErrState: Error
+        data:
+          - refId: A
+            relativeTimeRange: { from: 3600, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: sum(increase(gastos_asistente_coste_usd_total[1h]))
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0.5] } }] }
+      - uid: asistente-reserva
+        title: El modelo principal falla (contesta la reserva)
+        condition: C
+        for: 10m
+        annotations:
+          summary: "El {{ $values.A }} de las llamadas al modelo fallan con LLMNoDisponibleException desde hace 10 minutos"
+          description: "Un 429 (¿la cuota diaria de Groq?) o el proveedor caído. Panel 'Llamadas al modelo que fallan, por tipo'"
+        labels: { severidad: aviso }
+        noDataState: OK
+        execErrState: Error
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: (sum(rate(gen_ai_client_inference_duration_seconds_count{error_type="LLMNoDisponibleException"}[10m])) or vector(0)) / sum(rate(gen_ai_client_inference_duration_seconds_count[10m]))
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [0.2] } }] }
+      - uid: asistente-lento
+        title: El asistente tarda en empezar a contestar (p95 del primer trozo > 5 s)
+        condition: C
+        for: 10m
+        annotations:
+          summary: "El 95 % de las respuestas tarda más de {{ $values.A }} s en enseñar la primera palabra"
+          description: "¿Razonamiento alto? ¿El proveedor va lento? Panel 'Duración p95' y una traza lenta en Tempo"
+        labels: { severidad: aviso }
+        noDataState: OK
+        execErrState: Error
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            model:
+              expr: histogram_quantile(0.95, sum by (le) (rate(gen_ai_client_inference_time_to_first_chunk_seconds_bucket[10m])))
+              instant: true
+          - refId: C
+            datasourceUid: __expr__
+            model: { type: threshold, expression: A, conditions: [{ evaluator: { type: gt, params: [5] } }] }

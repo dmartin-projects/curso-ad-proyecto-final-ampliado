@@ -21,6 +21,7 @@ from collections.abc import AsyncIterator, Callable
 from asgiref.sync import sync_to_async
 
 from asistente.infrastructure.api.v1.streaming.emisor_sse import EmisorSSE
+from core.domain.exceptions.dominio_exception import DominioException
 from core.infrastructure.logging.request_id import request_id_var
 
 logger = logging.getLogger(__name__)
@@ -52,6 +53,8 @@ async def transmitir(trabajo: Callable[[EmisorSSE], object], *, latido: float = 
             # thread_sensitive=True: el mismo hilo que el resto del código síncrono de ESTA petición (Django le da uno
             # en ASGI): una sola conexión a la base de datos, que Django cierra al terminar
             await sync_to_async(trabajo, thread_sensitive=True)(emisor)
+        except DominioException as e:  # módulo 98: una regla (la cuota se ha agotado desde que se comprobó): su mensaje
+            emisor.emitir("error", {"detalle": e.mensaje, "codigo": e.codigo})
         except Exception:
             logger.exception("Error en la respuesta en streaming")
             emisor.emitir("error", {"detalle": "Ha ocurrido un error inesperado.", "request_id": peticion})

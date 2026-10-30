@@ -21,6 +21,7 @@ class ContextoPregunta:
     hogar: HogarDelUsuario
     actor: Actor  # limitado a LECTOR: el agente solo lee (los cambios, con confirmación: módulo 97)
     hoy: date  # en la zona horaria del HOGAR: "este mes" es el suyo
+    conversacion_id: int | None = None  # módulo 98: en el chat, para encontrar sus trazas (gen_ai.conversation.id)
 
     @classmethod
     def abrir(cls, *, usuario_id: int, hogar_id: int, membresias: IMembresias, reloj: IReloj) -> "ContextoPregunta":

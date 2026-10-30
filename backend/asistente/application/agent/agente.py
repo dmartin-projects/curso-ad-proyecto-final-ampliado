@@ -1,4 +1,4 @@
-# asistente/application/agent/agente.py — el agent loop, escrito a mano (módulos 94, 96 y 97)
+# asistente/application/agent/agente.py — el agent loop, escrito a mano (módulos 94, 96, 97 y 98)
 """Preguntar al modelo, ejecutar las tools que pide, devolverle los resultados y repetir hasta que conteste con texto.
 
     agente = Agente(llm=llm, tools=[ResumenMesTool(finanzas=…), …])
@@ -15,6 +15,8 @@ La reserva de modelos y el circuit breaker no están aquí: van detrás del port
 Módulo 97, para el chat: con `al_texto`, cada vuelta pide la respuesta en streaming (el texto sale según llega), y lo
 que las tools producen para la interfaz (gráficos, archivos, propuestas: ConArtefacto) se aparta del resultado que lee
 el modelo y se devuelve en ResultadoAgente.artefactos.
+
+Módulo 98: la pregunta y cada tool, dentro de un `with` de la telemetría (spans y métricas; por defecto, ninguna).
 """
 
 import json
@@ -30,9 +32,11 @@ from asistente.application.agent.instrucciones import VERSION, instrucciones
 from asistente.application.agent.limites import Limites
 from asistente.application.agent.observador_mudo import ObservadorMudo
 from asistente.application.agent.resultado_agente import ResultadoAgente
+from asistente.application.agent.telemetria_muda import TelemetriaMuda
 from asistente.application.agent.ventana import ventana
 from asistente.application.ports.i_llm import ILLM
 from asistente.application.ports.i_observador_agente import IObservadorAgente
+from asistente.application.ports.i_telemetria_del_agente import ITelemetriaDelAgente
 from asistente.application.tools.con_artefacto import ConArtefacto
 from asistente.application.tools.tool import Tool
 from asistente.domain.enums.motivo_fin import MotivoFin
@@ -60,6 +64,7 @@ class Agente:
         tools: list[Tool],
         limites: Limites | None = None,
         observador: IObservadorAgente | None = None,
+        telemetria: ITelemetriaDelAgente | None = None,  # módulo 98: trazas y métricas (por defecto, ninguna)
         cronometro: Callable[[], float] = time.monotonic,  # segundos; en los tests, uno que avanza a mano
     ):
         self.llm = llm
@@ -67,6 +72,7 @@ class Agente:
         self.declaraciones = tuple(t.declaracion() for t in tools)
         self.limites = limites or Limites()
         self.observador = observador or ObservadorMudo()
+        self.telemetria = telemetria or TelemetriaMuda()
         self.cronometro = cronometro
 
     def responder(
@@ -80,6 +86,12 @@ class Agente:
         que hay que añadirle está en ResultadoAgente.nuevos; quien llama decide dónde guardarlo. Viaja lo que cabe
         en el presupuesto de contexto (ventana.py). Con `estructurada`, una llamada más da la respuesta en JSON.
         Con `al_texto` (módulo 97), el texto de cada vuelta va saliendo por ahí mientras el modelo lo escribe."""
+        with self.telemetria.pregunta(contexto) as medir:  # módulo 98: el span de la pregunta, que envuelve los demás
+            resultado = self._responder(historial, contexto, estructurada, al_texto)
+            medir(resultado)
+            return resultado
+
+    def _responder(self, historial, contexto, estructurada, al_texto) -> ResultadoAgente:
         inicio = self.cronometro()
         sistema = instrucciones(contexto)  # el mismo en todas las vueltas: el prefijo que el proveedor cachea
         mensajes, nuevos, llamadas, modelos = list(ventana(historial, self.limites.max_tokens_historial)), [], [], []
@@ -145,7 +157,9 @@ class Agente:
             for llamada in r.llamadas:
                 self.observador.llamada(llamada)
                 antes = self.cronometro()
-                resultado, artefacto = self._ejecutar(llamada, contexto, usos_por_tool, ya_llamadas)
+                with self.telemetria.tool(llamada) as medir:
+                    resultado, artefacto = self._ejecutar(llamada, contexto, usos_por_tool, ya_llamadas)
+                    medir(resultado)
                 self.observador.resultado(resultado, int((self.cronometro() - antes) * 1000))
                 if artefacto is not None:  # módulo 97: para la interfaz, no para el modelo
                     artefactos.append(artefacto)

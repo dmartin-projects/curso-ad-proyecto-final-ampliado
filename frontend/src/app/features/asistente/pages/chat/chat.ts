@@ -23,6 +23,7 @@ import { ErrorApi } from '../../../../core/http/errores';
 import { Confirmaciones } from '../../../../shared/components/confirmar/confirmaciones';
 import { MarkdownLigero } from '../../../../shared/pipes/markdown-ligero';
 import { guardarArchivo } from '../../../../shared/utils/descargar';
+import { CuotaDelAsistente } from '../../components/cuota/cuota';
 import { Entrada } from '../../components/entrada/entrada';
 import { GraficoDelChatCard } from '../../components/grafico-del-chat/grafico-del-chat';
 import { ListaConversaciones } from '../../components/lista-conversaciones/lista-conversaciones';
@@ -53,6 +54,7 @@ const SUGERENCIAS = [
     MatIconModule,
     MatProgressBarModule,
     MarkdownLigero,
+    CuotaDelAsistente,
     Entrada,
     GraficoDelChatCard,
     ListaConversaciones,
@@ -82,6 +84,10 @@ export default class Chat {
     queryKey: clavesAsistente.conversaciones(this.hogarId(), this.carpeta(), this.busqueda()),
     queryFn: () =>
       lastValueFrom(this.api.conversaciones(this.hogarId(), this.carpeta(), this.busqueda())),
+  }));
+  protected readonly cuota = injectQuery(() => ({
+    queryKey: clavesAsistente.cuota(this.hogarId()),
+    queryFn: () => lastValueFrom(this.api.cuota(this.hogarId())),
   }));
   protected readonly carpetas = injectQuery(() => ({
     queryKey: clavesAsistente.carpetas(this.hogarId()),

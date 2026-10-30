@@ -12,18 +12,25 @@ from asistente.application.responder_pregunta_use_case.dtos.responder_pregunta_i
 )
 from asistente.application.responder_pregunta_use_case.responder_pregunta_use_case import ResponderPreguntaUseCase
 from asistente.domain.bo.conversacion import Conversacion
+from asistente.domain.enums.canal_de_consumo import CanalDeConsumo
 from asistente.domain.exceptions.adjunto_no_valido_exception import AdjuntoNoValidoException
 from asistente.domain.exceptions.conversacion_no_encontrada_exception import ConversacionNoEncontradaException
+from asistente.domain.exceptions.cuota_agotada_exception import CuotaAgotadaException
 from asistente.domain.exceptions.llm_no_disponible_exception import LLMNoDisponibleException
 from asistente.domain.read_models.mes_resumido import MesResumido
+from asistente.domain.vo.consumo import Consumo
+from asistente.domain.vo.uso import Uso
 from asistente.tests.fakes.almacen_de_archivos_fake import AlmacenDeArchivosFake
 from asistente.tests.fakes.consultas_de_finanzas_fake import resumen
+from asistente.tests.fakes.consumo_repositorio_fake import ConsumoRepositorioFake
 from asistente.tests.fakes.conversacion_command_repository_fake import ConversacionCommandRepositoryFake
 from asistente.tests.fakes.emisor_de_eventos_fake import EmisorDeEventosFake
 from asistente.tests.fakes.lector_de_adjuntos_fake import LectorDeAdjuntosFake
 from asistente.tests.fakes.llm_fake import LLMFake
 from asistente.tests.fakes.mundo import ANA, HOGAR, OCTUBRE, Mundo, membresias, reloj
+from asistente.tests.fakes.plan_del_hogar_repositorio_fake import PlanDelHogarRepositorioFake
 from asistente.tests.fakes.propuesta_command_repository_fake import PropuestaCommandRepositoryFake
+from asistente.tests.fakes.tarifas_fake import TarifasFake
 from core.domain.enums.rol import Rol
 from core.domain.vo.actor import Actor
 from core.domain.vo.mes import Mes
@@ -48,6 +55,7 @@ class Chat:
         self.conversaciones, self.propuestas = ConversacionCommandRepositoryFake(), PropuestaCommandRepositoryFake()
         self.llm, self.auxiliar = LLMFake(guion), LLMFake(titulos or [LLMFake.responder("Gasto del mes")])
         self.almacen, self.lector = AlmacenDeArchivosFake(), LectorDeAdjuntosFake()
+        self.consumos, self.planes = ConsumoRepositorioFake(), PlanDelHogarRepositorioFake()
         self.uow = UnidadDeTrabajoFake(self.conversaciones, self.propuestas)
         self.caso = ResponderPreguntaUseCase(
             conversaciones=self.conversaciones,
@@ -59,6 +67,10 @@ class Chat:
             almacen=self.almacen,
             reloj=reloj(),
             uow=self.uow,
+            planes=self.planes,
+            tarifas=TarifasFake(),
+            consumos=self.consumos,
+            consultas_de_consumo=self.consumos,
         )
         self.conversacion = Conversacion(ANA, HOGAR)
         self.conversaciones.guardar(self.conversacion)
@@ -186,3 +198,30 @@ def test_la_conversacion_de_otro_no_existe():
     chat.conversaciones.guardar(otra)
     with pytest.raises(ConversacionNoEncontradaException):
         chat.preguntar("hola", conversacion_id=otra.id)
+
+
+# ── Módulo 98: el libro de cuentas y las cuotas ──
+def test_se_apunta_lo_gastado_por_canal_y_modelo():
+    chat = Chat([LLMFake.responder("Llevais 505,14 €."), estructurada("Llevais 505,14 €.")])
+    chat.preguntar("¿Cuánto llevamos?")
+    assert [(str(c.canal), c.modelo, c.uso.total, c.conversacion_id) for c in chat.consumos.consumos] == [
+        ("chat", "fake", 240, chat.conversacion.id),  # la respuesta y la llamada que la estructura
+        ("titulo", "fake", 120, chat.conversacion.id),
+    ]
+
+
+def test_cancelada_tambien_se_apunta_lo_gastado():
+    emisor = EmisorDeEventosFake(cancelar_tras="tool")  # se va mientras corre la tool: el turno que la pidió se pagó
+    chat = Chat([LLMFake.llamar("resumen_mes", mes="2026-10"), LLMFake.responder("No llega.")])
+    assert chat.preguntar("¿Cuánto?", emisor=emisor) is None
+    assert [(str(c.canal), c.uso.total) for c in chat.consumos.consumos] == [("chat", 110)]
+
+
+def test_sin_cuota_ni_se_guarda_la_pregunta_ni_se_llama_al_modelo():
+    chat = Chat([LLMFake.responder("No debería")])
+    chat.consumos.anotar(
+        [Consumo(ANA, HOGAR, CanalDeConsumo.CHAT, "fake", Uso(5000, 0), None, reloj().ahora())]  # la del básico, entera
+    )
+    with pytest.raises(CuotaAgotadaException):
+        chat.preguntar("¿Una más?")
+    assert chat.llm.peticiones == [] and chat.conversaciones.mensajes == []

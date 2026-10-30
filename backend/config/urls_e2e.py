@@ -123,12 +123,36 @@ def envejecer_sesiones(request):
     return JsonResponse({"envejecidas": n})
 
 
+@csrf_exempt
+def gastar_cuota(request):
+    """Módulo 98: POST gasta la cuota del día de todos los miembros (una fila del libro de cuentas con los tokens del
+    plan); DELETE la devuelve. Gastarla de verdad serían decenas de preguntas."""
+    from datetime import timedelta
+
+    from django.utils import timezone
+
+    from asistente.models import Consumo
+    from hogares.models import Membresia
+
+    if request.method == "DELETE":
+        return JsonResponse({"borrados": Consumo.objects.filter(modelo="e2e").delete()[0]})
+    tokens = settings.ASISTENTE_PLANES["basico"]["tokens_dia_persona"]
+    ahora = timezone.now() - timedelta(minutes=1)
+    filas = [
+        Consumo(usuario_id=m.usuario_id, hogar_id=m.hogar_id, canal="chat", modelo="e2e", tokens_entrada=tokens,
+                tokens_salida=0, coste=0, momento=ahora)
+        for m in Membresia.objects.all()
+    ]  # fmt: skip
+    return JsonResponse({"gastadas": len(Consumo.objects.bulk_create(filas))})
+
+
 # en E2E los archivos están en disco (en producción, URLs firmadas de S3/R2): Django los sirve con DEBUG
 urlpatterns = [
     path("e2e/ia/chat/completions", ia_falsa),
     path("e2e/llm/chat/completions", llm_falso),  # módulo 97
     path("e2e/correos", correos),
     path("e2e/sesiones/envejecer", envejecer_sesiones),
+    path("e2e/asistente/cuota", gastar_cuota),  # módulo 98
     *urls_normales,
     *static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT),
 ]

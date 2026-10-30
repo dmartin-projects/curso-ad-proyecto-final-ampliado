@@ -7,6 +7,7 @@ export type Conversacion = S['Conversacion'];
 export type ConversacionDetalle = S['ConversacionDetalle'];
 export type Carpeta = S['Carpeta'];
 export type Propuesta = S['Propuesta'];
+export type Cuota = S['Cuota'];
 
 /** Un gráfico del chat: los datos y QUÉ los produce (la especificación, para fijarlo en el dashboard). */
 export interface GraficoDelChat extends GraficoDeDatos {

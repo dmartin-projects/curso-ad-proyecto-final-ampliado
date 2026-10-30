@@ -1,0 +1,21 @@
+@let c = cuota();
+@if (c.agotada) {
+  <p class="m-0 text-sm text-error" role="status">
+    @if (c.agotada_por === 'hogar') {
+      El hogar ha llegado al límite del asistente de este mes.
+    } @else {
+      Has llegado al límite de preguntas de hoy.
+    }
+    Vuelve a haber a partir del {{ c.renueva | date: 'd/M, HH:mm' }}.
+  </p>
+} @else if (usado() >= 50) {
+  <div class="flex items-center gap-2 text-sm text-texto-suave" role="status">
+    <mat-progress-bar
+      class="max-w-40"
+      mode="determinate"
+      [value]="usado()"
+      aria-label="Cuota de hoy usada"
+    />
+    <span>Hoy te quedan unas {{ preguntas() | number }} preguntas</span>
+  </div>
+}

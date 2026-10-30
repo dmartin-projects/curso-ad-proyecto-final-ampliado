@@ -1060,6 +1060,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/hogares/{hogar_pk}/asistente/cuota/": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description La cuota del asistente de quien pide: lo gastado hoy (suyo) y este mes (del hogar), con los límites de su plan. */
+        get: operations["hogares_asistente_cuota_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/hogares/{hogar_pk}/asistente/graficos-fijados/": {
         parameters: {
             query?: never;
@@ -1790,6 +1807,13 @@ export interface components {
         Actualizadas: {
             actualizadas: number;
         };
+        /**
+         * @description * `` -
+         *     * `persona` - persona
+         *     * `hogar` - hogar
+         * @enum {string}
+         */
+        AgotadaPorEnum: "persona" | "hogar";
         AltaTotp: {
             secreto: string;
             uri: string;
@@ -1823,6 +1847,8 @@ export interface components {
          * @enum {string}
          */
         AuditoriaAccionEnum: "crear" | "modificar" | "borrar";
+        /** @enum {unknown} */
+        BlankEnum: "";
         CambiarPasswordRequest: {
             actual: string;
             nueva: string;
@@ -1942,6 +1968,34 @@ export interface components {
          * @enum {string}
          */
         CuentaTipoEnum: "banco" | "tarjeta" | "efectivo";
+        Cuota: {
+            plan: string;
+            /** @description Los de quien pide, hoy (en el día del hogar) */
+            tokens_hoy: number;
+            /** @description Los que permite su plan al día, por persona */
+            tokens_dia: number;
+            /**
+             * Format: decimal
+             * @description USD del hogar este mes
+             */
+            coste_mes: string;
+            /** Format: decimal */
+            coste_mes_maximo: string;
+            agotada: boolean;
+            /**
+             * @description Qué cuota se ha agotado
+             *
+             *     * `` -
+             *     * `persona` - persona
+             *     * `hogar` - hogar
+             */
+            agotada_por: components["schemas"]["AgotadaPorEnum"] | components["schemas"]["BlankEnum"];
+            /**
+             * Format: date-time
+             * @description Cuándo vuelve a haber cuota (si está agotada) o empieza mañana
+             */
+            renueva: string;
+        };
         Dashboard: {
             /** Format: date */
             mes: string;
@@ -4683,6 +4737,27 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    hogares_asistente_cuota_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                hogar_pk: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Cuota"];
+                };
             };
         };
     };

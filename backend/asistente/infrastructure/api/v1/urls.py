@@ -1,9 +1,10 @@
-# asistente/infrastructure/api/v1/urls.py — las rutas del asistente: la app es dueña de sus endpoints (módulo 97)
+# asistente/infrastructure/api/v1/urls.py — las rutas del asistente: la app es dueña de sus endpoints (módulos 97 y 98)
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
 from asistente.infrastructure.api.v1.views.carpeta_viewset import CarpetaViewSet
 from asistente.infrastructure.api.v1.views.conversacion_viewset import ConversacionViewSet
+from asistente.infrastructure.api.v1.views.cuota_view import CuotaView
 from asistente.infrastructure.api.v1.views.grafico_fijado_viewset import GraficoFijadoViewSet
 from asistente.infrastructure.api.v1.views.preguntar_view import PreguntarView
 from asistente.infrastructure.api.v1.views.propuesta_viewset import PropuestaViewSet
@@ -21,5 +22,6 @@ urlpatterns = [
         PreguntarView.as_view(),
         name="asistente-preguntar",
     ),
+    path("hogares/<int:hogar_pk>/asistente/cuota/", CuotaView.as_view(), name="asistente-cuota"),  # módulo 98
     *router.urls,
 ]

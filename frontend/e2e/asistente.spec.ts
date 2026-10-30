@@ -116,3 +116,23 @@ test('ejercicios del 97: buscar, renombrar una carpeta y descargar en Markdown',
   await page.getByRole('menuitem', { name: 'Descargar en Markdown' }).click();
   expect((await descarga).suggestedFilename()).toMatch(/^conversacion-\d+\.md$/);
 });
+
+test('sin cuota: el aviso, y la pregunta no sale (un 429 antes del stream)', async ({
+  page,
+  request,
+}) => {
+  await abrirAsistente(page);
+  await request.post('http://localhost:8000/e2e/asistente/cuota');
+  try {
+    await page.reload();
+    await expect(
+      page.getByRole('status').filter({ hasText: 'límite de preguntas de hoy' }),
+    ).toBeVisible();
+    await preguntar(page, '¿Cuánto llevamos gastado este mes?');
+    await expect(page.getByRole('alert')).toContainText(
+      'Has llegado al límite de preguntas de hoy. Mañana vuelves a tenerlo.',
+    );
+  } finally {
+    await request.delete('http://localhost:8000/e2e/asistente/cuota');
+  }
+});

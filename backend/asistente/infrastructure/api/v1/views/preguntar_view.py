@@ -10,6 +10,7 @@
 """
 
 from django.http import StreamingHttpResponse
+from django.utils import timezone
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import JSONParser, MultiPartParser
@@ -17,6 +18,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
 
 from asistente.application.chat.adjunto import MAX_BYTES, TIPOS, Adjunto
+from asistente.application.consultar_cuota_use_case.dtos.consultar_cuota_input_dto import ConsultarCuotaInputDTO
 from asistente.application.obtener_conversacion_use_case.dtos.obtener_conversacion_input_dto import (
     ObtenerConversacionInputDTO,
 )
@@ -24,15 +26,22 @@ from asistente.application.responder_pregunta_use_case.dtos.responder_pregunta_i
     ResponderPreguntaInputDTO,
 )
 from asistente.domain.exceptions.adjunto_no_valido_exception import AdjuntoNoValidoException
+from asistente.domain.exceptions.cuota_agotada_exception import CuotaAgotadaException
 from asistente.infrastructure import container
 from asistente.infrastructure.api.v1.serializers.pregunta_serializer import PreguntaSerializer
 from asistente.infrastructure.api.v1.streaming.transmitir import transmitir
 from asistente.infrastructure.api.v1.views.sin_negociacion import SinNegociacion
 from asistente.infrastructure.database.models.conversacion_model import Conversacion as ConversacionModel
+from asistente.infrastructure.telemetria import instrumentos
 from core.infrastructure.api.views import consultas
 from hogares.infrastructure.api.base.hogar_desde_url_mixin import HogarDesdeUrlMixin
 from hogares.infrastructure.api.base.rol_en_hogar import RolEnHogar
 from hogares.models import Membresia
+
+AGOTADA = {
+    "persona": "Has llegado al límite de preguntas de hoy. Mañana vuelves a tenerlo.",
+    "hogar": "El hogar ha llegado al límite del asistente de este mes.",
+}
 
 
 class PreguntarView(HogarDesdeUrlMixin, APIView):
@@ -43,7 +52,9 @@ class PreguntarView(HogarDesdeUrlMixin, APIView):
     roles_por_metodo = {"POST": Membresia.Rol.LECTOR}  # el agente solo lee; cambiar algo lo decide quien confirma
     parser_classes = [JSONParser, MultiPartParser]
     content_negotiation_class = SinNegociacion
-    throttle_scope = "asistente"  # cada pregunta cuesta tokens: un límite por persona (las cuotas, módulo 98)
+    # Dos frenos distintos: el throttle (20 por minuto) para las ráfagas (un doble clic, un script); la cuota del plan
+    # (módulo 98) para el gasto del día y del mes
+    throttle_scope = "asistente"
 
     @extend_schema(
         request={"application/json": PreguntaSerializer, "multipart/form-data": PreguntaSerializer},
@@ -56,6 +67,16 @@ class PreguntarView(HogarDesdeUrlMixin, APIView):
         # La conversación, de quien pregunta: el 404, ahora (después del 200 ya no se puede)
         if container.obtener_conversacion().ejecutar(ObtenerConversacionInputDTO(hogar_id, actor, pk)) is None:
             raise consultas.no_encontrado(ConversacionModel)
+        # Módulo 98: la cuota, también ahora (un 429 con Retry-After). El use case la vuelve a mirar al empezar
+        cuota = container.consultar_cuota().ejecutar(ConsultarCuotaInputDTO(hogar_id, actor))
+        if cuota.agotada:
+            instrumentos.cuota_agotada.add(
+                1, {"gastos.asistente.plan": cuota.plan, "gastos.asistente.cuota": cuota.agotada_por}
+            )
+            segundos = max(1, int((cuota.renueva - timezone.now()).total_seconds()))
+            raise CuotaAgotadaException(
+                AGOTADA[cuota.agotada_por], segundos=segundos, renueva=cuota.renueva.isoformat()
+            )
         adjunto = self._adjunto(datos.validated_data.get("archivo"))
         texto = datos.validated_data["texto"]
 

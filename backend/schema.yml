@@ -1945,6 +1945,29 @@ paths:
       responses:
         '200':
           description: Los pasos de la respuesta (SSE)
+  /api/v1/hogares/{hogar_pk}/asistente/cuota/:
+    get:
+      operationId: hogares_asistente_cuota_retrieve
+      description: 'La cuota del asistente de quien pide: lo gastado hoy (suyo) y
+        este mes (del hogar), con los límites de su plan.'
+      parameters:
+      - in: path
+        name: hogar_pk
+        schema:
+          type: integer
+        required: true
+      tags:
+      - hogares
+      security:
+      - jwtAuth: []
+      - cookieAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cuota'
+          description: ''
   /api/v1/hogares/{hogar_pk}/asistente/graficos-fijados/:
     get:
       operationId: hogares_asistente_graficos_fijados_list
@@ -4218,6 +4241,12 @@ components:
           type: integer
       required:
       - actualizadas
+    AgotadaPorEnum:
+      enum:
+      - persona
+      - hogar
+      type: string
+      description: "* `` - \n* `persona` - persona\n* `hogar` - hogar"
     AltaTotp:
       type: object
       properties:
@@ -4303,6 +4332,9 @@ components:
         * `crear` - Crear
         * `modificar` - Modificar
         * `borrar` - Borrar
+    BlankEnum:
+      enum:
+      - ''
     CambiarPasswordRequest:
       type: object
       properties:
@@ -4622,6 +4654,47 @@ components:
         * `banco` - Cuenta bancaria
         * `tarjeta` - Tarjeta
         * `efectivo` - Efectivo
+    Cuota:
+      type: object
+      properties:
+        plan:
+          type: string
+        tokens_hoy:
+          type: integer
+          description: Los de quien pide, hoy (en el día del hogar)
+        tokens_dia:
+          type: integer
+          description: Los que permite su plan al día, por persona
+        coste_mes:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,6})?$
+          description: USD del hogar este mes
+        coste_mes_maximo:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,6}(?:\.\d{0,6})?$
+        agotada:
+          type: boolean
+        agotada_por:
+          description: "Qué cuota se ha agotado\n\n* `` - \n* `persona` - persona\n*
+            `hogar` - hogar"
+          oneOf:
+          - $ref: '#/components/schemas/AgotadaPorEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        renueva:
+          type: string
+          format: date-time
+          description: Cuándo vuelve a haber cuota (si está agotada) o empieza mañana
+      required:
+      - agotada
+      - agotada_por
+      - coste_mes
+      - coste_mes_maximo
+      - plan
+      - renueva
+      - tokens_dia
+      - tokens_hoy
     Dashboard:
       type: object
       properties:

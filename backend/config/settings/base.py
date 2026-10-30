@@ -436,6 +436,14 @@ ASISTENTE_PRECIOS = {
     "openai/gpt-oss-20b": ("0.075", "0.30", "0.037"),
     "qwen/qwen3.8-27b": ("0.80", "4.00", "0.80"),  # ejercicio 2 (sin precio de caché publicado: el de entrada)
 }
+# Módulo 98: el proveedor, como lo nombran las convenciones GenAI de OpenTelemetry (gen_ai.provider.name)
+ASISTENTE_PROVEEDOR = env("ASISTENTE_PROVEEDOR", default="groq")
+# Las cuotas de cada plan: tokens al día por persona (entrada + salida) y dólares al mes por hogar. Una pregunta del chat
+# gasta entre 3.000 y 15.000 tokens (módulo 96): el básico da para unas 10 preguntas al día por persona.
+ASISTENTE_PLANES = {
+    "basico": {"tokens_dia_persona": 80_000, "coste_mes_hogar": "0.50"},
+    "plus": {"tokens_dia_persona": 400_000, "coste_mes_hogar": "5.00"},
+}
 
 # ── Importación de extractos (módulo 75) ──
 IMPORTACION_TAMANO_MAXIMO = 5 * 1024 * 1024  # 5 MB
